@@ -7,7 +7,7 @@ SV_STAT is a tool for Structural Variation (SV) Statistics Evaluation. SV_STAT u
 Before using SV_STAT, both the user-called SV set and the gold standard set are in bed file format with first five columns are below:
 >    chromosome,	start_ref_pos,	end_ref_pos,	SV_type,	SV_len
 
-For translocations, the file format should bedpe before using SV_STAT, and the first 8 columns are listed as below:
+For translocations, the file format should be bedpe before using SV_STAT, and the first 8 columns are listed as below:
 >    chromosome1,	start_ref_pos1,	end_ref_pos1,	chromosome2,	start_ref_pos2,	end_ref_pos2,	SV_type,	SV_len
 
 The SV_type can be TRA or BND, and the SV_len will be 0.
