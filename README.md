@@ -9,6 +9,7 @@ Before using SV_STAT, both the user-called SV set and the gold standard set are 
 
 For translocations, they should be in bedpe format before using SV_STAT, and the first 8 columns are listed as below:
 >    chromosome1,	start_ref_pos1,	end_ref_pos1,	chromosome2,	start_ref_pos2,	end_ref_pos2,	SV_type,	SV_len
+
 The SV_type can be TRA or BND, and the SV_len will be 0.
 
 SV_STAT can convert VCF file format to bed or bedpe file format by typing:
