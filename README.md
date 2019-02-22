@@ -9,7 +9,7 @@ SV_STAT is a tool for Structural Variation (SV) Statistics Evaluation. SV_STAT u
 Compiling PERGA
 
 You can generate the binary file by typing:
-./autogen.sh
+>    ./autogen.sh
 
 and the binary file 'sv_stat' will be output into the folder 'bin'.
 
