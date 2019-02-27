@@ -175,7 +175,7 @@ void SVStat(string &sv_file1, string &sv_file2){
 
 void refRegSizeStat(string &standard_file, string &user_file, int32_t max_valid_reg_thres){
 	string refRegSizeFilename_standard, refRegSizeFilename_user;
-	refRegSizeFilename_standard = "reg_reg_size_standard";
+	refRegSizeFilename_standard = "ref_reg_size_standard";
 	refRegSizeFilename_user = "ref_reg_size_user";
 
 	cout << ">>>>>>>>> The SV reference region size statistics for gold-standard set: <<<<<<<<<" << endl;
