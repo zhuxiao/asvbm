@@ -30,7 +30,7 @@ int main(int argc, char *argv[]){
     	command = "stat";
     	return parseStat(argc-1, argv+1);
     }else{
-    	cerr << "invalid command " << argv[1] << endl;
+    	cerr << "invalid command: " << argv[1] << endl << endl;;
     	showUsage(); return 1;
     }
 
@@ -106,6 +106,8 @@ int parseConvert(int argc, char **argv)
 		convertVcf(in_file, out_file);
 	else if(sv_format.compare("csv")==0)
 		convertCsv(in_file, out_file);
+	else if(sv_format.compare("nm")==0)  // private usage: nm
+		convertNm(in_file, out_file);
 	else{
 		cout << "Error: Please specify the correct SV file format" << endl << endl;
 		showUsageConvert();
@@ -153,28 +155,99 @@ int parseStat(int argc, char **argv){
 }
 
 // SV stat
-int SVStat(string &sv_file1, string &sv_file2){
+void SVStat(string &sv_file1, string &sv_file2){
 
-	cout << "############# Phage 1: Num statistics: #############" << endl;
+	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+	cout << "############# Phage 1: SV size statistics: #############" << endl;
+	refRegSizeStat(sv_file1, sv_file2, maxValidRegThres);
+
+	cout << "############# Phage 2: Num statistics: #############" << endl;
 	SVNumStat(sv_file1, sv_file2, maxValidRegThres);
 
 	// compute SV size difference statistics
-	cout << "\n\n############# Phage 2: SV size difference statistics: #############" << endl;
+	cout << "\n\n############# Phage 3: SV size difference statistics: #############" << endl;
 	SVSizeDifStat(sv_file1, sv_file2, maxValidRegThres);
 
-	cout << "\n\n############# Phage 3: SV type and num statistics: #############" << endl;
+	cout << "\n\n############# Phage 4: SV type and num statistics: #############" << endl;
 	SVTypeNumStat(sv_file1, sv_file2, maxValidRegThres);
+}
 
-	return 0;
+void refRegSizeStat(string &standard_file, string &user_file, int32_t max_valid_reg_thres){
+	string refRegSizeFilename_standard, refRegSizeFilename_user;
+	refRegSizeFilename_standard = "reg_reg_size_standard";
+	refRegSizeFilename_user = "ref_reg_size_user";
+
+	cout << ">>>>>>>>> The SV reference region size statistics for gold-standard set: <<<<<<<<<" << endl;
+	refRegSizeStatOp(refRegSizeFilename_standard, standard_file, 0);
+
+	if(max_valid_reg_thres>0) cout << ">>>>>>>>> The SV reference region size statistics before filtering for user-called set: <<<<<<<<<" << endl;
+	else cout << ">>>>>>>>> The SV reference region size statistics for user-called set: <<<<<<<<<" << endl;
+	refRegSizeStatOp(refRegSizeFilename_user, user_file, 0);
+
+	if(max_valid_reg_thres>0){
+		cout << "\n>>>>>>>>> The SV reference region size statistics after filtering for user-called set: <<<<<<<<<" << endl;
+		refRegSizeStatOp(refRegSizeFilename_user, user_file, max_valid_reg_thres);
+	}
+}
+
+void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres){
+	vector<SV_item*> sv_data, long_sv_data;
+	SV_item *item;
+	size_t i, count_array[SV_SIZE_ARR_SIZE+2], reg_size, num;
+	string refRegSizeFinename_tmp, line;
+	ofstream outfile;
+
+	// load data
+	sv_data = loadData(sv_file);
+
+	if(max_valid_reg_thres>0) long_sv_data = getLongSVReg(sv_data, max_valid_reg_thres);
+	cout << "data.size: " << sv_data.size() << endl;
+	if(max_valid_reg_thres>0) cout << "data_long.size: " << long_sv_data.size() << endl;
+
+	for(i=0; i<SV_SIZE_ARR_SIZE+2; i++) count_array[i] = 0;
+
+	for(i=0; i<sv_data.size(); i++){
+		item = sv_data.at(i);
+		if(item->sv_type!=VAR_TRA or item->sv_type!=VAR_TRA or item->sv_type!=VAR_INV_TRA){
+			if(item->chrname.size()>0) reg_size = item->endPos - item->startPos + 1;
+			else reg_size = item->endPos2 - item->startPos2 + 1;
+			if(reg_size<=SV_SIZE_ARR_SIZE) count_array[reg_size] ++;
+			else count_array[SV_SIZE_ARR_SIZE+1] ++;
+		}
+	}
+
+	refRegSizeFinename_tmp = outputPathname + refRegSizeFinename;
+	if(max_valid_reg_thres>0) refRegSizeFinename_tmp += "_long_filtered";
+
+	outfile.open(refRegSizeFinename_tmp);
+	if(!outfile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << refRegSizeFinename_tmp << endl;
+		exit(1);
+	}
+
+	num = 0;
+	for(i=0; i<SV_SIZE_ARR_SIZE+1; i++){
+		line = to_string(i) + "\t" + to_string(count_array[i]);
+		outfile << line << endl;
+		num ++;
+	}
+	line = ">=" + to_string(SV_SIZE_ARR_SIZE+1) + "\t" + to_string(count_array[SV_SIZE_ARR_SIZE+1]);
+	outfile << line << endl;
+	num ++;
+
+	outfile.close();
+
+	cout << num << " reference region size items have been saved to file: " << refRegSizeFinename_tmp << endl;
 }
 
 void SVSizeDifStat(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres){
-	if(maxValidRegThres>0)
+	if(max_valid_reg_thres>0)
 		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 	SVSizeDifStatOp(sv_file1, sv_file2, 0);
-	if(maxValidRegThres>0){
+	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVSizeDifStatOp(sv_file1, sv_file2, maxValidRegThres);
+		SVSizeDifStatOp(sv_file1, sv_file2, max_valid_reg_thres);
 	}
 }
 
@@ -511,13 +584,13 @@ void outputRatioStatToFile(string &svSizeRatioStatFilename, vector<size_t> &rati
 }
 
 void SVNumStat(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres){
-	if(maxValidRegThres>0)
+	if(max_valid_reg_thres>0)
 		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 	SVNumStatOp(sv_file1, sv_file2, 0, outputPathname);
 
-	if(maxValidRegThres>0){
+	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVNumStatOp(sv_file1, sv_file2, maxValidRegThres, outputPathname);
+		SVNumStatOp(sv_file1, sv_file2, max_valid_reg_thres, outputPathname);
 	}
 }
 
@@ -526,7 +599,7 @@ void SVNumStatOp(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres
 	vector<SV_item*> sv_data1, sv_data2, long_sv_data;
 	string description_str_long, file_prefix, longFilename_tmp;
 
-	mkdir(dirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	//mkdir(dirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	longFilename_tmp = dirname + longSVFilename;
 
 	sv_data1 = loadData(sv_file1);
@@ -606,12 +679,12 @@ void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, stri
 }
 
 void SVTypeNumStat(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres){
-	if(maxValidRegThres>0)
+	if(max_valid_reg_thres>0)
 		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 	SVTypeNumStatOp(sv_file1, sv_file2, size_div_vec, 0);
-	if(maxValidRegThres>0){
+	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVTypeNumStatOp(sv_file1, sv_file2, size_div_vec, maxValidRegThres);
+		SVTypeNumStatOp(sv_file1, sv_file2, size_div_vec, max_valid_reg_thres);
 	}
 }
 
@@ -1192,12 +1265,57 @@ void convertCsv(const string &infilename, const string &outfilename){
 					outfile << data_out << endl;
 				}
 
-//				data_out = str_vec.at(0);
 //				for(size_t i=1; i<str_vec.size(); i++){
 //					if(str_vec.at(i).size()>0) data_out += "\t" + str_vec.at(i);
 //				}
 //				if(data_out.size()>0) outfile << data_out << endl;
 			}
+		}
+	}
+
+	infile.close();
+	outfile.close();
+}
+
+// convert data
+void convertNm(const string &infilename, const string &outfilename){
+	ifstream infile;
+	ofstream outfile;
+	string line, data_out, sv_type_str;
+	vector<string> str_vec;
+	int32_t sv_len, ref_seq_len, endPos;
+
+	infile.open(infilename);
+	if(!infile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << infilename << endl;
+		exit(1);
+	}
+
+	outfile.open(outfilename);
+	if(!outfile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << outfilename << endl;
+		exit(1);
+	}
+
+	// convert
+	while(getline(infile, line)){
+		if(line.size()>0){
+			str_vec = split(line, "\t");
+			data_out = str_vec.at(0) + "\t" + str_vec.at(1); // CHROM, startPos
+
+			ref_seq_len = str_vec.at(3).size();
+			endPos = stoi(str_vec.at(1)) + ref_seq_len - 1; // endPos
+			data_out += "\t" + to_string(endPos);
+
+			// get sv type
+			sv_type_str = getSVType(str_vec);
+			data_out += "\t" + sv_type_str;
+
+			// get sv length
+			sv_len = getSVLen(str_vec, sv_type_str);
+			data_out += "\t" + to_string(sv_len);
+
+			outfile << data_out << endl;
 		}
 	}
 
@@ -1215,14 +1333,15 @@ string getSVType(vector<string> &str_vec){
 	sv_type_str = "";
 	for(i=3; i<str_vec.size(); i++){
 		str_tmp = str_vec.at(i);
-		if(str_tmp.compare("INS")==0 or str_tmp.compare("DEL")==0 or str_tmp.compare("DUP")==0 or str_tmp.compare("INV")==0 or str_tmp.compare("TRA")==0 or str_tmp.compare("BND")==0 or str_tmp.compare("INVTRA")==0 or str_tmp.compare("MIX")==0){
+		if(str_tmp.compare("INS")==0 or str_tmp.compare("DEL")==0 or str_tmp.compare("DUP")==0 or str_tmp.compare("INV")==0 or str_tmp.compare("TRA")==0 or str_tmp.compare("BND")==0 or str_tmp.compare("INVTRA")==0 or str_tmp.compare("MIX")==0 or str_tmp.compare("MNP")==0){
 			sv_type_str = str_tmp;
-		}else if(str_tmp.compare("<INS>")==0 or str_tmp.compare("<DEL>")==0 or str_tmp.compare("<DUP>")==0 or str_tmp.compare("<INV>")==0 or str_tmp.compare("<TRA>")==0 or str_tmp.compare("<BND>")==0 or str_tmp.compare("<INVTRA>")==0 or str_tmp.compare("<MIX>")==0){
+		}else if(str_tmp.compare("<INS>")==0 or str_tmp.compare("<DEL>")==0 or str_tmp.compare("<DUP>")==0 or str_tmp.compare("<INV>")==0 or str_tmp.compare("<TRA>")==0 or str_tmp.compare("<BND>")==0 or str_tmp.compare("<INVTRA>")==0 or str_tmp.compare("<MIX>")==0 or str_tmp.compare("<MNP>")==0){
 			sv_type_str = str_tmp.substr(1, str_tmp.size()-2);
 		}
 	}
 
 	if(sv_type_str.size()==0){
+		vec_idx = -1; str_pos = -1;
 		for(i=3; i<str_vec.size(); i++){
 			str_tmp = str_vec.at(i);
 			sv_type_pos = str_tmp.find("sv_type=");
@@ -1262,7 +1381,7 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 	int32_t sv_len, vec_idx, str_pos, sv_length_pos, SVLEN_pos, start_pos, end_pos, sv_END_pos;
 	size_t i, j;
 	string str_tmp, sv_len_str;
-	bool flag;
+	bool flag, is_seq_flag_ref, is_seq_flag_alt;
 
 	flag = false;
 	sv_len = 0;
@@ -1298,14 +1417,17 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 			if(end_pos==-1) end_pos = str_tmp.size() - 1;
 			sv_len_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
 			if(sv_len_str.find_first_not_of("0123456789")==string::npos) { sv_len = stoi(sv_len_str); flag = true; }
-		}else{ // not found
-			start_pos = stoi(str_vec.at(1));
-			end_pos = stoi(str_vec.at(2));
-			sv_len = end_pos - start_pos + 1;
-			flag = true;
 		}
+//		else{ // not found
+//			start_pos = stoi(str_vec.at(1));
+//			end_pos = stoi(str_vec.at(2));
+//			sv_len = end_pos - start_pos + 1;
+//			flag = true;
+//			cout << "line=" << __LINE__ << ", please check." << endl;
+//			exit(1);
+//		}
 
-		// sv_len was not detected, then further detect 'END'
+		// 'SVLEN' was not detected, then further detect 'END'
 		if(flag==false){
 			vec_idx = str_pos = -1;
 			for(i=3; i<str_vec.size(); i++){
@@ -1331,15 +1453,48 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 				sv_len_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
 				if(sv_len_str.find_first_not_of("0123456789")==string::npos) { sv_len = stoi(sv_len_str); flag = true; }
 			}else{ // not found
-				start_pos = stoi(str_vec.at(1));
-				end_pos = stoi(str_vec.at(2));
-				sv_len = end_pos - start_pos + 1;
-				flag = true;
+				// check sequence
+				is_seq_flag_ref = isSeq(str_vec.at(3));
+				if(is_seq_flag_ref){
+					is_seq_flag_alt = isSeq(str_vec.at(4));
+					if(is_seq_flag_alt){
+						sv_len = str_vec.at(4).size() - str_vec.at(3).size();
+						flag = true;
+					}else{
+						str_tmp = str_vec.at(4);
+						if(str_tmp.at(0)=='<' and str_tmp.at(str_tmp.size()-1)=='>'){
+							sv_len = 0;
+							flag = true;
+						}
+					}
+				}
+
+				// no sequence
+				if(flag==false){
+					start_pos = stoi(str_vec.at(1));
+					end_pos = stoi(str_vec.at(2));
+					sv_len = end_pos - start_pos + 1;
+					flag = true;
+				}
 			}
 		}
 	}
 
 	return sv_len;
+}
+
+bool isSeq(string &seq){
+	bool flag = true;
+	char ch;
+	for(size_t i=0; i<seq.size(); i++){
+		ch = seq.at(i);
+		if(ch!='A' and ch!='C' and ch!='G' and ch!='T' and ch!='N' and ch!='a' and ch!='c' and ch!='g' and ch!='t' and ch!='n'){
+			flag = false;
+			break;
+		}
+	}
+
+	return flag;
 }
 
 // string split function

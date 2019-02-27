@@ -22,11 +22,14 @@ using namespace std;
 #define VAR_BND				6	// BND
 #define VAR_INV_TRA			7	// inverted translocation
 #define VAR_MIX				10	// mixed variation
+#define VAR_MNP				11	// MNP
 
 #define MIN_DIF_SIZE		20
 #define MAX_DIF_SIZE		1000
 
 #define SUB_DIF_REG_SIZE	50
+
+#define SV_SIZE_ARR_SIZE	2000
 
 
 typedef struct {
@@ -50,7 +53,10 @@ void showUsageConvert();
 void showUsageStat();
 int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
-int SVStat(string &sv_file1, string &sv_file2);
+void SVStat(string &sv_file1, string &sv_file2);
+
+void refRegSizeStat(string &standard_file, string &user_file, int32_t max_valid_reg_thres);
+void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres);
 
 void SVSizeDifStat(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres);
 void SVSizeDifStatOp(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres);
@@ -73,8 +79,10 @@ void computeTypeNumStat(vector<vector<SV_item*>> &divided_vec1, vector<vector<SV
 void convertBed(const string &infilename, const string &outfilename);
 void convertVcf(const string &infilename, const string &outfilename);
 void convertCsv(const string &infilename, const string &outfilename);
+void convertNm(const string &infilename, const string &outfilename);
 string getSVType(vector<string> &str_vec);
 int32_t getSVLen(vector<string> &str_vec, string &sv_type);
+bool isSeq(string &seq);
 vector<SV_item*> loadData(const string &filename);
 void destroySizeDividedData(vector< vector<SV_item*> > &divided_vec);
 void destroyData(vector<SV_item*> &sv_vec);
