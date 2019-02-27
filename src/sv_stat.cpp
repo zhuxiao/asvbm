@@ -173,7 +173,7 @@ void SVStat(string &sv_file1, string &sv_file2){
 	SVTypeNumStat(sv_file1, sv_file2, maxValidRegThres);
 }
 
-void refRegSizeStat(string &standard_file, string &user_file, int32_t max_valid_reg_thres){
+void refRegSizeStat(string &user_file, string &standard_file, int32_t max_valid_reg_thres){
 	string refRegSizeFilename_standard, refRegSizeFilename_user;
 	refRegSizeFilename_standard = "ref_reg_size_standard";
 	refRegSizeFilename_user = "ref_reg_size_user";
