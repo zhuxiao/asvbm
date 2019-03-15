@@ -55,7 +55,7 @@ int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
 void SVStat(string &sv_file1, string &sv_file2);
 
-void refRegSizeStat(string &standard_file, string &user_file, int32_t max_valid_reg_thres);
+void refRegSizeStat(string &user_file, string &standard_file, int32_t max_valid_reg_thres);
 void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres);
 
 void SVSizeDifStat(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres);

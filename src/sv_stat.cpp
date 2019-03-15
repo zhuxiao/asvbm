@@ -1151,8 +1151,9 @@ void convertVcf(const string &infilename, const string &outfilename){
 	string line, data_out;
 	string chrname, start_pos_str, endpos_str, chrname2, start_pos_str2, endpos_str2, sv_type_str, sv_len_str, bnd_str, bnd_pos_str;
 	vector<string> str_vec, info_vec, sub_info_vec, bnd_pos_vec;
-	size_t i;
+	size_t i, end_pos_ref;
 	int32_t sv_len;
+	bool is_seq_flag_ref;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -1176,7 +1177,7 @@ void convertVcf(const string &infilename, const string &outfilename){
 				chrname = str_vec.at(0);
 				start_pos_str = str_vec.at(1);
 
-				chrname2 = endpos_str = "";
+				chrname2 = endpos_str = sv_type_str = sv_len_str = "";
 				info_vec = split(str_vec.at(7), ";");
 				for(i=0; i<info_vec.size(); i++){
 					sub_info_vec = split(info_vec.at(i), "=");
@@ -1193,6 +1194,13 @@ void convertVcf(const string &infilename, const string &outfilename){
 				// get sv type and length
 				if(sv_type_str.size()==0) sv_type_str = getSVType(str_vec);
 				if(sv_len_str.size()==0) { sv_len = getSVLen(str_vec, sv_type_str); sv_len_str = to_string(sv_len); }
+				if(endpos_str.size()==0) {
+					is_seq_flag_ref = isSeq(str_vec.at(3));
+					if(is_seq_flag_ref){
+						end_pos_ref = stoi(start_pos_str) + str_vec.at(3).size() - 1;
+						endpos_str = to_string(end_pos_ref);
+					}
+				}
 
 				if(sv_type_str.size()>0){
 					if(sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0){ // TRA or BND
@@ -1211,7 +1219,7 @@ void convertVcf(const string &infilename, const string &outfilename){
 						endpos_str2 = start_pos_str2;
 						endpos_str = start_pos_str;
 						data_out = chrname + "\t" + start_pos_str + "\t" + endpos_str + "\t" + chrname2 + "\t" + start_pos_str2 + "\t" + endpos_str2 + "\t" + sv_type_str + "\t" + sv_len_str; // CHROM, startPos, endPos, sv_type, sv_len
-					}else  // INS, DEL, INV, DUP
+					}else  // INS, DEL, INV, DUP, UNC
 						data_out = chrname + "\t" + start_pos_str + "\t" + endpos_str + "\t" + sv_type_str + "\t" + sv_len_str; // CHROM, startPos, endPos, sv_type, sv_len
 					outfile << data_out << endl;
 				}else{
@@ -1373,6 +1381,8 @@ string getSVType(vector<string> &str_vec){
 		}
 	}
 
+	if(sv_type_str.size()==0) sv_type_str = "UNC";
+
 	return sv_type_str;
 }
 
@@ -1458,7 +1468,7 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 				if(is_seq_flag_ref){
 					is_seq_flag_alt = isSeq(str_vec.at(4));
 					if(is_seq_flag_alt){
-						sv_len = str_vec.at(4).size() - str_vec.at(3).size();
+						sv_len = (int32_t)str_vec.at(4).size() - (int32_t)str_vec.at(3).size();
 						flag = true;
 					}else{
 						str_tmp = str_vec.at(4);
@@ -1478,6 +1488,7 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 				}
 			}
 		}
+		if(flag==false) cout << "missing SVLEN information" << endl;
 	}
 
 	return sv_len;
