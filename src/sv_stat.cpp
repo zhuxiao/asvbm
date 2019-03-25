@@ -820,22 +820,22 @@ vector<SV_item*> loadData(const string &filename){
 			item->startPos2 = 0;
 			item->endPos2 = 0;
 			str_tmp = str_vec.at(3);
-			if(str_tmp.compare("INS")==0){
+			if(str_tmp.compare("INS")==0 or str_tmp.compare("insertion")==0){
 				item->sv_type = VAR_INS;
-			}else if(str_tmp.compare("DEL")==0){
+			}else if(str_tmp.compare("DEL")==0 or str_tmp.compare("deletion")==0){
 				item->sv_type = VAR_DEL;
-			}else if(str_tmp.compare("DUP")==0){
+			}else if(str_tmp.compare("DUP")==0 or str_tmp.compare("duplication")==0){
 				item->sv_type = VAR_DUP;
-			}else if(str_tmp.compare("INV")==0){
+			}else if(str_tmp.compare("INV")==0 or str_tmp.compare("inversion")==0){
 				item->sv_type = VAR_INV;
 			}else{
-				if(str_vec.size()>=7 and (str_vec.at(6).compare("TRA")==0 or str_vec.at(6).compare("BND")==0)){
+				if(str_vec.size()>=7 and (str_vec.at(6).compare("TRA")==0 or str_vec.at(6).compare("translocation")==0 or str_vec.at(6).compare("BND")==0)){
 					item->chrname2 = str_vec.at(3);
 					if(str_vec.at(4).compare("-")==0) item->startPos2 = 0;
 					else item->startPos2 = stoi(str_vec.at(4));
 					if(str_vec.at(5).compare("-")==0) item->endPos2 = 0;
 					else item->endPos2 = stoi(str_vec.at(5));
-					if(str_vec.at(6).compare("TRA")==0) item->sv_type = VAR_TRA;
+					if(str_vec.at(6).compare("TRA")==0 or str_vec.at(6).compare("translocation")==0) item->sv_type = VAR_TRA;
 					else item->sv_type = VAR_BND;
 				}else
 					item->sv_type = VAR_MIX;
@@ -1383,6 +1383,8 @@ string getSVType(vector<string> &str_vec){
 			sv_type_str = str_tmp;
 		}else if(str_tmp.compare("<INS>")==0 or str_tmp.compare("<DEL>")==0 or str_tmp.compare("<DUP>")==0 or str_tmp.compare("<INV>")==0 or str_tmp.compare("<TRA>")==0 or str_tmp.compare("<BND>")==0 or str_tmp.compare("<INVTRA>")==0 or str_tmp.compare("<MIX>")==0 or str_tmp.compare("<MNP>")==0){
 			sv_type_str = str_tmp.substr(1, str_tmp.size()-2);
+		}else if(str_tmp.compare("insertion")==0 or str_tmp.compare("deletion")==0 or str_tmp.compare("duplication")==0 or str_tmp.compare("inversion")==0 or str_tmp.compare("translocation")==0){
+			sv_type_str = str_tmp;
 		}
 	}
 
@@ -1552,15 +1554,15 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 
 	if(sv_type_str.compare("UNC")==0){
 		sv_type = VAR_UNC;
-	}else if(sv_type_str.compare("INS")==0){
+	}else if(sv_type_str.compare("INS")==0 or sv_type_str.compare("insertion")==0){
 		sv_type = VAR_INS;
-	}else if(sv_type_str.compare("DEL")==0){
+	}else if(sv_type_str.compare("DEL")==0 or sv_type_str.compare("deletion")==0){
 		sv_type = VAR_DEL;
-	}else if(sv_type_str.compare("DUP")==0){
+	}else if(sv_type_str.compare("DUP")==0 or sv_type_str.compare("duplication")==0){
 		sv_type = VAR_DUP;
-	}else if(sv_type_str.compare("INV")==0){
+	}else if(sv_type_str.compare("INV")==0 or sv_type_str.compare("inversion")==0){
 		sv_type = VAR_INV;
-	}else if(sv_type_str.compare("TRA")==0){
+	}else if(sv_type_str.compare("TRA")==0 or sv_type_str.compare("translocation")==0){
 		sv_type = VAR_TRA;
 	}else if(sv_type_str.compare("BND")==0){
 		sv_type = VAR_BND;
