@@ -57,6 +57,7 @@ void showUsageConvert(){
 	cout << "                  bed: BED format" << endl;
 	cout << "                  vcf: VCF format" << endl;
 	cout << "                  csv: CSV format" << endl;
+	cout << "     -d INT       remove duplicated variant items [1]: 1 for yes, 0 for no" << endl;
 	cout << "     -h           show this help message and exit" << endl;
 }
 
@@ -83,15 +84,25 @@ void showUsageStat(){
 int parseConvert(int argc, char **argv)
 {
 	int opt;
-	string sv_format, in_file, out_file;
+	string sv_format, in_file, out_file, remove_dup_str = "1";
+	bool remove_dup_falg;
 
-	while( (opt = getopt(argc, argv, ":f:h")) != -1 ){
+	while( (opt = getopt(argc, argv, ":f:d:h")) != -1 ){
 		switch(opt){
 			case 'f': sv_format = optarg; break;
+			case 'd': remove_dup_str = optarg; break;
 			case 'h': showUsageConvert(); exit(0);
 			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
 			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
 		}
+	}
+
+	if(remove_dup_str.compare("1")==0) remove_dup_falg = true;
+	else if(remove_dup_str.compare("0")==0) remove_dup_falg = false;
+	else{
+		cout << "Error: Please specify the correct value for '-d' option" << endl << endl;
+		showUsageConvert();
+		return 1;
 	}
 
 	opt = argc - optind; // the number of SAMs on the command line
@@ -101,13 +112,13 @@ int parseConvert(int argc, char **argv)
 	}else { showUsageConvert(); return 1; }
 
 	if(sv_format.compare("bed")==0)
-		convertBed(in_file, out_file);
+		convertBed(in_file, out_file, remove_dup_falg);
 	else if(sv_format.compare("vcf")==0)
-		convertVcf(in_file, out_file);
+		convertVcf(in_file, out_file, remove_dup_falg);
 	else if(sv_format.compare("csv")==0)
-		convertCsv(in_file, out_file);
+		convertCsv(in_file, out_file, remove_dup_falg);
 	else if(sv_format.compare("nm")==0)  // private usage: nm
-		convertNm(in_file, out_file);
+		convertNm(in_file, out_file, remove_dup_falg);
 	else{
 		cout << "Error: Please specify the correct SV file format" << endl << endl;
 		showUsageConvert();
@@ -630,7 +641,7 @@ void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, stri
 	vector<SV_item*> long_sv_data;
 	vector< vector<SV_item*> > result;
 	int32_t TP, FP, FN, positive_num_called;
-	float recall, precision, sv_num_per_reg, percent;
+	float recall, precision, F1_score, sv_num_per_reg, percent;
 	string filename_intersect, filename_private1, filename_private2;
 
 	filename_intersect = file_prefix + "_intersect";
@@ -668,12 +679,14 @@ void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, stri
 	if(TP+result.at(1).size()>0) precision = (float)TP / (TP + result.at(1).size());
 	else precision = 0;
 
+	F1_score = 2.0 * (recall * precision) / (recall + precision);
+
 	if(positive_num_called>0) sv_num_per_reg = (float)TP / positive_num_called;
 	else sv_num_per_reg = 0;
 
 	cout << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
 	cout << "Identified SV regions: " << positive_num_called << endl;
-	cout << "Recall=" << recall << ", precision=" << precision << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	cout << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 
 	destroyResultData(result);
 }
@@ -1099,24 +1112,19 @@ void computeLenStat(vector<SV_item*> &data, string &description_str){
 	cout << description_str << " reg_num=" << data.size() << ", total_len=" << sum << ", max_len=" << max_len << ", min_len=" << min_len << ", aver_len=" << aver_len << endl;
 }
 
-
 // convert data
-void convertBed(const string &infilename, const string &outfilename){
+void convertBed(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
 	ifstream infile;
-	ofstream outfile;
-	string line, data_out, sv_type_str;
+	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec;
+	size_t start_pos, endpos, start_pos2, endpos2;
 	int32_t sv_len;
+	vector<SV_item*> sv_item_vec;
+	SV_item *sv_item;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << infilename << endl;
-		exit(1);
-	}
-
-	outfile.open(outfilename);
-	if(!outfile.is_open()){
-		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << outfilename << endl;
 		exit(1);
 	}
 
@@ -1125,35 +1133,46 @@ void convertBed(const string &infilename, const string &outfilename){
 		if(line.size()){
 			if(line.at(0)!='#'){
 				str_vec = split(line, "\t");
-				data_out = str_vec.at(0) + "\t" + str_vec.at(1) + "\t" + str_vec.at(2); // CHROM, startPos, endPos
 
-				// get sv type
+				chrname = str_vec.at(0);
+				start_pos = stoi(str_vec.at(1));
+				endpos = stoi(str_vec.at(2));
+
+				// get sv type and sv_len
 				sv_type_str = getSVType(str_vec);
-				data_out += "\t" + sv_type_str;
-
-				// get sv length
 				sv_len = getSVLen(str_vec, sv_type_str);
-				data_out += "\t" + to_string(sv_len);
 
-				outfile << data_out << endl;
+				chrname2 = "";
+				start_pos2 = endpos2 = 0;
+
+				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+				sv_item_vec.push_back(sv_item);
 			}
 		}
 	}
-
 	infile.close();
-	outfile.close();
+
+	// remove duplicated sv items
+	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
+
+	// save to file
+	output2File(outfilename, sv_item_vec);
+
+	// release memory
+	releaseSVItemVec(sv_item_vec);
 }
 
 // convert vcf result
-void convertVcf(const string &infilename, const string &outfilename){
+void convertVcf(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
 	ifstream infile;
-	ofstream outfile;
-	string line, data_out;
-	string chrname, start_pos_str, endpos_str, chrname2, start_pos_str2, endpos_str2, sv_type_str, sv_len_str, bnd_str, bnd_pos_str;
-	vector<string> str_vec, info_vec, sub_info_vec, bnd_pos_vec;
+	string line, chrname, start_pos_str, endpos_str, chrname2, start_pos_str2, endpos_str2, sv_type_str, sv_len_str, bnd_str, bnd_pos_str;
+	size_t start_pos, endpos, start_pos2, endpos2;
 	size_t i, end_pos_ref;
 	int32_t sv_len;
+	vector<string> str_vec, info_vec, sub_info_vec, bnd_pos_vec;
 	bool is_seq_flag_ref;
+	vector<SV_item*> sv_item_vec;
+	SV_item *sv_item;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -1161,16 +1180,11 @@ void convertVcf(const string &infilename, const string &outfilename){
 		exit(1);
 	}
 
-	outfile.open(outfilename);
-	if(!outfile.is_open()){
-		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << outfilename << endl;
-		exit(1);
-	}
-
 	// convert
 	while(getline(infile, line)){
 		if(line.size()){
 			if(line.at(0)!='#'){
+
 				str_vec = split(line, "\t");
 
 				// get locations
@@ -1206,7 +1220,7 @@ void convertVcf(const string &infilename, const string &outfilename){
 					if(sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0){ // TRA or BND
 						if(sv_type_str.compare("BND")==0){ // BND
 							bnd_str = str_vec.at(4);
-							if(bnd_str.at(0)==']')
+							if(bnd_str.at(0)==']' or bnd_str.at(0)=='[')
 								bnd_pos_str = bnd_str.substr(1, bnd_str.size()-3);
 							else if(bnd_str.at(0)=='N')
 								bnd_pos_str = bnd_str.substr(2, bnd_str.size()-3);
@@ -1218,10 +1232,20 @@ void convertVcf(const string &infilename, const string &outfilename){
 						start_pos_str2 = endpos_str;
 						endpos_str2 = start_pos_str2;
 						endpos_str = start_pos_str;
-						data_out = chrname + "\t" + start_pos_str + "\t" + endpos_str + "\t" + chrname2 + "\t" + start_pos_str2 + "\t" + endpos_str2 + "\t" + sv_type_str + "\t" + sv_len_str; // CHROM, startPos, endPos, sv_type, sv_len
-					}else  // INS, DEL, INV, DUP, UNC
-						data_out = chrname + "\t" + start_pos_str + "\t" + endpos_str + "\t" + sv_type_str + "\t" + sv_len_str; // CHROM, startPos, endPos, sv_type, sv_len
-					outfile << data_out << endl;
+					}else { // INS, DEL, INV, DUP, UNC
+						start_pos_str2 = "0";
+						endpos_str2 = "0";
+					}
+
+					start_pos = stoi(start_pos_str);
+					endpos = stoi(endpos_str);
+					start_pos2 = stoi(start_pos_str2);
+					endpos2 = stoi(endpos_str2);
+					sv_len = stoi(sv_len_str);
+
+					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+					sv_item_vec.push_back(sv_item);
+
 				}else{
 					cout << line << endl;
 					cout << "missing SVTYPE information" << endl;
@@ -1229,28 +1253,31 @@ void convertVcf(const string &infilename, const string &outfilename){
 			}
 		}
 	}
-
 	infile.close();
-	outfile.close();
+
+	// remove duplicated sv items
+	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
+
+	// save to file
+	output2File(outfilename, sv_item_vec);
+
+	// release memory
+	releaseSVItemVec(sv_item_vec);
 }
 
 // convert data
-void convertCsv(const string &infilename, const string &outfilename){
+void convertCsv(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
 	ifstream infile;
-	ofstream outfile;
-	string line, data_out, sv_type_str;
+	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec;
+	size_t start_pos, endpos, start_pos2, endpos2;
 	int32_t sv_len;
+	vector<SV_item*> sv_item_vec;
+	SV_item *sv_item;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << infilename << endl;
-		exit(1);
-	}
-
-	outfile.open(outfilename);
-	if(!outfile.is_open()){
-		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << outfilename << endl;
 		exit(1);
 	}
 
@@ -1260,38 +1287,45 @@ void convertCsv(const string &infilename, const string &outfilename){
 			if(line.at(0)!='#'){
 				str_vec = split(line, ",");
 				if(str_vec.at(0).size()>0){
-					data_out = str_vec.at(0) + "\t" + str_vec.at(1) + "\t" + str_vec.at(2); // CHROM, startPos, endPos
+
+					chrname = str_vec.at(0);
+					start_pos = stoi(str_vec.at(1));
+					endpos = stoi(str_vec.at(2));
 
 					// get sv type and length
 					sv_type_str = getSVType(str_vec);
 					sv_len = getSVLen(str_vec, sv_type_str);
 					if(sv_type_str.compare("DEL")==0 and sv_len>0) sv_len = -sv_len;
 
-					data_out += "\t" + sv_type_str;
-					data_out += "\t" + to_string(sv_len);
+					chrname2 = "";
+					start_pos2 = endpos2 = 0;
 
-					outfile << data_out << endl;
+					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+					sv_item_vec.push_back(sv_item);
 				}
-
-//				for(size_t i=1; i<str_vec.size(); i++){
-//					if(str_vec.at(i).size()>0) data_out += "\t" + str_vec.at(i);
-//				}
-//				if(data_out.size()>0) outfile << data_out << endl;
 			}
 		}
 	}
-
 	infile.close();
-	outfile.close();
+
+	// remove duplicated sv items
+	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
+
+	// save to file
+	output2File(outfilename, sv_item_vec);
+
+	// release memory
+	releaseSVItemVec(sv_item_vec);
 }
 
 // convert data
-void convertNm(const string &infilename, const string &outfilename){
+void convertNm(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
 	ifstream infile;
-	ofstream outfile;
-	string line, data_out, sv_type_str;
+	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec;
-	int32_t sv_len, ref_seq_len, endPos;
+	int32_t sv_len, ref_seq_len, start_pos, endpos, start_pos2, endpos2;
+	vector<SV_item*> sv_item_vec;
+	SV_item *sv_item;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -1299,36 +1333,40 @@ void convertNm(const string &infilename, const string &outfilename){
 		exit(1);
 	}
 
-	outfile.open(outfilename);
-	if(!outfile.is_open()){
-		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << outfilename << endl;
-		exit(1);
-	}
-
 	// convert
 	while(getline(infile, line)){
 		if(line.size()>0){
 			str_vec = split(line, "\t");
-			data_out = str_vec.at(0) + "\t" + str_vec.at(1); // CHROM, startPos
+
+			chrname = str_vec.at(0);
+			start_pos = stoi(str_vec.at(1));
 
 			ref_seq_len = str_vec.at(3).size();
-			endPos = stoi(str_vec.at(1)) + ref_seq_len - 1; // endPos
-			data_out += "\t" + to_string(endPos);
+			endpos = stoi(str_vec.at(1)) + ref_seq_len - 1; // endPos
 
 			// get sv type
 			sv_type_str = getSVType(str_vec);
-			data_out += "\t" + sv_type_str;
 
 			// get sv length
 			sv_len = getSVLen(str_vec, sv_type_str);
-			data_out += "\t" + to_string(sv_len);
 
-			outfile << data_out << endl;
+			chrname2 = "";
+			start_pos2 = endpos2 = 0;
+
+			sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+			sv_item_vec.push_back(sv_item);
 		}
 	}
-
 	infile.close();
-	outfile.close();
+
+	// remove duplicated sv items
+	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
+
+	// save to file
+	output2File(outfilename, sv_item_vec);
+
+	// release memory
+	releaseSVItemVec(sv_item_vec);
 }
 
 // get sv type
@@ -1499,13 +1537,93 @@ bool isSeq(string &seq){
 	char ch;
 	for(size_t i=0; i<seq.size(); i++){
 		ch = seq.at(i);
-		if(ch!='A' and ch!='C' and ch!='G' and ch!='T' and ch!='N' and ch!='a' and ch!='c' and ch!='g' and ch!='t' and ch!='n'){
+		if(ch!='A' and ch!='C' and ch!='G' and ch!='T' and ch!='a' and ch!='c' and ch!='g' and ch!='t'){
 			flag = false;
 			break;
 		}
 	}
 
 	return flag;
+}
+
+// allocate SV item
+SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len){
+	size_t sv_type;
+
+	if(sv_type_str.compare("UNC")==0){
+		sv_type = VAR_UNC;
+	}else if(sv_type_str.compare("INS")==0){
+		sv_type = VAR_INS;
+	}else if(sv_type_str.compare("DEL")==0){
+		sv_type = VAR_DEL;
+	}else if(sv_type_str.compare("DUP")==0){
+		sv_type = VAR_DUP;
+	}else if(sv_type_str.compare("INV")==0){
+		sv_type = VAR_INV;
+	}else if(sv_type_str.compare("TRA")==0){
+		sv_type = VAR_TRA;
+	}else if(sv_type_str.compare("BND")==0){
+		sv_type = VAR_BND;
+	}else if(sv_type_str.compare("INVTRA")==0){
+		sv_type = VAR_INV_TRA;
+	}else if(sv_type_str.compare("MIX")==0){
+		sv_type = VAR_MIX;
+	}else if(sv_type_str.compare("MNP")==0){
+		sv_type = VAR_MNP;
+	}else{
+		sv_type = VAR_UNC;
+	}
+
+	SV_item *item = new SV_item();
+	item->chrname = chrname;
+	item->startPos = startPos;
+	item->endPos = endPos;
+	item->chrname2 = chrname2;
+	item->startPos2 = startPos2;
+	item->endPos2 = endPos2;
+	item->sv_type = sv_type;
+	item->sv_len = sv_len;
+	item->overlapped = false;
+	item->validFlag = true;
+	return item;
+}
+
+// remove duplicate SV items
+void removeDuplicatedSVItems(vector<SV_item*> &sv_item_vec){
+	size_t i, j;
+	SV_item *item, *item2;
+
+	for(i=0; i<sv_item_vec.size(); i++){
+		item = sv_item_vec.at(i);
+		if(item->validFlag and item->chrname.size()>0 and item->chrname2.size()>0){
+			for(j=i+1; j<sv_item_vec.size(); j++){
+				item2 = sv_item_vec.at(j);
+				if(item2->validFlag and item2->chrname.size()>0 and item2->chrname2.size()>0)
+					if(item->chrname.compare(item2->chrname2)==0 and item->startPos==item2->startPos2 and item->endPos==item2->endPos2
+						and item->chrname2.compare(item2->chrname)==0 and item->startPos2==item2->startPos and item->endPos2==item2->endPos)
+						item2->validFlag = false;
+			}
+		}
+	}
+
+	// remove items
+	for(i=0; i<sv_item_vec.size(); ){
+		item = sv_item_vec.at(i);
+		if(item->validFlag==false){
+			sv_item_vec.erase(sv_item_vec.begin()+i);
+			delete item;
+		}else i++;
+	}
+}
+
+// release sv item vector
+void releaseSVItemVec(vector<SV_item*> &sv_item_vec){
+	SV_item *item;
+	for(size_t i=0; i<sv_item_vec.size(); i++){
+		item = sv_item_vec.at(i);
+		delete item;
+	}
+	vector<SV_item*>().swap(sv_item_vec);
 }
 
 // string split function

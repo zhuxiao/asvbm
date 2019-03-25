@@ -37,7 +37,8 @@ typedef struct {
 	size_t startPos, endPos;  // 1-based
 	string chrname2;
 	size_t startPos2, endPos2;  // 1-based
-	bool overlapped;  // default: false
+	bool overlapped;	// default: false
+	bool validFlag;		// default: true
 	size_t sv_type;
 	int32_t sv_len;
 }SV_item;
@@ -76,13 +77,18 @@ void SVTypeNumStatOp(string &sv_file1, string &sv_file2, vector<size_t> &size_di
 vector<vector<SV_item*>> sizeDivideSV(vector<SV_item*> &sv_data, vector<size_t> &size_div_vec);
 void computeTypeNumStat(vector<vector<SV_item*>> &divided_vec1, vector<vector<SV_item*>> &divided_vec2);
 
-void convertBed(const string &infilename, const string &outfilename);
-void convertVcf(const string &infilename, const string &outfilename);
-void convertCsv(const string &infilename, const string &outfilename);
-void convertNm(const string &infilename, const string &outfilename);
+void convertBed(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag);
+void convertVcf(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag);
+void convertCsv(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag);
+void convertNm(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag);
 string getSVType(vector<string> &str_vec);
 int32_t getSVLen(vector<string> &str_vec, string &sv_type);
 bool isSeq(string &seq);
+
+SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len);
+void removeDuplicatedSVItems(vector<SV_item*> &sv_item_vec);
+void releaseSVItemVec(vector<SV_item*> &sv_item_vec);
+
 vector<SV_item*> loadData(const string &filename);
 void destroySizeDividedData(vector< vector<SV_item*> > &divided_vec);
 void destroyData(vector<SV_item*> &sv_vec);
