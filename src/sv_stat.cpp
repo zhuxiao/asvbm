@@ -173,7 +173,7 @@ void SVStat(string &sv_file1, string &sv_file2){
 	cout << "############# Phage 1: SV size statistics: #############" << endl;
 	refRegSizeStat(sv_file1, sv_file2, maxValidRegThres);
 
-	cout << "############# Phage 2: Num statistics: #############" << endl;
+	cout << "\n\n############# Phage 2: Num statistics: #############" << endl;
 	SVNumStat(sv_file1, sv_file2, maxValidRegThres);
 
 	// compute SV size difference statistics
@@ -774,17 +774,19 @@ void computeTypeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector
 
 	start_pos = 1;
 	for(size_t i=0; i<divided_vec1.size(); i++){
-		cout << "><><><><><>< i=" << i << endl;
 		sv_vec1 = divided_vec1.at(i);
 		sv_vec2 = divided_vec2.at(i);
 
 		if(i<size_div_vec.size()){
 			end_pos = size_div_vec.at(i);
+			cout << "><><><><><>< SV size: " << start_pos << "-" << end_pos << ":" << endl;
 			file_prefix_tmp = file_prefix + "_" + to_string(start_pos) + "_" + to_string(end_pos);
 			start_pos = end_pos + 1;
 		}else if(i==size_div_vec.size()){
+			cout << "><><><><><>< SV size: " << ">=" << start_pos << ":" << endl;
 			file_prefix_tmp = file_prefix + "_" + to_string(start_pos) + "_larger";
 		}else if(i==size_div_vec.size()+1){
+			cout << "><><><><><>< TRA:" << endl;
 			file_prefix_tmp = file_prefix + "_TRA_BND";
 		}
 		computeNumStat(sv_vec1, sv_vec2, file_prefix_tmp);
