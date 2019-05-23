@@ -1,0 +1,41 @@
+#ifndef SRC_STRUCTURE_H_
+#define SRC_STRUCTURE_H_
+
+#include <iostream>
+#include <cstring>
+
+using namespace std;
+
+#define VAR_UNC				0	// uncertain
+#define VAR_INS				1	// insertion
+#define VAR_DEL				2	// deletion
+#define VAR_DUP				3	// duplication
+#define VAR_INV				4	// inversion
+#define VAR_TRA				5	// translocation
+#define VAR_BND				6	// BND
+#define VAR_INV_TRA			7	// inverted translocation
+#define VAR_MIX				10	// mixed variation
+#define VAR_MNP				11	// MNP
+
+#define BALANCED_TRA_STR	"BALANCED"
+#define UNBALANCED_TRA_STR	"UNBALANCED"
+
+typedef struct {
+	string chrname;
+	size_t startPos, endPos;  // 1-based
+	string chrname2;
+	size_t startPos2, endPos2;  // 1-based
+	bool overlapped;	// default: false
+	bool validFlag;		// default: true
+	bool balancedTraFlag;	// default: false
+	size_t sv_type;
+	int32_t sv_len;
+}SV_item;
+
+typedef struct {
+	SV_item *sv_item1, *sv_item2;
+	double dif_size, size_ratio;
+}SV_pair;
+
+
+#endif /* SRC_STRUCTURE_H_ */
