@@ -27,7 +27,7 @@ typedef struct {
 	size_t startPos2, endPos2;  // 1-based
 	bool overlapped;	// default: false
 	bool validFlag;		// default: true
-	bool balancedTraFlag;	// TRA, default: false
+	//bool balancedTraFlag;	// TRA, default: false
 	//bool isTraBreakpointFlag, isTraBreakpointFlag2;	// TRA, default: false
 	bool traOverlappedArr[4];	// four TRA breakpoints, default: false
 	size_t sv_type;

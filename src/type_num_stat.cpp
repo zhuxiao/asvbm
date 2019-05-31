@@ -96,17 +96,17 @@ void computeTypeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector
 
 		if(i<size_div_vec.size()){
 			end_pos = size_div_vec.at(i);
-			cout << ">>>>>>>>> SV size: " << start_pos << "-" << end_pos << ":" << " <<<<<<<<<" << endl;
-			outStatScreenFile << ">>>>>>>>> SV size: " << start_pos << "-" << end_pos << ":" << " <<<<<<<<<" << endl;
+			cout << "\n>>>>>>>>> SV size: " << start_pos << "-" << end_pos << ":" << " <<<<<<<<<" << endl;
+			outStatScreenFile << "\n>>>>>>>>> SV size: " << start_pos << "-" << end_pos << ":" << " <<<<<<<<<" << endl;
 			file_prefix_tmp = file_prefix + "_" + to_string(start_pos) + "_" + to_string(end_pos);
 			start_pos = end_pos + 1;
 		}else if(i==size_div_vec.size()){
-			cout << ">>>>>>>>> SV size: " << ">=" << start_pos << ":" << " <<<<<<<<<" << endl;
-			outStatScreenFile << ">>>>>>>>> SV size: " << ">=" << start_pos << ":" << " <<<<<<<<<" << endl;
+			cout << "\n>>>>>>>>> SV size: " << ">=" << start_pos << ":" << " <<<<<<<<<" << endl;
+			outStatScreenFile << "\n>>>>>>>>> SV size: " << ">=" << start_pos << ":" << " <<<<<<<<<" << endl;
 			file_prefix_tmp = file_prefix + "_" + to_string(start_pos) + "_larger";
 		}else if(i==size_div_vec.size()+1){
-			cout << ">>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
-			outStatScreenFile << ">>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
+			cout << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
+			outStatScreenFile << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
 			file_prefix_tmp = file_prefix + "_TRA_BND_BP";
 		}
 		if(i<size_div_vec.size()+1) computeNumStat(sv_vec1, sv_vec2, file_prefix_tmp);

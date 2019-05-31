@@ -119,7 +119,7 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 // output pair data to file
 void outputPairDataToFile(string &filename, vector<SV_pair*> &sv_pair_vec){
 	ofstream outfile;
-	string line, sv_type_str1, sv_type_str2, balancedTraFlag1_str, balancedTraFlag2_str;
+	string line, sv_type_str1, sv_type_str2;
 	SV_pair *pair_item;
 	SV_item *item1, *item2;
 
@@ -160,18 +160,9 @@ void outputPairDataToFile(string &filename, vector<SV_pair*> &sv_pair_vec){
 			default: cerr << "line=" << __LINE__ << ", invalid SV type: " << item2->sv_type << endl; exit(1);
 		}
 
-		if(item1->sv_type==VAR_TRA or item1->sv_type==VAR_BND){
-			if(item1->balancedTraFlag) balancedTraFlag1_str = BALANCED_TRA_STR;
-			else balancedTraFlag1_str = UNBALANCED_TRA_STR;
-		}else balancedTraFlag1_str = "-";
-		if(item2->sv_type==VAR_TRA or item2->sv_type==VAR_BND){
-			if(item2->balancedTraFlag) balancedTraFlag2_str = BALANCED_TRA_STR;
-			else balancedTraFlag2_str = UNBALANCED_TRA_STR;
-		}else balancedTraFlag2_str = "-";
-
 		line = to_string(pair_item->dif_size) + "\t" + to_string(pair_item->size_ratio);
-		line += "\t" + item1->chrname + "\t" + to_string(item1->startPos) + "\t" + to_string(item1->endPos) + "\t" + sv_type_str1 + "\t" + to_string(item1->sv_len) + "\t" + balancedTraFlag1_str;
-		line += "\t" + item2->chrname + "\t" + to_string(item2->startPos) + "\t" + to_string(item2->endPos) + "\t" + sv_type_str2 + "\t" + to_string(item2->sv_len) + "\t" + balancedTraFlag2_str;
+		line += "\t" + item1->chrname + "\t" + to_string(item1->startPos) + "\t" + to_string(item1->endPos) + "\t" + sv_type_str1 + "\t" + to_string(item1->sv_len);
+		line += "\t" + item2->chrname + "\t" + to_string(item2->startPos) + "\t" + to_string(item2->endPos) + "\t" + sv_type_str2 + "\t" + to_string(item2->sv_len);
 		outfile << line << endl;
 	}
 

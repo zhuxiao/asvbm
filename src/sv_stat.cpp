@@ -103,14 +103,14 @@ int parseConvert(int argc, char **argv)
 		out_file = argv[optind+1];
 	}else { showUsageConvert(); return 1; }
 
-	if(sv_format.compare("bed")==0)
-		convertBed(in_file, out_file, remove_dup_falg);
-	else if(sv_format.compare("vcf")==0)
-		convertVcf(in_file, out_file, remove_dup_falg);
-	else if(sv_format.compare("csv")==0)
-		convertCsv(in_file, out_file, remove_dup_falg);
-	else if(sv_format.compare("nm")==0)  // private usage: nm
-		convertNm(in_file, out_file, remove_dup_falg);
+	if(in_file.size()>0 and in_file.compare(out_file)==0){
+		cout << "Please specify different SV file names" << endl << endl;
+		showUsageConvert();
+		return 1;
+	}
+
+	if(sv_format.compare("bed")==0 or sv_format.compare("vcf")==0 or sv_format.compare("csv")==0 or sv_format.compare("nm")==0) // nm: private usage
+		convert(in_file, out_file, remove_dup_falg, sv_format);
 	else{
 		cout << "Error: Please specify the correct SV file format" << endl << endl;
 		showUsageConvert();
@@ -169,21 +169,21 @@ void SVStat(string &user_file, string &benchmark_file){
 		exit(1);
 	}
 
-	cout << "############# Phage 1: SV size statistics: #############" << endl;
-	outStatScreenFile << "############# Phage 1: SV size statistics: #############" << endl;
+	cout << "############# Stage 1: SV size statistics: #############" << endl;
+	outStatScreenFile << "############# Stage 1: SV size statistics: #############" << endl;
 	refRegSizeStat(user_file, benchmark_file, maxValidRegThres);
 
-	cout << "\n\n############# Phage 2: Num statistics: #############" << endl;
-	outStatScreenFile << "\n\n############# Phage 2: Num statistics: #############" << endl;
+	cout << "\n\n############# Stage 2: Num statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Stage 2: Num statistics: #############" << endl;
 	SVNumStat(user_file, benchmark_file, maxValidRegThres, outputPathname);
 
 	// compute SV size difference statistics
-	cout << "\n\n############# Phage 3: SV size difference statistics: #############" << endl;
-	outStatScreenFile << "\n\n############# Phage 3: SV size difference statistics: #############" << endl;
+	cout << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
 	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres);
 
-	cout << "\n\n############# Phage 4: SV type and num statistics: #############" << endl;
-	outStatScreenFile << "\n\n############# Phage 4: SV type and num statistics: #############" << endl;
+	cout << "\n\n############# Stage 4: SV type and num statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Stage 4: SV type and num statistics: #############" << endl;
 	SVTypeNumStat(user_file, benchmark_file, maxValidRegThres);
 
 	outStatScreenFile.close();

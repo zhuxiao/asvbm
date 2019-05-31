@@ -1,6 +1,19 @@
 #include "convert.h"
 #include "util.h"
 
+void convert(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format){
+	cout << "############# Convert variants: #############" << endl;
+
+	if(sv_format.compare("bed")==0)
+		convertBed(infilename, outfilename, remove_dup_falg);
+	else if(sv_format.compare("vcf")==0)
+		convertVcf(infilename, outfilename, remove_dup_falg);
+	else if(sv_format.compare("csv")==0)
+		convertCsv(infilename, outfilename, remove_dup_falg);
+	else if(sv_format.compare("nm")==0)  // private usage: nm
+		convertNm(infilename, outfilename, remove_dup_falg);
+}
+
 // convert data
 void convertBed(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
 	ifstream infile;
@@ -10,7 +23,6 @@ void convertBed(const string &infilename, const string &outfilename, bool remove
 	int32_t sv_len;
 	vector<SV_item*> sv_item_vec;
 	SV_item *sv_item;
-	bool balancedTraFlag;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -37,15 +49,12 @@ void convertBed(const string &infilename, const string &outfilename, bool remove
 					chrname2 = str_vec.at(3);
 					start_pos2 = stoi(str_vec.at(4));
 					endpos2 = stoi(str_vec.at(5));
-					if(str_vec.at(7).compare("TRUE")==0 or str_vec.at(7).compare(BALANCED_TRA_STR)==0) balancedTraFlag = true;
-					else balancedTraFlag = false;
 				}else{
 					chrname2 = "";
 					start_pos2 = endpos2 = 0;
-					balancedTraFlag = false;
 				}
 
-				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, balancedTraFlag);
+				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
 				sv_item_vec.push_back(sv_item);
 			}
 		}
@@ -73,7 +82,6 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 	bool is_seq_flag_ref;
 	vector<SV_item*> sv_item_vec;
 	SV_item *sv_item;
-	bool balancedTraFlag;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -93,7 +101,6 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 				start_pos_str = str_vec.at(1);
 
 				chrname2 = endpos_str = sv_type_str = sv_len_str = "";
-				balancedTraFlag = false;
 				info_vec = split(str_vec.at(7), ";");
 				for(i=0; i<info_vec.size(); i++){
 					sub_info_vec = split(info_vec.at(i), "=");
@@ -145,7 +152,7 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 					endpos2 = stoi(endpos_str2);
 					sv_len = stoi(sv_len_str);
 
-					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, balancedTraFlag);
+					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
 					sv_item_vec.push_back(sv_item);
 
 				}else{
@@ -176,7 +183,6 @@ void convertCsv(const string &infilename, const string &outfilename, bool remove
 	int32_t sv_len;
 	vector<SV_item*> sv_item_vec;
 	SV_item *sv_item;
-	bool balancedTraFlag;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -203,15 +209,12 @@ void convertCsv(const string &infilename, const string &outfilename, bool remove
 						chrname2 = str_vec.at(3);
 						start_pos2 = stoi(str_vec.at(4));
 						endpos2 = stoi(str_vec.at(5));
-						if(str_vec.at(7).compare("TRUE")==0 or str_vec.at(7).compare(BALANCED_TRA_STR)==0) balancedTraFlag = true;
-						else balancedTraFlag = false;
 					}else{
 						chrname2 = "";
 						start_pos2 = endpos2 = 0;
-						balancedTraFlag = false;
 					}
 
-					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, balancedTraFlag);
+					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
 					sv_item_vec.push_back(sv_item);
 				}
 			}
@@ -237,7 +240,6 @@ void convertNm(const string &infilename, const string &outfilename, bool removeD
 	int32_t sv_len, ref_seq_len, start_pos, endpos, start_pos2, endpos2;
 	vector<SV_item*> sv_item_vec;
 	SV_item *sv_item;
-	bool balancedTraFlag;
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -264,9 +266,8 @@ void convertNm(const string &infilename, const string &outfilename, bool removeD
 
 			chrname2 = "";
 			start_pos2 = endpos2 = 0;
-			balancedTraFlag = false;
 
-			sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, balancedTraFlag);
+			sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
 			sv_item_vec.push_back(sv_item);
 		}
 	}
@@ -462,7 +463,7 @@ bool isSeq(string &seq){
 }
 
 // allocate SV item
-SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len, bool balancedTraFlag){
+SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len){
 	size_t sv_type;
 
 	if(sv_type_str.compare("UNC")==0){
@@ -498,7 +499,6 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 	item->endPos2 = endPos2;
 	item->sv_type = sv_type;
 	item->sv_len = sv_len;
-	item->balancedTraFlag = balancedTraFlag;
 	item->overlapped = false;
 	item->validFlag = true;
 	return item;
@@ -509,6 +509,8 @@ void removeDuplicatedSVItems(vector<SV_item*> &sv_item_vec){
 	size_t i, j;
 	SV_item *item, *item2;
 
+	cout << ">>>>>>>>> Remove duplicated variant items <<<<<<<<<" << endl;
+	cout << "Before removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
 	for(i=0; i<sv_item_vec.size(); i++){
 		item = sv_item_vec.at(i);
 		if(item->validFlag and item->chrname.size()>0 and item->chrname2.size()>0){
@@ -530,6 +532,8 @@ void removeDuplicatedSVItems(vector<SV_item*> &sv_item_vec){
 			delete item;
 		}else i++;
 	}
+
+	cout << "After removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
 }
 
 // release sv item vector

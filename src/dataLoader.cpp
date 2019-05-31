@@ -103,6 +103,7 @@ SV_item *constructSVItem(string &line){
 		item->chrname2 = "";
 		item->startPos2 = 0;
 		item->endPos2 = 0;
+
 		str_tmp = str_vec.at(3);
 		if(str_tmp.compare("INS")==0 or str_tmp.compare("insertion")==0){
 			item->sv_type = VAR_INS;
@@ -113,7 +114,7 @@ SV_item *constructSVItem(string &line){
 		}else if(str_tmp.compare("INV")==0 or str_tmp.compare("inversion")==0){
 			item->sv_type = VAR_INV;
 		}else{
-			if(str_vec.size()>=7 and (str_vec.at(6).compare("TRA")==0 or str_vec.at(6).compare("translocation")==0 or str_vec.at(6).compare("BND")==0)){
+			if(str_vec.size()>=8 and (str_vec.at(6).compare("TRA")==0 or str_vec.at(6).compare("translocation")==0 or str_vec.at(6).compare("BND")==0)){
 				item->chrname2 = str_vec.at(3);
 				if(str_vec.at(4).compare("-")==0) item->startPos2 = 0;
 				else item->startPos2 = stoi(str_vec.at(4));
@@ -121,9 +122,6 @@ SV_item *constructSVItem(string &line){
 				else item->endPos2 = stoi(str_vec.at(5));
 				if(str_vec.at(6).compare("TRA")==0 or str_vec.at(6).compare("translocation")==0) item->sv_type = VAR_TRA;
 				else item->sv_type = VAR_BND;
-
-				if(str_vec.at(8).compare(BALANCED_TRA_STR)==0 or str_vec.at(8).compare("TRUE")==0) item->balancedTraFlag = true;
-				else item->balancedTraFlag = false;
 
 				//item->isTraBreakpointFlag = item->isTraBreakpointFlag2 = false;
 				for(size_t i=0; i<4; i++) item->traOverlappedArr[i] = false;
@@ -169,7 +167,7 @@ vector<SV_item*> getLongSVReg(vector<SV_item*> &dataset, int32_t thres){
 
 void output2File(const string &filename, vector<SV_item*> &data){
 	ofstream outfile;
-	string data_out, sv_type_str, balancedTraFlag_str;
+	string data_out, sv_type_str;
 	SV_item *item;
 
 	outfile.open(filename);
@@ -196,17 +194,14 @@ void output2File(const string &filename, vector<SV_item*> &data){
 				exit(1);
 		}
 
-		if(item->sv_type==VAR_TRA or item->sv_type==VAR_BND){
-			if(item->balancedTraFlag) balancedTraFlag_str = BALANCED_TRA_STR;
-			else balancedTraFlag_str = UNBALANCED_TRA_STR;
-		}else balancedTraFlag_str = "-";
-
 		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND)
-			data_out = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + balancedTraFlag_str;
+			data_out = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
 		else
-			data_out = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + balancedTraFlag_str;
+			data_out = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
 		outfile << data_out << endl;
 	}
+
+	cout << data.size() << " items were saved to " << filename << endl;
 
 	outfile.close();
 }

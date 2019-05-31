@@ -199,7 +199,6 @@ SV_item* itemdup(SV_item* item){
 	item_new->sv_type = item->sv_type;
 	item_new->sv_len = item->sv_len;
 	item_new->overlapped = item->overlapped;
-	item_new->balancedTraFlag = item->balancedTraFlag;
 	for(size_t i=0; i<4; i++) item_new->traOverlappedArr[i] = item->traOverlappedArr[i];
 	return item_new;
 }
