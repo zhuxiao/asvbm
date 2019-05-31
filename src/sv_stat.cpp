@@ -162,17 +162,30 @@ void SVStat(string &user_file, string &benchmark_file){
 
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
+	statScreenFilename = outputPathname + statScreenFilename;
+	outStatScreenFile.open(statScreenFilename);
+	if(!outStatScreenFile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << statScreenFilename << endl;
+		exit(1);
+	}
+
 	cout << "############# Phage 1: SV size statistics: #############" << endl;
+	outStatScreenFile << "############# Phage 1: SV size statistics: #############" << endl;
 	refRegSizeStat(user_file, benchmark_file, maxValidRegThres);
 
 	cout << "\n\n############# Phage 2: Num statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Phage 2: Num statistics: #############" << endl;
 	SVNumStat(user_file, benchmark_file, maxValidRegThres, outputPathname);
 
 	// compute SV size difference statistics
 	cout << "\n\n############# Phage 3: SV size difference statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Phage 3: SV size difference statistics: #############" << endl;
 	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres);
 
 	cout << "\n\n############# Phage 4: SV type and num statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Phage 4: SV type and num statistics: #############" << endl;
 	SVTypeNumStat(user_file, benchmark_file, maxValidRegThres);
+
+	outStatScreenFile.close();
 }
 

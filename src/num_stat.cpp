@@ -8,17 +8,21 @@ void SVNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_
 	mkdir(numStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
 	// non-TRA
-	if(max_valid_reg_thres>0)
+	if(max_valid_reg_thres>0){
 		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
+		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
+	}
 	SVNumStatOp(user_file, benchmark_file, 0, numStatDirname);
 
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
+		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		SVNumStatOp(user_file, benchmark_file, max_valid_reg_thres, numStatDirname);
 	}
 
 	// TRA
 	cout << "\n>>>>>>>>> TRA breakpoint statistics: <<<<<<<<<" << endl;
+	outStatScreenFile << "\n>>>>>>>>> TRA breakpoint statistics: <<<<<<<<<" << endl;
 	SVNumStatTraOp(user_file, benchmark_file, numStatDirname);
 }
 
@@ -39,11 +43,16 @@ void SVNumStatOp(string &user_file, string &benchmark_file, int32_t max_valid_re
 		cout << "non-TRA: user data size: " << user_data.size() << endl;
 		cout << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
 		cout << "non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
+		outStatScreenFile << "non-TRA: user data size: " << user_data.size() << endl;
+		outStatScreenFile << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
+		outStatScreenFile << "non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
 		description_str_long = "Size statistics for long SV regions: ";
 		computeLenStat(long_sv_data, description_str_long);
 	}else{
 		cout << "non-TRA: user data size: " << user_data.size() << endl;
 		cout << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
+		outStatScreenFile << "non-TRA: user data size: " << user_data.size() << endl;
+		outStatScreenFile << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
 	}
 
 	file_prefix = dirname + "num_stat";
@@ -70,14 +79,17 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	if(benchmark_data.size()>0) percent = (double)result.at(0).size() / benchmark_data.size();
 	else percent = 0;
 	cout << "intersection size: " << result.at(0).size() << ", percent: " << percent << endl;
+	outStatScreenFile << "intersection size: " << result.at(0).size() << ", percent: " << percent << endl;
 
 	if(user_data.size()>0) percent = (double)result.at(1).size()/user_data.size();
 	else percent = 0;
 	cout << "user private data size: " << result.at(1).size() << ", percent: " << percent << endl;
+	outStatScreenFile << "user private data size: " << result.at(1).size() << ", percent: " << percent << endl;
 
 	if(benchmark_data.size()>0) percent = (double)result.at(2).size()/benchmark_data.size();
 	else percent = 0;
 	cout << "benchmark private data size: " << result.at(2).size() << ", percent: " << percent << endl;
+	outStatScreenFile << "benchmark private data size: " << result.at(2).size() << ", percent: " << percent << endl;
 
 	// output to file
 	output2File(filename_intersect, result.at(0));
@@ -105,6 +117,10 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	cout << "Identified SV regions: " << positive_num_called << endl;
 	cout << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 
+	outStatScreenFile << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
+	outStatScreenFile << "Identified SV regions: " << positive_num_called << endl;
+	outStatScreenFile << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+
 	destroyResultData(result);
 }
 
@@ -122,6 +138,8 @@ void computeLenStat(vector<SV_item*> &data, string &description_str){
 	if(data.size()>0) aver_len = sum / data.size();
 	else { aver_len = 0; min_len = 0; }
 	cout << description_str << " reg_num=" << data.size() << ", total_len=" << sum << ", max_len=" << max_len << ", min_len=" << min_len << ", aver_len=" << aver_len << endl;
+
+	outStatScreenFile << description_str << " reg_num=" << data.size() << ", total_len=" << sum << ", max_len=" << max_len << ", min_len=" << min_len << ", aver_len=" << aver_len << endl;
 }
 
 vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &data2){
@@ -440,6 +458,9 @@ void SVNumStatTraOp(string &user_file, string &benchmark_file, string &dirname){
 	cout << "TRA: user data size: " << user_data.size() << endl;
 	cout << "TRA: benchmark data size: " << benchmark_data.size() << endl;
 
+	outStatScreenFile << "TRA: user data size: " << user_data.size() << endl;
+	outStatScreenFile << "TRA: benchmark data size: " << benchmark_data.size() << endl;
+
 	file_prefix = dirname + "num_stat_TRA_BND";
 	computeNumStatTra(user_data, benchmark_data, file_prefix);
 
@@ -576,9 +597,17 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	if(recall+precision>0) F1_score = 2.0 * (recall * precision) / (recall + precision);
 	else F1_score = 0;
 
+	cout << "user breakpoint size: " << total_bp_num_user << endl;
+	cout << "benchmark breakpoint size: " << total_bp_num_benchmark << endl;
 	cout << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
 	cout << "Identified SV regions: " << positive_num_called << endl;
 	cout << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << endl;
+
+	outStatScreenFile << "user breakpoint size: " << total_bp_num_user << endl;
+	outStatScreenFile << "benchmark breakpoint size: " << total_bp_num_benchmark << endl;
+	outStatScreenFile << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
+	outStatScreenFile << "Identified SV regions: " << positive_num_called << endl;
+	outStatScreenFile << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << endl;
 
 	destroyBPData(bp_vec_intersect);
 	destroyBPData(bp_vec_private_user);

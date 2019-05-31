@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -12,6 +13,9 @@ string refRegSizeStatDirname = "1_ref_reg_size_stat/";
 string numStatDirname = "2_num_stat/";
 string sizeDifStatDirname = "3_size_dif_stat/";
 string typeNumStatDirname = "4_type_num_stat/";
+
+string statScreenFilename = "stat_screen";
+ofstream outStatScreenFile;
 
 int32_t maxValidRegThres;
 string outputPathname = "output";

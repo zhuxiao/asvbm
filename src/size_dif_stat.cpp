@@ -7,11 +7,14 @@ void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_
 	sizeDifStatDirname = outputPathname + sizeDifStatDirname;
 	mkdir(sizeDifStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-	if(max_valid_reg_thres>0)
+	if(max_valid_reg_thres>0){
 		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
+		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
+	}
 	SVSizeDifStatOp(user_file, benchmark_file, 0, sizeDifStatDirname);
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
+		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		SVSizeDifStatOp(user_file, benchmark_file, max_valid_reg_thres, sizeDifStatDirname);
 	}
 }
@@ -31,6 +34,9 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
 	cout << "user data size: " << user_data.size() << endl;
 	cout << "benchmark data size: " << benchmark_data.size() << endl;
+
+	outStatScreenFile << "user data size: " << user_data.size() << endl;
+	outStatScreenFile << "benchmark data size: " << benchmark_data.size() << endl;
 
 	// compute overlapped SV pairs
 	sv_pair_vec = computeOverlapSVPair(user_data, benchmark_data);
@@ -284,6 +290,7 @@ void outputDifStatToFile(string &svSizeDifStatFilename, vector< vector<int32_t> 
 	out_file.close();
 
 	cout << num << " size difference items have been saved to file: " << svSizeDifStatFilename << endl;
+	outStatScreenFile << num << " size difference items have been saved to file: " << svSizeDifStatFilename << endl;
 }
 
 vector<size_t> computeRatioStatVec(vector<SV_pair*> &sv_pair_vec, vector<double> &ratio_div_vec){
@@ -358,6 +365,7 @@ void outputRatioStatToFile(string &svSizeRatioStatFilename, vector<size_t> &rati
 	out_file.close();
 
 	cout << num << " size ratio items have been saved to file: " << svSizeRatioStatFilename << endl;
+	outStatScreenFile << num << " size ratio items have been saved to file: " << svSizeRatioStatFilename << endl;
 }
 
 void destroyPairData(vector<SV_pair*> &sv_vec){

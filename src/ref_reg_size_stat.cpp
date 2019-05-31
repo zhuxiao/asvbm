@@ -10,14 +10,22 @@ void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid
 	mkdir(refRegSizeStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
 	cout << ">>>>>>>>> The SV reference region size statistics for benchmark set: <<<<<<<<<" << endl;
+	outStatScreenFile << ">>>>>>>>> The SV reference region size statistics for benchmark set: <<<<<<<<<" << endl;
 	refRegSizeStatOp(refRegSizeFilename_benchmark, benchmark_file, 0, refRegSizeStatDirname);
 
-	if(max_valid_reg_thres>0) cout << ">>>>>>>>> The SV reference region size statistics before filtering for user-called set: <<<<<<<<<" << endl;
-	else cout << ">>>>>>>>> The SV reference region size statistics for user-called set: <<<<<<<<<" << endl;
+	if(max_valid_reg_thres>0) {
+		cout << ">>>>>>>>> The SV reference region size statistics before filtering for user-called set: <<<<<<<<<" << endl;
+		outStatScreenFile << ">>>>>>>>> The SV reference region size statistics before filtering for user-called set: <<<<<<<<<" << endl;
+	}
+	else{
+		cout << ">>>>>>>>> The SV reference region size statistics for user-called set: <<<<<<<<<" << endl;
+		outStatScreenFile << ">>>>>>>>> The SV reference region size statistics for user-called set: <<<<<<<<<" << endl;
+	}
 	refRegSizeStatOp(refRegSizeFilename_user, user_file, 0, refRegSizeStatDirname);
 
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> The SV reference region size statistics after filtering for user-called set: <<<<<<<<<" << endl;
+		outStatScreenFile << "\n>>>>>>>>> The SV reference region size statistics after filtering for user-called set: <<<<<<<<<" << endl;
 		refRegSizeStatOp(refRegSizeFilename_user, user_file, max_valid_reg_thres, refRegSizeStatDirname);
 	}
 }
@@ -33,8 +41,12 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 	sv_data = loadData(sv_file);
 
 	if(max_valid_reg_thres>0) long_sv_data = getLongSVReg(sv_data, max_valid_reg_thres);
-	cout << "data.size: " << sv_data.size() << endl;
-	if(max_valid_reg_thres>0) cout << "data_long.size: " << long_sv_data.size() << endl;
+	cout << "data size: " << sv_data.size() << endl;
+	outStatScreenFile << "data size: " << sv_data.size() << endl;
+	if(max_valid_reg_thres>0) {
+		cout << "data_long size: " << long_sv_data.size() << endl;
+		outStatScreenFile << "data_long size: " << long_sv_data.size() << endl;
+	}
 
 	for(i=0; i<SV_SIZE_ARR_SIZE+2; i++) count_array[i] = 0;
 
@@ -72,6 +84,7 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 	outfile.close();
 
 	cout << num << " reference region size items have been saved to file: " << refRegSizeFinename_tmp << endl;
+	outStatScreenFile << num << " reference region size items have been saved to file: " << refRegSizeFinename_tmp << endl;
 }
 
 
