@@ -597,14 +597,14 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	if(recall+precision>0) F1_score = 2.0 * (recall * precision) / (recall + precision);
 	else F1_score = 0;
 
-	cout << "user breakpoint size: " << total_bp_num_user << endl;
-	cout << "benchmark breakpoint size: " << total_bp_num_benchmark << endl;
+	cout << "user breakpoint data size: " << total_bp_num_user << endl;
+	cout << "benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
 	cout << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
 	cout << "Identified SV regions: " << positive_num_called << endl;
 	cout << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << endl;
 
-	outStatScreenFile << "user breakpoint size: " << total_bp_num_user << endl;
-	outStatScreenFile << "benchmark breakpoint size: " << total_bp_num_benchmark << endl;
+	outStatScreenFile << "user breakpoint data size: " << total_bp_num_user << endl;
+	outStatScreenFile << "benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
 	outStatScreenFile << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
 	outStatScreenFile << "Identified SV regions: " << positive_num_called << endl;
 	outStatScreenFile << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << endl;
