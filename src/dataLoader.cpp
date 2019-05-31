@@ -58,7 +58,7 @@ vector<SV_item*> loadDataWithoutTra(const string &filename){
 }
 
 // load TRA data
-vector<SV_item*> loadDataTra(const string &filename){
+vector<SV_item*> loadDataTra(string &filename){
 	vector<SV_item*> sv_vec;
 	ifstream infile;
 	string line;
@@ -124,6 +124,9 @@ SV_item *constructSVItem(string &line){
 
 				if(str_vec.at(8).compare(BALANCED_TRA_STR)==0 or str_vec.at(8).compare("TRUE")==0) item->balancedTraFlag = true;
 				else item->balancedTraFlag = false;
+
+				//item->isTraBreakpointFlag = item->isTraBreakpointFlag2 = false;
+				for(size_t i=0; i<4; i++) item->traOverlappedArr[i] = false;
 			}else
 				item->sv_type = VAR_MIX;
 		}

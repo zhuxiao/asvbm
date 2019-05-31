@@ -1,43 +1,46 @@
 #include "type_num_stat.h"
 #include "extvab.h"
 
-void SVTypeNumStat(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres){
+void SVTypeNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres){
+	typeNumStatDirname = outputPathname + typeNumStatDirname;
+	mkdir(typeNumStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
 	if(max_valid_reg_thres>0)
 		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
-	SVTypeNumStatOp(sv_file1, sv_file2, size_div_vec, 0);
+	SVTypeNumStatOp(user_file, benchmark_file, size_div_vec, 0, typeNumStatDirname);
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVTypeNumStatOp(sv_file1, sv_file2, size_div_vec, max_valid_reg_thres);
+		SVTypeNumStatOp(user_file, benchmark_file, size_div_vec, max_valid_reg_thres, typeNumStatDirname);
 	}
 }
 
-void SVTypeNumStatOp(string &sv_file1, string &sv_file2, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres){
-	vector<SV_item*> sv_data1, sv_data2, long_sv_data;
+void SVTypeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, string &dirname){
+	vector<SV_item*> user_data, benchmark_data, long_sv_data;
 	vector< vector<SV_item*> > divided_vec1, divided_vec2;
 
-	sv_data1 = loadData(sv_file1);
-	sv_data2 = loadData(sv_file2);
+	user_data = loadData(user_file);
+	benchmark_data = loadData(benchmark_file);
 
 	if(max_valid_reg_thres>0){
-		long_sv_data = getLongSVReg(sv_data1, max_valid_reg_thres);
+		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
 		cout << "long_sv_data.size: " << long_sv_data.size() << endl;
 	}
 
-	cout << "data1.size: " << sv_data1.size() << endl;
-	cout << "data2.size: " << sv_data2.size() << endl;
+	cout << "user data size: " << user_data.size() << endl;
+	cout << "benchmark data size: " << benchmark_data.size() << endl;
 
 	// prepare user called result
-	divided_vec1 = sizeDivideSV(sv_data1, size_div_vec);
+	divided_vec1 = sizeDivideSV(user_data, size_div_vec);
 
 	// prepare benchmark sv result
-	divided_vec2 = sizeDivideSV(sv_data2, size_div_vec);
+	divided_vec2 = sizeDivideSV(benchmark_data, size_div_vec);
 
 	// compute Num statistics for each sub-set
-	computeTypeNumStat(divided_vec1, divided_vec2);
+	computeTypeNumStat(divided_vec1, divided_vec2, dirname);
 
 	// free memory
-	destroyData(sv_data1);
-	destroyData(sv_data2);
+	destroyData(user_data);
+	destroyData(benchmark_data);
 	if(max_valid_reg_thres>0) destroyData(long_sv_data);
 	destroySizeDividedData(divided_vec1);
 	destroySizeDividedData(divided_vec2);
@@ -72,15 +75,12 @@ vector< vector<SV_item*> > sizeDivideSV(vector<SV_item*> &sv_data, vector<size_t
 	return divided_vec;
 }
 
-void computeTypeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector<SV_item*> > &divided_vec2){
+void computeTypeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector<SV_item*> > &divided_vec2, string &dirname){
 	vector<SV_item*> sv_vec1, sv_vec2;
-	string type_num_dirname, file_prefix, file_prefix_tmp;
+	string file_prefix, file_prefix_tmp;
 	size_t start_pos, end_pos;
 
-	type_num_dirname = outputPathname + "type_num_stat";
-	mkdir(type_num_dirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
-	file_prefix = type_num_dirname + "/type_num_stat";
+	file_prefix = dirname + "type_num_stat";
 
 	start_pos = 1;
 	for(size_t i=0; i<divided_vec1.size(); i++){
@@ -96,10 +96,11 @@ void computeTypeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector
 			cout << "><><><><><>< SV size: " << ">=" << start_pos << ":" << endl;
 			file_prefix_tmp = file_prefix + "_" + to_string(start_pos) + "_larger";
 		}else if(i==size_div_vec.size()+1){
-			cout << "><><><><><>< TRA:" << endl;
-			file_prefix_tmp = file_prefix + "_TRA_BND";
+			cout << "><><><><><>< TRA breakpoints:" << endl;
+			file_prefix_tmp = file_prefix + "_TRA_BND_BP";
 		}
-		computeNumStat(sv_vec1, sv_vec2, file_prefix_tmp);
+		if(i<size_div_vec.size()+1) computeNumStat(sv_vec1, sv_vec2, file_prefix_tmp);
+		else computeNumStatTra(sv_vec1, sv_vec2, file_prefix_tmp);
 	}
 }
 

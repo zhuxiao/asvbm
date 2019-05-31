@@ -1,0 +1,28 @@
+#ifndef SRC_CONSTANTS_H_
+#define SRC_CONSTANTS_H_
+
+#define ADJUST_SIZE		10
+
+#define NO_OVERLAP					0
+#define WHOLE_REG_OVERLAP			1
+// breakpoints
+#define ONE_OVERLAP_ONE_BP			2
+#define ONE_OVERLAP_TWO_BP			3
+#define ONE_OVERLAP_THREE_BP		4
+#define ONE_OVERLAP_FOUR_BP			5
+#define TWO_OVERLAP_ONE_BP			6
+#define TWO_OVERLAP_TWO_BP			7
+#define TWO_OVERLAP_THREE_BP		8
+#define TWO_OVERLAP_FOUR_BP			9
+#define THREE_OVERLAP_ONE_BP		10
+#define THREE_OVERLAP_TWO_BP		11
+#define THREE_OVERLAP_THREE_BP		12
+#define THREE_OVERLAP_FOUR_BP		13
+#define FOUR_OVERLAP_ONE_BP			14
+#define FOUR_OVERLAP_TWO_BP			15
+#define FOUR_OVERLAP_THREE_BP		16
+#define FOUR_OVERLAP_FOUR_BP		17
+
+
+
+#endif /* SRC_CONSTANTS_H_ */

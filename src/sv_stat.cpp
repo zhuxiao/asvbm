@@ -1,7 +1,6 @@
 #include "global.h"
-#include "dataLoader.h"
+#include "convert.h"
 #include "sv_stat.h"
-#include "util.h"
 
 
 int main(int argc, char *argv[]){
@@ -159,21 +158,21 @@ int parseStat(int argc, char **argv){
 }
 
 // SV stat
-void SVStat(string &sv_file1, string &sv_file2){
+void SVStat(string &user_file, string &benchmark_file){
 
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
 	cout << "############# Phage 1: SV size statistics: #############" << endl;
-	refRegSizeStat(sv_file1, sv_file2, maxValidRegThres);
+	refRegSizeStat(user_file, benchmark_file, maxValidRegThres);
 
 	cout << "\n\n############# Phage 2: Num statistics: #############" << endl;
-	SVNumStat(sv_file1, sv_file2, maxValidRegThres, outputPathname);
+	SVNumStat(user_file, benchmark_file, maxValidRegThres, outputPathname);
 
 	// compute SV size difference statistics
 	cout << "\n\n############# Phage 3: SV size difference statistics: #############" << endl;
-	SVSizeDifStat(sv_file1, sv_file2, maxValidRegThres);
+	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres);
 
 	cout << "\n\n############# Phage 4: SV type and num statistics: #############" << endl;
-	SVTypeNumStat(sv_file1, sv_file2, maxValidRegThres);
+	SVTypeNumStat(user_file, benchmark_file, maxValidRegThres);
 }
 

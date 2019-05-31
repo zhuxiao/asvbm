@@ -3,37 +3,40 @@
 #include "util.h"
 
 
-void SVSizeDifStat(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres){
+void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres){
+	sizeDifStatDirname = outputPathname + sizeDifStatDirname;
+	mkdir(sizeDifStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
 	if(max_valid_reg_thres>0)
 		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
-	SVSizeDifStatOp(sv_file1, sv_file2, 0);
+	SVSizeDifStatOp(user_file, benchmark_file, 0, sizeDifStatDirname);
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVSizeDifStatOp(sv_file1, sv_file2, max_valid_reg_thres);
+		SVSizeDifStatOp(user_file, benchmark_file, max_valid_reg_thres, sizeDifStatDirname);
 	}
 }
 
-void SVSizeDifStatOp(string &sv_file1, string &sv_file2, int32_t max_valid_reg_thres){
-	vector<SV_item*> sv_data1, sv_data2, long_sv_data;
+void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &dirname){
+	vector<SV_item*> user_data, benchmark_data, long_sv_data;
 	vector<SV_pair*> sv_pair_vec;
 	vector< vector<int32_t> > dif_stat_vec;
 	vector<size_t> ratio_stat_vec;
 	string svSizeDifRatioFilename_tmp, svSizeDifStatFilename_tmp, svSizeRatioStatFilename_tmp;
 
 	// load data
-	sv_data1 = loadData(sv_file1);
-	sv_data2 = loadData(sv_file2);
+	user_data = loadData(user_file);
+	benchmark_data = loadData(benchmark_file);
 
 	if(max_valid_reg_thres>0)
-		long_sv_data = getLongSVReg(sv_data1, max_valid_reg_thres);
-	cout << "data1.size: " << sv_data1.size() << endl;
-	cout << "data2.size: " << sv_data2.size() << endl;
+		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
+	cout << "user data size: " << user_data.size() << endl;
+	cout << "benchmark data size: " << benchmark_data.size() << endl;
 
 	// compute overlapped SV pairs
-	sv_pair_vec = computeOverlapSVPair(sv_data1, sv_data2);
+	sv_pair_vec = computeOverlapSVPair(user_data, benchmark_data);
 
 	// output pair statistics data to file
-	svSizeDifRatioFilename_tmp = outputPathname + svSizeDifRatioFilename;
+	svSizeDifRatioFilename_tmp = dirname + svSizeDifRatioFilename;
 	if(max_valid_reg_thres>0) svSizeDifRatioFilename_tmp += "_long_filtered";
 	outputPairDataToFile(svSizeDifRatioFilename_tmp, sv_pair_vec);
 
@@ -41,7 +44,7 @@ void SVSizeDifStatOp(string &sv_file1, string &sv_file2, int32_t max_valid_reg_t
 	dif_stat_vec = computeDifStatVec(sv_pair_vec);
 
 	// save to file
-	svSizeDifStatFilename_tmp = outputPathname + svSizeDifStatFilename;
+	svSizeDifStatFilename_tmp = dirname + svSizeDifStatFilename;
 	if(max_valid_reg_thres>0) svSizeDifStatFilename_tmp += "_long_filtered";
 	outputDifStatToFile(svSizeDifStatFilename_tmp, dif_stat_vec);
 
@@ -49,14 +52,14 @@ void SVSizeDifStatOp(string &sv_file1, string &sv_file2, int32_t max_valid_reg_t
 	ratio_stat_vec = computeRatioStatVec(sv_pair_vec, ratio_div_vec);
 
 	// save to file
-	svSizeRatioStatFilename_tmp = outputPathname + svSizeRatioStatFilename;
+	svSizeRatioStatFilename_tmp = dirname + svSizeRatioStatFilename;
 	if(max_valid_reg_thres>0) svSizeRatioStatFilename_tmp += "_long_filtered";
 	outputRatioStatToFile(svSizeRatioStatFilename_tmp, ratio_stat_vec, ratio_div_vec);
 
 	// release memory
 	destroyPairData(sv_pair_vec);
-	destroyData(sv_data1);
-	destroyData(sv_data2);
+	destroyData(user_data);
+	destroyData(benchmark_data);
 	if(max_valid_reg_thres>0) destroyData(long_sv_data);
 }
 
@@ -64,6 +67,7 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 	vector<SV_pair*> sv_pair_vec;
 	SV_item *item1, *item2;
 	SV_pair *pair_item;
+	vector<size_t> overlap_type_vec;
 	size_t i, j;
 	int32_t mid_loc1, mid_loc2, reg_size1, reg_size2, dif_tmp;
 	double dif_size, size_ratio;
@@ -72,7 +76,8 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 		item1 = data1.at(i);
 		for(j=0; j<data2.size(); j++){
 			item2 = data2.at(j);
-			if(haveOverlap(item1, item2)){
+			overlap_type_vec = computeOverlapType(item1, item2);
+			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
 				if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
 					pair_item = new SV_pair();
 					pair_item->sv_item1 = item1;
@@ -108,9 +113,10 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 // output pair data to file
 void outputPairDataToFile(string &filename, vector<SV_pair*> &sv_pair_vec){
 	ofstream outfile;
-	string line, sv_type_str1, sv_type_str2;
+	string line, sv_type_str1, sv_type_str2, balancedTraFlag1_str, balancedTraFlag2_str;
 	SV_pair *pair_item;
 	SV_item *item1, *item2;
+
 
 	outfile.open(filename);
 	if(!outfile.is_open()){
@@ -148,9 +154,18 @@ void outputPairDataToFile(string &filename, vector<SV_pair*> &sv_pair_vec){
 			default: cerr << "line=" << __LINE__ << ", invalid SV type: " << item2->sv_type << endl; exit(1);
 		}
 
+		if(item1->sv_type==VAR_TRA or item1->sv_type==VAR_BND){
+			if(item1->balancedTraFlag) balancedTraFlag1_str = BALANCED_TRA_STR;
+			else balancedTraFlag1_str = UNBALANCED_TRA_STR;
+		}else balancedTraFlag1_str = "-";
+		if(item2->sv_type==VAR_TRA or item2->sv_type==VAR_BND){
+			if(item2->balancedTraFlag) balancedTraFlag2_str = BALANCED_TRA_STR;
+			else balancedTraFlag2_str = UNBALANCED_TRA_STR;
+		}else balancedTraFlag2_str = "-";
+
 		line = to_string(pair_item->dif_size) + "\t" + to_string(pair_item->size_ratio);
-		line += "\t" + item1->chrname + "\t" + to_string(item1->startPos) + "\t" + to_string(item1->endPos) + "\t" + sv_type_str1 + "\t" + to_string(item1->sv_len);
-		line += "\t" + item2->chrname + "\t" + to_string(item2->startPos) + "\t" + to_string(item2->endPos) + "\t" + sv_type_str2 + "\t" + to_string(item2->sv_len);
+		line += "\t" + item1->chrname + "\t" + to_string(item1->startPos) + "\t" + to_string(item1->endPos) + "\t" + sv_type_str1 + "\t" + to_string(item1->sv_len) + "\t" + balancedTraFlag1_str;
+		line += "\t" + item2->chrname + "\t" + to_string(item2->startPos) + "\t" + to_string(item2->endPos) + "\t" + sv_type_str2 + "\t" + to_string(item2->sv_len) + "\t" + balancedTraFlag2_str;
 		outfile << line << endl;
 	}
 

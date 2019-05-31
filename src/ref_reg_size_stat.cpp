@@ -6,20 +6,23 @@ void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid
 	refRegSizeFilename_benchmark = "ref_reg_size_benchmark";
 	refRegSizeFilename_user = "ref_reg_size_user";
 
+	refRegSizeStatDirname = outputPathname + refRegSizeStatDirname;
+	mkdir(refRegSizeStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
 	cout << ">>>>>>>>> The SV reference region size statistics for benchmark set: <<<<<<<<<" << endl;
-	refRegSizeStatOp(refRegSizeFilename_benchmark, benchmark_file, 0);
+	refRegSizeStatOp(refRegSizeFilename_benchmark, benchmark_file, 0, refRegSizeStatDirname);
 
 	if(max_valid_reg_thres>0) cout << ">>>>>>>>> The SV reference region size statistics before filtering for user-called set: <<<<<<<<<" << endl;
 	else cout << ">>>>>>>>> The SV reference region size statistics for user-called set: <<<<<<<<<" << endl;
-	refRegSizeStatOp(refRegSizeFilename_user, user_file, 0);
+	refRegSizeStatOp(refRegSizeFilename_user, user_file, 0, refRegSizeStatDirname);
 
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> The SV reference region size statistics after filtering for user-called set: <<<<<<<<<" << endl;
-		refRegSizeStatOp(refRegSizeFilename_user, user_file, max_valid_reg_thres);
+		refRegSizeStatOp(refRegSizeFilename_user, user_file, max_valid_reg_thres, refRegSizeStatDirname);
 	}
 }
 
-void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres){
+void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres, string &dirname){
 	vector<SV_item*> sv_data, long_sv_data;
 	SV_item *item;
 	size_t i, count_array[SV_SIZE_ARR_SIZE+2], reg_size, num;
@@ -44,8 +47,10 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 			else count_array[SV_SIZE_ARR_SIZE+1] ++;
 		}
 	}
+	destroyData(sv_data); // release data
 
-	refRegSizeFinename_tmp = outputPathname + refRegSizeFinename;
+	// compute statistics
+	refRegSizeFinename_tmp = dirname + refRegSizeFinename;
 	if(max_valid_reg_thres>0) refRegSizeFinename_tmp += "_long_filtered";
 
 	outfile.open(refRegSizeFinename_tmp);

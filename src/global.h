@@ -8,6 +8,11 @@
 using namespace std;
 
 // global variables
+string refRegSizeStatDirname = "1_ref_reg_size_stat/";
+string numStatDirname = "2_num_stat/";
+string sizeDifStatDirname = "3_size_dif_stat/";
+string typeNumStatDirname = "4_type_num_stat/";
+
 int32_t maxValidRegThres;
 string outputPathname = "output";
 string longSVFilename = "long_sv_reg.bed";

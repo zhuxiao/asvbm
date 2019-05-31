@@ -12,7 +12,7 @@ using namespace std;
 
 vector<SV_item*> loadData(const string &filename);
 vector<SV_item*> loadDataWithoutTra(const string &filename);
-vector<SV_item*> loadDataTra(const string &filename);
+vector<SV_item*> loadDataTra(string &filename);
 SV_item *constructSVItem(string &line);
 
 void destroyData(vector<SV_item*> &sv_vec);

@@ -8,6 +8,11 @@
 using namespace std;
 
 // global variables
+extern string refRegSizeStatDirname;
+extern string numStatDirname;
+extern string sizeDifStatDirname;
+extern string typeNumStatDirname;
+
 extern int32_t maxValidRegThres;
 extern string outputPathname;
 extern string longSVFilename;
