@@ -26,11 +26,11 @@ The SV_type can be TRA or BND, and the SV_len will be 0, TRA_balanced_flag shoul
 
 Note that: In SV_STAT, all different variant types, including translocations, can be stored in the same file, for example:
 ```sh
-	chr1	1167806	1168012	DEL	-206
-	chr1	1142384	1142384	INS	87
-	chr1	841980	843383	INV	1404
-	chr1	3327738	3329244	DUP	3013
-	chr1	1	481701	chr2	4273477	4539804	TRA	0	BALANCED
+chr1	1167806	1168012	DEL	-206
+chr1	1142384	1142384	INS	87
+chr1	841980	843383	INV	1404
+chr1	3327738	3329244	DUP	3013
+chr1	1	481701	chr2	4273477	4539804	TRA	0	BALANCED
 
 ```		
 For the second item, there is a insertion of size 87 base pairs at the 1142381 location of chr1, and for the fifth item, it is a balanced translocation between chr1:1-481701 and chr2:4273477-4539804, and the 0 in the last second column means the SV_len, and for the sixth item, it is a unbalanced translocation.
