@@ -25,7 +25,7 @@ chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	
 ```
 The SV_type can be TRA or BND, and the SV_len will be 0.
 
-Note that: In SV_STAT, all variant types, including translocations, can be stored together in the same file as the inout, for example:
+Note that: In SV_STAT, all variant types, including translocations, can be stored together in the same file as the input, for example:
 ```sh
 chr1	1167806	1168012	DEL	-206
 chr1	1142384	1142384	INS	87
