@@ -16,12 +16,13 @@ and the binary file 'sv_stat' will be output into the folder 'bin'.
 ## File format description
 
 Before using SV_STAT, both the user-called SV set and the benchmark data set are in bed file format with the first five columns are below:
-
->    chromosome,	start_ref_pos,	end_ref_pos,	SV_type,	SV_len
-
+```Bash
+chromosome,	start_ref_pos,	end_ref_pos,	SV_type,	SV_len
+```
 For translocations, the file format should be bedpe before using SV_STAT, and the first 8 columns are listed as below:
->    chromosome1,	start_ref_pos1,	end_ref_pos1,	chromosome2,	start_ref_pos2,	end_ref_pos2,	SV_type,	SV_len,	TRA_balanced_flag
-
+```Bash
+chromosome1,	start_ref_pos1,	end_ref_pos1,	chromosome2,	start_ref_pos2,	end_ref_pos2,	SV_type,	SV_len,	TRA_balanced_flag
+```
 The SV_type can be TRA or BND, and the SV_len will be 0, TRA_balanced_flag should be 'BALANCED' or 'UNBALANCED'.
 
 Note that: In SV_STAT, all different variant types, including translocations, can be stored in the same file, for example:
