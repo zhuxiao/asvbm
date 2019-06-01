@@ -16,6 +16,8 @@ extern string typeNumStatDirname;
 extern string statScreenFilename;
 extern ofstream outStatScreenFile;
 
+extern int32_t extendSize;
+
 extern int32_t maxValidRegThres;
 extern string outputPathname;
 extern string longSVFilename;

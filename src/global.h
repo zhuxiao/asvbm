@@ -17,6 +17,8 @@ string typeNumStatDirname = "4_type_num_stat/";
 string statScreenFilename = "stat_screen";
 ofstream outStatScreenFile;
 
+int32_t extendSize;
+
 int32_t maxValidRegThres;
 string outputPathname = "output";
 string longSVFilename = "long_sv_reg.bed";

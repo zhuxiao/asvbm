@@ -22,9 +22,9 @@ using namespace std;
 
 typedef struct {
 	string chrname;
-	size_t startPos, endPos;  // 1-based
+	int64_t startPos, endPos;  // 1-based
 	string chrname2;
-	size_t startPos2, endPos2;  // 1-based
+	int64_t startPos2, endPos2;  // 1-based
 	bool overlapped;	// default: false
 	bool validFlag;		// default: true
 	//bool balancedTraFlag;	// TRA, default: false
@@ -41,7 +41,7 @@ typedef struct {
 
 typedef struct {
 	string chrname;
-	size_t bp_loc;
+	int64_t bp_loc;
 	bool overlappedFlag;
 }Breakpoint_t;
 

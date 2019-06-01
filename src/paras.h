@@ -1,5 +1,5 @@
-#ifndef SV_STAT_H_
-#define SV_STAT_H_
+#ifndef SRC_PARAS_H_
+#define SRC_PARAS_H_
 
 #include <iostream>
 #include <cstring>
@@ -9,13 +9,14 @@
 
 #include "structure.h"
 
+#include "convert.h"
+
 #include "ref_reg_size_stat.h"
 #include "num_stat.h"
 #include "size_dif_stat.h"
 #include "type_num_stat.h"
 
 using namespace std;
-
 
 void showUsage();
 void showUsageConvert();
@@ -24,4 +25,5 @@ int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
 void SVStat(string &user_file, string &benchmark_file);
 
-#endif /* SV_STAT_H_ */
+
+#endif /* SRC_PARAS_H_ */
