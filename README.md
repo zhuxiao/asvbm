@@ -43,7 +43,7 @@ $ sv_stat
 Usage:  sv_stat  <command> [options]
 
 Commands:
-     convert      convert SV results to 6-column BED (or 9-column BEDPE) file format
+     convert      convert SV results to 5-column BED (or 8-column BEDPE) file format
      stat         compute the SV statistics
 ```
 
