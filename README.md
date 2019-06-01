@@ -51,6 +51,7 @@ sv_stat stat -m 10000 user_sv.bed benchmark_sv.bed
 ```
 
 ------------------------------------------------------------------------------
+## Contact
 If you have problems or some suggestions, please contact: xzhu@hrbnu.edu.cn
 
 ---- Enjoy !!! -----
