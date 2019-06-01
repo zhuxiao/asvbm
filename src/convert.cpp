@@ -1,19 +1,6 @@
 #include "convert.h"
 #include "util.h"
 
-void convert(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format){
-	cout << "############# Convert variants: #############" << endl;
-
-	if(sv_format.compare("bed")==0)
-		convertBed(infilename, outfilename, remove_dup_falg);
-	else if(sv_format.compare("vcf")==0)
-		convertVcf(infilename, outfilename, remove_dup_falg);
-	else if(sv_format.compare("csv")==0)
-		convertCsv(infilename, outfilename, remove_dup_falg);
-	else if(sv_format.compare("nm")==0)  // private usage: nm
-		convertNm(infilename, outfilename, remove_dup_falg);
-}
-
 // convert data
 void convertBed(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
 	ifstream infile;
@@ -65,7 +52,7 @@ void convertBed(const string &infilename, const string &outfilename, bool remove
 	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
 
 	// save to file
-	output2File(outfilename, sv_item_vec);
+	output2File(outfilename, sv_item_vec, outConvertScreenFile);
 
 	// release memory
 	releaseSVItemVec(sv_item_vec);
@@ -168,7 +155,7 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
 
 	// save to file
-	output2File(outfilename, sv_item_vec);
+	output2File(outfilename, sv_item_vec, outConvertScreenFile);
 
 	// release memory
 	releaseSVItemVec(sv_item_vec);
@@ -226,7 +213,7 @@ void convertCsv(const string &infilename, const string &outfilename, bool remove
 	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
 
 	// save to file
-	output2File(outfilename, sv_item_vec);
+	output2File(outfilename, sv_item_vec, outConvertScreenFile);
 
 	// release memory
 	releaseSVItemVec(sv_item_vec);
@@ -277,7 +264,7 @@ void convertNm(const string &infilename, const string &outfilename, bool removeD
 	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
 
 	// save to file
-	output2File(outfilename, sv_item_vec);
+	output2File(outfilename, sv_item_vec, outConvertScreenFile);
 
 	// release memory
 	releaseSVItemVec(sv_item_vec);
@@ -511,6 +498,9 @@ void removeDuplicatedSVItems(vector<SV_item*> &sv_item_vec){
 
 	cout << ">>>>>>>>> Remove duplicated variant items <<<<<<<<<" << endl;
 	cout << "Before removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
+	outConvertScreenFile << ">>>>>>>>> Remove duplicated variant items <<<<<<<<<" << endl;
+	outConvertScreenFile << "Before removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
+
 	for(i=0; i<sv_item_vec.size(); i++){
 		item = sv_item_vec.at(i);
 		if(item->validFlag and item->chrname.size()>0 and item->chrname2.size()>0){
@@ -534,6 +524,7 @@ void removeDuplicatedSVItems(vector<SV_item*> &sv_item_vec){
 	}
 
 	cout << "After removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
+	outConvertScreenFile << "After removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
 }
 
 // release sv item vector

@@ -165,7 +165,7 @@ vector<SV_item*> getLongSVReg(vector<SV_item*> &dataset, int32_t thres){
 	return sv_vec;
 }
 
-void output2File(const string &filename, vector<SV_item*> &data){
+void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfile){
 	ofstream outfile;
 	string data_out, sv_type_str;
 	SV_item *item;
@@ -202,6 +202,7 @@ void output2File(const string &filename, vector<SV_item*> &data){
 	}
 
 	cout << data.size() << " items were saved to " << filename << endl;
+	logfile << data.size() << " items were saved to " << filename << endl;
 
 	outfile.close();
 }

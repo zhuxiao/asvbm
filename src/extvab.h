@@ -13,7 +13,9 @@ extern string numStatDirname;
 extern string sizeDifStatDirname;
 extern string typeNumStatDirname;
 
+extern string convertScreenFilename;
 extern string statScreenFilename;
+extern ofstream outConvertScreenFile;
 extern ofstream outStatScreenFile;
 
 extern int32_t extendSize;

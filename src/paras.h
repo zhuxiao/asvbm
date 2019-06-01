@@ -23,7 +23,11 @@ void showUsageConvert();
 void showUsageStat();
 int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
+
+void convert(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format);
 void SVStat(string &user_file, string &benchmark_file);
 
+void printConvertParas(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format);
+void printStatParas(string &user_file, string &benchmark_file);
 
 #endif /* SRC_PARAS_H_ */

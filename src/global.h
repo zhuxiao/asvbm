@@ -14,7 +14,9 @@ string numStatDirname = "2_num_stat/";
 string sizeDifStatDirname = "3_size_dif_stat/";
 string typeNumStatDirname = "4_type_num_stat/";
 
+string convertScreenFilename = "convert_screen";
 string statScreenFilename = "stat_screen";
+ofstream outConvertScreenFile;
 ofstream outStatScreenFile;
 
 int32_t extendSize;

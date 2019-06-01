@@ -8,11 +8,11 @@
 
 #include "structure.h"
 #include "dataLoader.h"
+#include "extvab.h"
 
 using namespace std;
 
 
-void convert(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format);
 void convertBed(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag);
 void convertVcf(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag);
 void convertCsv(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag);

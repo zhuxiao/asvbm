@@ -18,6 +18,6 @@ SV_item *constructSVItem(string &line);
 void destroyData(vector<SV_item*> &sv_vec);
 
 vector<SV_item*> getLongSVReg(vector<SV_item*> &dataset, int32_t thres);
-void output2File(const string &filename, vector<SV_item*> &data);
+void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfile);
 
 #endif /* SRC_DATALOADER_H_ */

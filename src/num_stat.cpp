@@ -39,7 +39,7 @@ void SVNumStatOp(string &user_file, string &benchmark_file, int32_t max_valid_re
 
 	if(max_valid_reg_thres>0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
-		output2File(longFilename_tmp, long_sv_data);
+		output2File(longFilename_tmp, long_sv_data, outStatScreenFile);
 		cout << "non-TRA: user data size: " << user_data.size() << endl;
 		cout << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
 		cout << "non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
@@ -92,9 +92,9 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	outStatScreenFile << "benchmark private data size: " << result.at(2).size() << ", percent: " << percent << endl;
 
 	// output to file
-	output2File(filename_intersect, result.at(0));
-	output2File(filename_private_user, result.at(1));
-	output2File(filename_private_benchmark, result.at(2));
+	output2File(filename_intersect, result.at(0), outStatScreenFile);
+	output2File(filename_private_user, result.at(1), outStatScreenFile);
+	output2File(filename_private_benchmark, result.at(2), outStatScreenFile);
 
 	//TP = sv_data1.size() - result.at(1).size();
 	TP = result.at(0).size();

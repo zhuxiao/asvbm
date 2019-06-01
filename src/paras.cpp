@@ -7,7 +7,7 @@ void showUsage(){
 	cout << "Usage:  sv_stat  <command> [options]" << endl << endl;
 
 	cout << "Commands:" << endl;
-	cout << "     convert      convert SV results to 6-column BED (or 9-column BEDPE) file format" << endl;
+	cout << "     convert      convert SV results to 5-column BED (or 8-column BEDPE) file format" << endl;
 	cout << "     stat         compute the SV statistics" << endl;
 }
 
@@ -35,11 +35,11 @@ void showUsageStat(){
 	cout << "     BENCHMARK_SV_FILE    Benchmark SV file." << endl << endl;
 
 	cout << "Options:" << endl;
-	cout << "     -m           valid maximal region size for statistics: [0]" << endl;
+	cout << "     -m INT       valid maximal region size for statistics: [0]" << endl;
 	cout << "                  0 is for all variant size are valid, and while positive" << endl;
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
 	cout << "                  regions are omitted and saved to the file specified with -l" << endl;
-	cout << "     -s FILE      breakpoint extend size: [10]" << endl;
+	cout << "     -s INT       breakpoint extend size: [10]" << endl;
 	cout << "     -o FILE      output path name for SV statistics: [output]" << endl;
 	cout << "     -l FILE      file name for long SV regions: [long_sv_reg.bed]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
@@ -91,6 +91,31 @@ int parseConvert(int argc, char **argv)
 	}
 
 	return 0;
+}
+
+void convert(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format){
+
+	outConvertScreenFile.open(convertScreenFilename);
+	if(!outConvertScreenFile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << convertScreenFilename << endl;
+		exit(1);
+	}
+
+	printConvertParas(infilename, outfilename, remove_dup_falg, sv_format); // print parameters
+
+	cout << "############# Convert variants: #############" << endl;
+	outConvertScreenFile << "############# Convert variants: #############" << endl;
+
+	if(sv_format.compare("bed")==0)
+		convertBed(infilename, outfilename, remove_dup_falg);
+	else if(sv_format.compare("vcf")==0)
+		convertVcf(infilename, outfilename, remove_dup_falg);
+	else if(sv_format.compare("csv")==0)
+		convertCsv(infilename, outfilename, remove_dup_falg);
+	else if(sv_format.compare("nm")==0)  // private usage: nm
+		convertNm(infilename, outfilename, remove_dup_falg);
+
+	outConvertScreenFile.close();
 }
 
 // parse the parameters for stat command
@@ -149,6 +174,8 @@ void SVStat(string &user_file, string &benchmark_file){
 		exit(1);
 	}
 
+	printStatParas(user_file, benchmark_file); // print parameters
+
 	cout << "############# Stage 1: SV size statistics: #############" << endl;
 	outStatScreenFile << "############# Stage 1: SV size statistics: #############" << endl;
 	refRegSizeStat(user_file, benchmark_file, maxValidRegThres);
@@ -169,3 +196,68 @@ void SVStat(string &user_file, string &benchmark_file){
 	outStatScreenFile.close();
 }
 
+// print parameters for 'convert' command
+void printConvertParas(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format){
+	cout << "############# Parameters for 'convert' command: #############" << endl;
+
+	cout << "                  Input SV file: " << infilename << endl;
+	cout << "                 Output SV file: " << outfilename << endl;
+
+	if(remove_dup_falg)
+		cout << "Remove duplicated variant items: yes" << endl;
+	else
+		cout << "Remove duplicated variant items: no" << endl;
+
+	if(sv_format.compare("bed")==0)
+		cout << "              Input file format: BED" << endl;
+	else if(sv_format.compare("vcf")==0)
+		cout << "              Input file format: VCF" << endl;
+	else if(sv_format.compare("csv")==0)
+		cout << "              Input file format: CSV" << endl;
+	else if(sv_format.compare("nm")==0)  // private usage: nm
+		cout << "              Input file format: nm, [private usage]" << endl;
+	cout << endl;
+
+	// print to file
+	outConvertScreenFile << "############# Parameters for 'convert' command: #############" << endl;
+
+	outConvertScreenFile << "                  Input SV file: " << infilename << endl;
+	outConvertScreenFile << "                 Output SV file: " << outfilename << endl;
+
+	if(remove_dup_falg)
+		outConvertScreenFile << "Remove duplicated variant items: yes" << endl;
+	else
+		outConvertScreenFile << "Remove duplicated variant items: no" << endl;
+
+	if(sv_format.compare("bed")==0)
+		outConvertScreenFile << "              Input file format: BED" << endl;
+	else if(sv_format.compare("vcf")==0)
+		outConvertScreenFile << "              Input file format: VCF" << endl;
+	else if(sv_format.compare("csv")==0)
+		outConvertScreenFile << "              Input file format: CSV" << endl;
+	else if(sv_format.compare("nm")==0)  // private usage: nm
+		outConvertScreenFile << "              Input file format: nm, [private usage]" << endl;
+	outConvertScreenFile << endl;
+}
+
+// print parameters for 'stat' command
+void printStatParas(string &user_file, string &benchmark_file){
+	cout << "############# Parameters for 'stat' command: #############" << endl;
+	cout << "               User-called SV file: " << user_file << endl;
+	cout << "                 Benchmark SV file: " << benchmark_file << endl;
+
+	cout << "Maximal region size for statistics: " << maxValidRegThres << endl;
+	cout << "            breakpoint extend size: " << extendSize << endl;
+	cout << "Output path name for SV statistics: " << outputPathname << endl;
+	cout << "     File name for long SV regions: " << longSVFilename << endl << endl;
+
+	// print to file
+	outStatScreenFile << "############# Parameters for 'stat' command: #############" << endl;
+	outStatScreenFile << "               User-called SV file: " << user_file << endl;
+	outStatScreenFile << "                 Benchmark SV file: " << benchmark_file << endl;
+
+	outStatScreenFile << "Maximal region size for statistics: " << maxValidRegThres << endl;
+	outStatScreenFile << "            breakpoint extend size: " << extendSize << endl;
+	outStatScreenFile << "Output path name for SV statistics: " << outputPathname << endl;
+	outStatScreenFile << "     File name for long SV regions: " << longSVFilename << endl << endl;
+}
