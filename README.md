@@ -47,6 +47,7 @@ Commands:
      stat         compute the SV statistics
 ```
 
+### 'convert' command
 SV_STAT can be used to convert VCF/BED/CSV file format to bed or bedpe file format by typing:
 ```sh
 $ sv_stat convert -f vcf var.vcf var.bed
@@ -67,6 +68,7 @@ Options:
      -h           show this help message and exit
 ```
 
+### 'stat' command
 Invalid long user-called regions can be removed by using -m option as they are two long to be a valid variant region, the command can be:
 ```sh
 $ sv_stat stat -m 10000 user_sv.bed benchmark_sv.bed 
@@ -92,7 +94,8 @@ Options:
 ```
 
 
-## Output results
+## Output result description
+
 
 
 ------------------------------------------------------------------------------
