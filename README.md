@@ -33,7 +33,7 @@ chr1	841980	843383	INV	1404
 chr1	3327738	3329244	DUP	3013
 chr1	1	481701	chr2	4273477	4539804	TRA	0
 ```		
-For the second item, there is a insertion of size 87 base pairs at the 1142381 location of chr1, and for the fifth item, it is a translocation between chr1:1-481701 and chr2:4273477-4539804, and the 0 in the last second column means the SV_len which will be 0 for translocations.
+For the second item, there is a insertion of size 87 base pairs at the 1142381 location of chr1, and for the fifth item, it is a translocation between chr1:1-481701 and chr2:4273477-4539804, and the 0 in the last second column means the SV_len which will be 0 for translocations or translocation breakpoints.
 
 
 ## Usage
