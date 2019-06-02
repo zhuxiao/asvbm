@@ -95,8 +95,19 @@ Options:
 
 
 ## Output result description
+There are 4 statistical categories for 'stat' command results, which are stored in 4 folders respectively:
+* 1_ref_reg_size_stat: variant region size statistics (and the statistical figures) in reference.
+* 2_num_stat: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
+* 3_size_dif_stat: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
+* 4_type_num_stat: the classical number statistics (and the statistical figures) for different variant types with varies region lengths.
+Moreover, the overall simplified statistics will be output to terminal screen, and these screen results will be saved to the file 'stat_screen' in the output directory.
 
 
+## Draw statistical figures (To do ...)
+Figures can be drawn for more intuitive and detailed illustration for the four statistical categories. Statistical figures can be draw by typing:
+```sh
+$ draw command
+```
 
 ------------------------------------------------------------------------------
 ## Contact
