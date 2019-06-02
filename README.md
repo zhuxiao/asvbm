@@ -69,11 +69,11 @@ Options:
 ```
 
 ### `stat` command
-Invalid long user-called regions can be removed by using `-m` option as they are two long to be a valid variant region, the command can be:
+Invalid long user-called regions can be removed by using `-m` option as they are too long to be valid variant regions. The command could be:
 ```sh
 $ sv_stat stat -m 10000 user_sv.bed benchmark_sv.bed 
 ```
-And the Usage information are below:
+And the Usage information are shown below:
 ```sh
 $ sv_stat stat
 Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
@@ -94,24 +94,25 @@ Options:
 ```
 
 
-## Output result description
-There are 4 statistical categories for `stat` command results, which are stored in 4 folders respectively:
-* __`1_ref_reg_size_stat`__: variant region size statistics (and the statistical figures) in reference.
-* __`2_num_stat`__: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
-* __`3_size_dif_stat`__: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
-* __`4_type_num_stat`__: the classical number statistics (and the statistical figures) for different variant types with varies region lengths.
-Moreover, the overall simplified statistics will be output to terminal screen, and these screen results will be saved to the file `stat_screen` in the output directory.
-
-
 ## Draw statistical figures (To do ...)
 Figures can be drawn for more intuitive and detailed illustration for the four statistical categories. Statistical figures can be draw by typing:
 ```sh
 $ draw command
 ```
 
+
+## Output result description
+There are 4 statistical categories for `stat` command results, which will be saved into the following 4 folders respectively:
+* __`1_ref_reg_size_stat`__: variant region size statistics (and the statistical figures) in reference.
+* __`2_num_stat`__: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
+* __`3_size_dif_stat`__: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
+* __`4_type_num_stat`__: the classical number statistics (and the statistical figures) for different variant types with varies region lengths.
+Moreover, the overall simplified statistics will be output to the terminal screen, and these screen results will be saved to the file `stat_screen` in the output directory.
+
+
 ------------------------------------------------------------------------------
 ## Contact
-If you have problems or some suggestions, please contact: xzhu@hrbnu.edu.cn
+If you have problems or some suggestions, please contact: xzhu@hrbnu.edu.cn without hesitate.
 
 ---- Enjoy !!! -----
 
