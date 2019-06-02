@@ -69,7 +69,7 @@ Options:
 ```
 
 ### `stat` command
-Invalid long user-called regions can be removed by using -m option as they are two long to be a valid variant region, the command can be:
+Invalid long user-called regions can be removed by using `-m` option as they are two long to be a valid variant region, the command can be:
 ```sh
 $ sv_stat stat -m 10000 user_sv.bed benchmark_sv.bed 
 ```
@@ -96,10 +96,10 @@ Options:
 
 ## Output result description
 There are 4 statistical categories for `stat` command results, which are stored in 4 folders respectively:
-* `1_ref_reg_size_stat`: variant region size statistics (and the statistical figures) in reference.
-* `2_num_stat`: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
-* `3_size_dif_stat`: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
-* `4_type_num_stat`: the classical number statistics (and the statistical figures) for different variant types with varies region lengths.
+* __`1_ref_reg_size_stat`__: variant region size statistics (and the statistical figures) in reference.
+* __`2_num_stat`__: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
+* __`3_size_dif_stat`__: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
+* __`4_type_num_stat`__: the classical number statistics (and the statistical figures) for different variant types with varies region lengths.
 Moreover, the overall simplified statistics will be output to terminal screen, and these screen results will be saved to the file `stat_screen` in the output directory.
 
 
