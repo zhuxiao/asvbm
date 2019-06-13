@@ -54,7 +54,7 @@ $ sv_stat convert -f vcf var.vcf var.bed
 $ sv_stat convert -f bed var.vcf var.bed
 $ sv_stat convert -f csv var.vcf var.bed
 ```
-And the usage information are below:
+And the help information are below:
 ```sh
 $ sv_stat convert
 Usage:  sv_stat convert [options] <infile> <outfile>
@@ -73,7 +73,7 @@ Invalid long user-called regions can be removed by using `-m` option as they are
 ```sh
 $ sv_stat stat -m 10000 user_sv.bed benchmark_sv.bed 
 ```
-And the Usage information are shown below:
+And the help information are shown below:
 ```sh
 $ sv_stat stat
 Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
