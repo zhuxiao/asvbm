@@ -106,7 +106,7 @@ Options:
 ## Draw statistical figures (To do ...)
 Figures can be drawn for more intuitive and detailed illustration for the four statistical categories. Statistical figures can be draw by typing:
 ```sh
-$ draw command
+$ draw_command
 ```
 
 
