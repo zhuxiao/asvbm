@@ -114,7 +114,7 @@ Moreover, the overall simplified statistics will be output to the terminal scree
 
 ------------------------------------------------------------------------------
 ## Contact
-If you have problems or some suggestions, please contact: xzhu@hrbnu.edu.cn without hesitation.
+If you have problems or some suggestions, please contact: zhuxiao_hit@yeah.net without hesitation.
 
 ---- Enjoy !!! -----
 
