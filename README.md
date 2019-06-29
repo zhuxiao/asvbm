@@ -53,9 +53,16 @@ Commands:
 SV_STAT can be used to convert VCF/BED/CSV file format to bed or bedpe file format by typing:
 ```sh
 $ sv_stat convert -f vcf var.vcf var.bed
+```
+or
+```sh
 $ sv_stat convert -f bed var.vcf var.bed
+```
+or
+```sh
 $ sv_stat convert -f csv var.vcf var.bed
 ```
+
 And the help information are below:
 ```sh
 $ sv_stat convert
