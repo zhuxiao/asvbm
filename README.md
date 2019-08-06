@@ -56,11 +56,11 @@ $ sv_stat convert -f vcf var.vcf var.bed
 ```
 or
 ```sh
-$ sv_stat convert -f bed var.vcf var.bed
+$ sv_stat convert -f bed var.bed var_new.bed
 ```
 or
 ```sh
-$ sv_stat convert -f csv var.vcf var.bed
+$ sv_stat convert -f csv var.csv var.bed
 ```
 
 And the help information are below:
