@@ -67,44 +67,56 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	vector< vector<SV_item*> > result;
 	int32_t TP, FP, FN, positive_num_called;
 	float recall, precision, F1_score, sv_num_per_reg, percent;
-	string filename_intersect, filename_private_user, filename_private_benchmark;
+	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
 
-	filename_intersect = file_prefix + "_intersect";
+	filename_intersect_user = file_prefix + "_intersect_user";
+	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
 	filename_private_user = file_prefix + "_private_user";
 	filename_private_benchmark = file_prefix + "_private_benchmark";
 
 	// compute intersection
 	result = intersect(user_data, benchmark_data);
 
-	if(benchmark_data.size()>0) percent = (double)result.at(0).size() / benchmark_data.size();
+	if(user_data.size()>0) percent = (double)result.at(0).size() / user_data.size();
 	else percent = 0;
-	cout << "intersection size: " << result.at(0).size() << ", percent: " << percent << endl;
-	outStatScreenFile << "intersection size: " << result.at(0).size() << ", percent: " << percent << endl;
+	out_str = "user intersection data size: " + to_string(result.at(0).size()) + ", percent: " + to_string(percent);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
+
+	if(benchmark_data.size()>0) percent = (double)result.at(1).size() / benchmark_data.size();
+	else percent = 0;
+	out_str = "benchmark intersection data size: " + to_string(result.at(1).size()) + ", percent: " + to_string(percent);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
 
 	if(user_data.size()>0) percent = (double)result.at(1).size()/user_data.size();
 	else percent = 0;
-	cout << "user private data size: " << result.at(1).size() << ", percent: " << percent << endl;
-	outStatScreenFile << "user private data size: " << result.at(1).size() << ", percent: " << percent << endl;
+	out_str = "user private data size: " + to_string(result.at(1).size()) + ", percent: " + to_string(percent);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
 
 	if(benchmark_data.size()>0) percent = (double)result.at(2).size()/benchmark_data.size();
 	else percent = 0;
-	cout << "benchmark private data size: " << result.at(2).size() << ", percent: " << percent << endl;
-	outStatScreenFile << "benchmark private data size: " << result.at(2).size() << ", percent: " << percent << endl;
+	out_str = "benchmark private data size: " + to_string(result.at(2).size()) + ", percent: " + to_string(percent);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
 
 	// output to file
-	output2File(filename_intersect, result.at(0), outStatScreenFile);
-	output2File(filename_private_user, result.at(1), outStatScreenFile);
-	output2File(filename_private_benchmark, result.at(2), outStatScreenFile);
+	output2File(filename_intersect_user, result.at(0), outStatScreenFile);
+	output2File(filename_intersect_benchmark, result.at(1), outStatScreenFile);
+	output2File(filename_private_user, result.at(2), outStatScreenFile);
+	output2File(filename_private_benchmark, result.at(3), outStatScreenFile);
 
-	//TP = sv_data1.size() - result.at(1).size();
-	TP = result.at(0).size();
-	FP = result.at(1).size();
-	FN = result.at(2).size();
-	positive_num_called = user_data.size() - result.at(1).size();
+	//TP = user_data.size() - result.at(1).size();
+	TP = result.at(1).size();
+	FP = result.at(2).size();
+	FN = result.at(3).size();
+	//positive_num_called = user_data.size() - result.at(2).size();
+	positive_num_called = result.at(0).size();
 	if(benchmark_data.size()>0) recall = (float)TP / benchmark_data.size();
 	else recall = 0;
-	//precision = (float)TP / sv_data1.size();
-	if(TP+result.at(1).size()>0) precision = (float)TP / (TP + result.at(1).size());
+	//precision = (float)TP / user_data.size();
+	if(TP+result.at(2).size()>0) precision = (float)TP / (TP + result.at(2).size());
 	else precision = 0;
 
 	if(recall+precision>0) F1_score = 2.0 * (recall * precision) / (recall + precision);
@@ -127,6 +139,8 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 void computeLenStat(vector<SV_item*> &data, string &description_str){
 	int64_t len, sum, max_len, min_len, aver_len;
 	SV_item *item;
+	string out_str;
+
 	sum = 0; max_len = 0; min_len = INT_MAX;
 	for(size_t i=0; i<data.size(); i++){
 		item = data.at(i);
@@ -137,25 +151,26 @@ void computeLenStat(vector<SV_item*> &data, string &description_str){
 	}
 	if(data.size()>0) aver_len = sum / data.size();
 	else { aver_len = 0; min_len = 0; }
-	cout << description_str << " reg_num=" << data.size() << ", total_len=" << sum << ", max_len=" << max_len << ", min_len=" << min_len << ", aver_len=" << aver_len << endl;
 
-	outStatScreenFile << description_str << " reg_num=" << data.size() << ", total_len=" << sum << ", max_len=" << max_len << ", min_len=" << min_len << ", aver_len=" << aver_len << endl;
+	out_str = description_str + " reg_num=" + to_string(data.size()) + ", total_len=" + to_string(sum) + ", max_len=" + to_string(max_len) + ", min_len=" + to_string(min_len) + ", aver_len=" + to_string(aver_len);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
 }
 
-vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &data2){
+vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data){
 	vector< vector<SV_item*> > result;
-	vector<SV_item*> intersect_vec, private_vec1, private_vec2;
+	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
 	SV_item *item1, *item2, *item;
 	size_t i, j;
 	vector<size_t> overlap_type_vec;
 
-	for(i=0; i<data1.size(); i++) data1.at(i)->overlapped = false;
-	for(i=0; i<data2.size(); i++) data2.at(i)->overlapped = false;
+	for(i=0; i<user_data.size(); i++) user_data.at(i)->overlapped = false;
+	for(i=0; i<benchmark_data.size(); i++) benchmark_data.at(i)->overlapped = false;
 
-	for(i=0; i<data1.size(); i++){
-		item1 = data1.at(i);
-		for(j=0; j<data2.size(); j++){
-			item2 = data2.at(j);
+	for(i=0; i<user_data.size(); i++){
+		item1 = user_data.at(i);
+		for(j=0; j<benchmark_data.size(); j++){
+			item2 = benchmark_data.at(j);
 			overlap_type_vec = computeOverlapType(item1, item2);
 			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
 				item1->overlapped = true;
@@ -164,26 +179,28 @@ vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &da
 		}
 	}
 
-	for(i=0; i<data2.size(); i++){
-		item2 = data2.at(i);
+	for(i=0; i<benchmark_data.size(); i++){
+		item2 = benchmark_data.at(i);
 		item = itemdup(item2);
 		if(item2->overlapped)
-			intersect_vec.push_back(item);
+			intersect_vec_benchmark.push_back(item);
 		else
-			private_vec2.push_back(item);
+			private_vec_benchmark.push_back(item);
 	}
 
-	for(i=0; i<data1.size(); i++){
-		item1 = data1.at(i);
-		if(!item1->overlapped){
-			item = itemdup(item1);
-			private_vec1.push_back(item);
-		}
+	for(i=0; i<user_data.size(); i++){
+		item1 = user_data.at(i);
+		item = itemdup(item1);
+		if(!item1->overlapped)
+			private_vec_user.push_back(item);
+		else
+			intersect_vec_user.push_back(item);
 	}
 
-	result.push_back(intersect_vec);
-	result.push_back(private_vec1);
-	result.push_back(private_vec2);
+	result.push_back(intersect_vec_user);
+	result.push_back(intersect_vec_benchmark);
+	result.push_back(private_vec_user);
+	result.push_back(private_vec_benchmark);
 
 	return result;
 }
