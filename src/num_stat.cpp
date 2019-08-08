@@ -257,39 +257,47 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 
 		if(item1->chrname.size()>0){
 			if(item1->chrname.compare(item2->chrname)==0){
-				// 1: one_overlap_one_bp
-				startPos1 = item1->startPos - extendSize;
-				if(startPos1<1) startPos1 = 1;
-				endPos1 = item1->startPos + extendSize;
-				startPos2 = item2->startPos - extendSize;
-				if(startPos2<1) startPos2 = 1;
-				endPos2 = item2->startPos + extendSize;
+				if(item1->startPos!=0){
+					// 1: one_overlap_one_bp
+					startPos1 = item1->startPos - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->startPos + extendSize;
 
-				flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
-				if(flag_tmp) overlap_type = ONE_OVERLAP_ONE_BP;
-				else if(item2->startPos!=item2->endPos){
-					// one_overlap_two_bp
-					startPos2 = item2->endPos - extendSize;
-					if(startPos2<1) startPos2 = 1;
-					endPos2 = item2->endPos + extendSize;
+					if(item2->startPos!=0){
+						startPos2 = item2->startPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
 
-					flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
-					if(flag_tmp) overlap_type = ONE_OVERLAP_TWO_BP;
+					if(flag_tmp) overlap_type = ONE_OVERLAP_ONE_BP;
+					else if(item2->startPos!=item2->endPos and item2->endPos!=0){
+						// one_overlap_two_bp
+						startPos2 = item2->endPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = ONE_OVERLAP_TWO_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 				}
-				if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 
-				if(item1->startPos!=item1->endPos){
+				if(item1->startPos!=item1->endPos and item1->endPos!=0){
 					// 2: two_overlap_one_bp
 					startPos1 = item1->endPos - extendSize;
 					if(startPos1<1) startPos1 = 1;
 					endPos1 = item1->endPos + extendSize;
-					startPos2 = item2->startPos - extendSize;
-					if(startPos2<1) startPos2 = 1;
-					endPos2 = item2->startPos + extendSize;
 
-					flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					if(item2->startPos!=0){
+						startPos2 = item2->startPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
 					if(flag_tmp) overlap_type = TWO_OVERLAP_ONE_BP;
-					else if(item2->startPos!=item2->endPos){
+					else if(item2->startPos!=item2->endPos and item2->endPos!=0){
 						// two_overlap_two_bp
 						startPos2 = item2->endPos - extendSize;
 						if(startPos2<1) startPos2 = 1;
@@ -301,39 +309,48 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 				}
 			}else if(item1->chrname.compare(item2->chrname2)==0){
-				// one_overlap_three_bp
-				startPos1 = item1->startPos - extendSize;
-				if(startPos1<1) startPos1 = 1;
-				endPos1 = item1->startPos + extendSize;
-				startPos2 = item2->startPos2 - extendSize;
-				if(startPos2<1) startPos2 = 1;
-				endPos2 = item2->startPos2 + extendSize;
 
-				flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
-				if(flag_tmp) overlap_type = ONE_OVERLAP_THREE_BP;
-				else if(item2->startPos2!=item2->endPos2){
-					// one_overlap_four_bp
-					startPos2 = item2->endPos2 - extendSize;
-					if(startPos2<1) startPos2 = 1;
-					endPos2 = item2->endPos2 + extendSize;
+				if(item1->startPos!=0){
+					// one_overlap_three_bp
+					startPos1 = item1->startPos - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->startPos + extendSize;
 
-					flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
-					if(flag_tmp) overlap_type = ONE_OVERLAP_FOUR_BP;
+					if(item2->startPos2!=0){
+						startPos2 = item2->startPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos2 + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = ONE_OVERLAP_THREE_BP;
+					else if(item2->startPos2!=item2->endPos2 and item2->endPos2!=0){
+						// one_overlap_four_bp
+						startPos2 = item2->endPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos2 + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = ONE_OVERLAP_FOUR_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 				}
-				if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 
-				if(item1->startPos!=item1->endPos){
+				if(item1->startPos!=item1->endPos and item1->endPos!=0){
 					// two_overlap_three_bp
 					startPos1 = item1->endPos - extendSize;
 					if(startPos1<1) startPos1 = 1;
 					endPos1 = item1->endPos + extendSize;
-					startPos2 = item2->startPos2 - extendSize;
-					if(startPos2<1) startPos2 = 1;
-					endPos2 = item2->startPos2 + extendSize;
 
-					flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					if(item2->startPos2!=0){
+						startPos2 = item2->startPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos2 + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
 					if(flag_tmp) overlap_type = TWO_OVERLAP_THREE_BP;
-					else if(item2->startPos2!=item2->endPos2) { // two_overlap_four_bp
+					else if(item2->startPos2!=item2->endPos2 and item2->endPos2!=0) { // two_overlap_four_bp
 						startPos2 = item2->endPos2 - extendSize;
 						if(startPos2<1) startPos2 = 1;
 						endPos2 = item2->endPos2 + extendSize;
@@ -348,39 +365,47 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 
 		if(item1->chrname2.size()>0){
 			if(item1->chrname2.compare(item2->chrname)==0){
-				// 3: three_overlap_one_bp
-				startPos1 = item1->startPos2 - extendSize;
-				if(startPos1<1) startPos1 = 1;
-				endPos1 = item1->startPos2 + extendSize;
-				startPos2 = item2->startPos - extendSize;
-				if(startPos2<1) startPos2 = 1;
-				endPos2 = item2->startPos + extendSize;
+				if(item1->startPos2!=0){
+					// 3: three_overlap_one_bp
+					startPos1 = item1->startPos2 - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->startPos2 + extendSize;
 
-				flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
-				if(flag_tmp) overlap_type = THREE_OVERLAP_ONE_BP;
-				else if(item2->startPos!=item2->endPos){
-					// three_overlap_two_bp
-					startPos2 = item2->endPos - extendSize;
-					if(startPos2<1) startPos2 = 1;
-					endPos2 = item2->endPos + extendSize;
+					if(item2->startPos!=0){
+						startPos2 = item2->startPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
 
-					flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
-					if(flag_tmp) overlap_type = THREE_OVERLAP_TWO_BP;
+					if(flag_tmp) overlap_type = THREE_OVERLAP_ONE_BP;
+					else if(item2->startPos!=item2->endPos and item2->endPos!=0){
+						// three_overlap_two_bp
+						startPos2 = item2->endPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = THREE_OVERLAP_TWO_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 				}
-				if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 
-				if(item1->startPos2!=item1->endPos2){
+				if(item1->startPos2!=item1->endPos2 and item1->endPos2!=0){
 					// 4: four_overlap_one_bp
 					startPos1 = item1->endPos2 - extendSize;
 					if(startPos1<1) startPos1 = 1;
 					endPos1 = item1->endPos2 + extendSize;
-					startPos2 = item2->startPos - extendSize;
-					if(startPos2<1) startPos2 = 1;
-					endPos2 = item2->startPos + extendSize;
 
-					flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					if(item2->startPos!=0){
+						startPos2 = item2->startPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
 					if(flag_tmp) overlap_type = FOUR_OVERLAP_ONE_BP;
-					else if(item2->startPos!=item2->endPos){
+					else if(item2->startPos!=item2->endPos and item2->endPos!=0){
 						// four_overlap_two_bp
 						startPos2 = item2->endPos - extendSize;
 						if(startPos2<1) startPos2 = 1;
@@ -392,39 +417,47 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 				}
 			}else if(item1->chrname2.compare(item2->chrname2)==0){
-				// three_overlap_three_bp
-				startPos1 = item1->startPos2 - extendSize;
-				if(startPos1<1) startPos1 = 1;
-				endPos1 = item1->startPos2 + extendSize;
-				startPos2 = item2->startPos2 - extendSize;
-				if(startPos2<1) startPos2 = 1;
-				endPos2 = item2->startPos2 + extendSize;
+				if(item1->startPos2!=0){
+					// three_overlap_three_bp
+					startPos1 = item1->startPos2 - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->startPos2 + extendSize;
 
-				flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
-				if(flag_tmp) overlap_type = THREE_OVERLAP_THREE_BP;
-				else if(item2->startPos2!=item2->endPos2) {
-					// three_overlap_four_bp
-					startPos2 = item2->endPos2 - extendSize;
-					if(startPos2<1) startPos2 = 1;
-					endPos2 = item2->endPos2 + extendSize;
+					if(item2->startPos2!=0){
+						startPos2 = item2->startPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos2 + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
 
-					flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
-					if(flag_tmp) overlap_type = THREE_OVERLAP_FOUR_BP;
+					if(flag_tmp) overlap_type = THREE_OVERLAP_THREE_BP;
+					else if(item2->startPos2!=item2->endPos2 and item2->endPos2!=0) {
+						// three_overlap_four_bp
+						startPos2 = item2->endPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos2 + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = THREE_OVERLAP_FOUR_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 				}
-				if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 
-				if(item1->startPos2!=item1->endPos2){
+				if(item1->startPos2!=item1->endPos2 and item1->endPos2!=0){
 					// four_overlap_three_bp
 					startPos1 = item1->endPos2 - extendSize;
 					if(startPos1<1) startPos1 = 1;
 					endPos1 = item1->endPos2 + extendSize;
-					startPos2 = item2->startPos2 - extendSize;
-					if(startPos2<1) startPos2 = 1;
-					endPos2 = item2->startPos2 + extendSize;
 
-					flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					if(item2->startPos2!=0){
+						startPos2 = item2->startPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos2 + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
 					if(flag_tmp) overlap_type = FOUR_OVERLAP_THREE_BP;
-					else if(item2->startPos2!=item2->endPos2) { // four_overlap_four_bp
+					else if(item2->startPos2!=item2->endPos2 and item2->endPos2!=0) { // four_overlap_four_bp
 						startPos2 = item2->endPos2 - extendSize;
 						if(startPos2<1) startPos2 = 1;
 						endPos2 = item2->endPos2 + extendSize;
@@ -486,6 +519,10 @@ void SVNumStatTraOp(string &user_file, string &benchmark_file, string &dirname){
 
 void computeNumStatTra(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, string &file_prefix){
 	vector<Breakpoint_t*> bp_vec_user, bp_vec_benchmark;
+	string filename_bp_user, filename_bp_benchmark;
+
+	filename_bp_user = file_prefix + "_user";
+	filename_bp_benchmark = file_prefix + "_benchmark";
 
 	// compute intersection
 	computeOverlapTra(user_data, benchmark_data);
@@ -493,6 +530,10 @@ void computeNumStatTra(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_
 	// construct breakpoint vectors
 	bp_vec_user = constructBPVec(user_data);
 	bp_vec_benchmark = constructBPVec(benchmark_data);
+
+	// output breakpoints to file
+	outputBP2File(filename_bp_user, bp_vec_user);
+	outputBP2File(filename_bp_benchmark, bp_vec_benchmark);
 
 	// compute statistics
 	computeBPNumStatTra(bp_vec_user, bp_vec_benchmark, file_prefix);
@@ -665,34 +706,40 @@ vector<Breakpoint_t*> constructBPVec(vector<SV_item*> &sv_data){
 		item = sv_data.at(i);
 		if(item->sv_type==VAR_TRA or item->sv_type==VAR_BND){
 			if(item->chrname.size()>0){
-				if(item->startPos!=item->endPos){ // two breakpoints
-					bp_item = allocateBPItem(item->chrname, item->startPos);
-					if(item->traOverlappedArr[0]) bp_item->overlappedFlag = true;
-					bp_vec.push_back(bp_item);
-
-					bp_item = allocateBPItem(item->chrname, item->endPos);
-					if(item->traOverlappedArr[1]) bp_item->overlappedFlag = true;
-					bp_vec.push_back(bp_item);
-				}else{ // one breakpoint
-					bp_item = allocateBPItem(item->chrname, item->startPos);
-					if(item->traOverlappedArr[0]) bp_item->overlappedFlag = true;
-					bp_vec.push_back(bp_item);
-				}
+//				if(item->startPos!=item->endPos){ // two breakpoints
+					if(item->startPos!=0){
+						bp_item = allocateBPItem(item->chrname, item->startPos);
+						if(item->traOverlappedArr[0]) bp_item->overlappedFlag = true;
+						bp_vec.push_back(bp_item);
+					}
+					if(item->endPos!=0){
+						bp_item = allocateBPItem(item->chrname, item->endPos);
+						if(item->traOverlappedArr[1]) bp_item->overlappedFlag = true;
+						bp_vec.push_back(bp_item);
+					}
+//				}else{ // one breakpoint
+//					bp_item = allocateBPItem(item->chrname, item->startPos);
+//					if(item->traOverlappedArr[0]) bp_item->overlappedFlag = true;
+//					bp_vec.push_back(bp_item);
+//				}
 			}
 			if(item->chrname2.size()>0){
-				if(item->startPos2!=item->endPos2){ // two breakpoints
-					bp_item = allocateBPItem(item->chrname2, item->startPos2);
-					if(item->traOverlappedArr[2]) bp_item->overlappedFlag = true;
-					bp_vec.push_back(bp_item);
-
-					bp_item = allocateBPItem(item->chrname2, item->endPos2);
-					if(item->traOverlappedArr[3]) bp_item->overlappedFlag = true;
-					bp_vec.push_back(bp_item);
-				}else{ // one breakpoint
-					bp_item = allocateBPItem(item->chrname2, item->startPos2);
-					if(item->traOverlappedArr[2]) bp_item->overlappedFlag = true;
-					bp_vec.push_back(bp_item);
-				}
+//				if(item->startPos2!=item->endPos2){ // two breakpoints
+					if(item->startPos2!=0){
+						bp_item = allocateBPItem(item->chrname2, item->startPos2);
+						if(item->traOverlappedArr[2]) bp_item->overlappedFlag = true;
+						bp_vec.push_back(bp_item);
+					}
+					if(item->endPos2!=0){
+						bp_item = allocateBPItem(item->chrname2, item->endPos2);
+						if(item->traOverlappedArr[3]) bp_item->overlappedFlag = true;
+						bp_vec.push_back(bp_item);
+					}
+//				}else{ // one breakpoint
+//					bp_item = allocateBPItem(item->chrname2, item->startPos2);
+//					if(item->traOverlappedArr[2]) bp_item->overlappedFlag = true;
+//					bp_vec.push_back(bp_item);
+//				}
 			}
 		}
 	}
