@@ -40,19 +40,19 @@ void SVNumStatOp(string &user_file, string &benchmark_file, int32_t max_valid_re
 	if(max_valid_reg_thres>0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
 		output2File(longFilename_tmp, long_sv_data, outStatScreenFile);
-		cout << "non-TRA: user data size: " << user_data.size() << endl;
-		cout << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
-		cout << "non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
-		outStatScreenFile << "non-TRA: user data size: " << user_data.size() << endl;
-		outStatScreenFile << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
-		outStatScreenFile << "non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
+		cout << "Non-TRA: user data size: " << user_data.size() << endl;
+		cout << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
+		cout << "Non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
+		outStatScreenFile << "Non-TRA: user data size: " << user_data.size() << endl;
+		outStatScreenFile << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
+		outStatScreenFile << "Non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
 		description_str_long = "Size statistics for long SV regions: ";
 		computeLenStat(long_sv_data, description_str_long);
 	}else{
-		cout << "non-TRA: user data size: " << user_data.size() << endl;
-		cout << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
-		outStatScreenFile << "non-TRA: user data size: " << user_data.size() << endl;
-		outStatScreenFile << "non-TRA: benchmark data size: " << benchmark_data.size() << endl;
+		cout << "Non-TRA: user data size: " << user_data.size() << endl;
+		cout << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
+		outStatScreenFile << "Non-TRA: user data size: " << user_data.size() << endl;
+		outStatScreenFile << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
 	}
 
 	file_prefix = dirname + "num_stat";
@@ -79,25 +79,25 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 
 	if(user_data.size()>0) percent = (double)result.at(0).size() / user_data.size();
 	else percent = 0;
-	out_str = "user intersection data size: " + to_string(result.at(0).size()) + ", percent: " + to_string(percent);
+	out_str = "User intersection data size: " + to_string(result.at(0).size()) + ", percent: " + to_string(percent);
 	cout << out_str << endl;
 	outStatScreenFile << out_str << endl;
 
 	if(benchmark_data.size()>0) percent = (double)result.at(1).size() / benchmark_data.size();
 	else percent = 0;
-	out_str = "benchmark intersection data size: " + to_string(result.at(1).size()) + ", percent: " + to_string(percent);
+	out_str = "Benchmark intersection data size: " + to_string(result.at(1).size()) + ", percent: " + to_string(percent);
 	cout << out_str << endl;
 	outStatScreenFile << out_str << endl;
 
 	if(user_data.size()>0) percent = (double)result.at(1).size()/user_data.size();
 	else percent = 0;
-	out_str = "user private data size: " + to_string(result.at(1).size()) + ", percent: " + to_string(percent);
+	out_str = "User private data size: " + to_string(result.at(1).size()) + ", percent: " + to_string(percent);
 	cout << out_str << endl;
 	outStatScreenFile << out_str << endl;
 
 	if(benchmark_data.size()>0) percent = (double)result.at(2).size()/benchmark_data.size();
 	else percent = 0;
-	out_str = "benchmark private data size: " + to_string(result.at(2).size()) + ", percent: " + to_string(percent);
+	out_str = "Benchmark private data size: " + to_string(result.at(2).size()) + ", percent: " + to_string(percent);
 	cout << out_str << endl;
 	outStatScreenFile << out_str << endl;
 
@@ -558,14 +558,15 @@ void computeOverlapTra(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_
 // cpmpute breakpoint statistics for TRA
 void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t*> &bp_vec_benchmark, string &file_prefix){
 	size_t i, total_bp_num_user, overlapped_bp_num_user, total_bp_num_benchmark, overlapped_bp_num_benchmark;
-	vector<Breakpoint_t*> bp_vec_intersect, bp_vec_private_user, bp_vec_private_benchmark;
+	vector<Breakpoint_t*> bp_vec_intersect_user, bp_vec_intersect_benchmark, bp_vec_private_user, bp_vec_private_benchmark;
 	Breakpoint_t *bp_item, *bp_item_tmp;
 
 	int32_t TP, FP, FN, positive_num_called;
 	float recall, precision, F1_score;
-	string filename_intersect, filename_private_user, filename_private_benchmark;
+	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark;
 
-	filename_intersect = file_prefix + "_BP_intersect";
+	filename_intersect_user = file_prefix + "_BP_intersect_user";
+	filename_intersect_benchmark = file_prefix + "_BP_intersect_benchmark";
 	filename_private_user = file_prefix + "_BP_private_user";
 	filename_private_benchmark = file_prefix + "_BP_private_benchmark";
 
@@ -576,27 +577,27 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	overlapped_bp_num_user = 0;
 	for(i=0; i<bp_vec_user.size(); i++){
 		bp_item = bp_vec_user.at(i);
-		if(bp_item->overlappedFlag) overlapped_bp_num_user ++;
-		else{ // user-private
-			bp_item_tmp = allocateBPItem(bp_item->chrname, bp_item->bp_loc);
+		bp_item_tmp = allocateBPItem(bp_item->chrname, bp_item->bp_loc);
+		if(bp_item->overlappedFlag){
+			bp_vec_intersect_user.push_back(bp_item_tmp);
+			overlapped_bp_num_user ++;
+		}else // user-private
 			bp_vec_private_user.push_back(bp_item_tmp);
-		}
 	}
 	overlapped_bp_num_benchmark = 0;
 	for(i=0; i<bp_vec_benchmark.size(); i++){
 		bp_item = bp_vec_benchmark.at(i);
+		bp_item_tmp = allocateBPItem(bp_item->chrname, bp_item->bp_loc);
 		if(bp_item->overlappedFlag) {
-			bp_item_tmp = allocateBPItem(bp_item->chrname, bp_item->bp_loc);
-			bp_vec_intersect.push_back(bp_item_tmp);
+			bp_vec_intersect_benchmark.push_back(bp_item_tmp);
 			overlapped_bp_num_benchmark ++;
-		}else{ // user-private
-			bp_item_tmp = allocateBPItem(bp_item->chrname, bp_item->bp_loc);
+		}else // benchmark-private
 			bp_vec_private_benchmark.push_back(bp_item_tmp);
-		}
 	}
 
 	// output breakpoints to file
-	outputBP2File(filename_intersect, bp_vec_intersect);
+	outputBP2File(filename_intersect_user, bp_vec_intersect_user);
+	outputBP2File(filename_intersect_benchmark, bp_vec_intersect_benchmark);
 	outputBP2File(filename_private_user, bp_vec_private_user);
 	outputBP2File(filename_private_benchmark, bp_vec_private_benchmark);
 
@@ -613,19 +614,28 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	if(recall+precision>0) F1_score = 2.0 * (recall * precision) / (recall + precision);
 	else F1_score = 0;
 
-	cout << "user breakpoint data size: " << total_bp_num_user << endl;
-	cout << "benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
+	cout << "Total user breakpoint data size: " << total_bp_num_user << endl;
+	cout << "Total benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
+	cout << "User intersection breakpoint data size:" << overlapped_bp_num_user << endl;
+	cout << "Benchmark intersection breakpoint data size:" << overlapped_bp_num_benchmark << endl;
+	cout << "User private breakpoint data size:" << bp_vec_private_user.size() << endl;
+	cout << "Benchmark private breakpoint data size:" << bp_vec_private_benchmark.size() << endl;
 	cout << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
-	cout << "Identified SV regions: " << positive_num_called << endl;
+	cout << "Identified breakpoint regions in benchmark data set: " << positive_num_called << endl;
 	cout << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << endl;
 
-	outStatScreenFile << "user breakpoint data size: " << total_bp_num_user << endl;
-	outStatScreenFile << "benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
+	outStatScreenFile << "Total user breakpoint data size: " << total_bp_num_user << endl;
+	outStatScreenFile << "Total benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
+	outStatScreenFile << "User intersection breakpoint data size:" << overlapped_bp_num_user << endl;
+	outStatScreenFile << "Benchmark intersection breakpoint data size:" << overlapped_bp_num_benchmark << endl;
+	outStatScreenFile << "User private breakpoint data size:" << bp_vec_private_user.size() << endl;
+	outStatScreenFile << "Benchmark private breakpoint data size:" << bp_vec_private_benchmark.size() << endl;
 	outStatScreenFile << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
-	outStatScreenFile << "Identified SV regions: " << positive_num_called << endl;
+	outStatScreenFile << "Identified breakpoint regions in benchmark data set: " << positive_num_called << endl;
 	outStatScreenFile << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << endl;
 
-	destroyBPData(bp_vec_intersect);
+	destroyBPData(bp_vec_intersect_user);
+	destroyBPData(bp_vec_intersect_benchmark);
 	destroyBPData(bp_vec_private_user);
 	destroyBPData(bp_vec_private_benchmark);
 }

@@ -167,7 +167,7 @@ vector<SV_item*> getLongSVReg(vector<SV_item*> &dataset, int32_t thres){
 
 void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfile){
 	ofstream outfile;
-	string data_out, sv_type_str;
+	string line, sv_type_str;
 	SV_item *item;
 
 	outfile.open(filename);
@@ -175,6 +175,9 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << filename << endl;
 		exit(1);
 	}
+
+	line = "#chr\tstartPos\tendPos\tSVType\tSVLen";
+	outfile << line << endl;
 
 	for(size_t i=0; i<data.size(); i++){
 		item = data.at(i);
@@ -195,10 +198,10 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 		}
 
 		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND)
-			data_out = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
+			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
 		else
-			data_out = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
-		outfile << data_out << endl;
+			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
+		outfile << line << endl;
 	}
 
 	cout << data.size() << " items were saved to " << filename << endl;

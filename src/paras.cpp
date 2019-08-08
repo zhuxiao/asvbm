@@ -247,7 +247,7 @@ void printStatParas(string &user_file, string &benchmark_file){
 	cout << "                 Benchmark SV file: " << benchmark_file << endl;
 
 	cout << "Maximal region size for statistics: " << maxValidRegThres << endl;
-	cout << "            breakpoint extend size: " << extendSize << endl;
+	cout << "            Breakpoint extend size: " << extendSize << endl;
 	cout << "Output path name for SV statistics: " << outputPathname << endl;
 	cout << "     File name for long SV regions: " << longSVFilename << endl << endl;
 
@@ -257,7 +257,7 @@ void printStatParas(string &user_file, string &benchmark_file){
 	outStatScreenFile << "                 Benchmark SV file: " << benchmark_file << endl;
 
 	outStatScreenFile << "Maximal region size for statistics: " << maxValidRegThres << endl;
-	outStatScreenFile << "            breakpoint extend size: " << extendSize << endl;
+	outStatScreenFile << "            Breakpoint extend size: " << extendSize << endl;
 	outStatScreenFile << "Output path name for SV statistics: " << outputPathname << endl;
 	outStatScreenFile << "     File name for long SV regions: " << longSVFilename << endl << endl;
 }

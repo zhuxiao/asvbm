@@ -41,11 +41,11 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 	sv_data = loadData(sv_file);
 
 	if(max_valid_reg_thres>0) long_sv_data = getLongSVReg(sv_data, max_valid_reg_thres);
-	cout << "data size: " << sv_data.size() << endl;
-	outStatScreenFile << "data size: " << sv_data.size() << endl;
+	cout << "Total data size: " << sv_data.size() << endl;
+	outStatScreenFile << "Total data size: " << sv_data.size() << endl;
 	if(max_valid_reg_thres>0) {
-		cout << "data_long size: " << long_sv_data.size() << endl;
-		outStatScreenFile << "data_long size: " << long_sv_data.size() << endl;
+		cout << "Total long SV data size: " << long_sv_data.size() << endl;
+		outStatScreenFile << "Total long SV data size: " << long_sv_data.size() << endl;
 	}
 
 	for(i=0; i<SV_SIZE_ARR_SIZE+2; i++) count_array[i] = 0;

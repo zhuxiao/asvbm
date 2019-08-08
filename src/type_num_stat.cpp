@@ -26,15 +26,15 @@ void SVTypeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &
 
 	if(max_valid_reg_thres>0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
-		cout << "long_sv_data.size: " << long_sv_data.size() << endl;
-		outStatScreenFile << "long_sv_data.size: " << long_sv_data.size() << endl;
+		cout << "Total long SV data size: " << long_sv_data.size() << endl;
+		outStatScreenFile << "Total long SV data size: " << long_sv_data.size() << endl;
 	}
 
-	cout << "user data size: " << user_data.size() << endl;
-	cout << "benchmark data size: " << benchmark_data.size() << endl;
+	cout << "Total user data size: " << user_data.size() << endl;
+	cout << "Total benchmark data size: " << benchmark_data.size() << endl;
 
-	outStatScreenFile << "user data size: " << user_data.size() << endl;
-	outStatScreenFile << "benchmark data size: " << benchmark_data.size() << endl;
+	outStatScreenFile << "Total user data size: " << user_data.size() << endl;
+	outStatScreenFile << "Total benchmark data size: " << benchmark_data.size() << endl;
 
 	// prepare user called result
 	divided_vec1 = sizeDivideSV(user_data, size_div_vec);

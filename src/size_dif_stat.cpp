@@ -32,11 +32,11 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 
 	if(max_valid_reg_thres>0)
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
-	cout << "user data size: " << user_data.size() << endl;
-	cout << "benchmark data size: " << benchmark_data.size() << endl;
+	cout << "Total user data size: " << user_data.size() << endl;
+	cout << "Total benchmark data size: " << benchmark_data.size() << endl;
 
-	outStatScreenFile << "user data size: " << user_data.size() << endl;
-	outStatScreenFile << "benchmark data size: " << benchmark_data.size() << endl;
+	outStatScreenFile << "Total user data size: " << user_data.size() << endl;
+	outStatScreenFile << "Total benchmark data size: " << benchmark_data.size() << endl;
 
 	// compute overlapped SV pairs
 	sv_pair_vec = computeOverlapSVPair(user_data, benchmark_data);
@@ -123,12 +123,14 @@ void outputPairDataToFile(string &filename, vector<SV_pair*> &sv_pair_vec){
 	SV_pair *pair_item;
 	SV_item *item1, *item2;
 
-
 	outfile.open(filename);
 	if(!outfile.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << filename << endl;
 		exit(1);
 	}
+
+	line = "#difSize\tsizeRatio\tchrA\tstartPosA\tendPosA\tSVTypeA\tSVLenA\tchrB\tstartPosB\tendPosB\tSVTypeB\tSVLenB";
+	outfile << line << endl;
 
 	for(size_t i=0; i<sv_pair_vec.size(); i++){
 		pair_item = sv_pair_vec.at(i);
@@ -235,6 +237,9 @@ void outputDifStatToFile(string &svSizeDifStatFilename, vector< vector<int32_t> 
 		exit(1);
 	}
 
+	line = "#difSize\tNum";
+	out_file << line << endl;
+
 	negative_dif_stat_vec = dif_stat_vec.at(0);
 	positive_dif_stat_vec = dif_stat_vec.at(1);
 
@@ -327,6 +332,9 @@ void outputRatioStatToFile(string &svSizeRatioStatFilename, vector<size_t> &rati
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << svSizeRatioStatFilename << endl;
 		exit(1);
 	}
+
+	line = "#sizeRatio\tNum";
+	out_file << line << endl;
 
 	fixed_precision = 1;
 	num = 0;
