@@ -71,6 +71,9 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 		exit(1);
 	}
 
+	line = "#SVLen\tNum";
+	outfile << line << endl;
+
 	num = 0;
 	for(i=0; i<SV_SIZE_ARR_SIZE+1; i++){
 		line = to_string(i) + "\t" + to_string(count_array[i]);

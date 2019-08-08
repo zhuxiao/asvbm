@@ -703,7 +703,7 @@ vector<Breakpoint_t*> constructBPVec(vector<SV_item*> &sv_data){
 // output breakpoints to file
 void outputBP2File(string &filename, vector<Breakpoint_t*> &bp_vec){
 	ofstream outfile;
-	string data_out;
+	string line;
 	Breakpoint_t *bp_item;
 
 	outfile.open(filename);
@@ -712,10 +712,13 @@ void outputBP2File(string &filename, vector<Breakpoint_t*> &bp_vec){
 		exit(1);
 	}
 
+	line = "#chr\trefPos";
+	outfile << line << endl;
+
 	for(size_t i=0; i<bp_vec.size(); i++){
 		bp_item = bp_vec.at(i);
-		data_out = bp_item->chrname + "\t" + to_string(bp_item->bp_loc);
-		outfile << data_out << endl;
+		line = bp_item->chrname + "\t" + to_string(bp_item->bp_loc);
+		outfile << line << endl;
 	}
 
 	outfile.close();
