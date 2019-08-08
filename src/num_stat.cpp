@@ -565,10 +565,10 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	float recall, precision, F1_score;
 	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark;
 
-	filename_intersect_user = file_prefix + "_BP_intersect_user";
-	filename_intersect_benchmark = file_prefix + "_BP_intersect_benchmark";
-	filename_private_user = file_prefix + "_BP_private_user";
-	filename_private_benchmark = file_prefix + "_BP_private_benchmark";
+	filename_intersect_user = file_prefix + "_intersect_user";
+	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
+	filename_private_user = file_prefix + "_private_user";
+	filename_private_benchmark = file_prefix + "_private_benchmark";
 
 	total_bp_num_user = bp_vec_user.size();
 	total_bp_num_benchmark = bp_vec_benchmark.size();
