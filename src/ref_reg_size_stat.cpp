@@ -60,6 +60,7 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 		}
 	}
 	destroyData(sv_data); // release data
+	destroyData(long_sv_data); // release long sv data
 
 	// compute statistics
 	refRegSizeFinename_tmp = dirname + refRegSizeFinename;

@@ -4,6 +4,9 @@
 // show usage
 void showUsage(){
 
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl << endl;
+
 	cout << "Usage:  sv_stat  <command> [options]" << endl << endl;
 
 	cout << "Commands:" << endl;
@@ -13,6 +16,9 @@ void showUsage(){
 
 // show usage for convert command
 void showUsageConvert(){
+
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl << endl;
 
 	cout << "Usage:  sv_stat convert [options] <infile> <outfile>" << endl << endl;
 
@@ -27,6 +33,9 @@ void showUsageConvert(){
 
 // show usage for stat command
 void showUsageStat(){
+
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl << endl;
 
 	cout << "Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>" << endl << endl;
 
@@ -198,6 +207,10 @@ void SVStat(string &user_file, string &benchmark_file){
 
 // print parameters for 'convert' command
 void printConvertParas(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format){
+
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl << endl;
+
 	cout << "############# Parameters for 'convert' command: #############" << endl;
 
 	cout << "                  Input SV file: " << infilename << endl;
@@ -219,6 +232,9 @@ void printConvertParas(string &infilename, string &outfilename, bool remove_dup_
 	cout << endl;
 
 	// print to file
+	outConvertScreenFile << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	outConvertScreenFile << "Version: " << PROG_VERSION << endl << endl;
+
 	outConvertScreenFile << "############# Parameters for 'convert' command: #############" << endl;
 
 	outConvertScreenFile << "                  Input SV file: " << infilename << endl;
@@ -242,6 +258,10 @@ void printConvertParas(string &infilename, string &outfilename, bool remove_dup_
 
 // print parameters for 'stat' command
 void printStatParas(string &user_file, string &benchmark_file){
+
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl << endl;
+
 	cout << "############# Parameters for 'stat' command: #############" << endl;
 	cout << "               User-called SV file: " << user_file << endl;
 	cout << "                 Benchmark SV file: " << benchmark_file << endl;
@@ -252,6 +272,9 @@ void printStatParas(string &user_file, string &benchmark_file){
 	cout << "     File name for long SV regions: " << longSVFilename << endl << endl;
 
 	// print to file
+	outStatScreenFile << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	outStatScreenFile << "Version: " << PROG_VERSION << endl << endl;
+
 	outStatScreenFile << "############# Parameters for 'stat' command: #############" << endl;
 	outStatScreenFile << "               User-called SV file: " << user_file << endl;
 	outStatScreenFile << "                 Benchmark SV file: " << benchmark_file << endl;
