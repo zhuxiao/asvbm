@@ -115,7 +115,7 @@ There are 4 statistical categories for `stat` command results, which will be sav
 * __`1_ref_reg_size_stat`__: variant region size statistics (and the statistical figures) in reference.
 * __`2_num_stat`__: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
 * __`3_size_dif_stat`__: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
-* __`4_size_num_stat`__: the classical number statistics (and the statistical figures) for variants with varies region lengths.
+* __`4_size_num_stat`__: the classical number statistics (and the statistical figures) for variants with vary region lengths.
 Moreover, the overall simplified statistics will be output to the terminal screen, and these screen results will be saved to the file `stat_screen` in the output directory.
 
 
