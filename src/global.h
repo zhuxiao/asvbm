@@ -12,7 +12,7 @@ using namespace std;
 string refRegSizeStatDirname = "1_ref_reg_size_stat/";
 string numStatDirname = "2_num_stat/";
 string sizeDifStatDirname = "3_size_dif_stat/";
-string typeNumStatDirname = "4_type_num_stat/";
+string sizeNumStatDirname = "4_size_num_stat/";
 
 string convertScreenFilename = "convert_screen";
 string statScreenFilename = "stat_screen";

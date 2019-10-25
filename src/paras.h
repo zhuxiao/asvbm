@@ -14,7 +14,7 @@
 #include "ref_reg_size_stat.h"
 #include "num_stat.h"
 #include "size_dif_stat.h"
-#include "type_num_stat.h"
+#include "size_num_stat.h"
 #include "util.h"
 
 using namespace std;

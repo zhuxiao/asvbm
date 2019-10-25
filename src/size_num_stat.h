@@ -1,5 +1,5 @@
-#ifndef SRC_TYPE_NUM_STAT_H_
-#define SRC_TYPE_NUM_STAT_H_
+#ifndef SRC_SIZE_NUM_STAT_H_
+#define SRC_SIZE_NUM_STAT_H_
 
 #include <iostream>
 #include <cstring>
@@ -11,10 +11,10 @@
 
 using namespace std;
 
-void SVTypeNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres);
-void SVTypeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, string &dirname);
+void SVSizeNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres);
+void SVSizeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, string &dirname);
 vector<vector<SV_item*>> sizeDivideSV(vector<SV_item*> &sv_data, vector<size_t> &size_div_vec);
-void computeTypeNumStat(vector<vector<SV_item*>> &divided_vec1, vector<vector<SV_item*>> &divided_vec2, string &dirname);
+void computeSizeNumStat(vector<vector<SV_item*>> &divided_vec1, vector<vector<SV_item*>> &divided_vec2, string &dirname);
 
 void destroySizeDividedData(vector< vector<SV_item*> > &divided_vec);
 
@@ -23,4 +23,4 @@ extern void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data
 extern void computeNumStatTra(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, string &file_prefix);
 extern void destroyResultData(vector<vector<SV_item*>> &result);
 
-#endif /* SRC_TYPE_NUM_STAT_H_ */
+#endif /* SRC_SIZE_NUM_STAT_H_ */

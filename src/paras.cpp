@@ -198,9 +198,9 @@ void SVStat(string &user_file, string &benchmark_file){
 	outStatScreenFile << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
 	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres);
 
-	cout << "\n\n############# Stage 4: SV type and num statistics: #############" << endl;
-	outStatScreenFile << "\n\n############# Stage 4: SV type and num statistics: #############" << endl;
-	SVTypeNumStat(user_file, benchmark_file, maxValidRegThres);
+	cout << "\n\n############# Stage 4: SV size and num statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Stage 4: SV size and num statistics: #############" << endl;
+	SVSizeNumStat(user_file, benchmark_file, maxValidRegThres);
 
 	outStatScreenFile.close();
 }

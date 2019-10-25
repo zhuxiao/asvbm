@@ -11,7 +11,7 @@ using namespace std;
 extern string refRegSizeStatDirname;
 extern string numStatDirname;
 extern string sizeDifStatDirname;
-extern string typeNumStatDirname;
+extern string sizeNumStatDirname;
 
 extern string convertScreenFilename;
 extern string statScreenFilename;

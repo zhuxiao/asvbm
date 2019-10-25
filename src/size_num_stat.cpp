@@ -1,23 +1,23 @@
-#include "type_num_stat.h"
 #include "extvab.h"
+#include "size_num_stat.h"
 
-void SVTypeNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres){
-	typeNumStatDirname = outputPathname + typeNumStatDirname;
-	mkdir(typeNumStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+void SVSizeNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres){
+	sizeNumStatDirname = outputPathname + sizeNumStatDirname;
+	mkdir(sizeNumStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
 	if(max_valid_reg_thres>0){
 		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 	}
-	SVTypeNumStatOp(user_file, benchmark_file, size_div_vec, 0, typeNumStatDirname);
+	SVSizeNumStatOp(user_file, benchmark_file, size_div_vec, 0, sizeNumStatDirname);
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVTypeNumStatOp(user_file, benchmark_file, size_div_vec, max_valid_reg_thres, typeNumStatDirname);
+		SVSizeNumStatOp(user_file, benchmark_file, size_div_vec, max_valid_reg_thres, sizeNumStatDirname);
 	}
 }
 
-void SVTypeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, string &dirname){
+void SVSizeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, string &dirname){
 	vector<SV_item*> user_data, benchmark_data, long_sv_data;
 	vector< vector<SV_item*> > divided_vec1, divided_vec2;
 
@@ -43,7 +43,7 @@ void SVTypeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &
 	divided_vec2 = sizeDivideSV(benchmark_data, size_div_vec);
 
 	// compute Num statistics for each sub-set
-	computeTypeNumStat(divided_vec1, divided_vec2, dirname);
+	computeSizeNumStat(divided_vec1, divided_vec2, dirname);
 
 	// free memory
 	destroyData(user_data);
@@ -82,12 +82,12 @@ vector< vector<SV_item*> > sizeDivideSV(vector<SV_item*> &sv_data, vector<size_t
 	return divided_vec;
 }
 
-void computeTypeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector<SV_item*> > &divided_vec2, string &dirname){
+void computeSizeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector<SV_item*> > &divided_vec2, string &dirname){
 	vector<SV_item*> sv_vec1, sv_vec2;
 	string file_prefix, file_prefix_tmp;
 	size_t start_pos, end_pos;
 
-	file_prefix = dirname + "type_num_stat";
+	file_prefix = dirname + "size_num_stat";
 
 	start_pos = 1;
 	for(size_t i=0; i<divided_vec1.size(); i++){
