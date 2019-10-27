@@ -48,7 +48,7 @@ void showUsageStat(){
 	cout << "                  0 is for all variant size are valid, and while positive" << endl;
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
 	cout << "                  regions are omitted and saved to the file specified with -l" << endl;
-	cout << "     -s INT       breakpoint extend size: [10]" << endl;
+	cout << "     -s INT       overlap extend size: [10]" << endl;
 	cout << "     -o FILE      output path name for SV statistics: [output]" << endl;
 	cout << "     -l FILE      file name for long SV regions: [long_sv_reg.bed]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
@@ -267,7 +267,7 @@ void printStatParas(string &user_file, string &benchmark_file){
 	cout << "                 Benchmark SV file: " << benchmark_file << endl;
 
 	cout << "Maximal region size for statistics: " << maxValidRegThres << endl;
-	cout << "            Breakpoint extend size: " << extendSize << endl;
+	cout << "               Overlap extend size: " << extendSize << endl;
 	cout << "Output path name for SV statistics: " << outputPathname << endl;
 	cout << "     File name for long SV regions: " << longSVFilename << endl << endl;
 
@@ -280,7 +280,7 @@ void printStatParas(string &user_file, string &benchmark_file){
 	outStatScreenFile << "                 Benchmark SV file: " << benchmark_file << endl;
 
 	outStatScreenFile << "Maximal region size for statistics: " << maxValidRegThres << endl;
-	outStatScreenFile << "            Breakpoint extend size: " << extendSize << endl;
+	outStatScreenFile << "               Overlap extend size: " << extendSize << endl;
 	outStatScreenFile << "Output path name for SV statistics: " << outputPathname << endl;
 	outStatScreenFile << "     File name for long SV regions: " << longSVFilename << endl << endl;
 }

@@ -19,7 +19,7 @@ string statScreenFilename = "stat_screen";
 ofstream outConvertScreenFile;
 ofstream outStatScreenFile;
 
-int32_t extendSize;
+int32_t extendSize;		// overlap extend size
 
 int32_t maxValidRegThres;
 string outputPathname = "output";

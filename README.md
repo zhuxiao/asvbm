@@ -96,7 +96,7 @@ Options:
                   0 is for all variant size are valid, and while positive
                   values are for the valid maximal region size, then longer
                   regions are omitted and saved to the file specified with -l
-     -s INT       breakpoint extend size: [10]
+     -s INT       overlap extend size: [10]
      -o FILE      output path name for SV statistics: [output]
      -l FILE      file name for long SV regions: [long_sv_reg.bed]
      -h           show this help message and exit
