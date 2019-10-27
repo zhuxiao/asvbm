@@ -2,7 +2,7 @@
 A tool for Structural Variation Statistics Evaluation
 
 -------------------
-SV_STAT is a tool for Structural Variation (SV) Statistics Evaluation. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the tranditional metrics, such as the number of true positives (TPs), false positives (TPs), false negatives (FNs), recall, precision and F1 score; and it then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance bwtween their region centers, and it also computes the region size ratio for the two variant regions; and finally, it computes the statistics for different variant types with varies variant size.
+SV_STAT is a tool for Structural Variation (SV) Statistics Evaluation. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the tranditional metrics, such as the number of true positives (TPs), false positives (TPs), false negatives (FNs), recall, precision and F1 score; and it then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance bwtween their region centers, and it also computes the region size ratio for the two variant regions; and finally, it computes the statistics for variants with vary region lengths.
 
 
 ## Compiling SV_STAT
