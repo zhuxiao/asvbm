@@ -237,25 +237,27 @@ void convertNm(const string &infilename, const string &outfilename, bool removeD
 	// convert
 	while(getline(infile, line)){
 		if(line.size()>0){
-			str_vec = split(line, "\t");
+			if(line.at(0)!='#'){
+				str_vec = split(line, "\t");
 
-			chrname = str_vec.at(0);
-			start_pos = stoi(str_vec.at(1));
+				chrname = str_vec.at(0);
+				start_pos = stoi(str_vec.at(1));
 
-			ref_seq_len = str_vec.at(3).size();
-			endpos = stoi(str_vec.at(1)) + ref_seq_len - 1; // endPos
+				ref_seq_len = str_vec.at(3).size();
+				endpos = stoi(str_vec.at(1)) + ref_seq_len - 1; // endPos
 
-			// get sv type
-			sv_type_str = getSVType(str_vec);
+				// get sv type
+				sv_type_str = getSVType(str_vec);
 
-			// get sv length
-			sv_len = getSVLen(str_vec, sv_type_str);
+				// get sv length
+				sv_len = getSVLen(str_vec, sv_type_str);
 
-			chrname2 = "";
-			start_pos2 = endpos2 = 0;
+				chrname2 = "";
+				start_pos2 = endpos2 = 0;
 
-			sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
-			sv_item_vec.push_back(sv_item);
+				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+				sv_item_vec.push_back(sv_item);
+			}
 		}
 	}
 	infile.close();

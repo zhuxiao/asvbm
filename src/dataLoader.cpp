@@ -18,9 +18,10 @@ vector<SV_item*> loadData(const string &filename){
 	// load data
 	while(getline(infile, line)){
 		if(line.size()){
-			item = constructSVItem(line);
-
-			if(item) sv_vec.push_back(item);
+			if(line.at(0)!='#'){
+				item = constructSVItem(line);
+				if(item) sv_vec.push_back(item);
+			}
 		}
 	}
 	infile.close();
@@ -44,11 +45,12 @@ vector<SV_item*> loadDataWithoutTra(const string &filename){
 	// load data
 	while(getline(infile, line)){
 		if(line.size()){
-			item = constructSVItem(line);
-
-			if(item){
-				if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND) sv_vec.push_back(item);
-				else delete item;
+			if(line.at(0)!='#'){
+				item = constructSVItem(line);
+				if(item){
+					if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND) sv_vec.push_back(item);
+					else delete item;
+				}
 			}
 		}
 	}
@@ -73,11 +75,12 @@ vector<SV_item*> loadDataTra(string &filename){
 	// load data
 	while(getline(infile, line)){
 		if(line.size()){
-			item = constructSVItem(line);
-
-			if(item){
-				if(item->sv_type==VAR_TRA or item->sv_type==VAR_BND) sv_vec.push_back(item);
-				else delete item;
+			if(line.at(0)!='#'){
+				item = constructSVItem(line);
+				if(item){
+					if(item->sv_type==VAR_TRA or item->sv_type==VAR_BND) sv_vec.push_back(item);
+					else delete item;
+				}
 			}
 		}
 	}
