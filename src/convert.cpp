@@ -97,8 +97,10 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 						endpos_str = sub_info_vec.at(1);
 					if(sub_info_vec.at(0).compare("SVTYPE")==0)
 						sv_type_str = sub_info_vec.at(1);
-					if(sub_info_vec.at(0).compare("SVLEN")==0)
+					if(sub_info_vec.at(0).compare("SVLEN")==0){
 						sv_len_str = sub_info_vec.at(1);
+						if(sv_len_str.find_first_not_of("0123456789")!=string::npos) sv_len_str = "";
+					}
 				}
 
 				// get sv type and length
@@ -370,6 +372,7 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 			if(end_pos==-1) end_pos = str_tmp.size() - 1;
 			sv_len_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
 			if(sv_len_str.find_first_not_of("0123456789")==string::npos) { sv_len = stoi(sv_len_str); flag = true; }
+			else { sv_len_str = ""; flag = false; }
 		}
 //		else{ // not found
 //			start_pos = stoi(str_vec.at(1));
