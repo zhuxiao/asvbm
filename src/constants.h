@@ -1,10 +1,14 @@
 #ifndef SRC_CONSTANTS_H_
 #define SRC_CONSTANTS_H_
 
+// maximal valid SVLEN
+#define MAX_VALID_SVLEN				99999999	// 99M
+
 #define ADJUST_SIZE		10
 
 #define NO_OVERLAP					0
 #define WHOLE_REG_OVERLAP			1
+
 // breakpoints
 #define ONE_OVERLAP_ONE_BP			2
 #define ONE_OVERLAP_TWO_BP			3

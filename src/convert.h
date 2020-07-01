@@ -6,6 +6,7 @@
 #include <vector>
 #include <fstream>
 
+#include "constants.h"
 #include "structure.h"
 #include "dataLoader.h"
 #include "extvab.h"

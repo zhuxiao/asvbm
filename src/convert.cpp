@@ -100,6 +100,10 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 					if(sub_info_vec.at(0).compare("SVLEN")==0){
 						sv_len_str = sub_info_vec.at(1);
 						if(sv_len_str.find_first_not_of("0123456789")!=string::npos) sv_len_str = "";
+						else{ // ignore too large invalid variant length, e.g. SVLEN=999999999 in Sniffles output
+							sv_len = stoi(sv_len_str);
+							if(sv_len>MAX_VALID_SVLEN) { sv_len_str = ""; sv_len = 0; }
+						}
 					}
 				}
 
@@ -371,8 +375,10 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 			}
 			if(end_pos==-1) end_pos = str_tmp.size() - 1;
 			sv_len_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
-			if(sv_len_str.find_first_not_of("0123456789")==string::npos) { sv_len = stoi(sv_len_str); flag = true; }
-			else { sv_len_str = ""; flag = false; }
+			if(sv_len_str.find_first_not_of("0123456789")==string::npos) {
+				sv_len = stoi(sv_len_str); flag = true;
+				if(sv_len>MAX_VALID_SVLEN) { sv_len_str = ""; sv_len = 0; flag = false; }
+			}else { sv_len_str = ""; flag = false; }
 		}
 //		else{ // not found
 //			start_pos = stoi(str_vec.at(1));
@@ -407,7 +413,7 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 				}
 				if(end_pos==-1) end_pos = str_tmp.size() - 1;
 				sv_len_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
-				if(sv_len_str.find_first_not_of("0123456789")==string::npos) { sv_len = stoi(sv_len_str); flag = true; }
+				if(sv_len_str.find_first_not_of("0123456789")==string::npos) { sv_len = stoi(sv_len_str) - stoi(str_vec.at(1)) + 1; flag = true; }
 			}else{ // not found
 				// check sequence
 				is_seq_flag_ref = isSeq(str_vec.at(3));
