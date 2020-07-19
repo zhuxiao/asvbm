@@ -124,7 +124,7 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 							bnd_str = str_vec.at(4);
 							if(bnd_str.at(0)==']' or bnd_str.at(0)=='[')
 								bnd_pos_str = bnd_str.substr(1, bnd_str.size()-3);
-							else if(bnd_str.at(0)=='N')
+							else if(isBase(bnd_str.at(0)))
 								bnd_pos_str = bnd_str.substr(2, bnd_str.size()-3);
 							bnd_pos_vec = split(bnd_pos_str, ":");
 							chrname2 = bnd_pos_vec.at(0);

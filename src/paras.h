@@ -8,9 +8,7 @@
 #include <getopt.h>
 
 #include "structure.h"
-
 #include "convert.h"
-
 #include "ref_reg_size_stat.h"
 #include "num_stat.h"
 #include "size_dif_stat.h"
@@ -22,7 +20,7 @@ using namespace std;
 // program variables
 #define PROG_NAME		"SV_STAT"
 #define PROG_DESC		"A tool for Structural Variation Statistics Evaluation"
-#define PROG_VERSION	"0.1.3"
+#define PROG_VERSION	"0.1.4"
 
 
 void showUsage();

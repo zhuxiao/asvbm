@@ -54,6 +54,48 @@ string double2Str(double num, int32_t fixedPrecision){
 	return num_str;
 }
 
+// determine whether the character is a base
+bool isBase(const char ch){
+	bool flag = false;
+	switch(ch){
+		case 'a':
+		case 'c':
+		case 'g':
+		case 't':
+		case 'A':
+		case 'C':
+		case 'G':
+		case 'T':
+		case 'N':
+		case 'n':
+
+		// mixed bases
+		case 'M':
+		case 'm':
+		case 'R':
+		case 'r':
+		case 'S':
+		case 's':
+		case 'V':
+		case 'v':
+		case 'W':
+		case 'w':
+		case 'Y':
+		case 'y':
+		case 'H':
+		case 'h':
+		case 'K':
+		case 'k':
+		case 'D':
+		case 'd':
+		case 'B':
+		case 'b': flag = true; break;
+		default: cerr << __func__ << ": unknown base: " << ch << endl; exit(1);
+	}
+
+	return flag;
+}
+
 void printSV(vector<SV_item*> &data){
 	string data_out, sv_type_str;
 	SV_item *item;
