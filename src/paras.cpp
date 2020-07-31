@@ -28,7 +28,7 @@ void showUsageConvert(){
 	cout << "                  vcf: VCF format" << endl;
 	cout << "                  csv: CSV format" << endl;
 	cout << "     -r INT       remove redundant variant items [1]: 1 for yes, 0 for no" << endl;
-	cout << "     -R FILE      Redundant variant items file: [" << redundantItemFilename << "]" << endl;
+	cout << "     -R FILE      redundant variant items file: [" << redundantItemFilename << "]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
 }
 
