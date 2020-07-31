@@ -42,8 +42,8 @@ For the second item, there is a insertion of size 87 base pairs at the 1142381 l
 There are two commands for SV_STAT: `convert` and `stat`. The help information are below:
 ```sh
 $ sv_stat
-Program: SV_STAT (A tool for Structural Variation Statistics Evaluation)
-Version: 0.1.4
+Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
+Version: 0.1.5
 
 Usage:  sv_stat  <command> [options]
 
@@ -69,8 +69,8 @@ $ sv_stat convert -f csv var.csv var.bed
 And the help information are below:
 ```sh
 $ sv_stat convert
-Program: SV_STAT (A tool for Structural Variation Statistics Evaluation)
-Version: 0.1.4
+Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
+Version: 0.1.5
 
 Usage:  sv_stat convert [options] <infile> <outfile>
 
@@ -79,7 +79,8 @@ Options:
                   bed: BED/BEDPE format
                   vcf: VCF format
                   csv: CSV format
-     -d INT       remove duplicated variant items [1]: 1 for yes, 0 for no
+     -r INT       remove redundant variant items [1]: 1 for yes, 0 for no
+     -R FILE      redundant variant items file: [redundant_items.bed]
      -h           show this help message and exit
 ```
 
@@ -91,8 +92,8 @@ $ sv_stat stat -m 10000 user_sv.bed benchmark_sv.bed
 And the help information are shown below:
 ```sh
 $ sv_stat stat
-Program: SV_STAT (A tool for Structural Variation Statistics Evaluation)
-Version: 0.1.4
+Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
+Version: 0.1.5
 
 Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
 
