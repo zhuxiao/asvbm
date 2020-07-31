@@ -22,6 +22,7 @@ extern int32_t extendSize;
 
 extern int32_t maxValidRegThres;
 extern string outputPathname;
+extern string redundantItemFilename;
 extern string longSVFilename;
 extern string svSizeDifRatioFilename;
 extern string svSizeDifStatFilename;

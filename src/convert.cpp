@@ -2,7 +2,7 @@
 #include "util.h"
 
 // convert data
-void convertBed(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
+void convertBed(const string &infilename, const string &outfilename, string &redundant_filename){
 	ifstream infile;
 	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec;
@@ -48,8 +48,8 @@ void convertBed(const string &infilename, const string &outfilename, bool remove
 	}
 	infile.close();
 
-	// remove duplicated sv items
-	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
+	// remove redundant sv items
+	if(redundant_filename.size()) removeRedundantSVItems(redundant_filename, sv_item_vec);
 
 	// save to file
 	output2File(outfilename, sv_item_vec, outConvertScreenFile);
@@ -59,7 +59,7 @@ void convertBed(const string &infilename, const string &outfilename, bool remove
 }
 
 // convert vcf result
-void convertVcf(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
+void convertVcf(const string &infilename, const string &outfilename, string &redundant_filename){
 	ifstream infile;
 	string line, chrname, start_pos_str, endpos_str, chrname2, start_pos_str2, endpos_str2, sv_type_str, sv_len_str, bnd_str, bnd_pos_str;
 	size_t start_pos, endpos, start_pos2, endpos2;
@@ -126,10 +126,6 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 								bnd_pos_str = bnd_str.substr(1, bnd_str.size()-3);
 							else if(isBase(bnd_str.at(0)))
 								bnd_pos_str = bnd_str.substr(2, bnd_str.size()-3);
-							else{
-								cerr << __func__ << ", line=" << __LINE__ << ": invalid BND string: " << bnd_str << ", error!" << endl;
-								exit(1);
-							}
 							bnd_pos_vec = split(bnd_pos_str, ":");
 							chrname2 = bnd_pos_vec.at(0);
 							endpos_str = bnd_pos_vec.at(1);
@@ -161,8 +157,8 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 	}
 	infile.close();
 
-	// remove duplicated sv items
-	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
+	// remove redundant sv items
+	if(redundant_filename.size()) removeRedundantSVItems(redundant_filename, sv_item_vec);
 
 	// save to file
 	output2File(outfilename, sv_item_vec, outConvertScreenFile);
@@ -172,7 +168,7 @@ void convertVcf(const string &infilename, const string &outfilename, bool remove
 }
 
 // convert data
-void convertCsv(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
+void convertCsv(const string &infilename, const string &outfilename, string &redundant_filename){
 	ifstream infile;
 	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec;
@@ -219,8 +215,8 @@ void convertCsv(const string &infilename, const string &outfilename, bool remove
 	}
 	infile.close();
 
-	// remove duplicated sv items
-	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
+	// remove redundant sv items
+	if(redundant_filename.size()) removeRedundantSVItems(redundant_filename, sv_item_vec);
 
 	// save to file
 	output2File(outfilename, sv_item_vec, outConvertScreenFile);
@@ -230,7 +226,7 @@ void convertCsv(const string &infilename, const string &outfilename, bool remove
 }
 
 // convert data
-void convertNm(const string &infilename, const string &outfilename, bool removeDuplicatedItemFlag){
+void convertNm(const string &infilename, const string &outfilename, string &redundant_filename){
 	ifstream infile;
 	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec;
@@ -272,8 +268,8 @@ void convertNm(const string &infilename, const string &outfilename, bool removeD
 	}
 	infile.close();
 
-	// remove duplicated sv items
-	if(removeDuplicatedItemFlag) removeDuplicatedSVItems(sv_item_vec);
+	// remove redundant sv items
+	if(redundant_filename.size()) removeRedundantSVItems(redundant_filename, sv_item_vec);
 
 	// save to file
 	output2File(outfilename, sv_item_vec, outConvertScreenFile);
@@ -506,15 +502,17 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 	return item;
 }
 
-// remove duplicate SV items
-void removeDuplicatedSVItems(vector<SV_item*> &sv_item_vec){
-	size_t i, j;
+// remove redundant SV items
+void removeRedundantSVItems(string &redundant_filename, vector<SV_item*> &sv_item_vec){
+	size_t i, j, redundant_num;
 	SV_item *item, *item2;
+	ofstream redudant_file;
+	string line, sv_type_str;
 
-	cout << ">>>>>>>>> Remove duplicated variant items <<<<<<<<<" << endl;
-	cout << "Before removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
-	outConvertScreenFile << ">>>>>>>>> Remove duplicated variant items <<<<<<<<<" << endl;
-	outConvertScreenFile << "Before removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
+	cout << ">>>>>>>>> Remove redundant variant items <<<<<<<<<" << endl;
+	cout << "Before removing redundant variant items, data size: " << sv_item_vec.size() << endl;
+	outConvertScreenFile << ">>>>>>>>> Remove redundant variant items <<<<<<<<<" << endl;
+	outConvertScreenFile << "Before removing redundant variant items, data size: " << sv_item_vec.size() << endl;
 
 	for(i=0; i<sv_item_vec.size(); i++){
 		item = sv_item_vec.at(i);
@@ -529,17 +527,49 @@ void removeDuplicatedSVItems(vector<SV_item*> &sv_item_vec){
 		}
 	}
 
+	redudant_file.open(redundant_filename);
+	if(!redudant_file.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << redundant_filename << endl;
+		exit(1);
+	}
+
+	line = "#chr\tstartPos\tendPos\tSVType\tSVLen";
+	redudant_file << line << endl;
+
 	// remove items
+	redundant_num = 0;
 	for(i=0; i<sv_item_vec.size(); ){
 		item = sv_item_vec.at(i);
 		if(item->validFlag==false){
+			switch(item->sv_type){
+				case VAR_UNC: sv_type_str = "UNC"; break;
+				case VAR_INS: sv_type_str = "INS"; break;
+				case VAR_DEL: sv_type_str = "DEL"; break;
+				case VAR_DUP: sv_type_str = "DUP"; break;
+				case VAR_INV: sv_type_str = "INV"; break;
+				case VAR_TRA: sv_type_str = "TRA"; break;
+				case VAR_BND: sv_type_str = "BND"; break;
+				case VAR_INV_TRA: sv_type_str = "INVTRA"; break;
+				case VAR_MIX: sv_type_str = "MIX"; break;
+				default:
+					cerr << "line=" << __LINE__ << ", invalid sv type: " << item->sv_type << endl;
+					exit(1);
+			}
+			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
+			redudant_file << line << endl;
+			redundant_num ++;
+
+			// delete redundant items
 			sv_item_vec.erase(sv_item_vec.begin()+i);
 			delete item;
 		}else i++;
 	}
+	redudant_file.close();
 
-	cout << "After removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
-	outConvertScreenFile << "After removing duplicated variant items, data size: " << sv_item_vec.size() << endl;
+	cout << "Number of redundant variant items: " << redundant_num << endl;
+	outConvertScreenFile << "Number of redundant variant items: " << redundant_num << endl;
+	cout << "After removing redundant variant items, data size: " << sv_item_vec.size() << endl;
+	outConvertScreenFile << "After removing redundant variant items, data size: " << sv_item_vec.size() << endl;
 }
 
 // release sv item vector

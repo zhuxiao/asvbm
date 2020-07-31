@@ -27,7 +27,8 @@ void showUsageConvert(){
 	cout << "                  bed: BED/BEDPE format" << endl;
 	cout << "                  vcf: VCF format" << endl;
 	cout << "                  csv: CSV format" << endl;
-	cout << "     -d INT       remove duplicated variant items [1]: 1 for yes, 0 for no" << endl;
+	cout << "     -r INT       remove redundant variant items [1]: 1 for yes, 0 for no" << endl;
+	cout << "     -R FILE      Redundant variant items file: [" << redundantItemFilename << "]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
 }
 
@@ -58,21 +59,22 @@ void showUsageStat(){
 int parseConvert(int argc, char **argv)
 {
 	int opt;
-	string sv_format, in_file, out_file, remove_dup_str = "1";
-	bool remove_dup_falg;
+	string sv_format, in_file, out_file, remove_redundant_str = "1", redundant_filename = "";
 
-	while( (opt = getopt(argc, argv, ":f:d:h")) != -1 ){
+	while( (opt = getopt(argc, argv, ":f:r:R:h")) != -1 ){
 		switch(opt){
 			case 'f': sv_format = optarg; break;
-			case 'd': remove_dup_str = optarg; break;
+			case 'r': remove_redundant_str = optarg; break;
+			case 'R': redundant_filename = optarg; break;
 			case 'h': showUsageConvert(); exit(0);
 			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
 			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
 		}
 	}
 
-	if(remove_dup_str.compare("1")==0) remove_dup_falg = true;
-	else if(remove_dup_str.compare("0")==0) remove_dup_falg = false;
+	if(remove_redundant_str.compare("1")==0) {
+		if(redundant_filename.size()==0) redundant_filename = redundantItemFilename;
+	}else if(remove_redundant_str.compare("0")==0) redundant_filename = "";
 	else{
 		cout << "Error: Please specify the correct value for '-d' option" << endl << endl;
 		showUsageConvert();
@@ -92,7 +94,7 @@ int parseConvert(int argc, char **argv)
 	}
 
 	if(sv_format.compare("bed")==0 or sv_format.compare("vcf")==0 or sv_format.compare("csv")==0 or sv_format.compare("nm")==0) // nm: private usage
-		convert(in_file, out_file, remove_dup_falg, sv_format);
+		convert(in_file, out_file, redundant_filename, sv_format);
 	else{
 		cout << "Error: Please specify the correct SV file format" << endl << endl;
 		showUsageConvert();
@@ -102,7 +104,7 @@ int parseConvert(int argc, char **argv)
 	return 0;
 }
 
-void convert(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format){
+void convert(string &infilename, string &outfilename, string &redundant_filename, string &sv_format){
 
 	outConvertScreenFile.open(convertScreenFilename);
 	if(!outConvertScreenFile.is_open()){
@@ -110,19 +112,19 @@ void convert(string &infilename, string &outfilename, bool remove_dup_falg, stri
 		exit(1);
 	}
 
-	printConvertParas(infilename, outfilename, remove_dup_falg, sv_format); // print parameters
+	printConvertParas(infilename, outfilename, redundant_filename, sv_format); // print parameters
 
 	cout << "############# Convert variants: #############" << endl;
 	outConvertScreenFile << "############# Convert variants: #############" << endl;
 
 	if(sv_format.compare("bed")==0)
-		convertBed(infilename, outfilename, remove_dup_falg);
+		convertBed(infilename, outfilename, redundant_filename);
 	else if(sv_format.compare("vcf")==0)
-		convertVcf(infilename, outfilename, remove_dup_falg);
+		convertVcf(infilename, outfilename, redundant_filename);
 	else if(sv_format.compare("csv")==0)
-		convertCsv(infilename, outfilename, remove_dup_falg);
+		convertCsv(infilename, outfilename, redundant_filename);
 	else if(sv_format.compare("nm")==0)  // private usage: nm
-		convertNm(infilename, outfilename, remove_dup_falg);
+		convertNm(infilename, outfilename, redundant_filename);
 
 	outConvertScreenFile.close();
 }
@@ -206,29 +208,27 @@ void SVStat(string &user_file, string &benchmark_file){
 }
 
 // print parameters for 'convert' command
-void printConvertParas(string &infilename, string &outfilename, bool remove_dup_falg, string &sv_format){
+void printConvertParas(string &infilename, string &outfilename, string &redundant_filename, string &sv_format){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
 	cout << "############# Parameters for 'convert' command: #############" << endl;
 
-	cout << "                  Input SV file: " << infilename << endl;
-	cout << "                 Output SV file: " << outfilename << endl;
+	cout << "          Input SV file: " << infilename << endl;
+	cout << "         Output SV file: " << outfilename << endl;
 
-	if(remove_dup_falg)
-		cout << "Remove duplicated variant items: yes" << endl;
-	else
-		cout << "Remove duplicated variant items: no" << endl;
+	if(redundant_filename.size())
+		cout << "Redundant variant items: " << redundant_filename << endl;
 
 	if(sv_format.compare("bed")==0)
-		cout << "              Input file format: BED" << endl;
+		cout << "      Input file format: BED" << endl;
 	else if(sv_format.compare("vcf")==0)
-		cout << "              Input file format: VCF" << endl;
+		cout << "      Input file format: VCF" << endl;
 	else if(sv_format.compare("csv")==0)
-		cout << "              Input file format: CSV" << endl;
+		cout << "      Input file format: CSV" << endl;
 	else if(sv_format.compare("nm")==0)  // private usage: nm
-		cout << "              Input file format: nm, [private usage]" << endl;
+		cout << "      Input file format: nm, [private usage]" << endl;
 	cout << endl;
 
 	// print to file
@@ -237,22 +237,20 @@ void printConvertParas(string &infilename, string &outfilename, bool remove_dup_
 
 	outConvertScreenFile << "############# Parameters for 'convert' command: #############" << endl;
 
-	outConvertScreenFile << "                  Input SV file: " << infilename << endl;
-	outConvertScreenFile << "                 Output SV file: " << outfilename << endl;
+	outConvertScreenFile << "          Input SV file: " << infilename << endl;
+	outConvertScreenFile << "         Output SV file: " << outfilename << endl;
 
-	if(remove_dup_falg)
-		outConvertScreenFile << "Remove duplicated variant items: yes" << endl;
-	else
-		outConvertScreenFile << "Remove duplicated variant items: no" << endl;
+	if(redundant_filename.size())
+		outConvertScreenFile << "Redundant variant items: " << redundant_filename << endl;
 
 	if(sv_format.compare("bed")==0)
-		outConvertScreenFile << "              Input file format: BED" << endl;
+		outConvertScreenFile << "      Input file format: BED" << endl;
 	else if(sv_format.compare("vcf")==0)
-		outConvertScreenFile << "              Input file format: VCF" << endl;
+		outConvertScreenFile << "      Input file format: VCF" << endl;
 	else if(sv_format.compare("csv")==0)
-		outConvertScreenFile << "              Input file format: CSV" << endl;
+		outConvertScreenFile << "      Input file format: CSV" << endl;
 	else if(sv_format.compare("nm")==0)  // private usage: nm
-		outConvertScreenFile << "              Input file format: nm, [private usage]" << endl;
+		outConvertScreenFile << "      Input file format: nm, [private usage]" << endl;
 	outConvertScreenFile << endl;
 }
 
