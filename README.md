@@ -43,7 +43,7 @@ There are two commands for SV_STAT: `convert` and `stat`. The help information a
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.1.5
+Version: 0.1.6
 
 Usage:  sv_stat  <command> [options]
 
@@ -70,7 +70,7 @@ And the help information are below:
 ```sh
 $ sv_stat convert
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.1.5
+Version: 0.1.6
 
 Usage:  sv_stat convert [options] <infile> <outfile>
 
@@ -79,6 +79,7 @@ Options:
                   bed: BED/BEDPE format
                   vcf: VCF format
                   csv: CSV format
+     -o FILE      output directory: [output]
      -r INT       remove redundant variant items [1]: 1 for yes, 0 for no
      -R FILE      redundant variant items file: [redundant_items.bed]
      -h           show this help message and exit
@@ -93,7 +94,7 @@ And the help information are shown below:
 ```sh
 $ sv_stat stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.1.5
+Version: 0.1.6
 
 Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
 
@@ -107,7 +108,7 @@ Options:
                   values are for the valid maximal region size, then longer
                   regions are omitted and saved to the file specified with -l
      -s INT       overlap extend size: [10]
-     -o FILE      output path name for SV statistics: [output]
+     -o FILE      output directory: [output]
      -l FILE      file name for long SV regions: [long_sv_reg.bed]
      -h           show this help message and exit
 ```
