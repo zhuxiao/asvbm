@@ -126,3 +126,8 @@ void printSV(vector<SV_item*> &data){
 	}
 }
 
+string getProgramCmdStr(int argc, char *argv[]){
+	string program_cmd_str = argv[0];
+	for(int i=1; i<argc; i++) program_cmd_str = program_cmd_str + " " + argv[i];
+	return program_cmd_str;
+}

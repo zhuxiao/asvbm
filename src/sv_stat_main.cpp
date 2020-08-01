@@ -5,6 +5,8 @@ int main(int argc, char *argv[]){
 
 	string command;
 
+	program_cmd_str = getProgramCmdStr(argc, argv);
+
 	if (argc < 2) { showUsage(); return 1; }
 
 	if (strcmp(argv[1], "-h") == 0 or strcmp(argv[1], "help") == 0 or strcmp(argv[1], "--help") == 0) {

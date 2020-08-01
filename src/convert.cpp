@@ -377,17 +377,9 @@ int32_t getSVLen(vector<string> &str_vec, string &sv_type){
 			sv_len_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
 			if(sv_len_str.find_first_not_of("0123456789")==string::npos) {
 				sv_len = stoi(sv_len_str); flag = true;
-				if(sv_len>MAX_VALID_SVLEN) { sv_len_str = ""; sv_len = 0; flag = false; }
+				if(sv_len>=MAX_VALID_SVLEN) { sv_len_str = ""; sv_len = 0; flag = false; }
 			}else { sv_len_str = ""; flag = false; }
 		}
-//		else{ // not found
-//			start_pos = stoi(str_vec.at(1));
-//			end_pos = stoi(str_vec.at(2));
-//			sv_len = end_pos - start_pos + 1;
-//			flag = true;
-//			cout << "line=" << __LINE__ << ", please check." << endl;
-//			exit(1);
-//		}
 
 		// 'SVLEN' was not detected, then further detect 'END'
 		if(flag==false){
@@ -527,6 +519,7 @@ void removeRedundantSVItems(string &redundant_filename, vector<SV_item*> &sv_ite
 		}
 	}
 
+	redundant_filename = outputPathname + redundant_filename;
 	redudant_file.open(redundant_filename);
 	if(!redudant_file.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << redundant_filename << endl;
@@ -566,10 +559,10 @@ void removeRedundantSVItems(string &redundant_filename, vector<SV_item*> &sv_ite
 	}
 	redudant_file.close();
 
-	cout << "Number of redundant variant items: " << redundant_num << endl;
-	outConvertScreenFile << "Number of redundant variant items: " << redundant_num << endl;
 	cout << "After removing redundant variant items, data size: " << sv_item_vec.size() << endl;
 	outConvertScreenFile << "After removing redundant variant items, data size: " << sv_item_vec.size() << endl;
+	cout << redundant_num << " redundant variant items were saved to " << redundant_filename << endl;
+	outConvertScreenFile << redundant_num << " redundant variant items were saved to " << redundant_filename << endl;
 }
 
 // release sv item vector

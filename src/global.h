@@ -9,11 +9,13 @@
 using namespace std;
 
 // global variables
+string outputPathname = "output";
 string refRegSizeStatDirname = "1_ref_reg_size_stat/";
 string numStatDirname = "2_num_stat/";
 string sizeDifStatDirname = "3_size_dif_stat/";
 string sizeNumStatDirname = "4_size_num_stat/";
 
+string program_cmd_str = "";
 string convertScreenFilename = "convert_screen";
 string statScreenFilename = "stat_screen";
 ofstream outConvertScreenFile;
@@ -22,7 +24,6 @@ ofstream outStatScreenFile;
 int32_t extendSize;		// overlap extend size
 
 int32_t maxValidRegThres;
-string outputPathname = "output";
 string redundantItemFilename = "redundant_items.bed";
 string longSVFilename = "long_sv_reg.bed";
 string svSizeDifRatioFilename = "sv_size_dif_ratio";

@@ -8,11 +8,14 @@
 using namespace std;
 
 // global variables
+
+extern string outputPathname;
 extern string refRegSizeStatDirname;
 extern string numStatDirname;
 extern string sizeDifStatDirname;
 extern string sizeNumStatDirname;
 
+extern string program_cmd_str;
 extern string convertScreenFilename;
 extern string statScreenFilename;
 extern ofstream outConvertScreenFile;
@@ -21,7 +24,6 @@ extern ofstream outStatScreenFile;
 extern int32_t extendSize;
 
 extern int32_t maxValidRegThres;
-extern string outputPathname;
 extern string redundantItemFilename;
 extern string longSVFilename;
 extern string svSizeDifRatioFilename;

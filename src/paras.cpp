@@ -27,6 +27,7 @@ void showUsageConvert(){
 	cout << "                  bed: BED/BEDPE format" << endl;
 	cout << "                  vcf: VCF format" << endl;
 	cout << "                  csv: CSV format" << endl;
+	cout << "     -o FILE      output directory: [output]" << endl;
 	cout << "     -r INT       remove redundant variant items [1]: 1 for yes, 0 for no" << endl;
 	cout << "     -R FILE      redundant variant items file: [" << redundantItemFilename << "]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
@@ -50,7 +51,7 @@ void showUsageStat(){
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
 	cout << "                  regions are omitted and saved to the file specified with -l" << endl;
 	cout << "     -s INT       overlap extend size: [10]" << endl;
-	cout << "     -o FILE      output path name for SV statistics: [output]" << endl;
+	cout << "     -o FILE      output directory: [output]" << endl;
 	cout << "     -l FILE      file name for long SV regions: [long_sv_reg.bed]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
 }
@@ -61,9 +62,10 @@ int parseConvert(int argc, char **argv)
 	int opt;
 	string sv_format, in_file, out_file, remove_redundant_str = "1", redundant_filename = "";
 
-	while( (opt = getopt(argc, argv, ":f:r:R:h")) != -1 ){
+	while( (opt = getopt(argc, argv, ":f:o:r:R:h")) != -1 ){
 		switch(opt){
 			case 'f': sv_format = optarg; break;
+			case 'o': outputPathname = optarg; break;
 			case 'r': remove_redundant_str = optarg; break;
 			case 'R': redundant_filename = optarg; break;
 			case 'h': showUsageConvert(); exit(0);
@@ -76,10 +78,11 @@ int parseConvert(int argc, char **argv)
 		if(redundant_filename.size()==0) redundant_filename = redundantItemFilename;
 	}else if(remove_redundant_str.compare("0")==0) redundant_filename = "";
 	else{
-		cout << "Error: Please specify the correct value for '-d' option" << endl << endl;
+		cout << "Error: Please specify the correct value for '-r' option" << endl << endl;
 		showUsageConvert();
 		return 1;
 	}
+	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
 
 	opt = argc - optind; // the number of SAMs on the command line
 	if(opt==2) {
@@ -106,17 +109,22 @@ int parseConvert(int argc, char **argv)
 
 void convert(string &infilename, string &outfilename, string &redundant_filename, string &sv_format){
 
+	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+
+	convertScreenFilename = outputPathname + convertScreenFilename;
 	outConvertScreenFile.open(convertScreenFilename);
 	if(!outConvertScreenFile.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << convertScreenFilename << endl;
 		exit(1);
 	}
+	outConvertScreenFile << "Program command: " << program_cmd_str << endl << endl;
 
 	printConvertParas(infilename, outfilename, redundant_filename, sv_format); // print parameters
 
 	cout << "############# Convert variants: #############" << endl;
 	outConvertScreenFile << "############# Convert variants: #############" << endl;
 
+	outfilename = outputPathname + outfilename;
 	if(sv_format.compare("bed")==0)
 		convertBed(infilename, outfilename, redundant_filename);
 	else if(sv_format.compare("vcf")==0)
@@ -184,6 +192,7 @@ void SVStat(string &user_file, string &benchmark_file){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << statScreenFilename << endl;
 		exit(1);
 	}
+	outStatScreenFile << "Program command: " << program_cmd_str << endl << endl;
 
 	printStatParas(user_file, benchmark_file); // print parameters
 
@@ -214,12 +223,13 @@ void printConvertParas(string &infilename, string &outfilename, string &redundan
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
 	cout << "############# Parameters for 'convert' command: #############" << endl;
-
 	cout << "          Input SV file: " << infilename << endl;
 	cout << "         Output SV file: " << outfilename << endl;
 
 	if(redundant_filename.size())
 		cout << "Redundant variant items: " << redundant_filename << endl;
+
+	cout << "       Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 
 	if(sv_format.compare("bed")==0)
 		cout << "      Input file format: BED" << endl;
@@ -243,6 +253,8 @@ void printConvertParas(string &infilename, string &outfilename, string &redundan
 	if(redundant_filename.size())
 		outConvertScreenFile << "Redundant variant items: " << redundant_filename << endl;
 
+	outConvertScreenFile << "       Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+
 	if(sv_format.compare("bed")==0)
 		outConvertScreenFile << "      Input file format: BED" << endl;
 	else if(sv_format.compare("vcf")==0)
@@ -261,24 +273,24 @@ void printStatParas(string &user_file, string &benchmark_file){
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
 	cout << "############# Parameters for 'stat' command: #############" << endl;
-	cout << "               User-called SV file: " << user_file << endl;
-	cout << "                 Benchmark SV file: " << benchmark_file << endl;
+	cout << " User-called SV file: " << user_file << endl;
+	cout << "   Benchmark SV file: " << benchmark_file << endl;
 
-	cout << "Maximal region size for statistics: " << maxValidRegThres << endl;
-	cout << "               Overlap extend size: " << extendSize << endl;
-	cout << "Output path name for SV statistics: " << outputPathname << endl;
-	cout << "     File name for long SV regions: " << longSVFilename << endl << endl;
+	cout << " Maximal region size: " << maxValidRegThres << endl;
+	cout << " Overlap extend size: " << extendSize << endl;
+	cout << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+	cout << "Long SV regions file: " << longSVFilename << endl << endl;
 
 	// print to file
 	outStatScreenFile << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	outStatScreenFile << "Version: " << PROG_VERSION << endl << endl;
 
 	outStatScreenFile << "############# Parameters for 'stat' command: #############" << endl;
-	outStatScreenFile << "               User-called SV file: " << user_file << endl;
-	outStatScreenFile << "                 Benchmark SV file: " << benchmark_file << endl;
+	outStatScreenFile << " User-called SV file: " << user_file << endl;
+	outStatScreenFile << "   Benchmark SV file: " << benchmark_file << endl;
 
-	outStatScreenFile << "Maximal region size for statistics: " << maxValidRegThres << endl;
-	outStatScreenFile << "               Overlap extend size: " << extendSize << endl;
-	outStatScreenFile << "Output path name for SV statistics: " << outputPathname << endl;
-	outStatScreenFile << "     File name for long SV regions: " << longSVFilename << endl << endl;
+	outStatScreenFile << " Maximal region size: " << maxValidRegThres << endl;
+	outStatScreenFile << " Overlap extend size: " << extendSize << endl;
+	outStatScreenFile << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+	outStatScreenFile << "Long SV regions file: " << longSVFilename << endl << endl;
 }
