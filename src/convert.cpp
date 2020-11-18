@@ -561,8 +561,8 @@ void removeRedundantSVItems(string &redundant_filename, vector<SV_item*> &sv_ite
 
 	cout << "After removing redundant variant items, data size: " << sv_item_vec.size() << endl;
 	outConvertScreenFile << "After removing redundant variant items, data size: " << sv_item_vec.size() << endl;
-	cout << redundant_num << " redundant variant items were saved to " << redundant_filename << endl;
-	outConvertScreenFile << redundant_num << " redundant variant items were saved to " << redundant_filename << endl;
+	cout << redundant_num << " redundant items were saved to " << redundant_filename << endl;
+	outConvertScreenFile << redundant_num << " redundant items were saved to " << redundant_filename << endl;
 }
 
 // release sv item vector

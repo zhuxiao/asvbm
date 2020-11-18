@@ -4,7 +4,7 @@
 // maximal valid SVLEN
 #define MAX_VALID_SVLEN				99999999	// 99M
 
-#define ADJUST_SIZE		10
+#define EXTEND_SIZE					100  // 10
 
 #define NO_OVERLAP					0
 #define WHOLE_REG_OVERLAP			1

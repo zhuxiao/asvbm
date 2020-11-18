@@ -50,7 +50,7 @@ void showUsageStat(){
 	cout << "                  0 is for all variant size are valid, and while positive" << endl;
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
 	cout << "                  regions are omitted and saved to the file specified with -l" << endl;
-	cout << "     -s INT       overlap extend size: [10]" << endl;
+	cout << "     -s INT       overlap extend size: [" << EXTEND_SIZE << "]" << endl;
 	cout << "     -o FILE      output directory: [output]" << endl;
 	cout << "     -l FILE      file name for long SV regions: [long_sv_reg.bed]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
@@ -145,7 +145,7 @@ int parseStat(int argc, char **argv){
 	if (argc < 2) { showUsageStat(); return 1; }
 
 	maxValidRegThres = 0;
-	extendSize = ADJUST_SIZE;
+	extendSize = EXTEND_SIZE;
 	while( (opt = getopt(argc, argv, ":m:s:o:l:h")) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
