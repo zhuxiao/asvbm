@@ -43,7 +43,7 @@ There are two commands for SV_STAT: `convert` and `stat`. The help information a
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.1.7
+Version: 0.2.0
 
 Usage:  sv_stat  <command> [options]
 
@@ -70,7 +70,7 @@ And the help information are below:
 ```sh
 $ sv_stat convert
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.1.7
+Version: 0.2.0
 
 Usage:  sv_stat convert [options] <infile> <outfile>
 
@@ -94,7 +94,7 @@ And the help information are shown below:
 ```sh
 $ sv_stat stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.1.7
+Version: 0.2.0
 
 Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
 
