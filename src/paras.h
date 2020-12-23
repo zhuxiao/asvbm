@@ -20,7 +20,7 @@ using namespace std;
 // program variables
 #define PROG_NAME		"SV_STAT"
 #define PROG_DESC		"A tool for Structural Variant Statistics Evaluation"
-#define PROG_VERSION	"0.1.7"
+#define PROG_VERSION	"0.2.0"
 
 
 void showUsage();

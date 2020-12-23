@@ -65,8 +65,8 @@ void SVNumStatOp(string &user_file, string &benchmark_file, int32_t max_valid_re
 
 void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, string &file_prefix){
 	vector< vector<SV_item*> > result;
-	int32_t TP, FP, FN, positive_num_called;
-	float recall, precision, F1_score, sv_num_per_reg, percent;
+	int32_t TP_benchmark, TP_user, FP, FN;
+	float recall, precision_benchmark, precision_user, F1_score_benchmark, F1_score_user, sv_num_per_reg, percent;
 	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
 
 	filename_intersect_user = file_prefix + "_intersect_user";
@@ -89,15 +89,27 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	cout << out_str << endl;
 	outStatScreenFile << out_str << endl;
 
-	if(user_data.size()>0) percent = (double)result.at(1).size()/user_data.size();
-	else percent = 0;
-	out_str = "User private data size: " + to_string(result.at(1).size()) + ", percent: " + to_string(percent);
-	cout << out_str << endl;
-	outStatScreenFile << out_str << endl;
+//	if(user_data.size()>0) percent = (double)result.at(1).size()/user_data.size();
+//	else percent = 0;
+//	out_str = "User private data size: " + to_string(result.at(1).size()) + ", percent: " + to_string(percent);
+//	cout << out_str << endl;
+//	outStatScreenFile << out_str << endl;
 
-	if(benchmark_data.size()>0) percent = (double)result.at(2).size()/benchmark_data.size();
+	if(user_data.size()>0) percent = (double)result.at(2).size()/user_data.size();
+		else percent = 0;
+		out_str = "User private data size: " + to_string(result.at(2).size()) + ", percent: " + to_string(percent);
+		cout << out_str << endl;
+		outStatScreenFile << out_str << endl;
+
+//	if(benchmark_data.size()>0) percent = (double)result.at(2).size()/benchmark_data.size();
+//	else percent = 0;
+//	out_str = "Benchmark private data size: " + to_string(result.at(2).size()) + ", percent: " + to_string(percent);
+//	cout << out_str << endl;
+//	outStatScreenFile << out_str << endl;
+
+	if(benchmark_data.size()>0) percent = (double)result.at(3).size()/benchmark_data.size();
 	else percent = 0;
-	out_str = "Benchmark private data size: " + to_string(result.at(2).size()) + ", percent: " + to_string(percent);
+	out_str = "Benchmark private data size: " + to_string(result.at(3).size()) + ", percent: " + to_string(percent);
 	cout << out_str << endl;
 	outStatScreenFile << out_str << endl;
 
@@ -107,31 +119,39 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	output2File(filename_private_user, result.at(2), outStatScreenFile);
 	output2File(filename_private_benchmark, result.at(3), outStatScreenFile);
 
-	//TP = user_data.size() - result.at(1).size();
-	TP = result.at(1).size();
+	//TP_user = user_data.size() - result.at(0).size();
+	//TP_benchmark = user_data.size() - result.at(1).size();
+	TP_user = result.at(0).size();
+	TP_benchmark = result.at(1).size();
 	FP = result.at(2).size();
 	FN = result.at(3).size();
-	//positive_num_called = user_data.size() - result.at(2).size();
-	positive_num_called = result.at(0).size();
-	if(benchmark_data.size()>0) recall = (float)TP / benchmark_data.size();
+
+	if(benchmark_data.size()>0) recall = (float)TP_benchmark / benchmark_data.size();
 	else recall = 0;
-	//precision = (float)TP / user_data.size();
-	if(TP+result.at(2).size()>0) precision = (float)TP / (TP + result.at(2).size());
-	else precision = 0;
+	//precision_user = (float)TP_user / user_data.size();
+	if(TP_user+result.at(2).size()>0) precision_user = (float)TP_user / (TP_user + result.at(2).size());
+	else precision_user = 0;
+	//precision_benchmark = (float)TP_benchmark / user_data.size();
+	if(TP_benchmark+result.at(2).size()>0) precision_benchmark = (float)TP_benchmark / (TP_benchmark + result.at(2).size());
+	else precision_benchmark = 0;
 
-	if(recall+precision>0) F1_score = 2.0 * (recall * precision) / (recall + precision);
-	else F1_score = 0;
+	if(recall+precision_user>0) F1_score_user = 2.0 * (recall * precision_user) / (recall + precision_user);
+	else F1_score_user = 0;
+	if(recall+precision_benchmark>0) F1_score_benchmark = 2.0 * (recall * precision_benchmark) / (recall + precision_benchmark);
+	else F1_score_benchmark = 0;
 
-	if(positive_num_called>0) sv_num_per_reg = (float)TP / positive_num_called;
+	if(TP_user>0) sv_num_per_reg = (float)TP_benchmark / TP_user;
 	else sv_num_per_reg = 0;
 
-	cout << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
-	cout << "Identified SV regions: " << positive_num_called << endl;
-	cout << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	cout << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
+	cout << "Recall=" << recall << endl;
+	cout << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
+	cout << "precision_benchmark=" << precision_benchmark << ", F1 score_benchmark=" << F1_score_benchmark << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 
-	outStatScreenFile << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
-	outStatScreenFile << "Identified SV regions: " << positive_num_called << endl;
-	outStatScreenFile << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	outStatScreenFile << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
+	outStatScreenFile << "Recall=" << recall << endl;
+	outStatScreenFile << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
+	outStatScreenFile << "precision_benchmark=" << precision_benchmark << ", F1 score_benchmark=" << F1_score_benchmark << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 
 	destroyResultData(result);
 }
@@ -602,8 +622,8 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	vector<Breakpoint_t*> bp_vec_intersect_user, bp_vec_intersect_benchmark, bp_vec_private_user, bp_vec_private_benchmark;
 	Breakpoint_t *bp_item, *bp_item_tmp;
 
-	int32_t TP, FP, FN, positive_num_called;
-	float recall, precision, F1_score;
+	int32_t TP_user, TP_benchmark, FP, FN;
+	float recall, precision_user, F1_score_user, precision_benchmark, F1_score_benchmark;
 	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark;
 
 	filename_intersect_user = file_prefix + "_intersect_user";
@@ -643,17 +663,22 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	outputBP2File(filename_private_benchmark, bp_vec_private_benchmark);
 
 	// compute TRA breakpoint statistics
-	TP = overlapped_bp_num_benchmark;
+	TP_user = overlapped_bp_num_user;
+	TP_benchmark = overlapped_bp_num_benchmark;
 	FP = total_bp_num_user - overlapped_bp_num_user;
 	FN = total_bp_num_benchmark - overlapped_bp_num_benchmark;
-	positive_num_called = overlapped_bp_num_user;
-	if(total_bp_num_benchmark>0) recall = (float)TP / total_bp_num_benchmark;
-	else recall = 0;
-	if(total_bp_num_user>0) precision = (float)TP / total_bp_num_user;
-	else precision = 0;
 
-	if(recall+precision>0) F1_score = 2.0 * (recall * precision) / (recall + precision);
-	else F1_score = 0;
+	if(total_bp_num_benchmark>0) recall = (float)TP_benchmark / total_bp_num_benchmark;
+	else recall = 0;
+	if(total_bp_num_user>0) precision_user = (float)TP_user / total_bp_num_user;
+	else precision_user = 0;
+	if(total_bp_num_user>0) precision_benchmark = (float)TP_benchmark / total_bp_num_user;
+	else precision_benchmark = 0;
+
+	if(recall+precision_user>0) F1_score_user = 2.0 * (recall * precision_user) / (recall + precision_user);
+	else F1_score_user = 0;
+	if(recall+precision_benchmark>0) F1_score_benchmark = 2.0 * (recall * precision_benchmark) / (recall + precision_benchmark);
+	else F1_score_benchmark = 0;
 
 	cout << "Total user breakpoint data size: " << total_bp_num_user << endl;
 	cout << "Total benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
@@ -661,9 +686,10 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	cout << "Benchmark intersection breakpoint data size:" << overlapped_bp_num_benchmark << endl;
 	cout << "User private breakpoint data size:" << bp_vec_private_user.size() << endl;
 	cout << "Benchmark private breakpoint data size:" << bp_vec_private_benchmark.size() << endl;
-	cout << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
-	cout << "Identified breakpoint regions in benchmark data set: " << positive_num_called << endl;
-	cout << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << endl;
+	cout << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
+	cout << "Recall=" << recall << endl;
+	cout << "precision_user=" << precision_user << ", precision_benchmark=" << precision_benchmark << endl;
+	cout << "F1 score_user=" << F1_score_user << ", F1 score_benchmark=" << F1_score_benchmark << endl;
 
 	outStatScreenFile << "Total user breakpoint data size: " << total_bp_num_user << endl;
 	outStatScreenFile << "Total benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
@@ -671,9 +697,10 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	outStatScreenFile << "Benchmark intersection breakpoint data size:" << overlapped_bp_num_benchmark << endl;
 	outStatScreenFile << "User private breakpoint data size:" << bp_vec_private_user.size() << endl;
 	outStatScreenFile << "Benchmark private breakpoint data size:" << bp_vec_private_benchmark.size() << endl;
-	outStatScreenFile << "TP=" << TP << ", FP=" << FP << ", FN=" << FN << endl;
-	outStatScreenFile << "Identified breakpoint regions in benchmark data set: " << positive_num_called << endl;
-	outStatScreenFile << "Recall=" << recall << ", precision=" << precision << ", F1 score=" << F1_score << endl;
+	outStatScreenFile << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
+	outStatScreenFile << "Recall=" << recall << endl;
+	outStatScreenFile << "precision_user=" << precision_user << ", precision_benchmark=" << precision_benchmark << endl;
+	outStatScreenFile <<"F1 score_user=" << F1_score_user << ", F1 score_benchmark=" << F1_score_benchmark << endl;
 
 	destroyBPData(bp_vec_intersect_user);
 	destroyBPData(bp_vec_intersect_benchmark);

@@ -6,6 +6,7 @@
 #include <vector>
 #include <limits.h>
 #include <sys/stat.h>
+#include <cmath>
 
 #include "constants.h"
 #include "structure.h"
@@ -27,6 +28,7 @@ vector< vector<int32_t> > computeDifStatVec(vector<SV_pair*> &sv_pair_vec);
 void outputDifStatToFile(string &svSizeDifStatFilename, vector< vector<int32_t> > &dif_stat_vec);
 vector<size_t> computeRatioStatVec(vector<SV_pair*> &sv_pair_vec, vector<double> &ratio_div_vec);
 void outputRatioStatToFile(string &svSizeRatioStatFilename_tmp, vector<size_t> &ratio_stat_vec, vector<double> &ratio_div_vec);
+void computeDifRmse(vector<SV_pair*> &sv_pair_vec);
 
 void destroyPairData(vector<SV_pair*> &sv_vec);
 

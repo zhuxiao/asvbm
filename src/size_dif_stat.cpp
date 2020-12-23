@@ -62,6 +62,9 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 	if(max_valid_reg_thres>0) svSizeRatioStatFilename_tmp += "_long_filtered";
 	outputRatioStatToFile(svSizeRatioStatFilename_tmp, ratio_stat_vec, ratio_div_vec);
 
+	// compute rmse
+	computeDifRmse(sv_pair_vec);
+
 	// release memory
 	destroyPairData(sv_pair_vec);
 	destroyData(user_data);
@@ -75,8 +78,8 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 	SV_pair *pair_item;
 	vector<size_t> overlap_type_vec;
 	size_t i, j;
-	int32_t mid_loc1, mid_loc2, reg_size1, reg_size2, dif_tmp;
-	double dif_size, size_ratio;
+	int32_t mid_loc1, mid_loc2, reg_size1, reg_size2;
+	double dif_size, size_ratio, dif_rmse;
 
 	for(i=0; i<data1.size(); i++){
 		item1 = data1.at(i);
@@ -105,12 +108,13 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 		reg_size2 = item2->endPos - item2->startPos + 1;
 
 		dif_size = mid_loc1 - mid_loc2;
-		dif_tmp = reg_size1 - reg_size2;
-		if(dif_tmp<0) dif_tmp = -dif_tmp;
-		if(dif_tmp<MIN_DIF_SIZE) size_ratio = 1;
+		dif_rmse = reg_size1 - reg_size2;
+		if(dif_rmse<0) dif_rmse = -dif_rmse;
+		if(dif_rmse<MIN_DIF_SIZE) size_ratio = 1;
 		else size_ratio = (double)reg_size1 / reg_size2;
 		pair_item->dif_size = dif_size;
 		pair_item->size_ratio = size_ratio;
+		pair_item->dif_rmse = dif_rmse;
 	}
 
 	return sv_pair_vec;
@@ -129,7 +133,7 @@ void outputPairDataToFile(string &filename, vector<SV_pair*> &sv_pair_vec){
 		exit(1);
 	}
 
-	line = "#difSize\tsizeRatio\tchrA\tstartPosA\tendPosA\tSVTypeA\tSVLenA\tchrB\tstartPosB\tendPosB\tSVTypeB\tSVLenB";
+	line = "#difSize\tsizeRatio\tdifRmse\tchrA\tstartPosA\tendPosA\tSVTypeA\tSVLenA\tchrB\tstartPosB\tendPosB\tSVTypeB\tSVLenB";
 	outfile << line << endl;
 
 	for(size_t i=0; i<sv_pair_vec.size(); i++){
@@ -162,7 +166,7 @@ void outputPairDataToFile(string &filename, vector<SV_pair*> &sv_pair_vec){
 			default: cerr << "line=" << __LINE__ << ", invalid SV type: " << item2->sv_type << endl; exit(1);
 		}
 
-		line = to_string(pair_item->dif_size) + "\t" + to_string(pair_item->size_ratio);
+		line = to_string(pair_item->dif_size) + "\t" + to_string(pair_item->size_ratio) + "\t" + to_string(pair_item->dif_rmse);
 		line += "\t" + item1->chrname + "\t" + to_string(item1->startPos) + "\t" + to_string(item1->endPos) + "\t" + sv_type_str1 + "\t" + to_string(item1->sv_len);
 		line += "\t" + item2->chrname + "\t" + to_string(item2->startPos) + "\t" + to_string(item2->endPos) + "\t" + sv_type_str2 + "\t" + to_string(item2->sv_len);
 		outfile << line << endl;
@@ -365,6 +369,23 @@ void outputRatioStatToFile(string &svSizeRatioStatFilename, vector<size_t> &rati
 
 	cout << num << " size ratio items have been saved to file: " << svSizeRatioStatFilename << endl;
 	outStatScreenFile << num << " size ratio items have been saved to file: " << svSizeRatioStatFilename << endl;
+}
+
+void computeDifRmse(vector<SV_pair*> &sv_pair_vec){
+	size_t i;
+	double dif_rmse;
+	double Sum_size, rmse;
+	if(sv_pair_vec.size()>0){
+		for(i=0; i<sv_pair_vec.size(); i++){
+			dif_rmse = sv_pair_vec.at(i)->dif_rmse;
+			Sum_size += dif_rmse * dif_rmse;
+		}
+		rmse = (double) sqrt(Sum_size/sv_pair_vec.size());
+	}
+		else rmse = -1;
+
+	cout << "TP_user:" << sv_pair_vec.size() << ", RMSE:" << rmse << endl;
+	outStatScreenFile << "TP_user:" << sv_pair_vec.size() << ", RMSE:" << rmse << endl;
 }
 
 void destroyPairData(vector<SV_pair*> &sv_vec){

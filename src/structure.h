@@ -36,7 +36,7 @@ typedef struct {
 
 typedef struct {
 	SV_item *sv_item1, *sv_item2;
-	double dif_size, size_ratio;
+	double dif_size, size_ratio, dif_rmse;
 }SV_pair;
 
 typedef struct {
