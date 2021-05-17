@@ -43,7 +43,7 @@ There are two commands for SV_STAT: `convert` and `stat`. The help information a
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.3.0
+Version: 0.3.1
 
 Usage:  sv_stat  <command> [options]
 
@@ -70,7 +70,7 @@ And the help information are below:
 ```sh
 $ sv_stat convert
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.3.0
+Version: 0.3.1
 
 Usage:  sv_stat convert [options] <infile> <outfile>
 
@@ -94,7 +94,7 @@ And the help information are shown below:
 ```sh
 $ sv_stat stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.3.0
+Version: 0.3.1
 
 Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
 
@@ -108,6 +108,8 @@ Options:
                   values are for the valid maximal region size, then longer
                   regions are omitted and saved to the file specified with -l
      -s INT       overlap extend size: [100]
+     -t INT       number of threads [0]. 0 for the maximal number of threads
+                  in machine
      -o FILE      output directory: [output]
      -l FILE      file name for long SV regions: [long_sv_reg.bed]
      -h           show this help message and exit
