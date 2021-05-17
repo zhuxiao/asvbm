@@ -178,19 +178,194 @@ void computeLenStat(vector<SV_item*> &data, string &description_str){
 }
 
 vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data){
+	vector< vector<SV_item*> > result, subsets;
+	//vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
+	//SV_item *item1, *item2, *item;
+	size_t i;
+	//vector<size_t> overlap_type_vec;
+
+	for(i=0; i<user_data.size(); i++) user_data.at(i)->overlapped = false;
+	for(i=0; i<benchmark_data.size(); i++) benchmark_data.at(i)->overlapped = false;
+
+	subsets = constructSubsetByChr(user_data, benchmark_data);
+	result = intersectOp(subsets);
+
+//	for(i=0; i<user_data.size(); i++){
+//		item1 = user_data.at(i);
+//		for(j=0; j<benchmark_data.size(); j++){
+//			item2 = benchmark_data.at(j);
+//			overlap_type_vec = computeOverlapType(item1, item2);
+//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+//				item1->overlapped = true;
+//				item2->overlapped = true;
+//			}
+//		}
+//	}
+//
+//	for(i=0; i<benchmark_data.size(); i++){
+//		item2 = benchmark_data.at(i);
+//		item = itemdup(item2);
+//		if(item2->overlapped)
+//			intersect_vec_benchmark.push_back(item);
+//		else
+//			private_vec_benchmark.push_back(item);
+//	}
+//
+//	for(i=0; i<user_data.size(); i++){
+//		item1 = user_data.at(i);
+//		item = itemdup(item1);
+//		if(!item1->overlapped)
+//			private_vec_user.push_back(item);
+//		else
+//			intersect_vec_user.push_back(item);
+//	}
+
+//	result.push_back(intersect_vec_user);
+//	result.push_back(intersect_vec_benchmark);
+//	result.push_back(private_vec_user);
+//	result.push_back(private_vec_benchmark);
+
+	return result;
+}
+
+//generate two datasets
+vector<vector<SV_item*>> constructSubsetByChr(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data){
 	vector< vector<SV_item*> > result;
+	set<string> chrname_set1, chrname_set2;
+	set<string> chrname_set;
+
+	chrname_set1 = getChrnames(user_data);
+	chrname_set2 = getChrnames(benchmark_data);
+	chrname_set = getChrUnion(chrname_set1, chrname_set2);
+
+	result = constructSubsetByChrOp(user_data, benchmark_data, chrname_set);
+
+	return result;
+}
+
+//get chrnames
+set<string> getChrnames(vector<SV_item*> &dataset){
+	set<string> chrname_set;
+	size_t i;
+	SV_item *item;
+	set<string>::iterator iter;
+
+	for(i=0;i<dataset.size();i++){
+		item = dataset.at(i);
+		if(chrname_set.find(item->chrname)==chrname_set.end()) chrname_set.insert(item->chrname);
+	}
+
+	return chrname_set;
+}
+
+//union
+set<string> getChrUnion(set<string> &chrname_set1, set<string> &chrname_set2){
+	set<string> chrname_union;
+	set<string>::iterator iter, iter1;
+	string str1, str2, str3, tmp_str, chr = "chr";
+	size_t len = chr.size();
+	int32_t cond_idx;
+
+	for(iter=chrname_set1.begin(); iter!=chrname_set1.end(); ++iter) chrname_union.insert(*iter);
+
+	for(iter=chrname_set2.begin(); iter!=chrname_set2.end(); ++iter){
+		str1 = *iter;
+		str2 = "";
+		str3 = "";
+		if((*iter).size()>len){
+			tmp_str = (*iter).substr(0,len);
+			if(tmp_str.compare(chr)!=0) str2 = chr + *iter;
+			else str3 = (*iter).substr(len);
+		}else{
+			str2 = chr + *iter;
+		}
+
+		cond_idx = -1;
+		if(chrname_union.find(str1)!=chrname_union.end()) cond_idx = 0;
+		if(cond_idx==-1 and str2.size()>0 and chrname_union.find(str2)!=chrname_union.end()) cond_idx = 1;
+		if(cond_idx==-1 and str3.size()>0 and chrname_union.find(str3)!=chrname_union.end()) cond_idx = 2;
+		if(cond_idx==-1) chrname_union.insert(*iter);//not found
+	}
+
+	return chrname_union;
+}
+
+vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, set<string> &chrname_set){
+	vector< vector<SV_item*> > result;
+	set<string>::iterator iter;
+	string chr;
+	vector<SV_item*> subset1, subset2;
+
+	for(iter=chrname_set.begin(); iter!=chrname_set.end(); ++iter){
+		chr = *iter;
+		subset1 = getItemsByChr(chr, user_data);
+		subset2 = getItemsByChr(chr, benchmark_data);
+		result.push_back(subset1);
+		result.push_back(subset2);
+	}
+
+	return result;
+}
+
+vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset){
+	vector<SV_item*> result;
+	size_t i;
+	SV_item *item;
+
+	for(i=0; i<dataset.size(); i++){
+		item = dataset.at(i);
+		if(IsSameChrname(item->chrname, chrname)) result.push_back(item);
+	}
+
+	return result;
+}
+
+vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
+	vector<vector<SV_item*>> sub_result, result;
+	vector<SV_item*> subset1, subset2, intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark, vec_tmp;
+	size_t i, j;
+
+	cout << "Computing overlap information between user data and benchmark data ..." << endl;
+
+	for(i=0; i<subsets.size(); i+=2){
+		subset1 = subsets.at(i);
+		subset2 = subsets.at(i+1);
+
+		if(subset1.size()>0) cout << "\t" << subset1.at(0)->chrname << ", user_data: " << subset1.size() << ", benchmark_data: " << subset2.size() << endl;
+		sub_result = intersectSubset(subset1, subset2);
+
+		vec_tmp = sub_result.at(0);
+		for(j=0; j<vec_tmp.size(); j++) intersect_vec_user.push_back(vec_tmp.at(j));
+		vec_tmp = sub_result.at(1);
+		for(j=0; j<vec_tmp.size(); j++) intersect_vec_benchmark.push_back(vec_tmp.at(j));
+		vec_tmp = sub_result.at(2);
+		for(j=0; j<vec_tmp.size(); j++) private_vec_user.push_back(vec_tmp.at(j));
+		vec_tmp = sub_result.at(3);
+		for(j=0; j<vec_tmp.size(); j++) private_vec_benchmark.push_back(vec_tmp.at(j));
+	}
+
+	result.push_back(intersect_vec_user);
+	result.push_back(intersect_vec_benchmark);
+	result.push_back(private_vec_user);
+	result.push_back(private_vec_benchmark);
+
+	return result;
+}
+
+vector<vector<SV_item*>> intersectSubset(vector<SV_item*> &subset1, vector<SV_item*> &subset2){
+	vector< vector<SV_item*> > result, subsets;
 	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
 	SV_item *item1, *item2, *item;
 	size_t i, j;
 	vector<size_t> overlap_type_vec;
 
-	for(i=0; i<user_data.size(); i++) user_data.at(i)->overlapped = false;
-	for(i=0; i<benchmark_data.size(); i++) benchmark_data.at(i)->overlapped = false;
+	for(i=0; i<subset1.size(); i++) subset1.at(i)->overlapped = false;
+	for(i=0; i<subset2.size(); i++) subset2.at(i)->overlapped = false;
 
-	for(i=0; i<user_data.size(); i++){
-		item1 = user_data.at(i);
-		for(j=0; j<benchmark_data.size(); j++){
-			item2 = benchmark_data.at(j);
+	for(i=0; i<subset1.size(); i++){
+		item1 = subset1.at(i);
+		for(j=0; j<subset2.size(); j++){
+			item2 = subset2.at(j);
 			overlap_type_vec = computeOverlapType(item1, item2);
 			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
 				item1->overlapped = true;
@@ -199,8 +374,8 @@ vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*>
 		}
 	}
 
-	for(i=0; i<benchmark_data.size(); i++){
-		item2 = benchmark_data.at(i);
+	for(i=0; i<subset2.size(); i++){
+		item2 = subset2.at(i);
 		item = itemdup(item2);
 		if(item2->overlapped)
 			intersect_vec_benchmark.push_back(item);
@@ -208,8 +383,8 @@ vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*>
 			private_vec_benchmark.push_back(item);
 	}
 
-	for(i=0; i<user_data.size(); i++){
-		item1 = user_data.at(i);
+	for(i=0; i<subset1.size(); i++){
+		item1 = subset1.at(i);
 		item = itemdup(item1);
 		if(!item1->overlapped)
 			private_vec_user.push_back(item);
@@ -224,6 +399,8 @@ vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*>
 
 	return result;
 }
+
+
 
 SV_item* itemdup(SV_item* item){
 	SV_item *item_new = new SV_item;
@@ -240,6 +417,15 @@ SV_item* itemdup(SV_item* item){
 	return item_new;
 }
 
+//judge chrname is same
+bool IsSameChrname(string &chrname1, string &chrname2){
+	string chr = "chr";
+	if(chrname1.compare(chrname2)==0 or (chr + chrname1).compare(chrname2)==0 or chrname1.compare(chr + chrname2)==0){
+		return true;
+	}
+	return false;
+}
+
 vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 	bool flag = false, flag_tmp = false;
 	int32_t startPos1, endPos1, startPos2, endPos2;
@@ -247,7 +433,7 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 	size_t overlap_type;
 
 	if(item1->sv_type!=VAR_TRA and item1->sv_type!=VAR_BND){ // INS, DEL, DUP, INV
-		if(item1->chrname.size()>0 and item1->chrname.compare(item2->chrname)==0){
+		if(item1->chrname.size()>0 and IsSameChrname(item1->chrname, item2->chrname)){
 			startPos1 = item1->startPos - extendSize;
 			if(startPos1<1) startPos1 = 1;
 			endPos1 = item1->endPos + extendSize;
@@ -259,7 +445,7 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 		}
 
 		if(flag==false and (item2->sv_type==VAR_TRA or item2->sv_type==VAR_BND)){
-			if(item1->chrname.size()>0 and item1->chrname.compare(item2->chrname2)==0){
+			if(item1->chrname.size()>0 and IsSameChrname(item1->chrname, item2->chrname2)){
 				startPos1 = item1->startPos - extendSize;
 				if(startPos1<1) startPos1 = 1;
 				endPos1 = item1->endPos + extendSize;
@@ -276,7 +462,7 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 	}else{ // TRA or BND
 
 		if(item1->chrname.size()>0){
-			if(item1->chrname.compare(item2->chrname)==0){
+			if(IsSameChrname(item1->chrname, item2->chrname)){
 				if(item1->startPos!=0){
 					// 1: one_overlap_one_bp
 					startPos1 = item1->startPos - extendSize;
@@ -328,7 +514,7 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 					}
 					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 				}
-			}else if(item1->chrname.compare(item2->chrname2)==0){
+			}else if(IsSameChrname(item1->chrname, item2->chrname2)){
 
 				if(item1->startPos!=0){
 					// one_overlap_three_bp
@@ -384,7 +570,7 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 		}
 
 		if(item1->chrname2.size()>0){
-			if(item1->chrname2.compare(item2->chrname)==0){
+			if(IsSameChrname(item1->chrname2, item2->chrname)){
 				if(item1->startPos2!=0){
 					// 3: three_overlap_one_bp
 					startPos1 = item1->startPos2 - extendSize;
@@ -436,7 +622,7 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 					}
 					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
 				}
-			}else if(item1->chrname2.compare(item2->chrname2)==0){
+			}else if(IsSameChrname(item1->chrname2, item2->chrname2)){
 				if(item1->startPos2!=0){
 					// three_overlap_three_bp
 					startPos1 = item1->startPos2 - extendSize;

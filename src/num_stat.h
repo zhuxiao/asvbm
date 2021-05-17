@@ -6,6 +6,7 @@
 #include <vector>
 #include <limits.h>
 #include <sys/stat.h>
+#include <set>
 
 #include "constants.h"
 #include "structure.h"
@@ -20,7 +21,15 @@ void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, stri
 void computeLenStat(vector<SV_item*> &data, string &description_str);
 
 vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &data2);
+vector<vector<SV_item*>> constructSubsetByChr(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data);
+set<string> getChrnames(vector<SV_item*> &dataset);
+set<string> getChrUnion(set<string> &chrname_set1, set<string> &chrname_set2);
+vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, set<string> &chrname_set);
+vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets);
+vector<vector<SV_item*>> intersectSubset(vector<SV_item*> &subset1, vector<SV_item*> &subset2);
+vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset);
 SV_item* itemdup(SV_item* item);
+bool IsSameChrname(string &chrname1, string &chrname2);
 vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2);
 bool isOverlappedPos(size_t startPos1, size_t endPos1, size_t startPos2, size_t endPos2);
 

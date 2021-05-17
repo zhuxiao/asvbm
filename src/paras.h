@@ -20,7 +20,7 @@ using namespace std;
 // program variables
 #define PROG_NAME		"SV_STAT"
 #define PROG_DESC		"A tool for Structural Variant Statistics Evaluation"
-#define PROG_VERSION	"0.2.0"
+#define PROG_VERSION	"0.3.0"
 
 
 void showUsage();
@@ -29,10 +29,10 @@ void showUsageStat();
 int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
 
-void convert(string &infilename, string &outfilename, string &redundant_filename, string &sv_format);
+void convert(string &infilename, string &outfilename, string &redundant_filename, string &snv_filename, string &sv_format);
 void SVStat(string &user_file, string &benchmark_file);
 
-void printConvertParas(string &infilename, string &outfilename, string &redundant_filename, string &sv_format);
+void printConvertParas(string &infilename, string &outfilename, string &redundant_filename, string &snv_filename, string &sv_format);
 void printStatParas(string &user_file, string &benchmark_file);
 
 #endif /* SRC_PARAS_H_ */

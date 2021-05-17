@@ -16,6 +16,8 @@ using namespace std;
 #define VAR_INV_TRA			7	// inverted translocation
 #define VAR_MIX				10	// mixed variation
 #define VAR_MNP				11	// MNP
+#define VAR_SNV				12	// SNV
+#define VAR_CNV				13	// CNV
 
 #define BALANCED_TRA_STR	"BALANCED"
 #define UNBALANCED_TRA_STR	"UNBALANCED"

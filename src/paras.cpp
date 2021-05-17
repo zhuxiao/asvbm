@@ -30,6 +30,8 @@ void showUsageConvert(){
 	cout << "     -o FILE      output directory: [output]" << endl;
 	cout << "     -r INT       remove redundant variant items [1]: 1 for yes, 0 for no" << endl;
 	cout << "     -R FILE      redundant variant items file: [" << redundantItemFilename << "]" << endl;
+	cout << "     -s INT       remove snv items [1]: 1 for yes, 0 for no" << endl;
+	cout << "     -S FILE      snv items file: [" << snvFilename << "]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
 }
 
@@ -60,14 +62,16 @@ void showUsageStat(){
 int parseConvert(int argc, char **argv)
 {
 	int opt;
-	string sv_format, in_file, out_file, remove_redundant_str = "1", redundant_filename = "";
+	string sv_format, in_file, out_file, remove_redundant_str = "1", redundant_filename = "", remove_snv_str = "0", snv_filename = "";
 
-	while( (opt = getopt(argc, argv, ":f:o:r:R:h")) != -1 ){
+	while( (opt = getopt(argc, argv, ":f:o:r:R:s:S:h")) != -1 ){
 		switch(opt){
 			case 'f': sv_format = optarg; break;
 			case 'o': outputPathname = optarg; break;
 			case 'r': remove_redundant_str = optarg; break;
 			case 'R': redundant_filename = optarg; break;
+			case 's': remove_snv_str = optarg; break;
+			case 'S': snv_filename = optarg; break;
 			case 'h': showUsageConvert(); exit(0);
 			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
 			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
@@ -79,6 +83,15 @@ int parseConvert(int argc, char **argv)
 	}else if(remove_redundant_str.compare("0")==0) redundant_filename = "";
 	else{
 		cout << "Error: Please specify the correct value for '-r' option" << endl << endl;
+		showUsageConvert();
+		return 1;
+	}
+
+	if(remove_snv_str.compare("1")==0) {
+		if(snv_filename.size()==0) snv_filename = snvFilename;
+	}else if(remove_snv_str.compare("0")==0) snv_filename = "";
+	else{
+		cout << "Error: Please specify the correct value for '-s' option" << endl << endl;
 		showUsageConvert();
 		return 1;
 	}
@@ -97,7 +110,7 @@ int parseConvert(int argc, char **argv)
 	}
 
 	if(sv_format.compare("bed")==0 or sv_format.compare("vcf")==0 or sv_format.compare("csv")==0 or sv_format.compare("nm")==0) // nm: private usage
-		convert(in_file, out_file, redundant_filename, sv_format);
+		convert(in_file, out_file, redundant_filename, snv_filename, sv_format);
 	else{
 		cout << "Error: Please specify the correct SV file format" << endl << endl;
 		showUsageConvert();
@@ -107,7 +120,7 @@ int parseConvert(int argc, char **argv)
 	return 0;
 }
 
-void convert(string &infilename, string &outfilename, string &redundant_filename, string &sv_format){
+void convert(string &infilename, string &outfilename, string &redundant_filename, string &snv_filename, string &sv_format){
 
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -119,20 +132,20 @@ void convert(string &infilename, string &outfilename, string &redundant_filename
 	}
 	outConvertScreenFile << "Program command: " << program_cmd_str << endl << endl;
 
-	printConvertParas(infilename, outfilename, redundant_filename, sv_format); // print parameters
+	printConvertParas(infilename, outfilename, redundant_filename, snv_filename, sv_format); // print parameters
 
 	cout << "############# Convert variants: #############" << endl;
 	outConvertScreenFile << "############# Convert variants: #############" << endl;
 
 	outfilename = outputPathname + outfilename;
 	if(sv_format.compare("bed")==0)
-		convertBed(infilename, outfilename, redundant_filename);
+		convertBed(infilename, outfilename, redundant_filename, snv_filename);
 	else if(sv_format.compare("vcf")==0)
-		convertVcf(infilename, outfilename, redundant_filename);
+		convertVcf(infilename, outfilename, redundant_filename, snv_filename);
 	else if(sv_format.compare("csv")==0)
-		convertCsv(infilename, outfilename, redundant_filename);
+		convertCsv(infilename, outfilename, redundant_filename, snv_filename);
 	else if(sv_format.compare("nm")==0)  // private usage: nm
-		convertNm(infilename, outfilename, redundant_filename);
+		convertNm(infilename, outfilename, redundant_filename, snv_filename);
 
 	outConvertScreenFile.close();
 }
@@ -217,7 +230,7 @@ void SVStat(string &user_file, string &benchmark_file){
 }
 
 // print parameters for 'convert' command
-void printConvertParas(string &infilename, string &outfilename, string &redundant_filename, string &sv_format){
+void printConvertParas(string &infilename, string &outfilename, string &redundant_filename, string &snv_filename, string &sv_format){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
@@ -228,6 +241,8 @@ void printConvertParas(string &infilename, string &outfilename, string &redundan
 
 	if(redundant_filename.size())
 		cout << "Redundant variant items: " << redundant_filename << endl;
+	if(snv_filename.size())
+		cout << "              snv items: " << snv_filename << endl;
 
 	cout << "       Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 
@@ -252,6 +267,9 @@ void printConvertParas(string &infilename, string &outfilename, string &redundan
 
 	if(redundant_filename.size())
 		outConvertScreenFile << "Redundant variant items: " << redundant_filename << endl;
+
+	if(snv_filename.size())
+			outConvertScreenFile << "snv items: " << snv_filename << endl;
 
 	outConvertScreenFile << "       Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 

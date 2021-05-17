@@ -25,6 +25,7 @@ int32_t extendSize;		// overlap extend size
 
 int32_t maxValidRegThres;
 string redundantItemFilename = "redundant_items.bed";
+string snvFilename = "snv_items.bed";
 string longSVFilename = "long_sv_reg.bed";
 string svSizeDifRatioFilename = "sv_size_dif_ratio";
 string svSizeDifStatFilename = "sv_size_dif_stat";

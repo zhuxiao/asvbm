@@ -117,6 +117,10 @@ SV_item *constructSVItem(string &line){
 			item->sv_type = VAR_DUP;
 		}else if(str_tmp.compare("INV")==0 or str_tmp.compare("inversion")==0){
 			item->sv_type = VAR_INV;
+		}else if(str_tmp.compare("SNV")==0 or str_tmp.compare("snv")==0){
+			item->sv_type = VAR_SNV;
+		}else if(str_tmp.compare("CNV")==0 or str_tmp.compare("cnv")==0){
+			item->sv_type = VAR_CNV;
 		}else{
 			if(str_vec.size()>=8 and (str_vec.at(6).compare("TRA")==0 or str_vec.at(6).compare("translocation")==0 or str_vec.at(6).compare("BND")==0)){
 				item->chrname2 = str_vec.at(3);
@@ -196,6 +200,8 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 			case VAR_BND: sv_type_str = "BND"; break;
 			case VAR_INV_TRA: sv_type_str = "INVTRA"; break;
 			case VAR_MIX: sv_type_str = "MIX"; break;
+			case VAR_SNV: sv_type_str = "SNV"; break;
+			case VAR_CNV: sv_type_str = "CNV"; break;
 			default:
 				cerr << "line=" << __LINE__ << ", invalid sv type: " << item->sv_type << endl;
 				exit(1);

@@ -24,6 +24,7 @@ extern ofstream outStatScreenFile;
 extern int32_t extendSize;
 
 extern int32_t maxValidRegThres;
+extern string snvFilename;
 extern string redundantItemFilename;
 extern string longSVFilename;
 extern string svSizeDifRatioFilename;
