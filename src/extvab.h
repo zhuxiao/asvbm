@@ -21,6 +21,7 @@ extern string statScreenFilename;
 extern ofstream outConvertScreenFile;
 extern ofstream outStatScreenFile;
 
+extern int32_t num_threads;
 extern int32_t extendSize;
 
 extern int32_t maxValidRegThres;

@@ -2,6 +2,7 @@
 #include "num_stat.h"
 #include "extvab.h"
 
+pthread_mutex_t mtx_overlap = PTHREAD_MUTEX_INITIALIZER;;
 
 void SVNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &outputPathname){
 	numStatDirname = outputPathname + numStatDirname;
@@ -181,11 +182,11 @@ vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*>
 	vector< vector<SV_item*> > result, subsets;
 	//vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
 	//SV_item *item1, *item2, *item;
-	size_t i;
+	//size_t i;
 	//vector<size_t> overlap_type_vec;
 
-	for(i=0; i<user_data.size(); i++) user_data.at(i)->overlapped = false;
-	for(i=0; i<benchmark_data.size(); i++) benchmark_data.at(i)->overlapped = false;
+	//for(i=0; i<user_data.size(); i++) user_data.at(i)->overlapped = false;
+	//for(i=0; i<benchmark_data.size(); i++) benchmark_data.at(i)->overlapped = false;
 
 	subsets = constructSubsetByChr(user_data, benchmark_data);
 	result = intersectOp(subsets);
@@ -321,28 +322,35 @@ vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset){
 }
 
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
-	vector<vector<SV_item*>> sub_result, result;
-	vector<SV_item*> subset1, subset2, intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark, vec_tmp;
-	size_t i, j;
+	vector<vector<SV_item*>> result;
+	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark, vec_tmp;
+	size_t i;
+	overlapWork_opt *overlap_opt;
+	string chrname_tmp;
 
-	cout << "Computing overlap information between user data and benchmark data ..." << endl;
+	hts_tpool *p = hts_tpool_init(num_threads);
+	hts_tpool_process *q = hts_tpool_process_init(p, num_threads*2, 1);
+
+	pthread_mutex_init(&mtx_overlap, NULL);
+
+	cout << "Computing intersect information between user data and benchmark data ..." << endl;
 
 	for(i=0; i<subsets.size(); i+=2){
-		subset1 = subsets.at(i);
-		subset2 = subsets.at(i+1);
+		overlap_opt = new overlapWork_opt();
+		overlap_opt->subset1 = subsets.at(i);
+		overlap_opt->subset2 = subsets.at(i+1);
+		overlap_opt->intersect_vec_user = &intersect_vec_user;
+		overlap_opt->intersect_vec_benchmark = &intersect_vec_benchmark;
+		overlap_opt->private_vec_user = &private_vec_user;
+		overlap_opt->private_vec_benchmark = &private_vec_benchmark;
 
-		if(subset1.size()>0) cout << "\t" << subset1.at(0)->chrname << ", user_data: " << subset1.size() << ", benchmark_data: " << subset2.size() << endl;
-		sub_result = intersectSubset(subset1, subset2);
-
-		vec_tmp = sub_result.at(0);
-		for(j=0; j<vec_tmp.size(); j++) intersect_vec_user.push_back(vec_tmp.at(j));
-		vec_tmp = sub_result.at(1);
-		for(j=0; j<vec_tmp.size(); j++) intersect_vec_benchmark.push_back(vec_tmp.at(j));
-		vec_tmp = sub_result.at(2);
-		for(j=0; j<vec_tmp.size(); j++) private_vec_user.push_back(vec_tmp.at(j));
-		vec_tmp = sub_result.at(3);
-		for(j=0; j<vec_tmp.size(); j++) private_vec_benchmark.push_back(vec_tmp.at(j));
+		//if(subset1.size()>0) cout << "\t" << subset1.at(0)->chrname << ", user_data: " << subset1.size() << ", benchmark_data: " << subset2.size() << endl;
+		hts_tpool_dispatch(p, q, intersectSubset, overlap_opt);
 	}
+
+    hts_tpool_process_flush(q);
+    hts_tpool_process_destroy(q);
+    hts_tpool_destroy(p);
 
 	result.push_back(intersect_vec_user);
 	result.push_back(intersect_vec_benchmark);
@@ -352,13 +360,16 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
 	return result;
 }
 
-vector<vector<SV_item*>> intersectSubset(vector<SV_item*> &subset1, vector<SV_item*> &subset2){
-	vector< vector<SV_item*> > result, subsets;
+void* intersectSubset(void *arg){
+	overlapWork_opt *overlap_opt = (overlapWork_opt *)arg;
 	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
 	SV_item *item1, *item2, *item;
 	size_t i, j;
 	vector<size_t> overlap_type_vec;
+	vector<SV_item*> subset1, subset2;
 
+	subset1 = overlap_opt->subset1;
+	subset2 = overlap_opt->subset2;
 	for(i=0; i<subset1.size(); i++) subset1.at(i)->overlapped = false;
 	for(i=0; i<subset2.size(); i++) subset2.at(i)->overlapped = false;
 
@@ -392,18 +403,20 @@ vector<vector<SV_item*>> intersectSubset(vector<SV_item*> &subset1, vector<SV_it
 			intersect_vec_user.push_back(item);
 	}
 
-	result.push_back(intersect_vec_user);
-	result.push_back(intersect_vec_benchmark);
-	result.push_back(private_vec_user);
-	result.push_back(private_vec_benchmark);
+	pthread_mutex_lock(&mtx_overlap);
+	for(j=0; j<intersect_vec_user.size(); j++) overlap_opt->intersect_vec_user->push_back(intersect_vec_user.at(j));
+	for(j=0; j<intersect_vec_benchmark.size(); j++) overlap_opt->intersect_vec_benchmark->push_back(intersect_vec_benchmark.at(j));
+	for(j=0; j<private_vec_user.size(); j++) overlap_opt->private_vec_user->push_back(private_vec_user.at(j));
+	for(j=0; j<private_vec_benchmark.size(); j++) overlap_opt->private_vec_benchmark->push_back(private_vec_benchmark.at(j));
+	pthread_mutex_unlock(&mtx_overlap);
 
-	return result;
+	delete overlap_opt;
+
+	return NULL;;
 }
 
-
-
 SV_item* itemdup(SV_item* item){
-	SV_item *item_new = new SV_item;
+	SV_item *item_new = new SV_item();
 	item_new->chrname = item->chrname;
 	item_new->startPos = item->startPos;
 	item_new->endPos = item->endPos;

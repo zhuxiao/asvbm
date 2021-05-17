@@ -21,6 +21,7 @@ string statScreenFilename = "stat_screen";
 ofstream outConvertScreenFile;
 ofstream outStatScreenFile;
 
+int32_t num_threads;
 int32_t extendSize;		// overlap extend size
 
 int32_t maxValidRegThres;

@@ -53,6 +53,8 @@ void showUsageStat(){
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
 	cout << "                  regions are omitted and saved to the file specified with -l" << endl;
 	cout << "     -s INT       overlap extend size: [" << EXTEND_SIZE << "]" << endl;
+	cout << "     -t INT       number of threads [0]. 0 for the maximal number of threads" << endl;
+	cout << "                  in machine" << endl;
 	cout << "     -o FILE      output directory: [output]" << endl;
 	cout << "     -l FILE      file name for long SV regions: [long_sv_reg.bed]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
@@ -152,17 +154,19 @@ void convert(string &infilename, string &outfilename, string &redundant_filename
 
 // parse the parameters for stat command
 int parseStat(int argc, char **argv){
-	int32_t opt;
+	int32_t opt, threadNum_tmp;
 	string sv_file1, sv_file2;
 
 	if (argc < 2) { showUsageStat(); return 1; }
 
 	maxValidRegThres = 0;
 	extendSize = EXTEND_SIZE;
-	while( (opt = getopt(argc, argv, ":m:s:o:l:h")) != -1 ){
+	threadNum_tmp = 0;
+	while( (opt = getopt(argc, argv, ":m:s:t:o:l:h")) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
+			case 't': threadNum_tmp = stoi(optarg); break;
 			case 'o': outputPathname = optarg; break;
 			case 'l': longSVFilename = optarg; break;
 			case 'h': showUsageStat(); exit(0);
@@ -181,6 +185,10 @@ int parseStat(int argc, char **argv){
 		showUsageStat();
 		return 1;
 	}
+
+	if(threadNum_tmp==0) num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+	else num_threads = (threadNum_tmp>=sysconf(_SC_NPROCESSORS_ONLN)) ? sysconf(_SC_NPROCESSORS_ONLN) : threadNum_tmp;
+
 	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
 
 	opt = argc - optind; // the number of SAMs on the command line
@@ -296,6 +304,7 @@ void printStatParas(string &user_file, string &benchmark_file){
 
 	cout << " Maximal region size: " << maxValidRegThres << endl;
 	cout << " Overlap extend size: " << extendSize << endl;
+	cout << "   Number of threads: " << num_threads << endl;
 	cout << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 	cout << "Long SV regions file: " << longSVFilename << endl << endl;
 
@@ -309,6 +318,7 @@ void printStatParas(string &user_file, string &benchmark_file){
 
 	outStatScreenFile << " Maximal region size: " << maxValidRegThres << endl;
 	outStatScreenFile << " Overlap extend size: " << extendSize << endl;
+	outStatScreenFile << "   Number of threads: " << num_threads << endl;
 	outStatScreenFile << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 	outStatScreenFile << "Long SV regions file: " << longSVFilename << endl << endl;
 }

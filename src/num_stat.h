@@ -7,6 +7,10 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <set>
+#include <htslib/sam.h>
+#include <htslib/thread_pool.h>
+//#include <htslib/hts.h>
+//#include <htslib/faidx.h>
 
 #include "constants.h"
 #include "structure.h"
@@ -26,7 +30,7 @@ set<string> getChrnames(vector<SV_item*> &dataset);
 set<string> getChrUnion(set<string> &chrname_set1, set<string> &chrname_set2);
 vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, set<string> &chrname_set);
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets);
-vector<vector<SV_item*>> intersectSubset(vector<SV_item*> &subset1, vector<SV_item*> &subset2);
+void* intersectSubset(void *arg);
 vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset);
 SV_item* itemdup(SV_item* item);
 bool IsSameChrname(string &chrname1, string &chrname2);

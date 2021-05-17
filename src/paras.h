@@ -6,6 +6,7 @@
 #include <fstream>
 #include <vector>
 #include <getopt.h>
+#include <unistd.h>
 
 #include "structure.h"
 #include "convert.h"
@@ -20,7 +21,7 @@ using namespace std;
 // program variables
 #define PROG_NAME		"SV_STAT"
 #define PROG_DESC		"A tool for Structural Variant Statistics Evaluation"
-#define PROG_VERSION	"0.3.0"
+#define PROG_VERSION	"0.3.1"
 
 
 void showUsage();
