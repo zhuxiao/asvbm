@@ -11,6 +11,7 @@
 #include "constants.h"
 #include "structure.h"
 #include "dataLoader.h"
+#include "num_stat.h"
 
 using namespace std;
 
@@ -23,6 +24,8 @@ using namespace std;
 void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres);
 void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &dirname);
 vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> &data2);
+void* computeOverlapSVPairSubset(void *arg);
+vector<SV_pair*> computeOverlapSVPairOp(vector<vector<SV_item*>> &subsets);
 void outputPairDataToFile(string &filename, vector<SV_pair*> &sv_pair_vec);
 vector< vector<int32_t> > computeDifStatVec(vector<SV_pair*> &sv_pair_vec);
 void outputDifStatToFile(string &svSizeDifStatFilename, vector< vector<int32_t> > &dif_stat_vec);

@@ -35,5 +35,7 @@ string svSizeRatioStatFilename = "sv_size_ratio_stat";
 vector<size_t> size_div_vec = {100, 250, 500, 1000, 5000, 10000};
 vector<double> ratio_div_vec = {0.5, 0.7, 1.2, 2, 5, 10, 50, 100};
 
+pthread_mutex_t mtx_overlap = PTHREAD_MUTEX_INITIALIZER;
+
 
 #endif /* SRC_GLOBAL_H_ */

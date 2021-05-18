@@ -2,8 +2,6 @@
 #include "num_stat.h"
 #include "extvab.h"
 
-pthread_mutex_t mtx_overlap = PTHREAD_MUTEX_INITIALIZER;;
-
 void SVNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &outputPathname){
 	numStatDirname = outputPathname + numStatDirname;
 	mkdir(numStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -180,10 +178,6 @@ void computeLenStat(vector<SV_item*> &data, string &description_str){
 
 vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data){
 	vector< vector<SV_item*> > result, subsets;
-	//vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
-	//SV_item *item1, *item2, *item;
-	//size_t i;
-	//vector<size_t> overlap_type_vec;
 
 	//for(i=0; i<user_data.size(); i++) user_data.at(i)->overlapped = false;
 	//for(i=0; i<benchmark_data.size(); i++) benchmark_data.at(i)->overlapped = false;
@@ -323,10 +317,9 @@ vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset){
 
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
 	vector<vector<SV_item*>> result;
-	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark, vec_tmp;
+	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
 	size_t i;
 	overlapWork_opt *overlap_opt;
-	string chrname_tmp;
 
 	hts_tpool *p = hts_tpool_init(num_threads);
 	hts_tpool_process *q = hts_tpool_process_init(p, num_threads*2, 1);
@@ -412,7 +405,7 @@ void* intersectSubset(void *arg){
 
 	delete overlap_opt;
 
-	return NULL;;
+	return NULL;
 }
 
 SV_item* itemdup(SV_item* item){

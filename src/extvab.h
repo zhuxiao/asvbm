@@ -35,5 +35,6 @@ extern string svSizeRatioStatFilename;
 extern vector<size_t> size_div_vec;
 extern vector<double> ratio_div_vec;
 
+extern pthread_mutex_t mtx_overlap;
 
 #endif /* SRC_EXTVAB_H_ */
