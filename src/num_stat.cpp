@@ -421,7 +421,7 @@ void* intersectSubset(void *arg){
 	overlapWork_opt *overlap_opt = (overlapWork_opt *)arg;
 	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
 	SV_item *item1, *item2, *item;
-	size_t i, j, num1, num2;
+	size_t i, j;
 	vector<size_t> overlap_type_vec;
 	vector<SV_item*> subset1, subset2;
 	bool overlap_flag;
@@ -457,11 +457,10 @@ void* intersectSubset(void *arg){
 					break;
 				}
 			}
-			if(new_start_idx!=-1){
+			if(new_start_idx!=-1)
 				start_idx = new_start_idx;
-			}else{
+			else
 				start_idx = end_idx;
-			}
 		}
 
 		//begin overlap
@@ -538,79 +537,6 @@ void* intersectSubset(void *arg){
 	pthread_mutex_unlock(&mtx_overlap);
 
 	delete overlap_opt;
-
-
-//	for(i=0; i<subset1.size(); i++) subset1.at(i)->overlapped = false;
-//	for(i=0; i<subset2.size(); i++) subset2.at(i)->overlapped = false;
-
-//
-//	i = j = 0;
-//	while(i<subset1.size() and j<subset2.size()){
-//		item1 = subset1.at(i);
-//		item2 = subset2.at(j);
-//		overlap_flag = false;
-//		overlap_type_vec = computeOverlapType(item1, item2);
-//		if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
-//			item1->overlapped = true;
-//			item2->overlapped = true;
-//			overlap_flag = true;
-//
-//		}
-//		if(overlap_flag){ // overlapped
-//			if(i+1<subset1.size()){
-//				item1 = subset1.at(i+1);
-//				overlap_type_vec = computeOverlapType(item1, item2);
-//				if(overlap_type_vec.size()==0){
-//					j++;
-//				}else{
-//
-//				}
-//			}
-//			i++; j++;
-//		}
-//
-////		else if(item1->startPos<item2->startPos){ // user small
-////			i++;
-////		}else{ // benchmark small
-////			j++;
-////		}
-//	}
-//
-//	if(i==subset1.size()){
-//		item1 = subset1.at(subset1.size()-1);
-//		for(;j<subset2.size();j++){
-//			item2 = subset2.at(j);
-//			overlap_type_vec = computeOverlapType(item1, item2);
-//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
-//				item1->overlapped = true;
-//				item2->overlapped = true;
-//			}
-//		}
-//	}else if(j==subset2.size()){
-//		item2 = subset2.at(subset2.size()-1);
-//		for(;i<subset1.size();i++){
-//			item1 = subset1.at(i);
-//			overlap_type_vec = computeOverlapType(item1, item2);
-//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
-//				item1->overlapped = true;
-//				item2->overlapped = true;
-//			}
-//		}
-//	}else{
-//		cerr << "line= " << __LINE__ << ", i=" << i << ", j=" << j << ", error!" << endl;
-//		exit(1);
-//	}
-//
-//	num1 = num2 = 0;
-//	for(i=0; i<subset1.size(); i++){
-//		item1 = subset1.at(i);
-//		if(item1->overlapped) num1++;
-//	}
-//	for(i=0; i<subset2.size(); i++){
-//		item2 = subset2.at(i);
-//		if(item2->overlapped) num2++;
-//	}
-//	cout << "---new: num1=" << num1 << ", num2=" << num2 << endl;
 
 	return NULL;
 }
