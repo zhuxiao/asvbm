@@ -76,6 +76,10 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 	vector< vector<SV_item*> > subsets;
 
 	subsets = constructSubsetByChr(data1, data2);
+	// sort
+	sortSubsets(subsets);
+	// check order
+	checkOrder(subsets);
 	sv_pair_vec = computeOverlapSVPairOp(subsets);
 
 //	for(i=0; i<data1.size(); i++){
@@ -157,16 +161,55 @@ void* computeOverlapSVPairSubset(void *arg){
 	vector<SV_item*> subset1, subset2;
 	vector<SV_pair*> sv_pair_vec;
 	SV_pair *pair_item;
+	bool overlap_flag;
+	int64_t start_idx, end_idx, new_start_idx, start_search_pos, end_search_pos;
 
 	subset1 = overlap_opt->subset1;
 	subset2 = overlap_opt->subset2;
 
+	start_idx = end_idx = -1;
 	for(i=0; i<subset1.size(); i++){
+
 		item1 = subset1.at(i);
-		for(j=0; j<subset2.size(); j++){
+
+		//compute limit search regions
+		start_search_pos = item1->startPos - 2*extendSize;
+		end_search_pos = item1->endPos + 2*extendSize;
+		if(start_search_pos<1) start_search_pos = 1;
+
+		//compute start element index
+		if(start_idx==-1) start_idx = 0;
+		else{
+			new_start_idx = -1;
+			for(j=start_idx; j<subset2.size(); j++){
+				item2 = subset2.at(j);
+				overlap_type_vec = computeOverlapType(item1, item2);
+				if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+					new_start_idx = j;
+					break;
+				}else if(item2->endPos>=start_search_pos){
+					new_start_idx = j;
+					break;
+				}
+			}
+			if(new_start_idx!=-1){
+				start_idx = new_start_idx;
+			}else{
+				start_idx = end_idx;
+			}
+		}
+
+		//begin overlap
+		overlap_flag = false;
+		end_idx = -1;
+		for(j=start_idx; j<subset2.size(); j++){
 			item2 = subset2.at(j);
+
 			overlap_type_vec = computeOverlapType(item1, item2);
 			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+				end_idx = j;
+				overlap_flag = true;
+
 				if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
 					pair_item = new SV_pair();
 					pair_item->sv_item1 = item1;
@@ -174,9 +217,35 @@ void* computeOverlapSVPairSubset(void *arg){
 					sv_pair_vec.push_back(pair_item);
 					break;
 				}
+			}else{
+				if(overlap_flag) break;
+				else if(item2->endPos>start_search_pos){
+					end_idx = j - 1;
+					if(end_idx<0) end_idx = 0;
+					if(end_idx<start_idx) end_idx = start_idx;
+					break;
+				}
 			}
 		}
 	}
+
+
+//	for(i=0; i<subset1.size(); i++){
+//		item1 = subset1.at(i);
+//		for(j=0; j<subset2.size(); j++){
+//			item2 = subset2.at(j);
+//			overlap_type_vec = computeOverlapType(item1, item2);
+//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+//				if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
+//					pair_item = new SV_pair();
+//					pair_item->sv_item1 = item1;
+//					pair_item->sv_item2 = item2;
+//					sv_pair_vec.push_back(pair_item);
+//					break;
+//				}
+//			}
+//		}
+//	}
 
 	for(i=0; i<sv_pair_vec.size(); i++){
 		pair_item = sv_pair_vec.at(i);

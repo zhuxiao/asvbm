@@ -7,10 +7,9 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <set>
+#include<algorithm>
 #include <htslib/sam.h>
 #include <htslib/thread_pool.h>
-//#include <htslib/hts.h>
-//#include <htslib/faidx.h>
 
 #include "constants.h"
 #include "structure.h"
@@ -29,6 +28,10 @@ vector<vector<SV_item*>> constructSubsetByChr(vector<SV_item*> &user_data, vecto
 set<string> getChrnames(vector<SV_item*> &dataset);
 set<string> getChrUnion(set<string> &chrname_set1, set<string> &chrname_set2);
 vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, set<string> &chrname_set);
+void sortSubsets(vector<vector<SV_item*>> &subsets);
+void* sortSubsetOp(void *arg);
+bool sortFunSameChr(const SV_item *item1, const SV_item *item2);
+void checkOrder(vector<vector<SV_item*>> &subsets);
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets);
 void* intersectSubset(void *arg);
 vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset);

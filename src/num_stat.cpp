@@ -183,6 +183,11 @@ vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*>
 	//for(i=0; i<benchmark_data.size(); i++) benchmark_data.at(i)->overlapped = false;
 
 	subsets = constructSubsetByChr(user_data, benchmark_data);
+	// sort
+	sortSubsets(subsets);
+	// check order
+	checkOrder(subsets);
+
 	result = intersectOp(subsets);
 
 //	for(i=0; i<user_data.size(); i++){
@@ -315,6 +320,65 @@ vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset){
 	return result;
 }
 
+void sortSubsets(vector<vector<SV_item*>> &subsets){
+	sortWork_opt *sort_opt;
+	size_t i;
+
+	hts_tpool *p = hts_tpool_init(num_threads);
+	hts_tpool_process *q = hts_tpool_process_init(p, num_threads*2, 1);
+
+	pthread_mutex_init(&mtx_overlap, NULL);
+
+	cout << "Sort SV items ..." << endl;
+
+	for(i=0; i<subsets.size(); i++){
+		sort_opt =  new sortWork_opt();
+		sort_opt->dataset = &(subsets.at(i));
+
+		//if(sort_opt->dataset->size()>0) cout << "\t" << sort_opt->dataset->at(0)->chrname << ", data size: " << sort_opt->dataset->size() << endl;
+		hts_tpool_dispatch(p, q, sortSubsetOp, sort_opt);
+	}
+
+    hts_tpool_process_flush(q);
+    hts_tpool_process_destroy(q);
+    hts_tpool_destroy(p);
+}
+
+void* sortSubsetOp(void *arg){
+	sortWork_opt *sort_opt = (sortWork_opt *)arg;
+	sort(sort_opt->dataset->begin(), sort_opt->dataset->end(), sortFunSameChr);
+	return NULL;
+}
+
+// sort ascending
+bool sortFunSameChr(const SV_item *item1, const SV_item *item2){
+	return item1->startPos < item2->startPos;
+}
+
+// check order
+void checkOrder(vector<vector<SV_item*>> &subsets){
+	vector<SV_item*> subset;
+	size_t i, j;
+	SV_item *item1, *item2;
+
+	for(i=0; i<subsets.size(); i++){
+		subset = subsets.at(i);
+		for(j=1; j<subset.size(); j++){
+			item1 = subset.at(j-1);
+			item2 = subset.at(j);
+			if(item1->chrname.compare(item2->chrname)!=0){
+				cerr << "different chrname, error!" << endl;
+				exit(1);
+			}else if(item1->startPos>item2->startPos){
+				cerr << "item1.startPos=" << item1->startPos << " > item2.startPos=" << item2->startPos << ", error!" << endl;
+				exit(1);
+			}
+		}
+	}
+
+	//cout << "Check sort finished." << endl;
+}
+
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
 	vector<vector<SV_item*>> result;
 	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
@@ -337,7 +401,7 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
 		overlap_opt->private_vec_user = &private_vec_user;
 		overlap_opt->private_vec_benchmark = &private_vec_benchmark;
 
-		//if(subset1.size()>0) cout << "\t" << subset1.at(0)->chrname << ", user_data: " << subset1.size() << ", benchmark_data: " << subset2.size() << endl;
+		//if(overlap_opt->subset1.size()>0) cout << "\t" << overlap_opt->subset1.at(0)->chrname << ", user_data: " << overlap_opt->subset1.size() << ", benchmark_data: " << overlap_opt->subset2.size() << endl;
 		hts_tpool_dispatch(p, q, intersectSubset, overlap_opt);
 	}
 
@@ -357,26 +421,84 @@ void* intersectSubset(void *arg){
 	overlapWork_opt *overlap_opt = (overlapWork_opt *)arg;
 	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
 	SV_item *item1, *item2, *item;
-	size_t i, j;
+	size_t i, j, num1, num2;
 	vector<size_t> overlap_type_vec;
 	vector<SV_item*> subset1, subset2;
+	bool overlap_flag;
+	int64_t start_idx, end_idx, new_start_idx, start_search_pos, end_search_pos;
 
 	subset1 = overlap_opt->subset1;
 	subset2 = overlap_opt->subset2;
 	for(i=0; i<subset1.size(); i++) subset1.at(i)->overlapped = false;
 	for(i=0; i<subset2.size(); i++) subset2.at(i)->overlapped = false;
 
+	start_idx = end_idx = -1;
 	for(i=0; i<subset1.size(); i++){
+
 		item1 = subset1.at(i);
-		for(j=0; j<subset2.size(); j++){
+
+		//compute limit search regions
+		start_search_pos = item1->startPos - 2*extendSize;
+		end_search_pos = item1->endPos + 2*extendSize;
+		if(start_search_pos<1) start_search_pos = 1;
+
+		//compute start element index
+		if(start_idx==-1) start_idx = 0;
+		else{
+			new_start_idx = -1;
+			for(j=start_idx; j<subset2.size(); j++){
+				item2 = subset2.at(j);
+				overlap_type_vec = computeOverlapType(item1, item2);
+				if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+					new_start_idx = j;
+					break;
+				}else if(item2->endPos>=start_search_pos){
+					new_start_idx = j;
+					break;
+				}
+			}
+			if(new_start_idx!=-1){
+				start_idx = new_start_idx;
+			}else{
+				start_idx = end_idx;
+			}
+		}
+
+		//begin overlap
+		overlap_flag = false;
+		end_idx = -1;
+		for(j=start_idx; j<subset2.size(); j++){
 			item2 = subset2.at(j);
+
 			overlap_type_vec = computeOverlapType(item1, item2);
 			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
 				item1->overlapped = true;
 				item2->overlapped = true;
+				end_idx = j;
+				overlap_flag = true;
+			}else{
+				if(overlap_flag) break;
+				else if(item2->endPos>start_search_pos){
+					end_idx = j - 1;
+					if(end_idx<0) end_idx = 0;
+					if(end_idx<start_idx) end_idx = start_idx;
+					break;
+				}
 			}
 		}
 	}
+
+//	for(i=0; i<subset1.size(); i++){
+//		item1 = subset1.at(i);
+//		for(j=0; j<subset2.size(); j++){
+//			item2 = subset2.at(j);
+//			overlap_type_vec = computeOverlapType(item1, item2);
+//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+//				item1->overlapped = true;
+//				item2->overlapped = true;
+//			}
+//		}
+//	}
 
 	for(i=0; i<subset2.size(); i++){
 		item2 = subset2.at(i);
@@ -396,14 +518,99 @@ void* intersectSubset(void *arg){
 			intersect_vec_user.push_back(item);
 	}
 
+//	num1 = num2 = 0;
+//	for(i=0; i<subset1.size(); i++){
+//		item1 = subset1.at(i);
+//		if(item1->overlapped) num1++;
+//	}
+//	for(i=0; i<subset2.size(); i++){
+//		item2 = subset2.at(i);
+//		if(item2->overlapped) num2++;
+//	}
+//	cout << "num1=" << num1 << ", num2=" << num2 << endl;
+
 	pthread_mutex_lock(&mtx_overlap);
 	for(j=0; j<intersect_vec_user.size(); j++) overlap_opt->intersect_vec_user->push_back(intersect_vec_user.at(j));
 	for(j=0; j<intersect_vec_benchmark.size(); j++) overlap_opt->intersect_vec_benchmark->push_back(intersect_vec_benchmark.at(j));
 	for(j=0; j<private_vec_user.size(); j++) overlap_opt->private_vec_user->push_back(private_vec_user.at(j));
 	for(j=0; j<private_vec_benchmark.size(); j++) overlap_opt->private_vec_benchmark->push_back(private_vec_benchmark.at(j));
+	//cout << "[" << intersect_vec_user.size() << ", " << intersect_vec_benchmark.size() << ", " << private_vec_user.size() << ", " << private_vec_benchmark.size() << endl;
 	pthread_mutex_unlock(&mtx_overlap);
 
 	delete overlap_opt;
+
+
+//	for(i=0; i<subset1.size(); i++) subset1.at(i)->overlapped = false;
+//	for(i=0; i<subset2.size(); i++) subset2.at(i)->overlapped = false;
+
+//
+//	i = j = 0;
+//	while(i<subset1.size() and j<subset2.size()){
+//		item1 = subset1.at(i);
+//		item2 = subset2.at(j);
+//		overlap_flag = false;
+//		overlap_type_vec = computeOverlapType(item1, item2);
+//		if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+//			item1->overlapped = true;
+//			item2->overlapped = true;
+//			overlap_flag = true;
+//
+//		}
+//		if(overlap_flag){ // overlapped
+//			if(i+1<subset1.size()){
+//				item1 = subset1.at(i+1);
+//				overlap_type_vec = computeOverlapType(item1, item2);
+//				if(overlap_type_vec.size()==0){
+//					j++;
+//				}else{
+//
+//				}
+//			}
+//			i++; j++;
+//		}
+//
+////		else if(item1->startPos<item2->startPos){ // user small
+////			i++;
+////		}else{ // benchmark small
+////			j++;
+////		}
+//	}
+//
+//	if(i==subset1.size()){
+//		item1 = subset1.at(subset1.size()-1);
+//		for(;j<subset2.size();j++){
+//			item2 = subset2.at(j);
+//			overlap_type_vec = computeOverlapType(item1, item2);
+//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+//				item1->overlapped = true;
+//				item2->overlapped = true;
+//			}
+//		}
+//	}else if(j==subset2.size()){
+//		item2 = subset2.at(subset2.size()-1);
+//		for(;i<subset1.size();i++){
+//			item1 = subset1.at(i);
+//			overlap_type_vec = computeOverlapType(item1, item2);
+//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+//				item1->overlapped = true;
+//				item2->overlapped = true;
+//			}
+//		}
+//	}else{
+//		cerr << "line= " << __LINE__ << ", i=" << i << ", j=" << j << ", error!" << endl;
+//		exit(1);
+//	}
+//
+//	num1 = num2 = 0;
+//	for(i=0; i<subset1.size(); i++){
+//		item1 = subset1.at(i);
+//		if(item1->overlapped) num1++;
+//	}
+//	for(i=0; i<subset2.size(); i++){
+//		item2 = subset2.at(i);
+//		if(item2->overlapped) num2++;
+//	}
+//	cout << "---new: num1=" << num1 << ", num2=" << num2 << endl;
 
 	return NULL;
 }

@@ -53,4 +53,8 @@ typedef struct {
 	vector<SV_pair*> *sv_pair_vec;
 }overlapWork_opt;
 
+typedef struct {
+	vector<SV_item*> *dataset;
+}sortWork_opt;
+
 #endif /* SRC_STRUCTURE_H_ */
