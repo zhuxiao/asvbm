@@ -82,42 +82,6 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 	checkOrder(subsets);
 	sv_pair_vec = computeOverlapSVPairOp(subsets);
 
-//	for(i=0; i<data1.size(); i++){
-//		item1 = data1.at(i);
-//		for(j=0; j<data2.size(); j++){
-//			item2 = data2.at(j);
-//			overlap_type_vec = computeOverlapType(item1, item2);
-//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
-//				if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
-//					pair_item = new SV_pair();
-//					pair_item->sv_item1 = item1;
-//					pair_item->sv_item2 = item2;
-//					sv_pair_vec.push_back(pair_item);
-//					break;
-//				}
-//			}
-//		}
-//	}
-//
-//	for(i=0; i<sv_pair_vec.size(); i++){
-//		pair_item = sv_pair_vec.at(i);
-//		item1 = pair_item->sv_item1;
-//		item2 = pair_item->sv_item2;
-//		mid_loc1 = (double)(item1->startPos + item1->endPos) / 2;
-//		mid_loc2 = (double)(item2->startPos + item2->endPos) / 2;
-//		reg_size1 = item1->endPos - item1->startPos + 1;
-//		reg_size2 = item2->endPos - item2->startPos + 1;
-//
-//		dif_size = mid_loc1 - mid_loc2;
-//		dif_rmse = reg_size1 - reg_size2;
-//		if(dif_rmse<0) dif_rmse = -dif_rmse;
-//		if(dif_rmse<MIN_DIF_SIZE) size_ratio = 1;
-//		else size_ratio = (double)reg_size1 / reg_size2;
-//		pair_item->dif_size = dif_size;
-//		pair_item->size_ratio = size_ratio;
-//		pair_item->dif_rmse = dif_rmse;
-//	}
-
 	return sv_pair_vec;
 }
 
@@ -161,7 +125,6 @@ void* computeOverlapSVPairSubset(void *arg){
 	vector<SV_item*> subset1, subset2;
 	vector<SV_pair*> sv_pair_vec;
 	SV_pair *pair_item;
-	bool overlap_flag;
 	int64_t start_idx, end_idx, new_start_idx, start_search_pos, end_search_pos;
 
 	subset1 = overlap_opt->subset1;
@@ -200,7 +163,6 @@ void* computeOverlapSVPairSubset(void *arg){
 		}
 
 		//begin overlap
-		overlap_flag = false;
 		end_idx = -1;
 		for(j=start_idx; j<subset2.size(); j++){
 			item2 = subset2.at(j);
@@ -208,7 +170,6 @@ void* computeOverlapSVPairSubset(void *arg){
 			overlap_type_vec = computeOverlapType(item1, item2);
 			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
 				end_idx = j;
-				overlap_flag = true;
 
 				if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
 					pair_item = new SV_pair();
@@ -217,35 +178,14 @@ void* computeOverlapSVPairSubset(void *arg){
 					sv_pair_vec.push_back(pair_item);
 					break;
 				}
-			}else{
-				if(overlap_flag) break;
-				else if(item2->endPos>start_search_pos){
-					end_idx = j - 1;
-					if(end_idx<0) end_idx = 0;
-					if(end_idx<start_idx) end_idx = start_idx;
-					break;
-				}
+			}else if(item2->startPos>end_search_pos){
+				end_idx = j - 1;
+				if(end_idx<0) end_idx = 0;
+				if(end_idx<start_idx) end_idx = start_idx;
+				break;
 			}
 		}
 	}
-
-
-//	for(i=0; i<subset1.size(); i++){
-//		item1 = subset1.at(i);
-//		for(j=0; j<subset2.size(); j++){
-//			item2 = subset2.at(j);
-//			overlap_type_vec = computeOverlapType(item1, item2);
-//			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
-//				if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
-//					pair_item = new SV_pair();
-//					pair_item->sv_item1 = item1;
-//					pair_item->sv_item2 = item2;
-//					sv_pair_vec.push_back(pair_item);
-//					break;
-//				}
-//			}
-//		}
-//	}
 
 	for(i=0; i<sv_pair_vec.size(); i++){
 		pair_item = sv_pair_vec.at(i);
