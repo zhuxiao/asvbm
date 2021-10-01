@@ -13,6 +13,7 @@
 
 #include "constants.h"
 #include "structure.h"
+#include "util.h"
 
 using namespace std;
 
@@ -27,7 +28,8 @@ vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &da
 vector<vector<SV_item*>> constructSubsetByChr(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data);
 set<string> getChrnames(vector<SV_item*> &dataset);
 set<string> getChrUnion(set<string> &chrname_set1, set<string> &chrname_set2);
-vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, set<string> &chrname_set);
+vector<string> sortChrnames(set<string> &chrname_set);
+vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, vector<string> &chrname_vec);
 void sortSubsets(vector<vector<SV_item*>> &subsets);
 void* sortSubsetOp(void *arg);
 bool sortFunSameChr(const SV_item *item1, const SV_item *item2);

@@ -86,8 +86,8 @@ vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> 
 }
 
 vector<SV_pair*> computeOverlapSVPairOp(vector<vector<SV_item*>> &subsets){
-	vector<SV_pair*> sv_pair_vec;
-	size_t i;
+	size_t i, j, subset_num = subsets.size() >> 1;
+	vector<SV_pair*> sv_pair_vec[subset_num+1];
 	overlapWork_opt *overlap_opt;
 
 	hts_tpool *p = hts_tpool_init(num_threads);
@@ -97,11 +97,11 @@ vector<SV_pair*> computeOverlapSVPairOp(vector<vector<SV_item*>> &subsets){
 
 	cout << "Computing SV pair information between user data and benchmark data ..." << endl;
 
-	for(i=0; i<subsets.size(); i+=2){
+	for(i=0; i<subset_num; i++){
 		overlap_opt = new overlapWork_opt();
-		overlap_opt->subset1 = subsets.at(i);
-		overlap_opt->subset2 = subsets.at(i+1);
-		overlap_opt->sv_pair_vec = &sv_pair_vec;
+		overlap_opt->subset1 = subsets.at(i*2);
+		overlap_opt->subset2 = subsets.at(i*2+1);
+		overlap_opt->sv_pair_vec = sv_pair_vec + i;
 
 		//if(overlap_opt->subset1.size()>0) cout << "\t" << overlap_opt->subset1.at(0)->chrname << ", user_data: " << overlap_opt->subset1.size() << ", benchmark_data: " << overlap_opt->subset2.size() << endl;
 		hts_tpool_dispatch(p, q, computeOverlapSVPairSubset, overlap_opt);
@@ -111,8 +111,13 @@ vector<SV_pair*> computeOverlapSVPairOp(vector<vector<SV_item*>> &subsets){
     hts_tpool_process_destroy(q);
     hts_tpool_destroy(p);
 
-	return sv_pair_vec;
+    // merge sub-results
+    for(i=0; i<subset_num; i++){
+    	for(j=0; j<sv_pair_vec[i].size(); j++) sv_pair_vec[subset_num].push_back(sv_pair_vec[i].at(j));
+    	vector<SV_pair*>().swap(sv_pair_vec[i]);
+    }
 
+	return sv_pair_vec[subset_num];
 }
 
 void* computeOverlapSVPairSubset(void *arg){

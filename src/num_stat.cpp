@@ -192,13 +192,15 @@ vector<vector<SV_item*>> intersect(vector<SV_item*> &user_data, vector<SV_item*>
 vector<vector<SV_item*>> constructSubsetByChr(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data){
 	vector< vector<SV_item*> > result;
 	set<string> chrname_set1, chrname_set2;
-	set<string> chrname_set;
+	set<string> chrname_set_tmp;
+	vector<string> chrname_vec_sorted;
 
 	chrname_set1 = getChrnames(user_data);
 	chrname_set2 = getChrnames(benchmark_data);
-	chrname_set = getChrUnion(chrname_set1, chrname_set2);
+	chrname_set_tmp = getChrUnion(chrname_set1, chrname_set2);
+	chrname_vec_sorted = sortChrnames(chrname_set_tmp); // sort chromosome names
 
-	result = constructSubsetByChrOp(user_data, benchmark_data, chrname_set);
+	result = constructSubsetByChrOp(user_data, benchmark_data, chrname_vec_sorted);
 
 	return result;
 }
@@ -250,14 +252,85 @@ set<string> getChrUnion(set<string> &chrname_set1, set<string> &chrname_set2){
 	return chrname_union;
 }
 
-vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, set<string> &chrname_set){
-	vector< vector<SV_item*> > result;
+vector<string> sortChrnames(set<string> &chrname_set){
+	int8_t *selected_flag_array;
+	size_t i, j;
+	int32_t idx_chr;
 	set<string>::iterator iter;
+	string chr_str1, chr_str2, head_str, head_str_chr, chrname;
+	vector<string> chrname_vec_sorted, chr_str_vec, chrname_vec;
+	bool have_chr_prefix_flag;
+
+	chr_str1 = "chr1_chr2_chr3_chr4_chr5_chr6_chr7_chr8_chr9_chr10_chr11_chr12_chr13_chr14_chr15_chr16_chr17_chr18_chr19_chr20_chr21_chr22_chrX_chrY_chrM";
+	chr_str2 = "1_2_3_4_5_6_7_8_9_10_11_12_13_14_15_16_17_18_19_20_21_22_X_Y_MT";
+
+	for(iter=chrname_set.begin(); iter!=chrname_set.end(); ++iter) chrname_vec.push_back(*iter);
+	selected_flag_array = (int8_t*) calloc(chrname_vec.size(), sizeof(int8_t));
+
+	// determine the have_chr_prefix_flag
+	have_chr_prefix_flag = false;
+	for(i=0; i<chrname_vec.size(); i++){
+		if(chrname_vec.at(i).compare("chr1")==0){
+			have_chr_prefix_flag = true;
+			break;
+		}
+	}
+
+	if(have_chr_prefix_flag) chr_str_vec = split(chr_str1, "_");
+	else chr_str_vec = split(chr_str2, "_");
+
+	// select chromosomes by 'chr'
+	for(i=0; i<chr_str_vec.size(); i++){
+		idx_chr = -1;
+		for(j=0; j<chrname_vec.size(); j++){
+			chrname = chrname_vec.at(j);
+			if(chrname.compare(chr_str_vec.at(i))==0){
+				idx_chr = j;
+				break;
+			}
+		}
+		if(idx_chr!=-1){
+			chrname = chrname_vec.at(idx_chr);
+			chrname_vec_sorted.push_back(chrname);
+			selected_flag_array[idx_chr] = 1;
+		}
+	}
+
+	// select chromosomes by 'chrA_*'
+	for(i=0; i<chr_str_vec.size(); i++){
+		head_str = chr_str_vec.at(i) + "_";
+		for(j=0; j<chrname_vec.size(); j++){
+			chrname = chrname_vec.at(j);
+			head_str_chr = chrname.substr(0, head_str.size());
+			if(head_str_chr.compare(head_str)==0){
+				chrname_vec_sorted.push_back(chrname);
+				selected_flag_array[j] = 1;
+			}
+		}
+	}
+
+	// add unselected items
+	for(i=0; i<chrname_vec.size(); i++){
+		if(selected_flag_array[i]==0){
+			chrname = chrname_vec.at(i);
+			chrname_vec_sorted.push_back(chrname);
+		}
+	}
+
+	vector<string>().swap(chrname_vec);	// free memory
+
+	free(selected_flag_array);
+
+	return chrname_vec_sorted;
+}
+
+vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, vector<string> &chrname_vec){
+	vector< vector<SV_item*> > result;
 	string chr;
 	vector<SV_item*> subset1, subset2;
 
-	for(iter=chrname_set.begin(); iter!=chrname_set.end(); ++iter){
-		chr = *iter;
+	for(size_t i=0; i<chrname_vec.size(); i++){
+		chr = chrname_vec.at(i);
 		subset1 = getItemsByChr(chr, user_data);
 		subset2 = getItemsByChr(chr, benchmark_data);
 		result.push_back(subset1);
@@ -341,8 +414,8 @@ void checkOrder(vector<vector<SV_item*>> &subsets){
 
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
 	vector<vector<SV_item*>> result;
-	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
-	size_t i;
+	size_t i, j, subset_num = subsets.size() >> 1;
+	vector<SV_item*> vec_tmp, intersect_vec_user[subset_num+1], intersect_vec_benchmark[subset_num+1], private_vec_user[subset_num+1], private_vec_benchmark[subset_num+1];
 	overlapWork_opt *overlap_opt;
 
 	hts_tpool *p = hts_tpool_init(num_threads);
@@ -352,14 +425,14 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
 
 	cout << "Computing intersect information between user data and benchmark data ..." << endl;
 
-	for(i=0; i<subsets.size(); i+=2){
+	for(i=0; i<subset_num; i++){
 		overlap_opt = new overlapWork_opt();
-		overlap_opt->subset1 = subsets.at(i);
-		overlap_opt->subset2 = subsets.at(i+1);
-		overlap_opt->intersect_vec_user = &intersect_vec_user;
-		overlap_opt->intersect_vec_benchmark = &intersect_vec_benchmark;
-		overlap_opt->private_vec_user = &private_vec_user;
-		overlap_opt->private_vec_benchmark = &private_vec_benchmark;
+		overlap_opt->subset1 = subsets.at(i*2);
+		overlap_opt->subset2 = subsets.at(i*2+1);
+		overlap_opt->intersect_vec_user = intersect_vec_user + i;
+		overlap_opt->intersect_vec_benchmark = intersect_vec_benchmark + i;
+		overlap_opt->private_vec_user = private_vec_user + i;
+		overlap_opt->private_vec_benchmark = private_vec_benchmark + i;
 
 		//if(overlap_opt->subset1.size()>0) cout << "\t" << overlap_opt->subset1.at(0)->chrname << ", user_data: " << overlap_opt->subset1.size() << ", benchmark_data: " << overlap_opt->subset2.size() << endl;
 		hts_tpool_dispatch(p, q, intersectSubset, overlap_opt);
@@ -369,10 +442,22 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets){
     hts_tpool_process_destroy(q);
     hts_tpool_destroy(p);
 
-	result.push_back(intersect_vec_user);
-	result.push_back(intersect_vec_benchmark);
-	result.push_back(private_vec_user);
-	result.push_back(private_vec_benchmark);
+    // merge sub-results
+    for(i=0; i<subset_num; i++){
+    	for(j=0; j<intersect_vec_user[i].size(); j++) intersect_vec_user[subset_num].push_back(intersect_vec_user[i].at(j));
+    	vector<SV_item*>().swap(intersect_vec_user[i]);
+    	for(j=0; j<intersect_vec_benchmark[i].size(); j++) intersect_vec_benchmark[subset_num].push_back(intersect_vec_benchmark[i].at(j));
+    	vector<SV_item*>().swap(intersect_vec_benchmark[i]);
+    	for(j=0; j<private_vec_user[i].size(); j++) private_vec_user[subset_num].push_back(private_vec_user[i].at(j));
+    	vector<SV_item*>().swap(private_vec_user[i]);
+    	for(j=0; j<private_vec_benchmark[i].size(); j++) private_vec_benchmark[subset_num].push_back(private_vec_benchmark[i].at(j));
+    	vector<SV_item*>().swap(private_vec_benchmark[i]);
+    }
+
+	result.push_back(intersect_vec_user[subset_num]);
+	result.push_back(intersect_vec_benchmark[subset_num]);
+	result.push_back(private_vec_user[subset_num]);
+	result.push_back(private_vec_benchmark[subset_num]);
 
 	return result;
 }
