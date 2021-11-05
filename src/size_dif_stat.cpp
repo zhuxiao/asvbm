@@ -123,14 +123,17 @@ vector<SV_pair*> computeOverlapSVPairOp(vector<vector<SV_item*>> &subsets){
 void* computeOverlapSVPairSubset(void *arg){
 	overlapWork_opt *overlap_opt = (overlapWork_opt *)arg;
 	SV_item *item1, *item2;
-	size_t i, j;
+	size_t i, j, k;
 	int32_t mid_loc1, mid_loc2, reg_size1, reg_size2;
 	double dif_size, size_ratio, dif_rmse;
 	vector<size_t> overlap_type_vec;
 	vector<SV_item*> subset1, subset2;
-	vector<SV_pair*> sv_pair_vec;
-	SV_pair *pair_item;
-	int64_t start_idx, end_idx, new_start_idx, start_search_pos, end_search_pos;
+	vector<SV_pair*> sv_pair_vec, sv_pair_vec_tmp;
+	SV_pair *pair_item, *pair_item1, *pair_item2;
+	int64_t h, start_idx, end_idx, new_start_idx, start_search_pos, end_search_pos, extendsize_tmp, startpos_tmp, endpos_tmp;
+	int64_t start_idx_tmp0, end_idx_tmp0, start_idx_tmp, end_idx_tmp, svlen_1, svlen_2;
+	float svlenRatio_tmp;
+	bool flag;
 
 	subset1 = overlap_opt->subset1;
 	subset2 = overlap_opt->subset2;
@@ -139,57 +142,157 @@ void* computeOverlapSVPairSubset(void *arg){
 	for(i=0; i<subset1.size(); i++){
 
 		item1 = subset1.at(i);
+		sv_pair_vec_tmp.clear();
 
-		//compute limit search regions
-		start_search_pos = item1->startPos - 2*extendSize;
-		end_search_pos = item1->endPos + 2*extendSize;
-		if(start_search_pos<1) start_search_pos = 1;
+		start_idx_tmp0 = start_idx;
+		end_idx_tmp0 = end_idx;
 
-		//compute start element index
-		if(start_idx==-1) start_idx = 0;
-		else{
-			new_start_idx = -1;
-			for(j=start_idx; j<subset2.size(); j++){
-				item2 = subset2.at(j);
-				overlap_type_vec = computeOverlapType(item1, item2);
-				if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
-					new_start_idx = j;
-					break;
-				}else if(item2->endPos>=start_search_pos){
-					new_start_idx = j;
-					break;
+		for(k=0; k<2; k++){
+
+			if(k==0) extendsize_tmp = 2 * extendSize;
+			else{
+				svlen_1 = item1->sv_len;
+				if(svlen_1<0) svlen_1 = -svlen_1;
+				if(svlen_1>=minSizeLargeSV)
+					extendsize_tmp = extendSizeLargeSV;
+				else
+					continue;
+			}
+
+			//compute limit search regions
+			start_search_pos = item1->startPos - extendsize_tmp;
+			end_search_pos = item1->endPos + extendsize_tmp;
+			if(start_search_pos<1) start_search_pos = 1;
+
+			//compute start element index
+			if(start_idx_tmp0==-1) start_idx = 0;
+			else{
+				new_start_idx = -1;
+				if(k==0){
+					for(j=start_idx_tmp0; j<subset2.size(); j++){
+						item2 = subset2.at(j);
+						overlap_type_vec = computeOverlapType(item1, item2);
+						if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+							new_start_idx = j;
+							break;
+						}else if(item2->endPos>=start_search_pos){
+							new_start_idx = j;
+							break;
+						}
+					}
+				}else{
+					if(start_idx_tmp0>=0 and start_idx_tmp0<(int64_t)subset2.size()){
+						for(h=start_idx_tmp0; h>=0; h--){
+							item2 = subset2.at(h);
+							startpos_tmp = item2->startPos - extendSize;
+							endpos_tmp = item2->endPos + extendSize;
+							if(startpos_tmp<1) startpos_tmp = 1;
+							flag = isOverlappedPos(startpos_tmp, endpos_tmp, start_search_pos, end_search_pos);
+							if(flag){
+								new_start_idx = h;
+							}else
+								break;
+						}
+					}
+				}
+
+				if(new_start_idx!=-1){
+					start_idx = new_start_idx;
+				}else{
+					start_idx = end_idx_tmp0;
 				}
 			}
-			if(new_start_idx!=-1){
-				start_idx = new_start_idx;
-			}else{
-				start_idx = end_idx;
+
+			//begin overlap
+			if(start_idx!=-1){ // valid start index
+				end_idx = -1;
+				if(k==0){
+					for(j=start_idx; j<subset2.size(); j++){
+						item2 = subset2.at(j);
+						item2->overlapped = false;
+
+						overlap_type_vec = computeOverlapType(item1, item2);
+						if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+							end_idx = j;
+
+							if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
+								pair_item = new SV_pair();
+								pair_item->sv_item1 = item1;
+								pair_item->sv_item2 = item2;
+								pair_item->sv_item2->overlapped = true;
+								sv_pair_vec_tmp.push_back(pair_item);
+								break;
+							}
+						}else if(item2->startPos>end_search_pos){
+							end_idx = j - 1;
+							if(end_idx<0) end_idx = 0;
+							if(end_idx<start_idx) end_idx = start_idx;
+							break;
+						}
+					}
+				}else{
+					for(j=start_idx; j<subset2.size(); j++){
+						item2 = subset2.at(j);
+
+						if(item2->overlapped==false){
+							svlen_2 = item2->sv_len;
+							if(svlen_2<0) svlen_2 = -svlen_2;
+
+							if(svlen_1<svlen_2) svlenRatio_tmp = float(svlen_1) / svlen_2;
+							else svlenRatio_tmp = float(svlen_2) / svlen_1;
+
+							if(svlenRatio_tmp>=svlenRatio){
+								if(item1->sv_type==item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){
+									end_idx = j;
+
+									if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
+										pair_item = new SV_pair();
+										pair_item->sv_item1 = item1;
+										pair_item->sv_item2 = item2;
+										pair_item->sv_item2->overlapped = true;
+										sv_pair_vec_tmp.push_back(pair_item);
+										break;
+									}
+								}
+							}
+						}
+
+						if(item2->startPos>end_search_pos){
+							end_idx = j - 1;
+							if(end_idx<0) end_idx = 0;
+							if(end_idx<start_idx) end_idx = start_idx;
+							break;
+						}
+	 				}
+				}
+
+				if(k==0){
+					start_idx_tmp = start_idx;
+					end_idx_tmp = end_idx;
+				}else{
+					start_idx = start_idx_tmp;
+					end_idx = end_idx_tmp;
+				}
 			}
 		}
 
-		//begin overlap
-		end_idx = -1;
-		for(j=start_idx; j<subset2.size(); j++){
-			item2 = subset2.at(j);
+		//sort according to the second item in the pair
+		if(sv_pair_vec_tmp.size()>=2){
+			for(k=0; k<sv_pair_vec_tmp.size(); k++){
+				for(j=0; j<sv_pair_vec_tmp.size()-k-1; j++){
+					pair_item1 = sv_pair_vec_tmp.at(j);
+					pair_item2 = sv_pair_vec_tmp.at(j+1);
 
-			overlap_type_vec = computeOverlapType(item1, item2);
-			if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
-				end_idx = j;
-
-				if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
-					pair_item = new SV_pair();
-					pair_item->sv_item1 = item1;
-					pair_item->sv_item2 = item2;
-					sv_pair_vec.push_back(pair_item);
-					break;
+					if(pair_item1->sv_item2->startPos>pair_item2->sv_item2->startPos){
+						pair_item = sv_pair_vec_tmp.at(j);
+						sv_pair_vec_tmp.at(j) = sv_pair_vec_tmp.at(j+1);
+						sv_pair_vec_tmp.at(j+1) = pair_item;
+					}
 				}
-			}else if(item2->startPos>end_search_pos){
-				end_idx = j - 1;
-				if(end_idx<0) end_idx = 0;
-				if(end_idx<start_idx) end_idx = start_idx;
-				break;
 			}
 		}
+
+		for(j=0;j<sv_pair_vec_tmp.size(); j++) sv_pair_vec.push_back(sv_pair_vec_tmp.at(j));
 	}
 
 	for(i=0; i<sv_pair_vec.size(); i++){
@@ -474,7 +577,7 @@ void outputRatioStatToFile(string &svSizeRatioStatFilename, vector<size_t> &rati
 void computeDifRmse(vector<SV_pair*> &sv_pair_vec){
 	size_t i;
 	double dif_rmse;
-	double Sum_size, rmse;
+	double Sum_size = 0, rmse;
 	if(sv_pair_vec.size()>0){
 		for(i=0; i<sv_pair_vec.size(); i++){
 			dif_rmse = sv_pair_vec.at(i)->dif_rmse;

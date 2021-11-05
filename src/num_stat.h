@@ -7,7 +7,7 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <set>
-#include<algorithm>
+#include <algorithm>
 #include <htslib/sam.h>
 #include <htslib/thread_pool.h>
 

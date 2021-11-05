@@ -162,6 +162,9 @@ int parseStat(int argc, char **argv){
 	maxValidRegThres = 0;
 	extendSize = EXTEND_SIZE;
 	threadNum_tmp = 0;
+	minSizeLargeSV = MIN_SIZE_LARGE_SV;
+	extendSizeLargeSV = EXTEND_SIZE_LARGE_SV;
+	svlenRatio = SVLEN_RATIO;
 	while( (opt = getopt(argc, argv, ":m:s:t:o:l:h")) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;

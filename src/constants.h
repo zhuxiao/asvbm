@@ -6,6 +6,11 @@
 
 #define EXTEND_SIZE					100  // 10
 
+#define MIN_SIZE_LARGE_SV			100
+#define EXTEND_SIZE_LARGE_SV		1000
+
+#define SVLEN_RATIO					0.8f
+
 #define NO_OVERLAP					0
 #define WHOLE_REG_OVERLAP			1
 
