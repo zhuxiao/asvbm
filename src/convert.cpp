@@ -30,7 +30,11 @@ void convertBed(const string &infilename, const string &outfilename, string &red
 
 				// get sv type and sv_len
 				sv_type_vec = getSVType(str_vec);
-				sv_len_vec = getSVLen(str_vec, sv_type_str);
+				//sv_len_vec = getSVLen(str_vec, sv_type_str);
+				sv_len_vec = getSVLen(str_vec, sv_type_vec);
+
+				sv_type_str = sv_type_vec.at(0);
+				sv_len = sv_len_vec.at(0);
 
 				if(sv_type_str.compare("DEL")==0 and sv_len_vec.at(0)>0) sv_len = -sv_len;
 				if(sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0){
@@ -250,7 +254,11 @@ void convertCsv(const string &infilename, const string &outfilename, string &red
 
 					// get sv type and length
 					sv_type_vec = getSVType(str_vec);
-					sv_len_vec = getSVLen(str_vec, sv_type_str);
+					sv_len_vec = getSVLen(str_vec, sv_type_vec);
+					sv_type_str = sv_type_vec.at(0);
+					sv_len = sv_len_vec.at(0);
+					//if(sv_type_str.compare("DEL")==0 and sv_len_vec.at(0)>0) sv_len = -sv_len;
+					//if(sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0){
 					if(sv_type_str.compare("DEL")==0 and sv_len_vec.at(0)>0) sv_len = -sv_len;
 					if(sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0){
 						chrname2 = str_vec.at(3);
@@ -261,6 +269,7 @@ void convertCsv(const string &infilename, const string &outfilename, string &red
 						start_pos2 = endpos2 = 0;
 					}
 
+					//sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
 					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
 					sv_item_vec.push_back(sv_item);
 				}
@@ -316,10 +325,22 @@ void convertNm(const string &infilename, const string &outfilename, string &redu
 				sv_type_vec = getSVType(str_vec);
 
 				// get sv length
-				sv_len_vec = getSVLen(str_vec, sv_type_str);
+				//sv_len_vec = getSVLen(str_vec, sv_type_str);
+				sv_len_vec = getSVLen(str_vec, sv_type_vec);
 
-				chrname2 = "";
-				start_pos2 = endpos2 = 0;
+				sv_type_str = sv_type_vec.at(0);
+				sv_len = sv_len_vec.at(0);
+				if(sv_type_str.compare("DEL")==0 and sv_len_vec.at(0)>0) sv_len = -sv_len;
+				if(sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0){
+					chrname2 = str_vec.at(3);
+					start_pos2 = stoi(str_vec.at(4));
+					endpos2 = stoi(str_vec.at(5));
+				}else{
+					chrname2 = "";
+					start_pos2 = endpos2 = 0;
+				}
+//				chrname2 = "";
+//				start_pos2 = endpos2 = 0;
 
 				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
 				sv_item_vec.push_back(sv_item);
@@ -360,7 +381,10 @@ vector<string> getSVType(vector<string> &str_vec){
 			sv_type_str = str_tmp.substr(1, str_tmp.size()-2);
 		}else if(str_tmp.compare("insertion")==0 or str_tmp.compare("deletion")==0 or str_tmp.compare("duplication")==0 or str_tmp.compare("inversion")==0 or str_tmp.compare("translocation")==0 or str_tmp.compare("snv")==0){
 			sv_type_str = str_tmp;
+		}
+		if(sv_type_str.size()>0) {
 			sv_type_vec.push_back(sv_type_str);
+			break;
 		}
 	}
 
@@ -394,6 +418,8 @@ vector<string> getSVType(vector<string> &str_vec){
 			}
 			if(end_pos==-1) end_pos = str_tmp.size() - 1;
 			sv_type_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
+			if(sv_type_str.size()>0)
+				sv_type_vec.push_back(sv_type_str);
 		}
 	}
 
@@ -545,53 +571,181 @@ vector<int32_t> getSVLen(vector<string> &str_vec, string &sv_type){
 	return sv_len_vec;
 }
 
+// get SV length
+vector<int32_t> getSVLen(vector<string> &str_vec, vector<string> &sv_type_vec){
+	int32_t sv_len, sv_len1, sv_len2, vec_idx, str_pos, sv_length_pos, SVLEN_pos, start_pos, end_pos, sv_END_pos;
+	size_t i, j, n;
+	string str_tmp, sv_len_str, sv_type_str;
+	bool flag, is_seq_flag_ref, is_seq_flag_alt, is_comma_flag;
+	vector<string> comma_str_vec;
+	vector<int32_t> sv_len_vec;
+
+	for(n=0; n<sv_type_vec.size(); n++){
+		flag = false;
+		sv_len = 0;
+		sv_type_str = sv_type_vec.at(n);
+		if(sv_type_str.compare("TRA")!=0 and sv_type_str.compare("BND")!=0){ // not TRA
+			// sv_length, or SVLEN
+			vec_idx = str_pos = -1;
+			for(i=3; i<str_vec.size(); i++){
+				str_tmp = str_vec.at(i);
+				sv_length_pos = str_tmp.find("sv_length=");
+				if(sv_length_pos!=-1){
+					vec_idx = i;
+					str_pos = sv_length_pos + 10;
+					break;
+				}else{
+					SVLEN_pos = str_tmp.find("SVLEN=");
+					if(SVLEN_pos!=-1){
+						vec_idx = i;
+						str_pos = SVLEN_pos + 6;
+						break;
+					}
+				}
+			}
+
+			if(vec_idx!=-1 and str_pos!=-1){ // found
+				str_tmp = str_vec.at(vec_idx);
+				start_pos = str_pos; end_pos = -1;
+				for(j=start_pos; j<str_tmp.size(); j++){ // search ';'
+					if(str_tmp.at(j)==';'){
+						end_pos = j - 1;
+						break;
+					}
+				}
+				if(end_pos==-1) end_pos = str_tmp.size() - 1;
+				sv_len_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
+				if(sv_len_str.find_first_not_of("-0123456789")==string::npos) {
+					sv_len = stoi(sv_len_str);
+					sv_len_vec.push_back(sv_len);
+					flag = true;
+					if(sv_len>=MAX_VALID_SVLEN) { sv_len_str = ""; sv_len = 0; flag = false; }
+				}else { sv_len_str = ""; flag = false; }
+			}
+
+			// 'SVLEN' was not detected, then further detect 'END'
+			if(flag==false){
+				vec_idx = str_pos = -1;
+				for(i=3; i<str_vec.size(); i++){
+					str_tmp = str_vec.at(i);
+					sv_END_pos = str_tmp.find("END=");
+					if(sv_END_pos!=-1){
+						vec_idx = i;
+						str_pos = sv_END_pos + 4;
+						break;
+					}
+				}
+
+				if(vec_idx!=-1 and str_pos!=-1){ // found
+					str_tmp = str_vec.at(vec_idx);
+					start_pos = str_pos; end_pos = -1;
+					for(j=start_pos; j<str_tmp.size(); j++){ // search ';'
+						if(str_tmp.at(j)==';'){
+							end_pos = j - 1;
+							break;
+						}
+					}
+					if(end_pos==-1) end_pos = str_tmp.size() - 1;
+					sv_len_str = str_tmp.substr(start_pos, end_pos-start_pos+1);
+					if(sv_len_str.find_first_not_of("-0123456789")==string::npos) { sv_len = stoi(sv_len_str) - stoi(str_vec.at(1)) + 1; sv_len_vec.push_back(sv_len); flag = true; }
+				}else{ // not found
+					// check sequence
+					is_seq_flag_ref = isSeq(str_vec.at(3));
+					if(is_seq_flag_ref){
+						is_seq_flag_alt = isSeq(str_vec.at(4));
+						if(is_seq_flag_alt){
+							sv_len = (int32_t)str_vec.at(4).size() - (int32_t)str_vec.at(3).size();
+							sv_len_vec.push_back(sv_len);
+							flag = true;
+						}else{
+							str_tmp = str_vec.at(4);
+							is_comma_flag = isComma(str_vec.at(4));
+							if(is_comma_flag){
+								comma_str_vec = split(str_vec.at(4), ",");
+								sv_len1 = (int32_t)comma_str_vec.at(0).size() - (int32_t)str_vec.at(3).size();
+								sv_len2 = (int32_t)comma_str_vec.at(1).size() - (int32_t)str_vec.at(3).size();
+								sv_len_vec.push_back(sv_len1);
+								sv_len_vec.push_back(sv_len2);
+								flag = true;
+							}else{
+								if(str_tmp.at(0)=='<' and str_tmp.at(str_tmp.size()-1)=='>'){
+									sv_len = 0;
+									sv_len_vec.push_back(sv_len);
+									flag = true;
+								}
+							}
+						}
+					}
+
+					// no sequence
+					if(flag==false){
+						start_pos = stoi(str_vec.at(1));
+						end_pos = stoi(str_vec.at(2));
+						sv_len = end_pos - start_pos + 1;
+						sv_len_vec.push_back(sv_len);
+						flag = true;
+					}
+				}
+			}
+			if(flag==false) cout << "missing SVLEN information" << endl;
+		}else sv_len_vec.push_back(sv_len);
+	}
+
+	return sv_len_vec;
+}
+
 bool isSeq(string &seq){
-	bool flag = false;
+	bool flag = true;
 	bool comma_flag = false;
 	char ch;
 	for(size_t i=0; i<seq.size(); i++){
 		ch = seq.at(i);
 		switch(ch){
-					case 'A':
-					case 'a':
-					case 'C':
-					case 'c':
-					case 'G':
-					case 'g':
-					case 'T':
-					case 't':
-					case 'N':
-					case 'n':
-					case 'M':
-					case 'm':
-					case 'R':
-					case 'r':
-					case 'S':
-					case 's':
-					case 'V':
-					case 'v':
-					case 'W':
-					case 'w':
-					case 'Y':
-					case 'y':
-					case 'H':
-					case 'h':
-					case 'K':
-					case 'k':
-					case 'D':
-					case 'd':
-					case 'B':
-					case 'b':
-						flag = true;
-						break;
-					case ',':
-						flag = true;
-						comma_flag = true;
-						break;
-					default: cerr << __func__ << ": unknown base: " << ch << endl; exit(1);
-				}
+			case 'A':
+			case 'a':
+			case 'C':
+			case 'c':
+			case 'G':
+			case 'g':
+			case 'T':
+			case 't':
+			case 'N':
+			case 'n':
+			case 'M':
+			case 'm':
+			case 'R':
+			case 'r':
+			case 'S':
+			case 's':
+			case 'V':
+			case 'v':
+			case 'W':
+			case 'w':
+			case 'Y':
+			case 'y':
+			case 'H':
+			case 'h':
+			case 'K':
+			case 'k':
+			case 'D':
+			case 'd':
+			case 'B':
+			case 'b':
+				//flag = true;
+				break;
+			case ',':
+				flag = false;
+				comma_flag = true;
+				break;
+			default:
+				flag = false;
+				break;
+			//default: cerr << __func__ << ": unknown base: " << ch << endl; exit(1);
+		}
+		if(comma_flag) flag = false;
+		if(!flag) break;
 	}
-	if(comma_flag) flag = false;
+	//if(comma_flag) flag = false;
 	return flag;
 }
 

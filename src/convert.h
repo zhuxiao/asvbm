@@ -20,6 +20,7 @@ void convertCsv(const string &infilename, const string &outfilename, string &red
 void convertNm(const string &infilename, const string &outfilename, string &redundant_filename, string &snv_filename);
 vector<string> getSVType(vector<string> &str_vec);
 vector<int32_t> getSVLen(vector<string> &str_vec, string &sv_type);
+vector<int32_t> getSVLen(vector<string> &str_vec, vector<string> &sv_type_vec);
 bool isSeq(string &seq);
 bool isComma(string &seq);
 

@@ -200,6 +200,7 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 			case VAR_BND: sv_type_str = "BND"; break;
 			case VAR_INV_TRA: sv_type_str = "INVTRA"; break;
 			case VAR_MIX: sv_type_str = "MIX"; break;
+			case VAR_MNP: sv_type_str = "MNP"; break;
 			case VAR_SNV: sv_type_str = "SNV"; break;
 			case VAR_CNV: sv_type_str = "CNV"; break;
 			default:
