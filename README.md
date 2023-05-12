@@ -50,7 +50,7 @@ There are two commands for SV_STAT: `convert` and `stat`. The help information a
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.1
+Version: 0.5.2
 
 Usage:  sv_stat  <command> [options]
 
@@ -77,7 +77,7 @@ And the help information are below:
 ```sh
 $ sv_stat convert
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.1
+Version: 0.5.2
 
 Usage:  sv_stat convert [options] <infile> <outfile>
 
@@ -101,7 +101,7 @@ And the help information are shown below:
 ```sh
 $ sv_stat stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.1
+Version: 0.5.2
 
 Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
 
@@ -141,7 +141,7 @@ Moreover, the overall simplified statistics will be output to the terminal scree
 
 ------------------------------------------------------------------------------
 ## Contact
-If you have problems or some suggestions, please contact: zhuxiao_hit@yeah.net without hesitation.
+If you have problems or some suggestions, please contact: xzhu@ytu.edu.cn without hesitation.
 
 ---- Enjoy !!! -----
 

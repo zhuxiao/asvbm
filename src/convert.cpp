@@ -179,7 +179,8 @@ void convertVcf(const string &infilename, const string &outfilename, string &red
 						endpos = stoi(endpos_str);
 						start_pos2 = stoi(start_pos_str2);
 						endpos2 = stoi(endpos_str2);
-						sv_len = stoi(sv_len_str);
+						if(sv_len_str.size()>0) sv_len = stoi(sv_len_str);
+						else sv_len = 0;
 
 						if(sv_type_str.compare("DEL")==0) sv_len = -sv_len;
 
