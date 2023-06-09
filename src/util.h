@@ -14,5 +14,6 @@ string double2Str(double num, int32_t fixedPrecision);
 bool isBase(const char ch);
 void printSV(vector<SV_item*> &data);
 string getProgramCmdStr(int argc, char *argv[]);
+bool isDigitString(string &str);
 
 #endif /* SRC_UTIL_H_ */

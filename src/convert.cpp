@@ -1,6 +1,6 @@
 #include "convert.h"
 #include "util.h"
-
+#include <typeinfo>
 // convert data
 void convertBed(const string &infilename, const string &outfilename, string &redundant_filename, string &snv_filename){
 	ifstream infile;
@@ -245,17 +245,21 @@ void convertCsv(const string &infilename, const string &outfilename, string &red
 	// convert
 	while(getline(infile, line)){
 		if(line.size()>0){
+
 			if(line.at(0)!='#'){
 				str_vec = split(line, ",");
 				if(str_vec.at(0).size()>0){
 
 					chrname = str_vec.at(0);
+					if(isDigitString(str_vec.at(1))==false or isDigitString(str_vec.at(2))==false)
+						continue;
 					start_pos = stoi(str_vec.at(1));
 					endpos = stoi(str_vec.at(2));
 
 					// get sv type and length
 					sv_type_vec = getSVType(str_vec);
 					sv_len_vec = getSVLen(str_vec, sv_type_vec);
+
 					sv_type_str = sv_type_vec.at(0);
 					sv_len = sv_len_vec.at(0);
 					//if(sv_type_str.compare("DEL")==0 and sv_len_vec.at(0)>0) sv_len = -sv_len;

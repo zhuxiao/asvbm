@@ -134,3 +134,17 @@ string getProgramCmdStr(int argc, char *argv[]){
 	for(int i=1; i<argc; i++) program_cmd_str = program_cmd_str + " " + argv[i];
 	return program_cmd_str;
 }
+
+bool isDigitString(string &str){
+	bool flag = true;
+	for (unsigned i = 0; i < str.size(); i++)
+	   {
+//	    cout<<"panduan:"<<isdigit(str[i])<<endl;
+	    if (isdigit(str[i])==false)
+	      {
+	           flag = false;
+	           break;
+	       }
+	    }
+	return flag;
+}
