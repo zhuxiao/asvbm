@@ -251,8 +251,7 @@ void convertCsv(const string &infilename, const string &outfilename, string &red
 				if(str_vec.at(0).size()>0){
 
 					chrname = str_vec.at(0);
-					if(isDigitString(str_vec.at(1))==false or isDigitString(str_vec.at(2))==false)
-						continue;
+					if(isDigitString(str_vec.at(1))==false or isDigitString(str_vec.at(2))==false)  continue;
 					start_pos = stoi(str_vec.at(1));
 					endpos = stoi(str_vec.at(2));
 
