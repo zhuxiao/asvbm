@@ -55,6 +55,7 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND and item->sv_type!=VAR_INV_TRA){
 			if(item->chrname.size()>0) reg_size = item->endPos - item->startPos + 1;
 			else reg_size = item->endPos2 - item->startPos2 + 1;
+			if(reg_size<(size_t)item->sv_len) reg_size = item->sv_len;
 			if(reg_size<=SV_SIZE_ARR_SIZE) count_array[reg_size] ++;
 			else count_array[SV_SIZE_ARR_SIZE+1] ++;
 		}

@@ -24,13 +24,9 @@ And the binary file `sv_stat` will be output into the folder `bin` in this packa
 
 ## File format description
 
-Both the user-called SV set and the benchmark data set are in bed file format with the first 5 columns are below:
+Before using SV_STAT, both the user-called SV set and the benchmark data set are in bed file format with the first 5 columns are below:
 ```sh
 chromosome	start_ref_pos	end_ref_pos	SV_type	SV_len
-```
-Ensure that the first five columns of the CSV file meet the following format when converting it to the BED file format: 
-```sh
-chromosome,start_ref_pos,end_ref_pos,SV_type,SV_len
 ```
 For translocations, the file format should be bedpe before using SV_STAT, and the first 8 columns are listed as below:
 ```sh
@@ -54,7 +50,7 @@ There are two commands for SV_STAT: `convert` and `stat`. The help information a
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.3
+Version: 0.5.4
 
 Usage:  sv_stat  <command> [options]
 
@@ -81,7 +77,7 @@ And the help information are below:
 ```sh
 $ sv_stat convert
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.3
+Version: 0.5.4
 
 Usage:  sv_stat convert [options] <infile> <outfile>
 
@@ -105,7 +101,7 @@ And the help information are shown below:
 ```sh
 $ sv_stat stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.3
+Version: 0.5.4
 
 Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
 

@@ -2,7 +2,7 @@
 #include "util.h"
 #include <typeinfo>
 // convert data
-void convertBed(const string &infilename, const string &outfilename, string &redundant_filename, string &snv_filename){
+void convertBed(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
 	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec, sv_type_vec;
@@ -53,8 +53,8 @@ void convertBed(const string &infilename, const string &outfilename, string &red
 	}
 	infile.close();
 
-	// remove redundant sv items
-	if(redundant_filename.size()) removeRedundantSVItems(redundant_filename, sv_item_vec);
+	// remove mate sv items
+	if(mate_filename.size()) removemateSVItems(mate_filename, sv_item_vec);
 
 	// remove snv items
 	if(snv_filename.size()) removeSNVItems(snv_filename, sv_item_vec);
@@ -67,7 +67,7 @@ void convertBed(const string &infilename, const string &outfilename, string &red
 }
 
 // convert vcf result
-void convertVcf(const string &infilename, const string &outfilename, string &redundant_filename, string &snv_filename){
+void convertVcf(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
 	string line, chrname, start_pos_str, endpos_str, endpos_str_1, endpos_str_2, chrname2, start_pos_str2, endpos_str2, sv_type_str, sv_type_str1, sv_type_str2, sv_len_str, sv_len_str1, sv_len_str2, bnd_str, bnd_pos_str, str_tmp;
 	size_t start_pos, endpos, endpos_1, endpos_2, start_pos2, endpos2;
@@ -212,8 +212,8 @@ void convertVcf(const string &infilename, const string &outfilename, string &red
 	}
 	infile.close();
 
-	// remove redundant sv items
-	if(redundant_filename.size()) removeRedundantSVItems(redundant_filename, sv_item_vec);
+	// remove mate sv items
+	if(mate_filename.size()) removemateSVItems(mate_filename, sv_item_vec);
 
 	// remove snv items
 	if(snv_filename.size()) removeSNVItems(snv_filename, sv_item_vec);
@@ -226,7 +226,7 @@ void convertVcf(const string &infilename, const string &outfilename, string &red
 }
 
 // convert data
-void convertCsv(const string &infilename, const string &outfilename, string &redundant_filename, string &snv_filename){
+void convertCsv(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
 	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec, sv_type_vec;
@@ -251,7 +251,8 @@ void convertCsv(const string &infilename, const string &outfilename, string &red
 				if(str_vec.at(0).size()>0){
 
 					chrname = str_vec.at(0);
-					if(isDigitString(str_vec.at(1))==false or isDigitString(str_vec.at(2))==false)  continue;
+					if(isDigitString(str_vec.at(1))==false or isDigitString(str_vec.at(2))==false)
+						continue;
 					start_pos = stoi(str_vec.at(1));
 					endpos = stoi(str_vec.at(2));
 
@@ -282,8 +283,8 @@ void convertCsv(const string &infilename, const string &outfilename, string &red
 	}
 	infile.close();
 
-	// remove redundant sv items
-	if(redundant_filename.size()) removeRedundantSVItems(redundant_filename, sv_item_vec);
+	// remove mate sv items
+	if(mate_filename.size()) removemateSVItems(mate_filename, sv_item_vec);
 
 	// remove snv items
 	if(snv_filename.size()) removeSNVItems(snv_filename, sv_item_vec);
@@ -296,7 +297,7 @@ void convertCsv(const string &infilename, const string &outfilename, string &red
 }
 
 // convert data
-void convertNm(const string &infilename, const string &outfilename, string &redundant_filename, string &snv_filename){
+void convertNm(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
 	string line, chrname, chrname2, sv_type_str;
 	vector<string> str_vec, sv_type_vec;
@@ -353,8 +354,8 @@ void convertNm(const string &infilename, const string &outfilename, string &redu
 	}
 	infile.close();
 
-	// remove redundant sv items
-	if(redundant_filename.size()) removeRedundantSVItems(redundant_filename, sv_item_vec);
+	// remove mate sv items
+	if(mate_filename.size()) removemateSVItems(mate_filename, sv_item_vec);
 
 	// remove snv items
 	if(snv_filename.size()) removeSNVItems(snv_filename, sv_item_vec);
@@ -812,17 +813,17 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 	return item;
 }
 
-// remove redundant SV items
-void removeRedundantSVItems(string &redundant_filename, vector<SV_item*> &sv_item_vec){
-	size_t i, j, redundant_num;
+// remove mate SV items
+void removemateSVItems(string &mate_filename, vector<SV_item*> &sv_item_vec){
+	size_t i, j, mate_num;
 	SV_item *item, *item2;
 	ofstream redudant_file;
 	string line, sv_type_str;
 
-	cout << ">>>>>>>>> Remove redundant variant items <<<<<<<<<" << endl;
-	cout << "Before removing redundant variant items, data size: " << sv_item_vec.size() << endl;
-	outConvertScreenFile << ">>>>>>>>> Remove redundant variant items <<<<<<<<<" << endl;
-	outConvertScreenFile << "Before removing redundant variant items, data size: " << sv_item_vec.size() << endl;
+	cout << ">>>>>>>>> Remove duplicated mate variant items <<<<<<<<<" << endl;
+	cout << "Before removing duplicated mate variant items, data size: " << sv_item_vec.size() << endl;
+	outConvertScreenFile << ">>>>>>>>> Remove duplicated mate variant items <<<<<<<<<" << endl;
+	outConvertScreenFile << "Before removing duplicated mate variant items, data size: " << sv_item_vec.size() << endl;
 
 	for(i=0; i<sv_item_vec.size(); i++){
 		item = sv_item_vec.at(i);
@@ -837,10 +838,10 @@ void removeRedundantSVItems(string &redundant_filename, vector<SV_item*> &sv_ite
 		}
 	}
 
-	redundant_filename = outputPathname + redundant_filename;
-	redudant_file.open(redundant_filename);
+	mate_filename = outputPathname + mate_filename;
+	redudant_file.open(mate_filename);
 	if(!redudant_file.is_open()){
-		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << redundant_filename << endl;
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << mate_filename << endl;
 		exit(1);
 	}
 
@@ -848,7 +849,7 @@ void removeRedundantSVItems(string &redundant_filename, vector<SV_item*> &sv_ite
 	redudant_file << line << endl;
 
 	// remove items
-	redundant_num = 0;
+	mate_num = 0;
 	for(i=0; i<sv_item_vec.size(); ){
 		item = sv_item_vec.at(i);
 		if(item->validFlag==false){
@@ -869,19 +870,19 @@ void removeRedundantSVItems(string &redundant_filename, vector<SV_item*> &sv_ite
 			}
 			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
 			redudant_file << line << endl;
-			redundant_num ++;
+			mate_num ++;
 
-			// delete redundant items
+			// delete mate items
 			sv_item_vec.erase(sv_item_vec.begin()+i);
 			delete item;
 		}else i++;
 	}
 	redudant_file.close();
 
-	cout << "After removing redundant variant items, data size: " << sv_item_vec.size() << endl;
-	outConvertScreenFile << "After removing redundant variant items, data size: " << sv_item_vec.size() << endl;
-	cout << redundant_num << " redundant items were saved to " << redundant_filename << endl;
-	outConvertScreenFile << redundant_num << " redundant items were saved to " << redundant_filename << endl;
+	cout << "After removing duplicated mate variant items, data size: " << sv_item_vec.size() << endl;
+	outConvertScreenFile << "After removing duplicated mate variant items, data size: " << sv_item_vec.size() << endl;
+	cout << mate_num << " duplicated mate items were saved to " << mate_filename << endl;
+	outConvertScreenFile << mate_num << " duplicated mate items were saved to " << mate_filename << endl;
 }
 
 //remove SNV

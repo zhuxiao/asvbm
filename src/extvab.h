@@ -30,7 +30,7 @@ extern float svlenRatio;
 
 extern int32_t maxValidRegThres;
 extern string snvFilename;
-extern string redundantItemFilename;
+extern string mateItemFilename;
 extern string longSVFilename;
 extern string svSizeDifRatioFilename;
 extern string svSizeDifStatFilename;
