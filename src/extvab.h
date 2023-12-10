@@ -10,6 +10,10 @@ using namespace std;
 // global variables
 
 extern string outputPathname;
+extern string outputInsideToolDirname;
+extern string outputBasicMetricschart;
+extern string outputDiffRangeBasicMetricschart;
+extern string SVsizeratiofile;
 extern string refRegSizeStatDirname;
 extern string numStatDirname;
 extern string sizeDifStatDirname;
@@ -27,6 +31,28 @@ extern int32_t extendSize;
 extern int32_t minSizeLargeSV;
 extern int32_t extendSizeLargeSV;
 extern float svlenRatio;
+extern string typeMatchLevel;
+extern vector<float> data;
+extern vector<int> data1;
+extern vector< vector<float> > MeticsValues;
+extern vector< vector<int> > MeticsValues1;
+extern vector<float> data_4;
+extern vector<int> data1_4;
+extern vector< vector<float> > MeticsValues_4;
+extern vector< vector<int> > MeticsValues1_4;
+
+extern vector< vector<float> > MeticsValues4_0;
+extern vector< vector<float> > MeticsValues4_1;
+extern vector< vector<float> > MeticsValues4_2;
+extern vector< vector<float> > MeticsValues4_3;
+extern vector< vector<float> > MeticsValues4_4;
+extern vector< vector<float> > MeticsValues4_5;
+extern vector< vector<float> > MeticsValues4_6;
+
+extern vector<vector<int>> SizeRatioV;
+extern vector<vector<double>> SizeRatio_V;
+
+extern vector<string> SVSizeRatioFile;
 
 extern int32_t maxValidRegThres;
 extern string snvFilename;

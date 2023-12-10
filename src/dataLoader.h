@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#define MIN_DATA_COLS_NUM		7
+
 vector<SV_item*> loadData(const string &filename);
 vector<SV_item*> loadDataWithoutTra(const string &filename);
 vector<SV_item*> loadDataTra(string &filename);

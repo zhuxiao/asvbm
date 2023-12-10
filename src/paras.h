@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <fstream>
+#include <sstream>
 #include <vector>
 #include <getopt.h>
 #include <unistd.h>
@@ -15,13 +16,15 @@
 #include "size_dif_stat.h"
 #include "size_num_stat.h"
 #include "util.h"
+#include "meminfo.h"
+#include "gnuplotcall.h"
 
 using namespace std;
 
 // program variables
 #define PROG_NAME		"SV_STAT"
 #define PROG_DESC		"A tool for Structural Variant Statistics Evaluation"
-#define PROG_VERSION	"0.5.4"
+#define PROG_VERSION	"0.6.0"
 
 
 void showUsage();
@@ -30,10 +33,12 @@ void showUsageStat();
 int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
 
-void convert(string &infilename, string &outfilename, string &mate_filename, string &snv_filename, string &sv_format);
-void SVStat(string &user_file, string &benchmark_file);
+void convert(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format);
+//void SVStat(string &ref_file, string &user_file, string &benchmark_file);
+void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names);
+void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names);
 
-void printConvertParas(string &infilename, string &outfilename, string &mate_filename, string &snv_filename, string &sv_format);
-void printStatParas(string &user_file, string &benchmark_file);
+void printConvertParas(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format);
+void printStatParas(string &user_file, string &benchmark_file, string &ref_file);
 
 #endif /* SRC_PARAS_H_ */

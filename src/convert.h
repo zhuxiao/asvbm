@@ -13,18 +13,20 @@
 
 using namespace std;
 
+#define Max_SeqLen    50000  //The maximum length of the sequence
 
-void convertBed(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename);
-void convertVcf(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename);
-void convertCsv(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename);
-void convertNm(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename);
+
+void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename);
+void convertVcf(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename);
+void convertCsv(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename);
+void convertNm(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename);
 vector<string> getSVType(vector<string> &str_vec);
 vector<int32_t> getSVLen(vector<string> &str_vec, string &sv_type);
 vector<int32_t> getSVLen(vector<string> &str_vec, vector<string> &sv_type_vec);
 bool isSeq(string &seq);
 bool isComma(string &seq);
 
-SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len);
+SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len, string &ref_seq, string &alt_seq);
 void removemateSVItems(string &mate_filename, vector<SV_item*> &sv_item_vec);
 void removeSNVItems(string &snv_filename, vector<SV_item*> &sv_item_vec);
 void releaseSVItemVec(vector<SV_item*> &sv_item_vec);

@@ -98,6 +98,11 @@ SV_item *constructSVItem(string &line){
 	if(line.size()>0){
 		str_vec = split(line, "\t");
 
+		if(str_vec.size()<MIN_DATA_COLS_NUM){
+			cerr << "Error: The dataset should include nucleotide sequences, please use the 'convert' command of sv_stat to generate them." << endl;
+			exit(1);
+		}
+
 		item = new SV_item();
 		item->chrname = str_vec.at(0);
 		if(str_vec.at(1).compare("-")==0) item->startPos = 0;
@@ -140,6 +145,9 @@ SV_item *constructSVItem(string &line){
 		if(item->sv_type==VAR_TRA or item->sv_type==VAR_BND) item->sv_len = 0;
 		else item->sv_len = stoi(str_vec.at(4));
 		item->overlapped = false;
+
+		item->ref_seq = str_vec.at(5);
+		item->alt_seq = str_vec.at(6);
 	}
 
 	return item;
@@ -184,7 +192,7 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 		exit(1);
 	}
 
-	line = "#chr\tstartPos\tendPos\tSVType\tSVLen";
+	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt";
 	outfile << line << endl;
 
 	for(size_t i=0; i<data.size(); i++){
@@ -209,9 +217,9 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 		}
 
 		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND)
-			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
+			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq;
 		else
-			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
+			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq;
 		outfile << line << endl;
 	}
 

@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <cstring>
+#include <htslib/faidx.h>
 
 using namespace std;
 
@@ -34,6 +35,7 @@ typedef struct {
 	bool traOverlappedArr[4];	// four TRA breakpoints, default: false
 	size_t sv_type;
 	int32_t sv_len;
+	string ref_seq, alt_seq;
 }SV_item;
 
 typedef struct {
@@ -51,6 +53,7 @@ typedef struct {
 	vector<SV_item*> subset1, subset2;
 	vector<SV_item*> *intersect_vec_user, *intersect_vec_benchmark, *private_vec_user, *private_vec_benchmark;
 	vector<SV_pair*> *sv_pair_vec;
+	faidx_t *fai;
 }overlapWork_opt;
 
 typedef struct {

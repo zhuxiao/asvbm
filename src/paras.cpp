@@ -1,6 +1,7 @@
 #include "paras.h"
 #include "global.h"
 
+
 // show usage
 void showUsage(){
 
@@ -20,7 +21,7 @@ void showUsageConvert(){
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
-	cout << "Usage:  sv_stat convert [options] <infile> <outfile>" << endl << endl;
+	cout << "Usage:  sv_stat convert [options] <Ref> <infile> <outfile>" << endl << endl;
 
 	cout << "Options:" << endl;
 	cout << "     -f STR       SV input file format (required):" << endl;
@@ -42,20 +43,28 @@ void showUsageStat(){
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
-	cout << "Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>" << endl << endl;
+	cout << "Usage:  sv_stat stat [options] <REFERENCE_FILE> <USER_SV_FILE> <BENCHMARK_SV_FILE>" << endl << endl;
 
 	cout << "Description:" << endl;
+	cout << "     REFERENCE_FILE       Reference file." << endl;
 	cout << "     USER_SV_FILE         User called SV result file." << endl;
 	cout << "     BENCHMARK_SV_FILE    Benchmark SV file." << endl << endl;
 
 	cout << "Options:" << endl;
-	cout << "     -m INT       valid maximal region size for statistics: [0]" << endl;
+	cout << "     -m INT       valid maximal region size for statistics: [50000]" << endl;
 	cout << "                  0 is for all variant size are valid, and while positive" << endl;
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
 	cout << "                  regions are omitted and saved to the file specified with -l" << endl;
+	cout << "     -L STR       Variant type matching pattern: [strict]" << endl;
+	cout << "                  strict: strict variant type matching" << endl;
+	cout << "                  loose: treating duplications as insertions" << endl;
 	cout << "     -s INT       overlap extend size: [" << EXTEND_SIZE << "]" << endl;
 	cout << "     -t INT       number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "                  in machine" << endl;
+	cout << "     -T STRING    Tool names [0]. 0 indicates that the tool name is not entered." << endl;
+	cout << "                  This parameter is used for comparing multiple datasets. The number" << endl;
+	cout << "                  of inputs should be consistent with the data set. Tool names are " <<endl;
+	cout << "                  separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
 	cout << "     -o FILE      output directory: [output]" << endl;
 	cout << "     -l FILE      file name for long SV regions: [long_sv_reg.bed]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
@@ -65,7 +74,7 @@ void showUsageStat(){
 int parseConvert(int argc, char **argv)
 {
 	int opt;
-	string sv_format, in_file, out_file, remove_mate_str = "1", mate_filename = "", remove_snv_str = "0", snv_filename = "";
+	string sv_format, ref_file, in_file, out_file, remove_mate_str = "1", mate_filename = "", remove_snv_str = "0", snv_filename = "";
 
 	while( (opt = getopt(argc, argv, ":f:o:r:R:s:S:h")) != -1 ){
 		switch(opt){
@@ -101,10 +110,17 @@ int parseConvert(int argc, char **argv)
 	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
 
 	opt = argc - optind; // the number of SAMs on the command line
-	if(opt==2) {
-		in_file = argv[optind];
-		out_file = argv[optind+1];
+	if(opt==3) {
+		ref_file = argv[optind];
+		in_file = argv[optind+1];
+		out_file = argv[optind+2];
 	}else { showUsageConvert(); return 1; }
+
+	if(ref_file.size()>0 and (ref_file.compare(in_file)==0 or ref_file.compare(out_file)==0)){
+		cout << "Please specify different reference file name" << endl << endl;
+		showUsageConvert();
+		return 1;
+	}
 
 	if(in_file.size()>0 and in_file.compare(out_file)==0){
 		cout << "Please specify different SV file names" << endl << endl;
@@ -113,7 +129,7 @@ int parseConvert(int argc, char **argv)
 	}
 
 	if(sv_format.compare("bed")==0 or sv_format.compare("vcf")==0 or sv_format.compare("csv")==0 or sv_format.compare("nm")==0) // nm: private usage
-		convert(in_file, out_file, mate_filename, snv_filename, sv_format);
+		convert(in_file, out_file, ref_file, mate_filename, snv_filename, sv_format);
 	else{
 		cout << "Error: Please specify the correct SV file format" << endl << endl;
 		showUsageConvert();
@@ -123,7 +139,7 @@ int parseConvert(int argc, char **argv)
 	return 0;
 }
 
-void convert(string &infilename, string &outfilename, string &mate_filename, string &snv_filename, string &sv_format){
+void convert(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format){
 
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -135,20 +151,20 @@ void convert(string &infilename, string &outfilename, string &mate_filename, str
 	}
 	outConvertScreenFile << "Program command: " << program_cmd_str << endl << endl;
 
-	printConvertParas(infilename, outfilename, mate_filename, snv_filename, sv_format); // print parameters
+	printConvertParas(infilename, outfilename, reffilename, mate_filename, snv_filename, sv_format); // print parameters
 
 	cout << "############# Convert variants: #############" << endl;
 	outConvertScreenFile << "############# Convert variants: #############" << endl;
 
 	outfilename = outputPathname + outfilename;
 	if(sv_format.compare("bed")==0)
-		convertBed(infilename, outfilename, mate_filename, snv_filename);
+		convertBed(infilename, outfilename, reffilename, mate_filename, snv_filename);
 	else if(sv_format.compare("vcf")==0)
-		convertVcf(infilename, outfilename, mate_filename, snv_filename);
+		convertVcf(infilename, outfilename, reffilename, mate_filename, snv_filename);
 	else if(sv_format.compare("csv")==0)
-		convertCsv(infilename, outfilename, mate_filename, snv_filename);
+		convertCsv(infilename, outfilename, reffilename, mate_filename, snv_filename);
 	else if(sv_format.compare("nm")==0)  // private usage: nm
-		convertNm(infilename, outfilename, mate_filename, snv_filename);
+		convertNm(infilename, outfilename, reffilename, mate_filename, snv_filename);
 
 	outConvertScreenFile.close();
 }
@@ -156,24 +172,30 @@ void convert(string &infilename, string &outfilename, string &mate_filename, str
 // parse the parameters for stat command
 int parseStat(int argc, char **argv){
 	int32_t opt, threadNum_tmp;
-	string sv_file1, sv_file2;
+	string sv_file2, ref_file, sv_file1, ToolNameStore;
+	vector<string> sv_files1;
+	vector<string> tool_names;
 
 	if (argc < 2) { showUsageStat(); return 1; }
 
-	maxValidRegThres = 0;
+	maxValidRegThres = MAX_VALID_REG_THRES;
 	extendSize = EXTEND_SIZE;
 	threadNum_tmp = 0;
 	minSizeLargeSV = MIN_SIZE_LARGE_SV;
 	extendSizeLargeSV = EXTEND_SIZE_LARGE_SV;
 	svlenRatio = SVLEN_RATIO;
-	while( (opt = getopt(argc, argv, ":m:s:t:o:l:h")) != -1 ){
+	typeMatchLevel = "strict";
+
+	while( (opt = getopt(argc, argv, ":m:s:t:o:l:T:h:L:")) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
 			case 't': threadNum_tmp = stoi(optarg); break;
 			case 'o': outputPathname = optarg; break;
 			case 'l': longSVFilename = optarg; break;
+			case 'T': ToolNameStore = optarg; break;
 			case 'h': showUsageStat(); exit(0);
+			case 'L': typeMatchLevel = optarg; break;
 			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
 			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
 		}
@@ -189,60 +211,141 @@ int parseStat(int argc, char **argv){
 		showUsageStat();
 		return 1;
 	}
-
+	if(ToolNameStore.size()<0){
+		cout << "Error: Specify the correct tool name for the option, separated by ';' :-T" << endl;
+		showUsageStat();
+		return 1;
+	}
+	if(typeMatchLevel.compare("strict")==0 or typeMatchLevel.compare("loose")==0);
+	else {
+		cout << "Error: Specify a type matching mode for the option: -L" << endl;
+		showUsageStat();
+		return 1;
+	}
 	if(threadNum_tmp==0) num_threads = sysconf(_SC_NPROCESSORS_ONLN);
 	else num_threads = (threadNum_tmp>=sysconf(_SC_NPROCESSORS_ONLN)) ? sysconf(_SC_NPROCESSORS_ONLN) : threadNum_tmp;
 
 	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
 
-	opt = argc - optind; // the number of SAMs on the command line
-	if(opt==2) {
-		sv_file1 = argv[optind];
-		sv_file2 = argv[optind+1];
-	}else { showUsageStat(); return 1; }
+	tool_names = split(ToolNameStore,";");
 
-	SVStat(sv_file1, sv_file2);
+	opt = argc - optind; // the number of SAMs on the command line
+	if(tool_names.size()>1){ //use the -T parameter to enter multiple tool names
+		for(int i = optind ; i<argc; i++){
+			if(i == optind) ref_file = argv[i];
+			else if(i == argc-1) sv_file2 = argv[i];
+			else sv_files1.push_back(argv[i]);
+		}
+		if(tool_names.size() != sv_files1.size()){
+			cout << "Error: The number of tool names does not match the data set :-T" << endl;
+			showUsageStat();
+			return 1;
+		}
+	}else if(opt==3){ //evaluate a data set
+		if(opt==3) {
+			ref_file = argv[optind];
+			sv_file1 = argv[optind+1];
+			sv_file2 = argv[optind+2];
+		}else { showUsageStat(); return 1; }
+	}else{ //evaluate multiple data sets without using the "-T" parameter
+		for(int i = optind ; i<argc; i++){
+			if(i == optind) ref_file = argv[i];
+			else if(i == argc-1) sv_file2 = argv[i];
+			else sv_files1.push_back(argv[i]);
+		}
+	}
+
+	mem_total = getMemInfo("MemTotal", 2);
+	swap_total = getMemInfo("SwapTotal", 2);
+	if(mem_total<0 or swap_total<0){
+		cerr << "line=" << __LINE__ << ", mem_total=" << mem_total << ", swap_total=" << swap_total << ", cannot get the supplied memory information, error." << endl;
+		exit(1);
+	}
+	extend_total = mem_total<swap_total ? mem_total : swap_total;
+
+	cout << "mem_total=" << mem_total << ", swap_total=" << swap_total << ", extend_total=" << extend_total << endl;
+
+	SVStatOp(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
 
 	return 0;
 }
 
+//SVStatOp :Determine whether a single data set evaluation or a multi-data set evaluation
+void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names){
+	if(sv_files1.size()>1){	//multiple data sets are evaluated
+		for(string& sv_file1 : sv_files1){
+			SVStat(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
+		}
+	}else
+		SVStat(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
+
+	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1);
+
+}
+
 // SV stat
-void SVStat(string &user_file, string &benchmark_file){
+void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names){
 
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if(sv_files1.size()>1){
+		for(size_t i=1; i<=sv_files1.size();i++){
+			if(user_file == sv_files1.at(i-1)){
+				if(tool_names.size()>0) outputInsideToolDirname = tool_names.at(i-1);
+				else{
+					//Instead of entering the tool name, use the data set name as the name of the output file
+					size_t lastSlashPos = user_file.find_last_of('/');
+					if (lastSlashPos == string::npos) {
+						// If '/' is not found, the entire string is printed
+						outputInsideToolDirname = sv_files1.at(i-1);
+					} else {
+						// When '/' is reached, the part after '/' is printed
+						outputInsideToolDirname = user_file.substr(lastSlashPos + 1);
+					}
+				}
+				outputInsideToolDirname = outputPathname + outputInsideToolDirname;
+				mkdir(outputInsideToolDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+				statScreenFilename = outputInsideToolDirname +'/' + statScreenFilename;
+				outStatScreenFile.open(statScreenFilename);
+				break;
+			}
+		}
+	}else{
+		statScreenFilename = outputPathname + statScreenFilename;
+		outStatScreenFile.open(statScreenFilename);
+	}
 
-	statScreenFilename = outputPathname + statScreenFilename;
-	outStatScreenFile.open(statScreenFilename);
 	if(!outStatScreenFile.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << statScreenFilename << endl;
 		exit(1);
 	}
 	outStatScreenFile << "Program command: " << program_cmd_str << endl << endl;
 
-	printStatParas(user_file, benchmark_file); // print parameters
+	printStatParas(user_file, benchmark_file, ref_file); // print parameters
 
 	cout << "############# Stage 1: SV size statistics: #############" << endl;
 	outStatScreenFile << "############# Stage 1: SV size statistics: #############" << endl;
-	refRegSizeStat(user_file, benchmark_file, maxValidRegThres);
+	refRegSizeStat(user_file, benchmark_file, maxValidRegThres, sv_files1);
 
 	cout << "\n\n############# Stage 2: Num statistics: #############" << endl;
 	outStatScreenFile << "\n\n############# Stage 2: Num statistics: #############" << endl;
-	SVNumStat(user_file, benchmark_file, maxValidRegThres, outputPathname);
+	SVNumStat(user_file, benchmark_file, ref_file,  maxValidRegThres, outputPathname, sv_files1);
 
 	// compute SV size difference statistics
 	cout << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
 	outStatScreenFile << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
-	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres);
+	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres, sv_files1);
 
 	cout << "\n\n############# Stage 4: SV size and num statistics: #############" << endl;
 	outStatScreenFile << "\n\n############# Stage 4: SV size and num statistics: #############" << endl;
-	SVSizeNumStat(user_file, benchmark_file, maxValidRegThres);
+	SVSizeNumStat(user_file, benchmark_file, ref_file, maxValidRegThres, sv_files1);
 
 	outStatScreenFile.close();
+	//Evaluate multiple data sets and initialize the path for the next data save
+	if(sv_files1.size()>1)	FolderInit();
 }
 
 // print parameters for 'convert' command
-void printConvertParas(string &infilename, string &outfilename, string &mate_filename, string &snv_filename, string &sv_format){
+void printConvertParas(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
@@ -250,6 +353,7 @@ void printConvertParas(string &infilename, string &outfilename, string &mate_fil
 	cout << "############# Parameters for 'convert' command: #############" << endl;
 	cout << "          Input SV file: " << infilename << endl;
 	cout << "         Output SV file: " << outfilename << endl;
+	cout << "         Input Ref file: " << reffilename << endl;
 
 	if(mate_filename.size())
 		cout << "mate variant items: " << mate_filename << endl;
@@ -297,12 +401,13 @@ void printConvertParas(string &infilename, string &outfilename, string &mate_fil
 }
 
 // print parameters for 'stat' command
-void printStatParas(string &user_file, string &benchmark_file){
+void printStatParas(string &user_file, string &benchmark_file ,string &ref_file){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
 	cout << "############# Parameters for 'stat' command: #############" << endl;
+	cout << "      Reference file: " << ref_file << endl;
 	cout << " User-called SV file: " << user_file << endl;
 	cout << "   Benchmark SV file: " << benchmark_file << endl;
 
@@ -317,6 +422,7 @@ void printStatParas(string &user_file, string &benchmark_file){
 	outStatScreenFile << "Version: " << PROG_VERSION << endl << endl;
 
 	outStatScreenFile << "############# Parameters for 'stat' command: #############" << endl;
+	outStatScreenFile << "      Reference file: " << ref_file << endl;
 	outStatScreenFile << " User-called SV file: " << user_file << endl;
 	outStatScreenFile << "   Benchmark SV file: " << benchmark_file << endl;
 

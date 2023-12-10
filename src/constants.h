@@ -4,12 +4,26 @@
 // maximal valid SVLEN
 #define MAX_VALID_SVLEN				99999999	// 99M
 
+//Scoring matrix
+#define MATCH_SCORE					2
+#define MISMATCH_SCORE				-1
+#define GAP_PENALTY				    -1
+
+//Relieving factor of continuous gap
+#define RELIEF_FACTOR				0.1
+
+//Sequence consistency condition setting
+#define SEQ_CONSISTENCY				0.7f
+
+#define MAX_VALID_REG_THRES			50000
 #define EXTEND_SIZE					100  // 10
 
 #define MIN_SIZE_LARGE_SV			100
 #define EXTEND_SIZE_LARGE_SV		1000
 
-#define SVLEN_RATIO					0.8f
+#define SVLEN_RATIO					0.7f
+
+#define minSizeLittleSV			    100
 
 #define NO_OVERLAP					0
 #define WHOLE_REG_OVERLAP			1

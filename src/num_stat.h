@@ -10,21 +10,25 @@
 #include <algorithm>
 #include <htslib/sam.h>
 #include <htslib/thread_pool.h>
+#include <unistd.h>
 
 #include "constants.h"
 #include "structure.h"
 #include "util.h"
+#include "meminfo.h"
 
 using namespace std;
 
 
-void SVNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &outputPathname);
-void SVNumStatOp(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &dirname);
-void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, string &file_prefix);
+void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, string &outputPathname, vector<string> &sv_files1);
+void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, string &dirname);
+void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, string &file_prefix, faidx_t *fai, int Markers);
 
+void CollectData(float recall, float precision_user, float F1_score_user, vector<float> &Data, size_t num);
+void CollectData(int TP_user, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num);
 void computeLenStat(vector<SV_item*> &data, string &description_str);
 
-vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &data2);
+vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &data2, faidx_t *fai);
 vector<vector<SV_item*>> constructSubsetByChr(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data);
 set<string> getChrnames(vector<SV_item*> &dataset);
 set<string> getChrUnion(set<string> &chrname_set1, set<string> &chrname_set2);
@@ -34,13 +38,21 @@ void sortSubsets(vector<vector<SV_item*>> &subsets);
 void* sortSubsetOp(void *arg);
 bool sortFunSameChr(const SV_item *item1, const SV_item *item2);
 void checkOrder(vector<vector<SV_item*>> &subsets);
-vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets);
+vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t *fai);
 void* intersectSubset(void *arg);
 vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset);
 SV_item* itemdup(SV_item* item);
 bool IsSameChrname(string &chrname1, string &chrname2);
 vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2);
 bool isOverlappedPos(size_t startPos1, size_t endPos1, size_t startPos2, size_t endPos2);
+int32_t minDistance(const string &seq1, const string &seq2);
+double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai);
+void extractRefSeq(SV_item* item1, SV_item* item2, string &seq_new1, string &seq_new2, faidx_t *fai);
+void needleman_wunsch(const string &seq1, const string &seq2, int32_t match_score, int32_t mismatch_score, int32_t gap_penalty, string &seq1_new, string &seq2_new);
+void needleman_wunschOp(const string &seq1, const string &seq2, int32_t match_score, int32_t mismatch_score, int32_t gap_penalty, string &seq1_new, string &seq2_new);
+int32_t max(int32_t a, int32_t b, int32_t c);
+int32_t min(int32_t a, int32_t b, int32_t c);
+double calculate_consistency(const string& seq1, const string& seq2);
 
 void destroyResultData(vector<vector<SV_item*>> &result);
 

@@ -1,16 +1,22 @@
 #include "convert.h"
 #include "util.h"
 #include <typeinfo>
+#include <htslib/faidx.h>
+
 // convert data
-void convertBed(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename){
+void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
-	string line, chrname, chrname2, sv_type_str;
+	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str;
 	vector<string> str_vec, sv_type_vec;
 	size_t start_pos, endpos, start_pos2, endpos2;
-	int32_t sv_len = 0;
+	int32_t sv_len = 0, refseq_len_tmp;
 	vector<int32_t> sv_len_vec;
 	vector<SV_item*> sv_item_vec;
 	SV_item *sv_item;
+	char *seq;
+	faidx_t *fai;
+
+	fai = fai_load(reffilename.c_str());
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -36,22 +42,37 @@ void convertBed(const string &infilename, const string &outfilename, string &mat
 				sv_type_str = sv_type_vec.at(0);
 				sv_len = sv_len_vec.at(0);
 
+				ref_seq = str_vec.at(3);
+				alt_seq = str_vec.at(4);
+
 				if(sv_type_str.compare("DEL")==0 and sv_len_vec.at(0)>0) sv_len = -sv_len;
 				if(sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0){
 					chrname2 = str_vec.at(3);
 					start_pos2 = stoi(str_vec.at(4));
 					endpos2 = stoi(str_vec.at(5));
+					ref_seq = alt_seq = "-";
 				}else{
 					chrname2 = "";
 					start_pos2 = endpos2 = 0;
 				}
 
-				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+				if(ref_seq.compare("N")==0 or ref_seq.compare(".")==0 or ref_seq.compare("0")==0){
+					reg_str = chrname + ":" + to_string(start_pos) + "-" + to_string(endpos);
+					seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+					if(strlen(seq)>=Max_SeqLen) ref_seq="-";
+					else ref_seq = seq;
+					free(seq);
+				}
+				if(alt_seq.compare("N")==0 or alt_seq.compare(".")==0 or alt_seq.compare("0")==0 or alt_seq.size()>=Max_SeqLen)
+					alt_seq = "-";
+
+				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
 				sv_item_vec.push_back(sv_item);
 			}
 		}
 	}
 	infile.close();
+	fai_destroy(fai);
 
 	// remove mate sv items
 	if(mate_filename.size()) removemateSVItems(mate_filename, sv_item_vec);
@@ -67,18 +88,22 @@ void convertBed(const string &infilename, const string &outfilename, string &mat
 }
 
 // convert vcf result
-void convertVcf(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename){
+void convertVcf(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
 	string line, chrname, start_pos_str, endpos_str, endpos_str_1, endpos_str_2, chrname2, start_pos_str2, endpos_str2, sv_type_str, sv_type_str1, sv_type_str2, sv_len_str, sv_len_str1, sv_len_str2, bnd_str, bnd_pos_str, str_tmp;
+	string ref_seq, alt_seq, reg_str;
 	size_t start_pos, endpos, endpos_1, endpos_2, start_pos2, endpos2;
 	size_t i, end_pos_ref, end_pos_ref1, end_pos_ref2;
-	int32_t sv_len, sv_len1, sv_len2, ref_seq_len;
+	int32_t sv_len, sv_len1, sv_len2, ref_seq_len, refseq_len_tmp;
 	bool is_svlen_flag;
 	vector<int32_t> sv_len_vec;
 	vector<string> str_vec, sv_type_vec, info_vec, sub_info_vec, bnd_pos_vec;
 	vector<SV_item*> sv_item_vec;
 	SV_item *sv_item, *sv_item1, *sv_item2;
+	char *seq;
+	faidx_t *fai;
 
+	fai = fai_load(reffilename.c_str());
 	is_svlen_flag = false;
 
 	infile.open(infilename);
@@ -97,8 +122,13 @@ void convertVcf(const string &infilename, const string &outfilename, string &mat
 				// get locations
 				chrname = str_vec.at(0);
 				start_pos_str = str_vec.at(1);
-
+//				if(start_pos_str!="757841")
+//					continue;
 				ref_seq_len = str_vec.at(3).size();
+				ref_seq = str_vec.at(3);
+				alt_seq = str_vec.at(4);
+
+				if(alt_seq.at(0) == '<') alt_seq = "-";
 
 				chrname2 = endpos_str = sv_type_str = sv_len_str = "";
 				info_vec = split(str_vec.at(7), ";");
@@ -147,6 +177,8 @@ void convertVcf(const string &infilename, const string &outfilename, string &mat
 						end_pos_ref = stoi(start_pos_str) + ref_seq_len - 1;
 						endpos_str = to_string(end_pos_ref);
 					}else{
+						if(sv_len_str.size()>0)	endpos_str = to_string(stoi(start_pos_str) + stoi(sv_len_str) - 1);
+						else endpos_str = to_string(stoi(start_pos_str) + abs(sv_len_vec.at(0)) - 1);
 						end_pos_ref1 = stoi(start_pos_str) + ref_seq_len - 1;
 						end_pos_ref2 = stoi(start_pos_str) + ref_seq_len - 1;
 						endpos_str_1 = to_string(end_pos_ref1);
@@ -182,9 +214,17 @@ void convertVcf(const string &infilename, const string &outfilename, string &mat
 						if(sv_len_str.size()>0) sv_len = stoi(sv_len_str);
 						else sv_len = 0;
 
-						if(sv_type_str.compare("DEL")==0) sv_len = -sv_len;
+						if(sv_type_str.compare("DEL")==0) sv_len = abs(sv_len);
 
-						sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+						if(ref_seq.compare("N")==0 or ref_seq.compare(".")==0 or ref_seq.compare("0")==0){
+							reg_str = chrname + ":" + start_pos_str + "-" + to_string(endpos);
+							seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+							if(strlen(seq)>=Max_SeqLen) ref_seq="-";
+							else ref_seq = seq;
+							free(seq);
+						}
+						if(alt_seq.size()>=Max_SeqLen or sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0) alt_seq="-";
+						sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
 						sv_item_vec.push_back(sv_item);
 					}else{
 						start_pos = stoi(start_pos_str);
@@ -195,11 +235,13 @@ void convertVcf(const string &infilename, const string &outfilename, string &mat
 						sv_len1 = stoi(sv_len_str1);
 						sv_len2 = stoi(sv_len_str2);
 
-						if(sv_type_str1.compare("DEL")==0) sv_len1 = -sv_len1;
-						if(sv_type_str2.compare("DEL")==0) sv_len2 = -sv_len2;
+						if(sv_type_str1.compare("DEL")==0) sv_len1 = abs(sv_len1);
+						if(sv_type_str2.compare("DEL")==0) sv_len2 = abs(sv_len2);
 
-						sv_item1 = allocateSVItem(chrname, start_pos, endpos_1, chrname2, start_pos2, endpos2, sv_type_str1, sv_len1);
-						sv_item2 = allocateSVItem(chrname, start_pos, endpos_2, chrname2, start_pos2, endpos2, sv_type_str2, sv_len2);
+						ref_seq = alt_seq = "-";
+
+						sv_item1 = allocateSVItem(chrname, start_pos, endpos_1, chrname2, start_pos2, endpos2, sv_type_str1, sv_len1, ref_seq, alt_seq);
+						sv_item2 = allocateSVItem(chrname, start_pos, endpos_2, chrname2, start_pos2, endpos2, sv_type_str2, sv_len2, ref_seq, alt_seq);
 						sv_item_vec.push_back(sv_item1);
 						sv_item_vec.push_back(sv_item2);
 					}
@@ -211,6 +253,7 @@ void convertVcf(const string &infilename, const string &outfilename, string &mat
 		}
 	}
 	infile.close();
+	fai_destroy(fai);
 
 	// remove mate sv items
 	if(mate_filename.size()) removemateSVItems(mate_filename, sv_item_vec);
@@ -226,15 +269,19 @@ void convertVcf(const string &infilename, const string &outfilename, string &mat
 }
 
 // convert data
-void convertCsv(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename){
+void convertCsv(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
-	string line, chrname, chrname2, sv_type_str;
+	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str;
 	vector<string> str_vec, sv_type_vec;
 	size_t start_pos, endpos, start_pos2, endpos2;
-	int32_t sv_len = 0;
+	int32_t sv_len = 0, refseq_len_tmp;
 	vector<int32_t> sv_len_vec;
 	vector<SV_item*> sv_item_vec;
 	SV_item *sv_item;
+	char *seq;
+	faidx_t *fai;
+
+	fai = fai_load(reffilename.c_str());
 
 	infile.open(infilename);
 	if(!infile.is_open()){
@@ -260,6 +307,9 @@ void convertCsv(const string &infilename, const string &outfilename, string &mat
 					sv_type_vec = getSVType(str_vec);
 					sv_len_vec = getSVLen(str_vec, sv_type_vec);
 
+					ref_seq = str_vec.at(3);
+					alt_seq = str_vec.at(4);
+
 					sv_type_str = sv_type_vec.at(0);
 					sv_len = sv_len_vec.at(0);
 					//if(sv_type_str.compare("DEL")==0 and sv_len_vec.at(0)>0) sv_len = -sv_len;
@@ -274,8 +324,18 @@ void convertCsv(const string &infilename, const string &outfilename, string &mat
 						start_pos2 = endpos2 = 0;
 					}
 
+					if(ref_seq.compare("N")==0 or ref_seq.compare(".")==0 or ref_seq.compare("0")==0){
+						reg_str = chrname + ":" + to_string(start_pos) + "-" + to_string(endpos);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						if(strlen(seq)>=Max_SeqLen) ref_seq="-";
+						else ref_seq = seq;
+						free(seq);
+					}
+					if(alt_seq.compare("N")==0 or alt_seq.compare(".")==0 or alt_seq.compare("0")==0 or alt_seq.size()>Max_SeqLen)
+						alt_seq = "-";
+
 					//sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
-					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
 					sv_item_vec.push_back(sv_item);
 				}
 			}
@@ -297,14 +357,18 @@ void convertCsv(const string &infilename, const string &outfilename, string &mat
 }
 
 // convert data
-void convertNm(const string &infilename, const string &outfilename, string &mate_filename, string &snv_filename){
+void convertNm(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
-	string line, chrname, chrname2, sv_type_str;
+	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str;
 	vector<string> str_vec, sv_type_vec;
-	int32_t sv_len, ref_seq_len, start_pos, endpos, start_pos2, endpos2;
+	int32_t sv_len, ref_seq_len, start_pos, endpos, start_pos2, endpos2, refseq_len_tmp;
 	vector<int32_t> sv_len_vec;
 	vector<SV_item*> sv_item_vec;
 	SV_item *sv_item;
+	char *seq;
+	faidx_t *fai;
+
+	fai = fai_load(reffilename.c_str());
 
 	sv_len = 0;
 
@@ -325,6 +389,11 @@ void convertNm(const string &infilename, const string &outfilename, string &mate
 
 				ref_seq_len = str_vec.at(3).size();
 				endpos = stoi(str_vec.at(1)) + ref_seq_len - 1; // endPos
+
+				ref_seq = str_vec.at(3);
+				alt_seq = str_vec.at(4);
+
+				if(alt_seq.at(0) == '<') alt_seq = "-";
 
 				// get sv type
 				sv_type_vec = getSVType(str_vec);
@@ -347,12 +416,24 @@ void convertNm(const string &infilename, const string &outfilename, string &mate
 //				chrname2 = "";
 //				start_pos2 = endpos2 = 0;
 
-				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
+				if(sv_type_str.compare("DEL")==0) sv_len = -sv_len;
+
+				if(ref_seq.compare("N")==0 or ref_seq.compare(".")==0 or ref_seq.compare("0")==0){
+					reg_str = chrname + ":" + to_string(start_pos) + "-" + to_string(endpos);
+					seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+					if(strlen(seq)>=Max_SeqLen) ref_seq="-";
+					else ref_seq = seq;
+					free(seq);
+				}
+				if(alt_seq.size()>=Max_SeqLen) alt_seq="-";
+
+				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
 				sv_item_vec.push_back(sv_item);
 			}
 		}
 	}
 	infile.close();
+	fai_destroy(fai);
 
 	// remove mate sv items
 	if(mate_filename.size()) removemateSVItems(mate_filename, sv_item_vec);
@@ -768,7 +849,7 @@ bool isComma(string &seq){
 }
 
 // allocate SV item
-SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len){
+SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len, string &ref_seq, string &alt_seq){
 	size_t sv_type;
 
 	if(sv_type_str.compare("UNC")==0){
@@ -777,7 +858,7 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 		sv_type = VAR_INS;
 	}else if(sv_type_str.compare("DEL")==0 or sv_type_str.compare("deletion")==0){
 		sv_type = VAR_DEL;
-	}else if(sv_type_str.compare("DUP")==0 or sv_type_str.compare("duplication")==0){
+	}else if(sv_type_str.compare("DUP")==0 or sv_type_str.compare("duplication")==0 or sv_type_str.compare("DUP:TANDEM")==0){
 		sv_type = VAR_DUP;
 	}else if(sv_type_str.compare("INV")==0 or sv_type_str.compare("inversion")==0){
 		sv_type = VAR_INV;
@@ -808,6 +889,8 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 	item->endPos2 = endPos2;
 	item->sv_type = sv_type;
 	item->sv_len = sv_len;
+	item->ref_seq = ref_seq;
+	item->alt_seq = alt_seq;
 	item->overlapped = false;
 	item->validFlag = true;
 	return item;
@@ -845,7 +928,7 @@ void removemateSVItems(string &mate_filename, vector<SV_item*> &sv_item_vec){
 		exit(1);
 	}
 
-	line = "#chr\tstartPos\tendPos\tSVType\tSVLen";
+	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt";
 	redudant_file << line << endl;
 
 	// remove items
@@ -868,7 +951,7 @@ void removemateSVItems(string &mate_filename, vector<SV_item*> &sv_item_vec){
 					cerr << "line=" << __LINE__ << ", invalid sv type: " << item->sv_type << endl;
 					exit(1);
 			}
-			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
+			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq;
 			redudant_file << line << endl;
 			mate_num ++;
 
@@ -904,7 +987,7 @@ void removeSNVItems(string &snv_filename, vector<SV_item*> &sv_item_vec){
 		exit(1);
 	}
 
-	line = "#chr\tstartPos\tendPos\tSVType\tSVLen";
+	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt";
 	snv_file << line << endl;
 
 	// remove items
@@ -913,7 +996,7 @@ void removeSNVItems(string &snv_filename, vector<SV_item*> &sv_item_vec){
 		item = sv_item_vec.at(i);
 		if(item->sv_len == 0){
 			sv_type_str = "SNV";
-			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len);
+			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq;
 
 			snv_file << line << endl;
 			snv_num ++;

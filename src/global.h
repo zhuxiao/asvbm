@@ -10,6 +10,10 @@ using namespace std;
 
 // global variables
 string outputPathname = "output";
+string outputInsideToolDirname = "";
+string outputBasicMetricschart = "figures";
+string outputDiffRangeBasicMetricschart = "different_ranges";
+string SVsizeratiofile = "sv_size_ratio";
 string refRegSizeStatDirname = "1_ref_reg_size_stat/";
 string numStatDirname = "2_num_stat/";
 string sizeDifStatDirname = "3_size_dif_stat/";
@@ -27,7 +31,30 @@ int32_t extendSize;		// overlap extend size
 int32_t minSizeLargeSV;
 int32_t extendSizeLargeSV;
 
+string typeMatchLevel;
+
 float svlenRatio;
+vector<float> data;
+vector<int> data1;
+vector< vector<float> > MeticsValues;
+vector< vector<int> > MeticsValues1;
+vector<float> data_4;
+vector<int> data1_4;
+vector< vector<float> > MeticsValues_4;
+vector< vector<int> > MeticsValues1_4;
+
+vector< vector<float> > MeticsValues4_0;
+vector< vector<float> > MeticsValues4_1;
+vector< vector<float> > MeticsValues4_2;
+vector< vector<float> > MeticsValues4_3;
+vector< vector<float> > MeticsValues4_4;
+vector< vector<float> > MeticsValues4_5;
+vector< vector<float> > MeticsValues4_6;
+
+vector<vector<int>> SizeRatioV = {{},{},{},{},{},{},{},{},{}};
+vector<vector<double>> SizeRatio_V = {{},{},{},{},{},{},{},{},{}};
+
+vector<string> SVSizeRatioFile;
 
 int32_t maxValidRegThres;
 string mateItemFilename = "duplicated_mate_items.bed";

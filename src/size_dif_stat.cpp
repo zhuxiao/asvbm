@@ -1,21 +1,24 @@
 #include "size_dif_stat.h"
 #include "extvab.h"
 #include "util.h"
+#include "gnuplotcall.h"
 
-void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres){
-	sizeDifStatDirname = outputPathname + sizeDifStatDirname;
+void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, vector<string> &sv_files1){
+	if(sv_files1.size()>0) sizeDifStatDirname = outputInsideToolDirname + '/' + sizeDifStatDirname;
+	else sizeDifStatDirname = outputPathname + sizeDifStatDirname;
 	mkdir(sizeDifStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-	if(max_valid_reg_thres>0){
-		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
-		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
-	}
-	SVSizeDifStatOp(user_file, benchmark_file, 0, sizeDifStatDirname);
+//	if(max_valid_reg_thres>0){
+//		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
+//		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
+//	}
+//	SVSizeDifStatOp(user_file, benchmark_file, 0, sizeDifStatDirname);
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		SVSizeDifStatOp(user_file, benchmark_file, max_valid_reg_thres, sizeDifStatDirname);
 	}
+	CenterdistanceAndAreasizeratio(sizeDifStatDirname);
 }
 
 void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &dirname){
@@ -533,11 +536,16 @@ void outputRatioStatToFile(string &svSizeRatioStatFilename, vector<size_t> &rati
 	string line, start_ratio_str, end_ratio_str;
 	double start_ratio, end_ratio;
 	int32_t fixed_precision;
+	double ratio_sum, ratio;
 
 	out_file.open(svSizeRatioStatFilename);
 	if(!out_file.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << svSizeRatioStatFilename << endl;
 		exit(1);
+	}
+	ratio_sum = 0;
+	for(i=0; i<ratio_stat_vec.size(); i++){
+		ratio_sum += (double)ratio_stat_vec.at(i);
 	}
 
 	line = "#sizeRatio\tNum";
@@ -547,22 +555,32 @@ void outputRatioStatToFile(string &svSizeRatioStatFilename, vector<size_t> &rati
 	num = 0;
 	for(i=0; i<ratio_stat_vec.size(); i++){
 		ratio_num = ratio_stat_vec.at(i);
+		ratio = (double)ratio_num/ratio_sum;
 		if(i==0){
 			start_ratio = 0;
 			end_ratio = ratio_div_vec.at(i);
 			start_ratio_str = double2Str(start_ratio, fixed_precision);
 			end_ratio_str = double2Str(end_ratio, fixed_precision);
 			line = start_ratio_str + "-" + end_ratio_str + "\t" + to_string(ratio_num);
+			SizeRatioV[i].push_back(ratio_num);	SizeRatio_V[i].push_back(ratio);
 		}else if(i<ratio_stat_vec.size()-1){
 			start_ratio = ratio_div_vec.at(i-1);
 			end_ratio = ratio_div_vec.at(i);
 			start_ratio_str = double2Str(start_ratio, fixed_precision);
 			end_ratio_str = double2Str(end_ratio, fixed_precision);
 			line = start_ratio_str + "-" + end_ratio_str + "\t" + to_string(ratio_num);
+			if(i==1) {SizeRatioV[i].push_back(ratio_num); SizeRatio_V[i].push_back(ratio);}
+			else if(i==2) {SizeRatioV[i].push_back(ratio_num);	SizeRatio_V[i].push_back(ratio);}
+			else if(i==3) {SizeRatioV[i].push_back(ratio_num);	SizeRatio_V[i].push_back(ratio);}
+			else if(i==4) {SizeRatioV[i].push_back(ratio_num);	SizeRatio_V[i].push_back(ratio);}
+			else if(i==5) {SizeRatioV[i].push_back(ratio_num);	SizeRatio_V[i].push_back(ratio);}
+			else if(i==6) {SizeRatioV[i].push_back(ratio_num);	SizeRatio_V[i].push_back(ratio);}
+			else if(i==7) {SizeRatioV[i].push_back(ratio_num);	SizeRatio_V[i].push_back(ratio);}
 		}else{
 			start_ratio = ratio_div_vec.at(i-1);
 			start_ratio_str = double2Str(start_ratio, fixed_precision);
 			line = ">" + start_ratio_str + "\t" + to_string(ratio_num);
+			SizeRatioV[i].push_back(ratio_num); SizeRatio_V[i].push_back(ratio);
 		}
 		out_file << line << endl;
 		num ++;

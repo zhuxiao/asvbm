@@ -1,23 +1,45 @@
 #include "extvab.h"
 #include "size_num_stat.h"
+#include "gnuplotcall.h"
 
-void SVSizeNumStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres){
-	sizeNumStatDirname = outputPathname + sizeNumStatDirname;
+void FolderInit(){
+	data.clear();
+	data1.clear();
+	data_4.clear();
+	data1_4.clear();
+	MeticsValues_4.clear();
+	MeticsValues1_4.clear();
+	outputInsideToolDirname = "";
+	refRegSizeStatDirname = "1_ref_reg_size_stat/";
+	numStatDirname = "2_num_stat/";
+	sizeDifStatDirname = "3_size_dif_stat/";
+	sizeNumStatDirname = "4_size_num_stat/";
+	statScreenFilename = "stat_screen";
+}
+
+void SVSizeNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, vector<string> &sv_files1){
+//	sizeNumStatDirname = outputPathname + sizeNumStatDirname;
+	if(sv_files1.size()>1) sizeNumStatDirname = outputInsideToolDirname + '/' + sizeNumStatDirname;
+	else sizeNumStatDirname = outputPathname + sizeNumStatDirname;
+//	sizeNumStatDirname = outputInsideToolDirname + '/' + sizeNumStatDirname;
 	mkdir(sizeNumStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-	if(max_valid_reg_thres>0){
-		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
-		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
-	}
-	SVSizeNumStatOp(user_file, benchmark_file, size_div_vec, 0, sizeNumStatDirname);
+//	if(max_valid_reg_thres>0){
+//		cout << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
+//		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
+//	}
+//	SVSizeNumStatOp(user_file, benchmark_file, ref_file, size_div_vec, 0, sizeNumStatDirname);
 	if(max_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVSizeNumStatOp(user_file, benchmark_file, size_div_vec, max_valid_reg_thres, sizeNumStatDirname);
+		SVSizeNumStatOp(user_file, benchmark_file, ref_file, size_div_vec, max_valid_reg_thres, sizeNumStatDirname);
 	}
+	//Call gnuplot to plot
+	SVsizeAndNumstatistics(sizeNumStatDirname, MeticsValues_4);
+	SVsizeAndNumstatistics(sizeNumStatDirname, MeticsValues1_4);
 }
 
-void SVSizeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, string &dirname){
+void SVSizeNumStatOp(string &user_file, string &benchmark_file, string &ref_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, string &dirname){
 	vector<SV_item*> user_data, benchmark_data, long_sv_data;
 	vector< vector<SV_item*> > divided_vec1, divided_vec2;
 
@@ -43,7 +65,7 @@ void SVSizeNumStatOp(string &user_file, string &benchmark_file, vector<size_t> &
 	divided_vec2 = sizeDivideSV(benchmark_data, size_div_vec);
 
 	// compute Num statistics for each sub-set
-	computeSizeNumStat(divided_vec1, divided_vec2, dirname);
+	computeSizeNumStat(divided_vec1, divided_vec2, dirname, ref_file);
 
 	// free memory
 	destroyData(user_data);
@@ -82,10 +104,13 @@ vector< vector<SV_item*> > sizeDivideSV(vector<SV_item*> &sv_data, vector<size_t
 	return divided_vec;
 }
 
-void computeSizeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector<SV_item*> > &divided_vec2, string &dirname){
+void computeSizeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector<SV_item*> > &divided_vec2, string &dirname, string &ref_file){
 	vector<SV_item*> sv_vec1, sv_vec2;
 	string file_prefix, file_prefix_tmp;
 	size_t start_pos, end_pos;
+	faidx_t *fai;
+
+	fai = fai_load(ref_file.c_str());
 
 	file_prefix = dirname + "size_num_stat";
 
@@ -109,12 +134,29 @@ void computeSizeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector
 			outStatScreenFile << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
 			file_prefix_tmp = file_prefix + "_TRA_BND_BP";
 		}
-		if(i<size_div_vec.size()+1) computeNumStat(sv_vec1, sv_vec2, file_prefix_tmp);
+		if(i<size_div_vec.size()+1) {
+			computeNumStat(sv_vec1, sv_vec2, file_prefix_tmp, fai, 4);
+			MeticsValues_4.push_back(data_4);
+			MeticsValues1_4.push_back(data1_4);
+			InformationStorage(i, data_4);
+			data_4.clear();
+			data1_4.clear();
+		}
 		else computeNumStatTra(sv_vec1, sv_vec2, file_prefix_tmp);
 	}
+	fai_destroy(fai);
 }
 
 void destroySizeDividedData(vector< vector<SV_item*> > &divided_vec){
 	destroyResultData(divided_vec);
 }
 
+void InformationStorage(size_t num, vector<float> &Data){
+	if(num == 0)	MeticsValues4_0.push_back(Data);
+	else if (num == 1) MeticsValues4_1.push_back(Data);
+	else if (num == 2) MeticsValues4_2.push_back(Data);
+	else if (num == 3) MeticsValues4_3.push_back(Data);
+	else if (num == 4) MeticsValues4_4.push_back(Data);
+	else if (num == 5) MeticsValues4_5.push_back(Data);
+	else if (num == 6) MeticsValues4_6.push_back(Data);
+}

@@ -1,12 +1,14 @@
 #include "ref_reg_size_stat.h"
 #include "extvab.h"
+#include "gnuplotcall.h"
 
-void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres){
+void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres , vector<string> &sv_files1){
 	string refRegSizeFilename_benchmark, refRegSizeFilename_user;
 	refRegSizeFilename_benchmark = "ref_reg_size_benchmark";
 	refRegSizeFilename_user = "ref_reg_size_user";
 
-	refRegSizeStatDirname = outputPathname + refRegSizeStatDirname;
+	if(sv_files1.size()>1)	refRegSizeStatDirname = outputInsideToolDirname + '/' + refRegSizeStatDirname;
+	else refRegSizeStatDirname = outputPathname + refRegSizeStatDirname;
 	mkdir(refRegSizeStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
 	cout << ">>>>>>>>> The SV reference region size statistics for benchmark set: <<<<<<<<<" << endl;
@@ -33,7 +35,8 @@ void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid
 void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres, string &dirname){
 	vector<SV_item*> sv_data, long_sv_data;
 	SV_item *item;
-	size_t i, count_array[SV_SIZE_ARR_SIZE+2], reg_size, num;
+	size_t i, count_array[SV_SIZE_ARR_SIZE+2],  num;
+	int32_t reg_size, count_array1[SV_SIZE_ARR_SIZE+1];
 	string refRegSizeFinename_tmp, line;
 	ofstream outfile;
 
@@ -49,15 +52,24 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 	}
 
 	for(i=0; i<SV_SIZE_ARR_SIZE+2; i++) count_array[i] = 0;
+	for(i=0; i<SV_SIZE_ARR_SIZE+1; i++) count_array1[i] = 0;
 
 	for(i=0; i<sv_data.size(); i++){
 		item = sv_data.at(i);
 		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND and item->sv_type!=VAR_INV_TRA){
-			if(item->chrname.size()>0) reg_size = item->endPos - item->startPos + 1;
-			else reg_size = item->endPos2 - item->startPos2 + 1;
-			if(reg_size<(size_t)item->sv_len) reg_size = item->sv_len;
-			if(reg_size<=SV_SIZE_ARR_SIZE) count_array[reg_size] ++;
-			else count_array[SV_SIZE_ARR_SIZE+1] ++;
+//			if(item->chrname.size()>0) reg_size = item->endPos - item->startPos + 1;
+//			else reg_size = item->endPos2 - item->startPos2 + 1;
+			if(item->chrname.size()>0) reg_size = item->endPos - item->startPos;
+			else reg_size = item->endPos2 - item->startPos2;
+			if(reg_size<item->sv_len) reg_size = item->sv_len;
+			if(item->sv_type == VAR_DEL) reg_size = -reg_size;
+			if(reg_size>=0){
+				if(reg_size<=SV_SIZE_ARR_SIZE) count_array[reg_size] ++;
+				else count_array[SV_SIZE_ARR_SIZE+1] ++;
+			}else{
+				if(reg_size>=DEL_SIZE_ARR_SIZE) count_array1[-reg_size-1] ++;
+				else count_array1[-DEL_SIZE_ARR_SIZE] ++;
+			}
 		}
 	}
 	destroyData(sv_data); // release data
@@ -77,6 +89,16 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 	outfile << line << endl;
 
 	num = 0;
+	line = "<=" + to_string(DEL_SIZE_ARR_SIZE-1) + "\t" + to_string(count_array1[-DEL_SIZE_ARR_SIZE]);
+	outfile << line << endl;
+	num ++;
+
+	for(int j=DEL_SIZE_ARR_SIZE; j<0; j++){
+		line = to_string(j) + "\t" + to_string(count_array1[-j-1]);
+		outfile << line << endl;
+		num ++;
+	}
+
 	for(i=0; i<SV_SIZE_ARR_SIZE+1; i++){
 		line = to_string(i) + "\t" + to_string(count_array[i]);
 		outfile << line << endl;
@@ -90,6 +112,8 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 
 	cout << num << " reference region size items have been saved to file: " << refRegSizeFinename_tmp << endl;
 	outStatScreenFile << num << " reference region size items have been saved to file: " << refRegSizeFinename_tmp << endl;
+	//graph
+	SvNumberDistributionGraph(max_valid_reg_thres, refRegSizeFinename, refRegSizeFinename_tmp);
 }
 
 

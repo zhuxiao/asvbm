@@ -148,3 +148,58 @@ bool isDigitString(string &str){
 	    }
 	return flag;
 }
+
+// reverse the sequence
+void reverseSeq(string &seq){
+	char tmp;
+	int32_t len = seq.size();
+	for(int32_t i=0; i<len/2; i++){
+		tmp = seq[i];
+		seq[i] = seq[len-1-i];
+		seq[len-1-i] = tmp;
+	}
+}
+
+// reverse complement the sequence
+void reverseComplement(string &seq){
+	reverseSeq(seq);
+
+	int32_t len = seq.size();
+	for(int32_t i=0; i<len; i++){
+		switch(seq[i]){
+			case 'a': seq[i] = 't'; break;
+			case 'c': seq[i] = 'g'; break;
+			case 'g': seq[i] = 'c'; break;
+			case 't': seq[i] = 'a'; break;
+			case 'A': seq[i] = 'T'; break;
+			case 'C': seq[i] = 'G'; break;
+			case 'G': seq[i] = 'C'; break;
+			case 'T': seq[i] = 'A'; break;
+			case 'N': seq[i] = 'N'; break;
+			case 'n': seq[i] = 'n'; break;
+
+			// mixed bases
+			case 'M': seq[i] = 'K'; break;
+			case 'm': seq[i] = 'k'; break;
+			case 'R': seq[i] = 'Y'; break;
+			case 'r': seq[i] = 'y'; break;
+			case 'S': seq[i] = 'S'; break;
+			case 's': seq[i] = 's'; break;
+			case 'V': seq[i] = 'B'; break;
+			case 'v': seq[i] = 'b'; break;
+			case 'W': seq[i] = 'W'; break;
+			case 'w': seq[i] = 'w'; break;
+			case 'Y': seq[i] = 'R'; break;
+			case 'y': seq[i] = 'r'; break;
+			case 'H': seq[i] = 'D'; break;
+			case 'h': seq[i] = 'd'; break;
+			case 'K': seq[i] = 'M'; break;
+			case 'k': seq[i] = 'm'; break;
+			case 'D': seq[i] = 'H'; break;
+			case 'd': seq[i] = 'h'; break;
+			case 'B': seq[i] = 'V'; break;
+			case 'b': seq[i] = 'v'; break;
+			default: cerr << __func__ << ": unknown base: " << seq[i] << endl; exit(1);
+		}
+	}
+}
