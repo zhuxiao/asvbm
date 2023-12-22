@@ -9,8 +9,24 @@ SV_STAT is a tool for Structural Variation (SV) Statistics Evaluation. SV_STAT u
 SV_STAT depends on the following libraries and tools:
 * HTSlib (http://www.htslib.org/download/)
 * g++ (v4.7 or higher which supports c++11)
+* gnuplot (v5.4 http://gnuplot.info/download.html)
 
 The above library and tools should be installed before compiling SV_STAT.
+
+## Quick install ##
+* Debian / Ubuntu 
+```
+$ sudo apt update  # Ensure the package list is up to date
+$ sudo apt install g++ gnuplot
+```
+HTSlib needs to be installed from source files.
+
+* RedHat / CentOS
+```
+$ sudo yum check-update # Ensure the package list is up to date
+$ sudo yum install g++ gnuplot
+```
+HTSlib needs to be installed from source files.
 
 ## Compiling SV_STAT
 
@@ -24,23 +40,27 @@ And the binary file `sv_stat` will be output into the folder `bin` in this packa
 
 ## File format description
 
-Before using SV_STAT, both the user-called SV set and the benchmark data set are in bed file format with the first 5 columns are below:
+Before using SV_STAT, both the user-called SV set and the benchmark data set are in the extended bed file format with the first 7 columns are below:
 ```sh
-chromosome	start_ref_pos	end_ref_pos	SV_type	SV_len
+chromosome	start_ref_pos	end_ref_pos	SV_type	SV_len	Ref	Alt
 ```
-For translocations, the file format should be bedpe before using SV_STAT, and the first 8 columns are listed as below:
+Ensure that the first five columns of the CSV file meet the following format when converting it to the extended BED file format: 
 ```sh
-chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	SV_type	SV_len
+chromosome,start_ref_pos,end_ref_pos,SV_type,SV_len,Ref,Alt
+```
+For translocations, the file format should be bedpe before using SV_STAT, and the first 10 columns are listed as below:
+```sh
+chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	SV_type	SV_len	Ref	Alt
 ```
 The SV_type can be TRA or BND, and the SV_len will be 0.
 
 Note that: In SV_STAT, all variant types, including translocations, can be stored together in the same file as the input, for example:
 ```sh
-chr1	1167806	1168012	DEL	-206
-chr1	1142384	1142384	INS	87
-chr1	841980	843383	INV	1404
-chr1	3327738	3329244	DUP	3013
-chr1	1	481701	chr2	4273477	4539804	TRA	0
+chr1	1167806	1168012	DEL	-206	ATCG...	A
+chr1	1142384	1142384	INS	87	T	TCGA...	
+chr1	841980	843383	INV	1404	A	ACGT...
+chr1	3327738	3329244	DUP	3013	C	CATG...	
+chr1	1	481701	chr2	4273477	4539804	TRA	0	-	-
 ```		
 For the second item, there is a insertion of size 87 base pairs at the 1142381 location of chr1, and for the fifth item, it is a translocation between chr1:1-481701 and chr2:4273477-4539804, and the 0 in the last second column means the SV_len which will be 0 for translocations or translocation breakpoints.
 
@@ -50,7 +70,7 @@ There are two commands for SV_STAT: `convert` and `stat`. The help information a
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.4
+Version: 0.7.0
 
 Usage:  sv_stat  <command> [options]
 
@@ -77,9 +97,9 @@ And the help information are below:
 ```sh
 $ sv_stat convert
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.4
+Version: 0.7.0
 
-Usage:  sv_stat convert [options] <infile> <outfile>
+Usage:  sv_stat convert [options] <Ref> <infile> <outfile>
 
 Options:
      -f STR       SV input file format (required):
@@ -87,51 +107,66 @@ Options:
                   vcf: VCF format
                   csv: CSV format
      -o FILE      output directory: [output]
-     -r INT       remove redundant variant items [1]: 1 for yes, 0 for no
-     -R FILE      redundant variant items file: [redundant_items.bed]
+     -m FILE      duplicated mate variant items file:
+                  [duplicated_mate_items.bed]
+     -s INT       remove snv items [1]: 1 for yes, 0 for no
+     -S FILE      snv items file: [snv_items.bed]
      -h           show this help message and exit
 ```
 
 ### `stat` command
 Invalid long user-called regions can be removed by using `-m` option as they are too long to be valid variant regions. The command could be:
 ```sh
-$ sv_stat stat -m 10000 user_sv.bed benchmark_sv.bed 
+$ sv_stat stat -m 10000 reference.fa user_sv.bed benchmark_sv.bed 
+```
+Evaluating multiple identification result datasets can be achieved by using the '-T' option. Please use the following command:
+```sh
+$ sv_stat stat -m 10000 -T "tool1;tool2;tool3" reference.fa user1_sv.bed user2_sv.bed user3_sv.bed benchmark_sv.bed 
 ```
 And the help information are shown below:
 ```sh
 $ sv_stat stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.5.4
+Version: 0.7.0
 
-Usage:  sv_stat stat [options] <USER_SV_FILE> <BENCHMARK_SV_FILE>
+Usage:  sv_stat stat [options] <REFERENCE_FILE> <USER_SV_FILE> <BENCHMARK_SV_FILE>
 
 Description:
+     REFERENCE_FILE       Reference file.
      USER_SV_FILE         User called SV result file.
      BENCHMARK_SV_FILE    Benchmark SV file.
 
 Options:
-     -m INT       valid maximal region size for statistics: [0]
+     -m INT       valid maximal region size for statistics: [50000]
                   0 is for all variant size are valid, and while positive
                   values are for the valid maximal region size, then longer
                   regions are omitted and saved to the file specified with -l
+     -L STR       Variant type matching pattern: [strict]
+                  strict: strict variant type matching
+                  loose: treating duplications as insertions
      -s INT       overlap extend size: [100]
      -t INT       number of threads [0]. 0 for the maximal number of threads
                   in machine
+     -T STRING    Tool names [0]. 0 indicates that the tool name is not entered.
+                  This parameter is used for comparing multiple datasets. The number
+                  of inputs should be consistent with the data set. Tool names are 
+                  separated by ';'. Example: -T "tool1;tool2;tool3" 
      -o FILE      output directory: [output]
      -l FILE      file name for long SV regions: [long_sv_reg.bed]
      -h           show this help message and exit
 ```
 
 
-## Draw statistical figures (To do ...)
-Figures can be drawn for more intuitive and detailed illustration for the four statistical categories. Statistical figures can be draw by typing:
-```sh
-$ draw_command
-```
-
+## Draw statistical figures
+There are 4 statistical categories for `stat` command results, figures can be drawn for more intuitive and detailed illustration for the four statistical categories:
+* __`1_ref_reg_size_stat`__: record the statistical graph of SV sizes in the user-called data set and the benchmark data set.
+* __`2_num_stat`__: generate the bar chart for the classification evaluation metrics.
+* __`3_size_dif_stat`__: record statistical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
+* __`4_size_num_stat`__: generate a bar chart of classification evaluation metrics for variants with varying region sizes.
+Additionally, when evaluating user-called sets from multiple tools, classification evaluation metric charts will be generated and saved in a 'figures' folder.
 
 ## Output Result Description
-There are 4 statistical categories for `stat` command results, which will be saved into the following 4 folders respectively:
+The detailed evaluation information for the 4 statistical categories for `stat` command results, which is saved into the following 4 folders respectively:
 * __`1_ref_reg_size_stat`__: variant region size statistics (and the statistical figures) in reference.
 * __`2_num_stat`__: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
 * __`3_size_dif_stat`__: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
