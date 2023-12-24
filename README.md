@@ -1,8 +1,8 @@
 # SV_STAT
-A tool for Structural Variation Statistics Evaluation
+A fast tool for Structural Variation Statistics Evaluation
 
 -------------------
-SV_STAT is a tool for Structural Variation (SV) Statistics Evaluation. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the tranditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), recall, precision and F1 score; and it then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance bwtween their region centers, and it also computes the region size ratio for the two variant regions; and finally, it computes the statistics for variants with vary region lengths.
+SV_STAT is a fast tool for Structural Variation (SV) Statistics Evaluation. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the tranditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), recall, precision and F1 score; and it then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance bwtween their region centers, and it also computes the region size ratio for the two variant regions; and finally, it computes the statistics for variants with vary region lengths.
 
 
 ## Prerequisites
@@ -82,15 +82,15 @@ Commands:
 ### `convert` command
 SV_STAT can be used to convert VCF/BED/CSV file format to bed or bedpe file format by typing:
 ```sh
-$ sv_stat convert -f vcf var.vcf var.bed
+$ sv_stat convert -f vcf reference.fa var.vcf var.bed
 ```
 or
 ```sh
-$ sv_stat convert -f bed var.bed var_new.bed
+$ sv_stat convert -f bed reference.fa var.bed var_new.bed
 ```
 or
 ```sh
-$ sv_stat convert -f csv var.csv var.bed
+$ sv_stat convert -f csv reference.fa var.csv var.bed
 ```
 
 And the help information are below:
