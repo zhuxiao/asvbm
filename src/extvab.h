@@ -11,6 +11,8 @@ using namespace std;
 
 extern string outputPathname;
 extern string outputInsideToolDirname;
+extern string suboutputDirname;
+extern string suboutputDirnamePath;
 extern string outputBasicMetricschart;
 extern string outputDiffRangeBasicMetricschart;
 extern string SVsizeratiofile;
@@ -31,6 +33,7 @@ extern int32_t extendSize;
 extern int32_t minSizeLargeSV;
 extern int32_t extendSizeLargeSV;
 extern float svlenRatio;
+extern vector<string> chromosomeSet;
 extern string typeMatchLevel;
 extern vector<float> data;
 extern vector<int> data1;

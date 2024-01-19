@@ -11,6 +11,7 @@
 
 using namespace std;
 
+void replaceUnderscoreWithDot(string& str);
 void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vector<string> &tool_names, string &outputBasicMetricschart, vector< vector<float> > MeticsValues, vector< vector<int> > MeticsValues1);
 void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart, string &newInfo);
 void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart, string &newInfo);

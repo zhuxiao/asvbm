@@ -11,6 +11,8 @@ using namespace std;
 // global variables
 string outputPathname = "output";
 string outputInsideToolDirname = "";
+string suboutputDirname = "convert";
+string suboutputDirnamePath;
 string outputBasicMetricschart = "figures";
 string outputDiffRangeBasicMetricschart = "different_ranges";
 string SVsizeratiofile = "sv_size_ratio";
@@ -30,6 +32,8 @@ int32_t extendSize;		// overlap extend size
 
 int32_t minSizeLargeSV;
 int32_t extendSizeLargeSV;
+
+vector<string> chromosomeSet;
 
 string typeMatchLevel;
 
@@ -68,6 +72,5 @@ vector<size_t> size_div_vec = {100, 250, 500, 1000, 5000, 10000};
 vector<double> ratio_div_vec = {0.5, 0.7, 1.2, 2, 5, 10, 50, 100};
 
 pthread_mutex_t mtx_overlap = PTHREAD_MUTEX_INITIALIZER;
-
 
 #endif /* SRC_GLOBAL_H_ */

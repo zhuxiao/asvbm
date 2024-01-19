@@ -11,6 +11,10 @@
 #include <htslib/sam.h>
 #include <htslib/thread_pool.h>
 #include <unistd.h>
+#include <unordered_map>
+#include <unordered_set>
+#include <cmath>
+#include <algorithm>
 
 #include "constants.h"
 #include "structure.h"
@@ -45,13 +49,21 @@ SV_item* itemdup(SV_item* item);
 bool IsSameChrname(string &chrname1, string &chrname2);
 vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2);
 bool isOverlappedPos(size_t startPos1, size_t endPos1, size_t startPos2, size_t endPos2);
+//int MINDistance(string seq1, string seq2);
 int32_t minDistance(const string &seq1, const string &seq2);
 double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai);
 void extractRefSeq(SV_item* item1, SV_item* item2, string &seq_new1, string &seq_new2, faidx_t *fai);
+size_t customHashFunction(const string& kmer, size_t kmerSize);
+double MinimizerMethodOp(string& seq1, string& seq2, string& aln_seq1, string& aln_seq2, string& AlignSeq, string& AlignSeq1);
+vector<Minimizer> findMinimizers(const string& sequence, size_t windowSize, size_t kmerSize);
+void retainCommonHashValuesMinimizers(vector<Minimizer>& containerA, vector<Minimizer>& containerB);
+void findSimilarityPosMinimizers(vector<Minimizer>& minimizers, vector<Minimizer>& minimizers1);
+void FilterDissimilaPosMinimizers(vector<Minimizer>& minimizers, vector<Minimizer>& minimizers1);
 void needleman_wunsch(const string &seq1, const string &seq2, int32_t match_score, int32_t mismatch_score, int32_t gap_penalty, string &seq1_new, string &seq2_new);
 void needleman_wunschOp(const string &seq1, const string &seq2, int32_t match_score, int32_t mismatch_score, int32_t gap_penalty, string &seq1_new, string &seq2_new);
 int32_t max(int32_t a, int32_t b, int32_t c);
 int32_t min(int32_t a, int32_t b, int32_t c);
+void LongSequenceSplitAlignment(vector<Minimizer>& minimizers, vector<Minimizer>& minimizers1, int k, string& AlignSeq, string& AlignSeq1, string sequence, string sequence1);
 double calculate_consistency(const string& seq1, const string& seq2);
 
 void destroyResultData(vector<vector<SV_item*>> &result);

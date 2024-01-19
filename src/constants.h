@@ -1,6 +1,10 @@
 #ifndef SRC_CONSTANTS_H_
 #define SRC_CONSTANTS_H_
 
+//decoy
+#define DECOY_PREFIX				"hs37d"
+#define DECOY_PREFIX2				"hs38d"
+
 // maximal valid SVLEN
 #define MAX_VALID_SVLEN				99999999	// 99M
 
@@ -21,12 +25,23 @@
 #define MIN_SIZE_LARGE_SV			100
 #define EXTEND_SIZE_LARGE_SV		1000
 
+#define MAXLEN  					15
+#define EXTEND_NUM					5
+#define WINDOWSIZE					10
+#define KMERSIZE					15
+#define EDLIBLEN					20000
+#define MAX_SEQ_LEN					20000
+
 #define SVLEN_RATIO					0.7f
 
 #define minSizeLittleSV			    100
 
 #define NO_OVERLAP					0
 #define WHOLE_REG_OVERLAP			1
+
+//MatchLevel
+#define MATCHLEVEL_S				"strict"
+#define MATCHLEVEL_L				"loose"
 
 // breakpoints
 #define ONE_OVERLAP_ONE_BP			2

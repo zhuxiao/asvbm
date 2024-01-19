@@ -5,6 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <fstream>
+#include <algorithm>
 
 #include "constants.h"
 #include "structure.h"
@@ -16,6 +17,10 @@ using namespace std;
 #define Max_SeqLen    50000  //The maximum length of the sequence
 
 
+string Pathquerybackslash(string filename);
+string PathqueryDot(string filename);
+bool isExistChromosomeSet(string &chrname);
+bool isDecoyChr(string &chrname);
 void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename);
 void convertVcf(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename);
 void convertCsv(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename);

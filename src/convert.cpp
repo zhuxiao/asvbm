@@ -3,6 +3,27 @@
 #include <typeinfo>
 #include <htslib/faidx.h>
 
+//Path query Dot
+string PathqueryDot(string filename){
+	string newfilename;
+	size_t lastDotPos = filename.find_last_of('.');
+	if(lastDotPos != string::npos && filename.substr(lastDotPos + 1) == "bed");
+	else
+		newfilename = filename.substr(0, lastDotPos) + ".bed";
+
+	return newfilename;
+}
+//Path query backslash
+string Pathquerybackslash(string filename){
+	string newfilename;
+	size_t lastSlashPos = filename.find_last_of('/');
+	if (lastSlashPos != std::string::npos && lastSlashPos < filename.length() - 1) {
+		newfilename =  filename.substr(lastSlashPos + 1);
+	}
+
+	return newfilename;
+}
+
 // convert data
 void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
@@ -87,6 +108,27 @@ void convertBed(const string &infilename, const string &outfilename, const strin
 	releaseSVItemVec(sv_item_vec);
 }
 
+//Determine if it is present in chromosome collections
+bool isExistChromosomeSet(string &chrname){
+	auto it = find(chromosomeSet.begin(), chromosomeSet.end(), chrname);
+	if (it != chromosomeSet.end()) 	return true;
+	else	return false;
+}
+
+//To determine if it's decoy
+bool isDecoyChr(string &chrname){
+	bool flag = false;
+	size_t pos;
+
+	pos = chrname.find(DECOY_PREFIX);
+	if(pos==0) flag = true;
+	else{
+		pos = chrname.find(DECOY_PREFIX2);
+		if(pos==0) flag = true;
+	}
+
+	return flag;
+}
 // convert vcf result
 void convertVcf(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
 	ifstream infile;
@@ -121,9 +163,15 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 
 				// get locations
 				chrname = str_vec.at(0);
+				if(chromosomeSet.size()>0){
+					if(isExistChromosomeSet(chrname) == false) continue;
+				}else{
+					if(isDecoyChr(chrname) == true) continue;
+				}
 				start_pos_str = str_vec.at(1);
-//				if(start_pos_str!="757841")
+//				if(start_pos_str!="39059")
 //					continue;
+//				cout<<"start_pos_str:"<<start_pos_str<<endl;
 				ref_seq_len = str_vec.at(3).size();
 				ref_seq = str_vec.at(3);
 				alt_seq = str_vec.at(4);
@@ -153,14 +201,17 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 					}
 				}
 
+				//Skip mutations with incomplete information
+				if(sv_type_str.size()==0 and sv_len_str.size()==0 and endpos_str.size()==0)	continue;
+
 				// get sv type and length
 				if(sv_type_str.size()==0){
 					sv_type_vec = getSVType(str_vec);
 					if(sv_type_vec.size()==1){
 						sv_type_str = sv_type_vec.at(0);
 					}else{
-						sv_type_str1 = sv_type_vec.at(0);
-						sv_type_str2 = sv_type_vec.at(1);
+							sv_type_str1 = sv_type_vec.at(0);
+							sv_type_str2 = sv_type_vec.at(1);
 					}
 				}
 				if(sv_len_str.size()==0){
@@ -174,8 +225,8 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 				}
 				if(endpos_str.size()==0){
 					if(sv_len_vec.size()==1){
-						end_pos_ref = stoi(start_pos_str) + ref_seq_len - 1;
-						endpos_str = to_string(end_pos_ref);
+							end_pos_ref = stoi(start_pos_str) + ref_seq_len - 1;
+							endpos_str = to_string(end_pos_ref);
 					}else{
 						if(sv_len_str.size()>0)	endpos_str = to_string(stoi(start_pos_str) + stoi(sv_len_str) - 1);
 						else endpos_str = to_string(stoi(start_pos_str) + abs(sv_len_vec.at(0)) - 1);
@@ -217,13 +268,14 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 						if(sv_type_str.compare("DEL")==0) sv_len = abs(sv_len);
 
 						if(ref_seq.compare("N")==0 or ref_seq.compare(".")==0 or ref_seq.compare("0")==0){
+							if(endpos < (size_t)stoi(start_pos_str))	endpos = (size_t)stoi(start_pos_str);
 							reg_str = chrname + ":" + start_pos_str + "-" + to_string(endpos);
 							seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
-							if(strlen(seq)>=Max_SeqLen) ref_seq="-";
+							if(seq == nullptr or strlen(seq) >= Max_SeqLen ) ref_seq = "-";
 							else ref_seq = seq;
 							free(seq);
 						}
-						if(alt_seq.size()>=Max_SeqLen or sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0) alt_seq="-";
+						if(alt_seq.size()>=Max_SeqLen or sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0 or alt_seq.compare(".")==0) alt_seq="-";
 						sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
 						sv_item_vec.push_back(sv_item);
 					}else{
@@ -920,8 +972,8 @@ void removemateSVItems(string &mate_filename, vector<SV_item*> &sv_item_vec){
 			}
 		}
 	}
-
-	mate_filename = outputPathname + mate_filename;
+	//outputPathname
+	mate_filename = suboutputDirnamePath + "/" + mate_filename;
 	redudant_file.open(mate_filename);
 	if(!redudant_file.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << mate_filename << endl;

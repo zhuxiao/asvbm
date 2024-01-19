@@ -38,6 +38,16 @@ typedef struct {
 	string ref_seq, alt_seq;
 }SV_item;
 
+struct Minimizer {
+    size_t position;
+    size_t hashValue;
+    string sequence;
+    bool matchflag;
+
+    Minimizer(size_t pos, size_t hash, const string& seq, bool match)
+        : position(pos), hashValue(hash), sequence(seq), matchflag(match) {}
+};
+
 typedef struct {
 	SV_item *sv_item1, *sv_item2;
 	double dif_size, size_ratio, dif_rmse;

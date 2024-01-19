@@ -2,7 +2,6 @@
 #include "num_stat.h"
 #include "extvab.h"
 #include <htslib/faidx.h>
-#include <algorithm>
 #include "convert.h"
 
 
@@ -526,8 +525,6 @@ void* intersectSubset(void *arg){
 	for(i=0; i<subset1.size(); i++) subset1.at(i)->overlapped = false;
 	for(i=0; i<subset2.size(); i++) subset2.at(i)->overlapped = false;
 
-
-
 	start_idx = end_idx = -1;
 	for(i=0; i<subset1.size(); i++){
 
@@ -613,8 +610,7 @@ void* intersectSubset(void *arg){
 							flag = false;
 							if(svlenRatio_tmp1>=svlenRatio){
 								if(item1->sv_type==item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){
-										if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or
-										   (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV)) and typeMatchLevel == "strict"){ //or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)
+										if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV)) and typeMatchLevel == MATCHLEVEL_S){ //or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)
 //											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0 or item1->alt_seq.length()<(size_t)(sv_len1-1) or item1->alt_seq.length()>(size_t)(sv_len1+1)
 //												or item2->alt_seq.length()<(size_t)(sv_len2-1) or item2->alt_seq.length()>(size_t)(sv_len2+1)) {
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
@@ -623,8 +619,7 @@ void* intersectSubset(void *arg){
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 												if (consistency >= SEQ_CONSISTENCY) flag = true;
 											}
-										}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or
-												(item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == "loose"){
+										}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 													flag = true;
 												}else{
@@ -670,8 +665,7 @@ void* intersectSubset(void *arg){
 							if(svlenRatio_tmp>=svlenRatio){
 								if(item1->sv_type==item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){ // or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)
 									// compute the sequence consistency
-									if(((item1->sv_type==VAR_INS and item2->sv_type==VAR_INS) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_DUP) or
-									   (item1->sv_type==VAR_INV and item2->sv_type==VAR_INV)) and typeMatchLevel =="strict"){ //(item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS) or
+									if(((item1->sv_type==VAR_INS and item2->sv_type==VAR_INS) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_INV and item2->sv_type==VAR_INV)) and typeMatchLevel == MATCHLEVEL_S){ //(item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS) or
 										if (item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
 											flag = true;
 										}else{
@@ -679,8 +673,7 @@ void* intersectSubset(void *arg){
 											// determine the overlap flag according to consistency
 											if(consistency>=SEQ_CONSISTENCY) flag = true;
 										}
-									}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or
-											(item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == "loose"){
+									}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
 										if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 												flag = true;
 											}else{
@@ -695,7 +688,7 @@ void* intersectSubset(void *arg){
 											// determine the overlap flag according to consistency
 											if(consistency>=SEQ_CONSISTENCY) flag = true;
 										}
-									}else{
+									}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){
 										flag = true;
 									}
 								}
@@ -1036,7 +1029,6 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 	return overlap_type_vec;
 }
 
-// compute edit distance
 int32_t minDistance(const string &seq1, const string &seq2) {
 	int64_t m = seq1.size() + 1, n = seq2.size() + 1;
 	int64_t i, j, arrSize;
@@ -1064,6 +1056,7 @@ int32_t minDistance(const string &seq1, const string &seq2) {
 			}
 		}
 	}
+	int32_t result = dp[(m-1)*n+n-1];
 	free(dp);
 
 //	// initialize the matrix with size: m*n
@@ -1085,25 +1078,72 @@ int32_t minDistance(const string &seq1, const string &seq2) {
 //			}
 //		}
 //	}
-
-	return dp[(m-1)*n+n-1];
+	return result;
 }
 
 double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
-	string seq1, seq2, aln_seq1, aln_seq2;
+	string seq1, seq2, aln_seq1, aln_seq2,  AlignSeq,  AlignSeq1;
 	double consistency;
-
+	vector<Minimizer> minimizers, minimizers1;
 	seq1 = seq2 = aln_seq1 = aln_seq2 = "";
 
+	if(item1->sv_type == VAR_INS and item2->sv_type == VAR_INS){
+		if(item1->alt_seq.size() < MAX_SEQ_LEN and item2->alt_seq.size() < MAX_SEQ_LEN) {
+			seq1 = item1->alt_seq;	seq2 = item2->alt_seq;
+			needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
+			consistency = calculate_consistency(aln_seq1, aln_seq2);
+			if(consistency >= SEQ_CONSISTENCY)	return consistency;
+			else{
+				int distance = minDistance(seq1, seq2);
+				consistency =  1 - ((double)distance / (seq1.length() + seq2.length()));
+				if(consistency >= SEQ_CONSISTENCY) return consistency;
+				else seq1 = seq2 = aln_seq1 = aln_seq2 = "";
+			}
+		}else{
+			seq1 = item1->alt_seq;	seq2 = item2->alt_seq;
+			consistency = MinimizerMethodOp(seq1, seq2, aln_seq1, aln_seq2, AlignSeq, AlignSeq1);
+			if(consistency >= SEQ_CONSISTENCY)	return consistency;
+			else	seq1 = seq2 = aln_seq1 = aln_seq2 = AlignSeq = AlignSeq1 = "";
+		}
+	}
 	// extract the nucleotide sequences and add to both sides of variant sequences
 	extractRefSeq(item1, item2, seq1, seq2, fai);
-
+//	cout<<"exactSeq1:"<<seq1<<endl;
+//	cout<<"exactSeq2:"<<seq2<<endl;
+	//Determine which one to execute based on the sequence size
+	if(seq1.size() >= MAX_SEQ_LEN or seq2.size() >= MAX_SEQ_LEN){
+		consistency = MinimizerMethodOp(seq1, seq2, aln_seq1, aln_seq2, AlignSeq, AlignSeq1);
+		/*//Find minimizer
+		minimizers = findMinimizers(seq1, WINDOWSIZE, KMERSIZE);
+		minimizers1 = findMinimizers(seq2, WINDOWSIZE, KMERSIZE);
+		//Find a minimizer with a consistent sequence
+		retainCommonHashValuesMinimizers(minimizers, minimizers1);
+		//Look for minimizers in similar positions
+		findSimilarityPosMinimizers(minimizers, minimizers1);
+		//Filter minimizers with dissimilar positions.
+		FilterDissimilaPosMinimizers(minimizers, minimizers1);
+		//Segmentation sequence alignment
+		LongSequenceSplitAlignment(minimizers, minimizers1,  KMERSIZE,  AlignSeq,  AlignSeq1,  seq1,  seq2);
+		//Check whether minimizer exists after filtering
+		if (minimizers.empty() or minimizers1.empty()) {
+		        needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE,  GAP_PENALTY, aln_seq1, aln_seq2);
+		        consistency = calculate_consistency(aln_seq1, aln_seq2);
+		}else
+			consistency = calculate_consistency(AlignSeq, AlignSeq1);*/
+	}else{
 	// compute the optimal match result by NW alignment
-	needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
-
+		needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 	// compute the consistency according to alignment result
-	consistency = calculate_consistency(aln_seq1, aln_seq2);
+		consistency = calculate_consistency(aln_seq1, aln_seq2);
+	}
 //	consistency = 0.9;
+	/*if(item1->sv_type == VAR_INS and consistency < SEQ_CONSISTENCY){
+			cout<<"111111111111: "<<item1->chrname<<" :"<<item1->startPos<<endl;
+		}*/
+	if(consistency < SEQ_CONSISTENCY and seq1.size() <= EDLIBLEN){
+		int distance = minDistance(seq1, seq2);
+		consistency =  1 - ((double)distance / (seq1.length() + seq2.length()));
+	}
 
 	// compute the edit distance
 //	int32_t distance = minDistance(seq1, seq2);
@@ -1120,11 +1160,15 @@ void extractRefSeq(SV_item* item1, SV_item* item2, string &seq_new1, string &seq
 	int startpos1, startpos2, endpos1, endpos2;
 	int32_t refseq_len_tmp;
 	char *seq;
+	/*int s,e;
+	string q;*/
 
 	// If any of the alternate sequences is "-", no manipulation needed
 //	if (item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0) {
 //		return;
 //	}
+	/*if(item1->sv_type == VAR_INS || item2->sv_type == VAR_INS)
+		cout<<"INS:11111111111111"<<endl;*/
 	if(item1->sv_type == VAR_DEL || item2->sv_type == VAR_DEL){
 		seq_new1 = item1->ref_seq;
 		seq_new2 = item2->ref_seq;
@@ -1137,6 +1181,21 @@ void extractRefSeq(SV_item* item1, SV_item* item2, string &seq_new1, string &seq
 	startpos2 = item2->startPos;
 	endpos1 = item1->endPos;
 	endpos2 = item2->endPos;
+	/*if(startpos1<=startpos2)
+		s = startpos1;
+	else
+		s = startpos2;
+	if(endpos1<=endpos2)
+		e=endpos2;
+	else
+		e=endpos1;
+	reg_str = item1->chrname + ":" + to_string(s-20) + "-" + to_string(e+20);
+	pthread_mutex_lock(&mutex_mem);
+	seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+	pthread_mutex_unlock(&mutex_mem);
+	q = seq;
+	cout<<"The extended sequence is："<<q<<endl;
+	free(seq);*/
 //	if (item1->sv_type == VAR_INS and item1->startPos == item1->endPos) {
 //		endpos1 = item1->endPos + item1->sv_len;
 //	}else{
@@ -1216,6 +1275,201 @@ int32_t min(int32_t a, int32_t b, int32_t c) {
 	return min(a, min(b, c));
 }
 
+double MinimizerMethodOp(string& seq1, string& seq2, string& aln_seq1, string& aln_seq2, string& AlignSeq, string& AlignSeq1){
+	vector<Minimizer> minimizers,  minimizers1;
+	double result;
+	//Find minimizer
+	minimizers = findMinimizers(seq1, WINDOWSIZE, KMERSIZE);
+	minimizers1 = findMinimizers(seq2, WINDOWSIZE, KMERSIZE);
+	//Find a minimizer with a consistent sequence
+	retainCommonHashValuesMinimizers(minimizers, minimizers1);
+	//Look for minimizers in similar positions
+	findSimilarityPosMinimizers(minimizers, minimizers1);
+	//Filter minimizers with dissimilar positions.
+	FilterDissimilaPosMinimizers(minimizers, minimizers1);
+	//Segmentation sequence alignment
+//	LongSequenceSplitAlignment(minimizers, minimizers1,  KMERSIZE,  AlignSeq,  AlignSeq1,  seq1,  seq2);
+	//Check whether minimizer exists after filtering
+	if (minimizers.empty() or minimizers1.empty()) {
+		needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE,  GAP_PENALTY, aln_seq1, aln_seq2);
+		result = calculate_consistency(aln_seq1, aln_seq2);
+	}else{
+		//Segmentation sequence alignment
+		LongSequenceSplitAlignment(minimizers, minimizers1,  KMERSIZE,  AlignSeq,  AlignSeq1,  seq1,  seq2);
+		result = calculate_consistency(AlignSeq, AlignSeq1);
+	}
+	return result;
+}
+
+size_t customHashFunction(const string& kmer, size_t kmerSize) {
+    size_t hashValue = 0;
+    size_t base = 4;  //
+
+    for (size_t i = 0; i < kmer.length(); ++i) {
+        char baseChar = kmer[i];
+
+        //
+        size_t baseValue;
+        switch (baseChar) {
+        case 'A':
+            baseValue = 0;
+            break;
+        case 'C':
+            baseValue = 1;
+            break;
+        case 'G':
+            baseValue = 2;
+            break;
+        case 'T':
+            baseValue = 3;
+            break;
+        default:
+            //The abnormal character is assigned to the k-mer maximum value
+//            cerr << "Error: Invalid character in kmer." << endl;
+            hashValue = INT_MAX;
+            return hashValue;  //
+        }
+
+        //
+        hashValue += baseValue * pow(base, kmerSize-i-1);
+    }
+    return hashValue;
+}
+
+vector<Minimizer> findMinimizers(const string& sequence, size_t windowSize, size_t kmerSize) {
+    vector<Minimizer> minimizers;
+
+    for (size_t i = 0; i <= sequence.length() - windowSize- kmerSize+1; ++i) {
+        string window = sequence.substr(i, windowSize+ kmerSize-1);
+        //size_t Maximum value of the data type
+        size_t minHash = numeric_limits<size_t>::max();
+        string minKmer = "";
+        size_t pos;
+
+        for (size_t j = 0; j <= window.size() - kmerSize; ++j) {
+            string kmer = window.substr(j, kmerSize);
+            size_t hashValue = customHashFunction(kmer, kmerSize);
+
+            if (hashValue < minHash) {
+                minHash = hashValue;
+                minKmer = kmer;
+                pos = i + j;
+            }
+
+        }
+        Minimizer minimizer(pos, minHash, minKmer, false);
+        if (!minimizers.empty()) {
+            const Minimizer& lastMinimizer = minimizers.back();
+            if(minHash!=lastMinimizer.hashValue or pos != lastMinimizer.position)
+                minimizers.push_back(minimizer);
+        }
+        else {
+            minimizers.push_back(minimizer);
+        }
+    }
+    return minimizers;
+}
+
+void retainCommonHashValuesMinimizers(vector<Minimizer>& containerA, vector<Minimizer>& containerB) {
+    //
+    unordered_multiset<size_t> setB;
+    for (const auto& element : containerB) {
+        setB.insert(element.hashValue);
+    }
+
+    containerA.erase(remove_if(containerA.begin(), containerA.end(),
+        [&setB](const Minimizer& element) {
+            return setB.find(element.hashValue) == setB.end();
+        }),
+        containerA.end());
+
+    unordered_multiset<size_t> setA;
+    for (const auto& element : containerA) {
+        setA.insert(element.hashValue);
+    }
+    //
+    containerB.erase(remove_if(containerB.begin(), containerB.end(),
+        [&setA](const Minimizer& element) {
+            return setA.find(element.hashValue) == setA.end();
+        }),
+        containerB.end());
+}
+
+void findSimilarityPosMinimizers(vector<Minimizer>& minimizers, vector<Minimizer>& minimizers1) {
+
+    int record_pos = -1;
+    if (minimizers.empty() or minimizers1.empty())  return;
+    if (minimizers.size() <= minimizers1.size()) {
+        for (int i = 0; i < (int)minimizers.size(); i++) {
+            int start = max(0,i - EXTEND_NUM);
+            int end = min(i + EXTEND_NUM, (int)minimizers1.size()-1);
+
+            if (record_pos != -1 and i != 0  ) {
+                if (minimizers[record_pos].matchflag and abs((int)minimizers[i].position - (int)minimizers[record_pos].position) <= MAXLEN) continue;
+            }
+            //another
+            int MinPos = INT_MAX;
+            int j_subscript = -1;
+
+            for (int j = start; j <= end; j++) {
+
+                if (minimizers1[j].matchflag == true)   continue;
+                if ((minimizers[i].hashValue == minimizers1[j].hashValue) and (!minimizers[i].matchflag and !minimizers1[j].matchflag)) {
+                    if (abs((int)minimizers1[i].position - (int)minimizers[j].position) < MinPos)
+                    {
+                        MinPos = abs((int)minimizers1[i].position - (int)minimizers[j].position);
+                        j_subscript = j;
+                    }
+                }
+            }
+            //another
+            if (j_subscript != -1 and MinPos < MAXLEN ){
+                minimizers[i].matchflag = minimizers1[j_subscript].matchflag = true;
+                 record_pos = i;
+             }
+        }
+    } else {
+        for (int i = 0; i < (int)minimizers1.size(); i++) {
+            int start = max(0, i - EXTEND_NUM);
+            int end = min(i + EXTEND_NUM, (int)minimizers.size()-1);
+
+            if (record_pos != -1 and i != 0 ) {
+                if (minimizers1[record_pos].matchflag and abs((int)minimizers1[i].position - (int)minimizers1[record_pos].position) <= 15) continue;
+            }
+            //another
+            int MinPos = INT_MAX;
+            int j_subscript = -1;
+            for (int j = start; j <= end; j++) {
+                if (minimizers[j].matchflag == true)   continue;
+                    //another
+                if ((minimizers1[i].hashValue == minimizers[j].hashValue) and (!minimizers1[i].matchflag and !minimizers[j].matchflag)) {
+                    if (abs((int)minimizers1[i].position - (int)minimizers[j].position) < MinPos)
+                    {
+                        MinPos = abs((int)minimizers1[i].position - (int)minimizers[j].position);
+                        j_subscript = j;
+                    }
+                }
+            }
+            //another
+            if (j_subscript != -1 and MinPos < MAXLEN) {
+                minimizers1[i].matchflag = minimizers[j_subscript].matchflag = true;
+                record_pos = i;
+            }
+        }
+    }
+}
+
+void FilterDissimilaPosMinimizers(vector<Minimizer>& minimizers, vector<Minimizer>& minimizers1) {
+    //
+    minimizers.erase(remove_if(minimizers.begin(), minimizers.end(),
+        [](const Minimizer& m) { return !m.matchflag; }),
+        minimizers.end());
+
+    minimizers1.erase(remove_if(minimizers1.begin(), minimizers1.end(),
+        [](const Minimizer& m) { return !m.matchflag; }),
+        minimizers1.end());
+}
+
 void needleman_wunsch(const string &seq1, const string &seq2, int32_t match_score, int32_t mismatch_score, int32_t gap_penalty, string &seq1_new, string &seq2_new){
 	int64_t rowsNum = seq1.size() + 1, colsNum = seq2.size() + 1;
 	int64_t arrSize = rowsNum * colsNum;
@@ -1237,7 +1491,6 @@ void needleman_wunsch(const string &seq1, const string &seq2, int32_t match_scor
 	}
 	if(aln_flag){
 		needleman_wunschOp(seq1, seq2, match_score, mismatch_score, gap_penalty, seq1_new, seq2_new);
-
 		// update memory consumption
 		pthread_mutex_lock(&mutex_mem);
 		mem_seqAln -= mem_cost;
@@ -1387,6 +1640,48 @@ void needleman_wunschOp(const string &seq1, const string &seq2, int32_t match_sc
 //	cout << "Aligned Sequence 2(size):" << seq2_new.size() << endl;
 }
 
+void LongSequenceSplitAlignment(vector<Minimizer>& minimizers, vector<Minimizer>& minimizers1, int k, string& AlignSeq, string& AlignSeq1, string sequence, string sequence1) {
+
+    int Exact_len, Exact_len1;
+    string seq = "", seq1 = "", temporarily_seq = "", temporarily_seq1 ="";
+    if (minimizers.size() != minimizers1.size() or (minimizers.empty() or minimizers1.empty())) return;
+    int Length = minimizers.size(), sequece_len = sequence.size(), seqence_len1 = sequence1.size();
+    for (int i = 0; i <= Length; i++) {
+        if (i == 0) {
+            seq = sequence.substr(0 , minimizers[i].position);
+            seq1 = sequence.substr(0, minimizers1[i].position);
+        }
+        else if (i == Length) {
+            Exact_len = sequece_len - (minimizers[i - 1].position + k);
+            Exact_len1 = seqence_len1 - (minimizers1[i - 1].position + k);
+            seq = sequence.substr(minimizers[i - 1].position + k, Exact_len);
+            seq1 = sequence1.substr(minimizers1[i - 1].position + k, Exact_len1);
+        }
+        else {
+            Exact_len = minimizers[i].position - (minimizers[i - 1].position + k);
+            Exact_len1 = minimizers1[i].position - (minimizers1[i - 1].position + k);
+            seq = sequence.substr(minimizers[i-1].position + k, Exact_len);
+            seq1 = sequence1.substr(minimizers1[i - 1].position + k, Exact_len1);
+        }
+        //
+        needleman_wunschOp(seq, seq1, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, temporarily_seq, temporarily_seq1);
+
+        if (i != Length) {
+            temporarily_seq = temporarily_seq + minimizers[i].sequence;
+            temporarily_seq1 = temporarily_seq1 + minimizers1[i].sequence;
+            AlignSeq += temporarily_seq;
+            AlignSeq1 += temporarily_seq1;
+
+        }
+        else if (i == Length) {
+            AlignSeq += temporarily_seq;
+            AlignSeq1 += temporarily_seq1;
+        }
+
+        seq = "", seq = "", temporarily_seq = "", temporarily_seq1 = "";
+    }
+}
+
 // compute consistency according to alignment result
 double calculate_consistency(const string& seq1, const string& seq2) {
 	// number of matching characters
@@ -1406,12 +1701,12 @@ double calculate_consistency(const string& seq1, const string& seq2) {
 	// compute the number of consecutive gap
 	int32_t consecutive_gap_count = 0;
 	//int max_consecutive_gap = 0;
-	for (i = 0; i < seq_length; ++i) {
+	for (i = 0; i <= seq_length; ++i) {
 		if (i < seq1.length() and i < seq2.length() and (seq1[i] == '-' || seq2[i] == '-')) {
 			consecutive_gap_count++;
 			//cout << consecutive_gap_count << endl;
 		}else {
-			if (consecutive_gap_count > 3) {
+			if (consecutive_gap_count >= 3) {
 				 relief += (consecutive_gap_count * RELIEF_FACTOR);
 				 //cout << "relief:" << relief << endl;
 			}

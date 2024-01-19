@@ -1,5 +1,13 @@
 #include "gnuplotcall.h"
 
+void replaceUnderscoreWithDot(string& str) {
+    for (char& c : str) {
+        if (c == '_') {
+            c = '.';
+        }
+    }
+}
+
 void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vector<string> &tool_names, string &outputBasicMetricschart, vector< vector<float> > MeticsValues, vector< vector<int> > MeticsValues1){
 
 	cout << endl <<"############# Stage 5: Generate comparison graph information: #############" << endl << endl;
@@ -48,6 +56,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
 				// When '/' is reached, the part after '/' is printed
 				str = sv_files1.at(i).substr(lastSlashPos + 1);
 			}
+			replaceUnderscoreWithDot(str);
 			scenarios.push_back(str);
 		}
 	}
@@ -85,7 +94,8 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     fprintf(gnuplotPipe, "set term pngcairo\n"); // Set the output terminal to PNG
     fprintf(gnuplotPipe, "set terminal pngcairo size 1000,800\n");
     fprintf(gnuplotPipe, "set output '%s'\n", outputFileNamePath.c_str()); // Set output file name
-    fprintf(gnuplotPipe, "set title 'Performance evaluation between different tools' font 'Times-Roman,14'\n");
+    fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
+    fprintf(gnuplotPipe, "set title 'Performance comparison between different tools' font 'Times-Roman,14'\n");
     fprintf(gnuplotPipe, "set xlabel 'Tool name' font 'Times-Roman,12'\n");
     fprintf(gnuplotPipe, "set ylabel 'Percentage' font 'Times-Roman,12'\n");
     fprintf(gnuplotPipe, "set style fill solid\n");
@@ -95,8 +105,8 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     fprintf(gnuplotPipe, "set ytics 0.1\n");
     fprintf(gnuplotPipe, "set style data histograms\n");
 
-    // Draw a bar chart, specifying the number of columns for each data column
-    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'olive' title 'Precision', '' using 4 lc rgb 'magenta' title 'F1'\n", filenamePath.c_str());
+    // Draw a bar chart, specifying the number of columns for each data column purple  olive magenta
+    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#568AC6' title 'Recall', '' using 3 lc rgb '#F08700' title 'Precision', '' using 4 lc rgb '#F06767' title 'F1'\n", filenamePath.c_str());
 
     // Close the GNUplot pipeline
     pclose(gnuplotPipe);
@@ -123,6 +133,7 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
 				// When '/' is reached, the part after '/' is printed
 				str = sv_files1.at(i).substr(lastSlashPos + 1);
 			}
+			replaceUnderscoreWithDot(str);
 			scenarios.push_back(str);
 		}
 	}
@@ -159,7 +170,8 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
     fprintf(gnuplotPipe, "set term pngcairo\n"); // Set the output terminal to PNG
     fprintf(gnuplotPipe, "set terminal pngcairo size 1000,800\n");
     fprintf(gnuplotPipe, "set output '%s'\n", outputFileNamePath.c_str()); // Set output file name
-    fprintf(gnuplotPipe, "set title 'Classification of results between different tools' font 'Times-Roman,14'\n");
+    fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
+    fprintf(gnuplotPipe, "set title 'Benchmark results between different tools' font 'Times-Roman,14'\n");
     fprintf(gnuplotPipe, "set xlabel 'Tool name' font 'Times-Roman,12'\n");
     fprintf(gnuplotPipe, "set ylabel 'Count' font 'Times-Roman,12'\n");
     fprintf(gnuplotPipe, "set style fill solid\n");
@@ -168,8 +180,8 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
     fprintf(gnuplotPipe, "set yrange [0:*]\n");
     fprintf(gnuplotPipe, "set style data histograms\n");
 
-    // Draw a bar chart, specifying the number of columns for each data column
-    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'TP.user', '' using 3 lc rgb 'blue' title 'TP.bench', '' using 4 lc rgb 'green' title 'FP', '' using 5 lc rgb 'red' title 'FN'\n", filenamePath.c_str());
+    // Draw a bar chart, specifying the number of columns for each data column purple blue green red
+    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#6FBE47' title 'TP.user', '' using 3 lc rgb '#FF6847' title 'TP.bench', '' using 4 lc rgb '#FDD700' title 'FP', '' using 5 lc rgb '#AB6520' title 'FN'\n", filenamePath.c_str());
 //    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
 
     // Close the GNUplot pipeline
@@ -676,6 +688,7 @@ void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, stri
 				// When '/' is reached, the part after '/' is printed
 				str = sv_files1.at(i).substr(lastSlashPos + 1);
 			}
+			replaceUnderscoreWithDot(str);
 			scenarios.push_back(str);
 		}
 	}
@@ -857,6 +870,7 @@ void GenerateSVsizeRatioFileGraph(vector<string> svfilesV, vector<string> toolna
             } else {
                 str = svfilesV.at(i).substr(lastSlashPos + 1);
             }
+            replaceUnderscoreWithDot(str);
             annotations.push_back(str);
         }
     }
