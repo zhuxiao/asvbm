@@ -8,7 +8,7 @@ SV_STAT is a tool for Structural Variation (SV) Statistics Evaluation. SV_STAT u
 SV_STAT is a comprehensive tool for evaluating the results of structural variant identification. Taking the VCF files as input, SV_STAT utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, mutual overlap, size similarity, and sequence consistency to provide an improved approach to structural variant matching. SV_STAT supports multi-sample evaluation and generates detailed graphical information. The workflow of SV_STAT is briefly explained in the following diagram:
 
 <div align="center">
-<img src="img/SV_STAT_Workflow.png" alt= "SV_STAT workflow" width= "500" heiht="400" style="margin-left:25px"> 
+<img src="img/SV_STAT_Workflow.png" alt= "SV_STAT workflow" style="margin-left:25px"> 
 </div>
 
 ## Prerequisites
