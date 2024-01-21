@@ -351,6 +351,6 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
 The comprehensive evaluation results of the four detection methods were shown in the figure as follows:
 
 <div style="text-align:center;">
-<img src="img/evaluation_result.png" alt= "Performance comparison between different tools" width= "400" heiht="300" style="margin-right:25px"> 
-<img src="img/result_classification.png" alt= "Benchmark results between different tools" width= "400" heiht="300" style="margin-left:25px;" >
+<img src="img/Performance comparison between different tools.png" alt= "Performance comparison between different tools" width= "400" heiht="300" style="margin-right:25px"> 
+<img src="img/Benchmark results between different tools.png" alt= "Benchmark results between different tools" width= "400" heiht="300" style="margin-left:25px;" >
 </div>
