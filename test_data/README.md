@@ -39,7 +39,7 @@ $ tar -xJf test_sniffles_chr1.vcf.tar.xz
 $ tar -xJf test_asvclr_chr1.vcf.tar.xz
 
 ## Evaluating the VCF files mentioned in the test data using SV_STAT, run the following command:
-$ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles;asvclr" test_data/test_cutesv_chr1.vcf test_data/test_pbsv_chr1.vcf test_data/test_sniffles_chr1.vcf test_data/test_asvclr_chr1.vcf test_chr1.fa
+$ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles;asvclr" test_data/test_cutesv_chr1.vcf test_data/test_pbsv_chr1.vcf test_data/test_sniffles_chr1.vcf test_data/test_asvclr_chr1.vcf test_data/test_chr1.fa
 ```
 SV_STAT evaluated the provided identification set based on the input, generating corresponding file information. If needed, more detailed evaluation information can be obtained by running test data independently.
 
