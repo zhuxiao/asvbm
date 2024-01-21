@@ -68,8 +68,8 @@ The evaluation results were as follows:
       <th>576</th>
       <th>2569</th>
       <th>0.52</th>
-      <th>0.64</th>
       <th>0.82</th>
+      <th>0.64</th>
     </tr>
   </tbody>
    <tbody>
