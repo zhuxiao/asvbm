@@ -305,13 +305,13 @@ void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathna
 // stat 1
 void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinename, string &refRegSizeFinename_tmp){
     string fileName, fileNamePath;
-    if(refRegSizeFinename == "ref_reg_size_benchmark"){
+    if(refRegSizeFinename.compare("ref_reg_size_benchmark")==0){
 	    fileName = refRegSizeFinename;
 	    fileNamePath = refRegSizeFinename_tmp;
-    }else if(refRegSizeFinename == "ref_reg_size_user" and max_valid_reg_thres == 0){
+    }else if(refRegSizeFinename.compare("ref_reg_size_user")==0 and max_valid_reg_thres == 0){
 	    fileName = refRegSizeFinename;
 	    fileNamePath = refRegSizeFinename_tmp;
-    }else if(refRegSizeFinename == "ref_reg_size_user" and max_valid_reg_thres > 0){
+    }else if(refRegSizeFinename.compare("ref_reg_size_user")==0 and max_valid_reg_thres > 0){
 	    fileName = refRegSizeFinename + "_long_filtered";
 	    fileNamePath = refRegSizeFinename_tmp;
     }
