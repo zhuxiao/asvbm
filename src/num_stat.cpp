@@ -152,39 +152,63 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	if(TP_user>0) sv_num_per_reg = (float)TP_benchmark / TP_user;
 	else sv_num_per_reg = 0;
 
-	cout << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
-	cout << "Recall=" << recall << endl;
-	cout << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	cout << "precision_benchmark=" << precision_benchmark << ", F1 score_benchmark=" << F1_score_benchmark << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	cout << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
+	cout << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
+//	cout << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
+	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 
-	outStatScreenFile << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
-	outStatScreenFile << "Recall=" << recall << endl;
-	outStatScreenFile << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	outStatScreenFile << "precision_benchmark=" << precision_benchmark << ", F1 score_benchmark=" << F1_score_benchmark << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	outStatScreenFile << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
+	outStatScreenFile << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
+//	outStatScreenFile << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
+	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 	if(Markers == 2){
-		CollectData(recall, precision_user, F1_score_user, data, 3);
-		CollectData(TP_user, TP_benchmark, FP, FN, data1, 4);
+		CollectData(TP_user, TP_benchmark, FP, FN, data1, 4, 2);
+		CollectData(recall, precision_user, F1_score_user, data, 3, 2);
 	}
+	allmetric.clear();
 	if(Markers == 4){
-		CollectData(recall, precision_user, F1_score_user, data_4, 3);
-		CollectData(TP_user, TP_benchmark, FP, FN, data1_4, 4);
+		CollectData(TP_user, TP_benchmark, FP, FN, data1_4, 4, 4);
+		CollectData(recall, precision_user, F1_score_user, data_4, 3, 4);
 	}
+	regionmetric.clear();
 	destroyResultData(result);
 }
-void CollectData(float recall, float precision_user, float F1_score_user, vector<float> &Data, size_t num){
+void CollectData(float recall, float precision_user, float F1_score_user, vector<float> &Data, size_t num, int Markers){
 	Data.push_back(recall);
 	Data.push_back(precision_user);
 	Data.push_back(F1_score_user);
+	if(Markers==2){
+		allmetric.push_back(to_string(recall));
+		allmetric.push_back(to_string(precision_user));
+		allmetric.push_back(to_string(F1_score_user));
+		allmetrics.push_back(allmetric);
+	}else if(Markers==4){
+		regionmetric.push_back(to_string(recall));
+		regionmetric.push_back(to_string(precision_user));
+		regionmetric.push_back(to_string(F1_score_user));
+		regionmetrics.push_back(regionmetric);
+	}
 //	if(Data.size()>num){
 //		Data.clear();
 //		Data = {recall, precision_user, F1_score_user};
 //	}
 }
-void CollectData(int TP_user, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num){
+void CollectData(int TP_user, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers){
 	Data.push_back(TP_user);
 	Data.push_back(TP_benchmark);
 	Data.push_back(FP);
 	Data.push_back(FN);
+	if(Markers==2){
+		allmetric.push_back(to_string(TP_benchmark));
+		allmetric.push_back(to_string(TP_user));
+		allmetric.push_back(to_string(FP));
+		allmetric.push_back(to_string(FN));
+	}else if (Markers==4){
+		regionmetric.push_back(to_string(TP_benchmark));
+		regionmetric.push_back(to_string(TP_user));
+		regionmetric.push_back(to_string(FP));
+		regionmetric.push_back(to_string(FN));
+	}
 //	if(Data.size()>num){
 //		data1.clear();
 //		data1 = {TP_user, TP_benchmark, FP, FN};

@@ -8,18 +8,28 @@ void replaceUnderscoreWithDot(string& str) {
     }
 }
 
+string getContentAfterSlash(const string& inputString) {
+    size_t slashPosition = inputString.find('/');
+    if (slashPosition != string::npos) {
+        return inputString.substr(slashPosition + 1);
+    }
+    else {
+        return inputString;
+    }
+}
+
 void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vector<string> &tool_names, string &outputBasicMetricschart, vector< vector<float> > MeticsValues, vector< vector<int> > MeticsValues1){
 
 	cout << endl <<"############# Stage 5: Generate comparison graph information: #############" << endl << endl;
 	if(sv_files1.size()>1){
 		string newInfo = "tool Recall Precision F1-score";
 		string newInfo1 = "tool TP_user TP_benchmark FP FN";
-		outputBasicMetricschart = outputPathname + outputBasicMetricschart;
-		mkdir(outputBasicMetricschart.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		multipledataset(MeticsValues, sv_files1, tool_names, outputBasicMetricschart, newInfo);
-		multipledataset(MeticsValues1, sv_files1, tool_names, outputBasicMetricschart, newInfo1);
+		outputBasicMetricschartPath = outputPathname + outputBasicMetricschart;
+		mkdir(outputBasicMetricschartPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		multipledataset(MeticsValues, sv_files1, tool_names, outputBasicMetricschartPath, newInfo);
+		multipledataset(MeticsValues1, sv_files1, tool_names, outputBasicMetricschartPath, newInfo1);
 
-		outputDiffRangeBasicMetricschart = outputBasicMetricschart + '/' + outputDiffRangeBasicMetricschart;
+		outputDiffRangeBasicMetricschart = outputBasicMetricschartPath + '/' + outputDiffRangeBasicMetricschart;
 		mkdir(outputDiffRangeBasicMetricschart.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		//Draw multiple single graph patterns
 //		ComparisonofMetricsindifferentrangesOp(outputDiffRangeBasicMetricschart, tool_names, sv_files1);
@@ -29,14 +39,19 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		GenerateMultiBarCharts(outputDiffRangeBasicMetricschart, filenames, newInfo);
 
 		//sv information comparison of different sizes
-		SVsizeratiofile = outputBasicMetricschart + '/' + SVsizeratiofile;
+		SVsizeratiofile = outputBasicMetricschartPath + '/' + SVsizeratiofile;
 		mkdir(SVsizeratiofile.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		GenerateSVsizeRatioFileGraph(sv_files1, tool_names, SVsizeratiofile);
+		//html
+		Generatehtml(outputBasicMetricschart);
+		cout << endl << "Details of the assessment results are saved in:" << outputPathname + htmlFilename<<endl;
 	}else{
-		outputBasicMetricschart = outputPathname + outputBasicMetricschart;
-		mkdir(outputBasicMetricschart.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		Histogram_drawing(MeticsValues,  outputPathname, outputBasicMetricschart);
-		Histogram_drawing(MeticsValues1,  outputPathname, outputBasicMetricschart);
+		outputBasicMetricschartPath = outputPathname + outputBasicMetricschart;
+		mkdir(outputBasicMetricschartPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		Histogram_drawing(MeticsValues,  outputPathname, outputBasicMetricschartPath);
+		Histogram_drawing(MeticsValues1,  outputPathname, outputBasicMetricschartPath);
+		Generatehtml(outputBasicMetricschart);
+		cout << endl << "Details of the assessment results are saved in:" << outputPathname + htmlFilename<<endl;
 	}
 }
 
@@ -236,7 +251,7 @@ void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathn
 	dataV.push_back(make_pair("F1-score", MeticsValues[0][1]));
 	dataV.push_back(make_pair("Precision", MeticsValues[0][2]));
 
-	string outputFileName = "Evaluation_result.png";
+	string outputFileName = "evaluation_result.png";
 	string outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
 
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");
@@ -250,12 +265,13 @@ void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathn
 	fprintf(gnuplotPipe, "set xlabel 'performance metric' font 'Times-Roman,14'\n");
 	fprintf(gnuplotPipe, "set ylabel 'Percentage'\n");
 	fprintf(gnuplotPipe, "set style fill solid\n");
-	fprintf(gnuplotPipe, "set boxwidth 1.5\n");
+	fprintf(gnuplotPipe, "set boxwidth 1.2\n");
 	fprintf(gnuplotPipe, "set xtics nomirror font 'Times-Roman,12'\n");
 	fprintf(gnuplotPipe, "set yrange [0:1]\n");
 	fprintf(gnuplotPipe, "set ytics 0.1\n");
 	fprintf(gnuplotPipe, "set style data histograms\n");
 	fprintf(gnuplotPipe, "plot '-' using 2:xtic(1) title 'Percentage'\n");
+
 	for (const auto& pair : dataV) {
 		fprintf(gnuplotPipe, "%s %lf\n", pair.first.c_str(), pair.second);
 	}
@@ -266,15 +282,16 @@ void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathn
 
 // stat 2
 void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathname, string &outputBasicMetricschart){
-	  // Prepare the bar chart data
+		string outputFileName, outputFileNamePath;
+		// Prepare the bar chart data
 	    vector<pair<string, float>> dataV;
 	    dataV.push_back(make_pair("TP.user", MeticsValues1[0][0]));
 	    dataV.push_back(make_pair("TP.bench", MeticsValues1[0][1]));
 	    dataV.push_back(make_pair("FP", MeticsValues1[0][2]));
 	    dataV.push_back(make_pair("FN", MeticsValues1[0][3]));
 
-	    string outputFileName = "Quantitative_statistics.png";
-	    string outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
+	    outputFileName = "result_classification.png";
+	    outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
 	    // Create a pipe connection to GNUplot
 	    FILE* gnuplotPipe = popen("gnuplot -persist", "w");
 	    if (!gnuplotPipe) {
@@ -284,8 +301,8 @@ void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathna
 	    // Use the GNUplot command to plot the bar plot and save the output as a PNG file
 	    fprintf(gnuplotPipe, "set term pngcairo size 800,600\n");
 	    fprintf(gnuplotPipe, "set output '%s'\n", outputFileNamePath.c_str());
-	    fprintf(gnuplotPipe, "set title 'Statistics of Classification Evaluation Metric Results' font 'Times-Roman,16'\n");
-	    fprintf(gnuplotPipe, "set xlabel 'classification evaluation metric' font 'Times-Roman,14'\n");
+	    fprintf(gnuplotPipe, "set title 'Statistics of Benchmark Results' font 'Times-Roman,16'\n");
+	    fprintf(gnuplotPipe, "set xlabel 'benchmark evaluation metric' font 'Times-Roman,14'\n");
 	    fprintf(gnuplotPipe, "set ylabel 'Count'\n");
 	    fprintf(gnuplotPipe, "set style fill solid\n");
 	    fprintf(gnuplotPipe, "set boxwidth 1.5\n");
@@ -304,16 +321,22 @@ void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathna
 
 // stat 1
 void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinename, string &refRegSizeFinename_tmp){
-    string fileName, fileNamePath;
+    string fileName, fileNamePath, filePathstr_tmp;
     if(refRegSizeFinename.compare("ref_reg_size_benchmark")==0){
 	    fileName = refRegSizeFinename;
 	    fileNamePath = refRegSizeFinename_tmp;
-    }else if(refRegSizeFinename.compare("ref_reg_size_user")==0 and max_valid_reg_thres == 0){
+	    filePathstr_tmp = getContentAfterSlash(fileNamePath) + ".png";
+	    if(folderPng1.size()==0) folderPng1.push_back(filePathstr_tmp);
+    }else if(refRegSizeFinename.compare("ref_reg_size_user")== 0 and max_valid_reg_thres == 0){
 	    fileName = refRegSizeFinename;
 	    fileNamePath = refRegSizeFinename_tmp;
-    }else if(refRegSizeFinename.compare("ref_reg_size_user")==0 and max_valid_reg_thres > 0){
+	    filePathstr_tmp = getContentAfterSlash(fileNamePath) + ".png";
+	    folderPng1.push_back(filePathstr_tmp);
+    }else if(refRegSizeFinename.compare("ref_reg_size_user")== 0 and max_valid_reg_thres > 0){
 	    fileName = refRegSizeFinename + "_long_filtered";
 	    fileNamePath = refRegSizeFinename_tmp;
+	    filePathstr_tmp = getContentAfterSlash(fileNamePath) + ".png";
+	    folderPng1.push_back(filePathstr_tmp);
     }
 
 	ifstream inputFile(fileNamePath.c_str(), ios::in);
@@ -333,6 +356,7 @@ void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinena
 	fprintf(gnuplotPipe, "set ylabel 'Count'\n");
 	fprintf(gnuplotPipe, "set xrange [-100:100]\n");
 	fprintf(gnuplotPipe, "set terminal png  size 800,600\n");
+	fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
 	fprintf(gnuplotPipe, "set output '%s.png'\n", fileNamePath.c_str());
 
 	// Draw the graph with the filename variable as the data filename
@@ -346,12 +370,14 @@ void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinena
 
 //stat 3
 void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
-	string filename1 = "sv_size_ratio_stat_long_filtered", filename2 = "sv_size_dif_stat_long_filtered";
+	string filename1 = "sv_size_ratio_stat_long_filtered", filename2 = "sv_size_dif_stat_long_filtered", filename_pngPath_tmp;
 	string title1 = "SV size difference ratio", title2 = "Center distance difference";
 	string fileNamePath1 = sizeDifStatDirname + filename1, fileNamePath2 = sizeDifStatDirname + filename2;
 	string filename_png = "result_details.png";
 	string filename_pngPath = sizeDifStatDirname + filename_png;
 	SVSizeRatioFile.push_back(fileNamePath1);
+	filename_pngPath_tmp = getContentAfterSlash(filename_pngPath);
+	folderPng3.push_back(filename_pngPath_tmp);
 	// Create a pipe connection to the GNUplot process
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");
 	if (!gnuplotPipe) {
@@ -410,11 +436,12 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 	gnuplotCommands << "set output '" << filename_pngPath.c_str()<< "'\n";
 	gnuplotCommands << "set style data histograms\n";
 	gnuplotCommands << "set style fill solid border -1\n";
+	gnuplotCommands << "set border linecolor rgb 'black' linewidth 2\n";
 	gnuplotCommands << "set boxwidth 0.5 relative\n";
 	gnuplotCommands << "set xtics nomirror\n";
 	gnuplotCommands << "set yrange [0:*]\n";
 	gnuplotCommands << "set multiplot layout 2, 1\n";
-	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb 'blue' title 'count'\n";
+	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb '#2278B4' title 'count'\n";
 
 	fprintf(gnuplotPipe, "%s", gnuplotCommands.str().c_str());
 	fflush(gnuplotPipe);
@@ -428,9 +455,10 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 	gnuplotCommands.str(""); // Clear previous commands
 	gnuplotCommands << "set title '" << title2.c_str() << "' font 'Times-Roman,20'\n";
 	gnuplotCommands << "set xtics nomirror rotate by -45\n";
-	gnuplotCommands << "set boxwidth 1 relative\n"; // Set the column width for the second diagram
+	gnuplotCommands << "set boxwidth 1.0 relative\n"; // Set the column width for the second diagram
+	gnuplotCommands << "set border linecolor rgb 'black' linewidth 2\n";
 //    gnuplotCommands << "set label 'Center distance difference' at graph 0.3, 0.9 left font 'Time New Roman,18\n"; // Add diagram notes to the second diagram
-	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb 'red'  title 'count'\n";
+	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb '#E20613'  title 'count'\n";
 	fprintf(gnuplotPipe, "%s", gnuplotCommands.str().c_str());
 	fflush(gnuplotPipe);
 
@@ -447,12 +475,13 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 
 //stat 4
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > MeticsValues_4){
+	string filename, filenamePath, outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 	// Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
 	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-5000bp","5001-10000bp",">10000bp"};
 
 	// Create a data file to hold the data
-	string filename = "calculation_result";
-	string filenamePath = sizeNumStatDirname + '/'+ filename;
+	filename = "calculation_result";
+	filenamePath = sizeNumStatDirname + '/'+ filename;
 	ofstream dataFile(filenamePath);
 	if (!dataFile.is_open()) {
 		cerr << "Unable to create data file: " << filenamePath << endl;
@@ -470,9 +499,10 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 	dataFile.close();
 
 	// Set the file name to save
-	string outputFileName = "calculation_result.png";
-	string outputFileNamePath = sizeNumStatDirname + '/' + outputFileName;
-
+	outputFileName = "calculation_result.png";
+	outputFileNamePath = sizeNumStatDirname + '/' + outputFileName;
+	outputFileNamePath_tmp = getContentAfterSlash(outputFileNamePath);
+	folderPng4.push_back(outputFileNamePath_tmp);
 	// Create a pipe connection to GNUplot
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");
 	if (!gnuplotPipe) {
@@ -489,13 +519,14 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 	fprintf(gnuplotPipe, "set ylabel 'Percentage'\n");
 	fprintf(gnuplotPipe, "set style fill solid\n");
 	fprintf(gnuplotPipe, "set boxwidth 1.0\n"); // Set the bar width
+	fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
 	fprintf(gnuplotPipe, "set xtics nomirror font 'Times-Roman,10'\n");
 	fprintf(gnuplotPipe, "set yrange [0:1]\n");
 	fprintf(gnuplotPipe, "set ytics 0.1\n");
 	fprintf(gnuplotPipe, "set style data histograms\n");
 
 	// Draw a bar chart, specifying the number of columns for each data column
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'olive' title 'Precision', '' using 4 lc rgb 'magenta' title 'F1'\n", filenamePath.c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#3E4998' title 'Recall', '' using 3 lc rgb '#D95F02' title 'Precision', '' using 4 lc rgb '#E7298A' title 'F1'\n", filenamePath.c_str());
 //    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
 	// Close the GNUplot pipeline
 	pclose(gnuplotPipe);
@@ -506,12 +537,13 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 
 //stat 4
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > MeticsValues1_4){
+	string filename, filenamePath, outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 // Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
 	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-5000bp","5001-10000bp",">10000bp"};
 
 	// Create a data file to hold the data
-	string filename = "quantitative_statistics";
-	string filenamePath = sizeNumStatDirname + '/'+ filename;
+	filename = "quantitative_statistics";
+	filenamePath = sizeNumStatDirname + '/'+ filename;
 	ofstream dataFile(filenamePath);
 	if (!dataFile.is_open()) {
 		cerr << "Unable to create data file: " << filenamePath << endl;
@@ -529,9 +561,10 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > Me
 	dataFile.close();
 
 	// Set the file name to save
-	string outputFileName = "quantitative_Statistics.png";
-	string outputFileNamePath = sizeNumStatDirname + '/' + outputFileName;
-
+	outputFileName = "quantitative_Statistics.png";
+	outputFileNamePath = sizeNumStatDirname + '/' + outputFileName;
+	outputFileNamePath_tmp=getContentAfterSlash(outputFileNamePath);
+	folderPng4.push_back(outputFileNamePath_tmp);
 	// Create a pipe connection to GNUplot
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");
 	if (!gnuplotPipe) {
@@ -548,12 +581,13 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > Me
 	fprintf(gnuplotPipe, "set ylabel 'Count'\n");
 	fprintf(gnuplotPipe, "set style fill solid\n");
 	fprintf(gnuplotPipe, "set boxwidth 1.0\n"); // Set the bar width
+	fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
 	fprintf(gnuplotPipe, "set xtics nomirror font 'Times-Roman,10'\n");
 	fprintf(gnuplotPipe, "set yrange [0:*]\n");
 	fprintf(gnuplotPipe, "set style data histograms\n");
 
 	// Draw a bar chart, specifying the number of columns for each data column
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'TP.user', '' using 3 lc rgb 'blue' title 'TP.bench', '' using 4 lc rgb 'green' title 'FP', '' using 5 lc rgb 'red' title 'FN'\n", filenamePath.c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#A09DCB' title 'TP.user', '' using 3 lc rgb '#73B8FA' title 'TP.bench', '' using 4 lc rgb '#69BB1E' title 'FP', '' using 5 lc rgb '#EB6365' title 'FN'\n", filenamePath.c_str());
 //	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'olive' title 'Precision', '' using 4 lc rgb 'magenta' title 'F1'\n", filenamePath.c_str());
 
 	// Close the GNUplot pipeline
@@ -715,8 +749,11 @@ void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, stri
 
 //NEW stat 5
 void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fileNames, string Header_line) {
-	string outputFileName = "different_range.png";
-	string outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
+	string outputFileName, outputFileNamePath, outputFileNamePath_tmp;
+	outputFileName = "different_range.png";
+	outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
+	outputFileNamePath_tmp=getContentAfterSlash(outputFileNamePath);
+	folderPng5.push_back(outputFileNamePath_tmp);
 	vector<string> titles =  {
 			        "1-100 bp", "101-250 bp", "251-500 bp",
 			        "501-1000 bp", "1001-5000 bp", "5001-10000 bp", ">=10001 bp"
@@ -937,27 +974,35 @@ void GenerateSVsizeRatioFileGraph(vector<string> svfilesV, vector<string> toolna
    // Style the bar chart based on the number of input data sets
    if(svfilesV.size()==2){
 //	   fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title '%s', '' using 3 lc rgb 'red' title '%s' \n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str());
-	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb 'purple' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb 'red' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str());
-	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb 'purple' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb 'red' lw 2 title '%s' with linespoints axes x1y2 \n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str());
+	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str());
+	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 \n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str());
 	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
    }else if(svfilesV.size()==3){
-	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb 'purple' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb 'red' title '%s' with histogram, '' using ($4+0.2) lc rgb 'blue' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str());
-	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb 'purple' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb 'red' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb 'blue' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str());
+	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str());
+	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str());
 	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
    }else if(svfilesV.size()==4){
-	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb 'purple' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb 'red' title '%s' with histogram, '' using ($4+0.2) lc rgb 'blue' title '%s' with histogram, '' using ($5+0.2) lc rgb 'olive' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str());
-	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb 'purple' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb 'red' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb 'blue' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb 'olive' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str());
+	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str());
+	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str());
 	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
    }else if(svfilesV.size()==5){
-	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb 'purple' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb 'red' title '%s' with histogram, '' using ($4+0.2) lc rgb 'blue' title '%s' with histogram, '' using ($5+0.2) lc rgb 'olive' title '%s' with histogram, '' using ($6+0.2) lc rgb 'green' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str());
-	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb 'purple' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb 'red' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb 'blue' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb 'olive' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb 'green' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str());
+	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram, '' using ($6+0.2) lc rgb '#FAB833' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str());
+	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb '#FAB833' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str());
 	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
    }else if(svfilesV.size()==6){
-	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb 'purple' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb 'red' title '%s' with histogram, '' using ($4+0.2) lc rgb 'blue' title '%s' with histogram, '' using ($5+0.2) lc rgb 'olive' title '%s' with histogram, '' using ($6+0.2) lc rgb 'green' title '%s' with histogram, '' using ($7+0.2) lc rgb 'yellow' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str());
-	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb 'purple' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb 'red' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb 'blue' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb 'olive' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb 'green' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb 'yellow' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str());
+	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram, '' using ($6+0.2) lc rgb '#FAB833' title '%s' with histogram, '' using ($7+0.2) lc rgb '#227CDE' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str());
+	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb '#FAB833' lw 2 title '%s' with linespoints axes x1y2, '' using 7 lc rgb '#227CDE' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str());
+	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+   }else if(svfilesV.size()==7){
+	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram, '' using ($6+0.2) lc rgb '#FAB833' title '%s' with histogram, '' using ($7+0.2) lc rgb '#227CDE' title '%s' with histogram, '' using ($8+0.2) lc rgb '#55436E' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str(), annotations[6].c_str());
+	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb '#FAB833' lw 2 title '%s' with linespoints axes x1y2, '' using 7 lc rgb '#227CDE' lw 2 title '%s' with linespoints axes x1y2, '' using 8 lc rgb '#55436E' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str(), annotations[6].c_str());
+	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+   }else if(svfilesV.size()==8){
+	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram, '' using ($6+0.2) lc rgb '#FAB833' title '%s' with histogram, '' using ($7+0.2) lc rgb '#227CDE' title '%s' with histogram, '' using ($8+0.2) lc rgb '#55436E' title '%s' with histogram, '' using ($9+0.2) lc rgb '#A7C4E1' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str(), annotations[6].c_str(), annotations[7].c_str());
+	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb '#FAB833' lw 2 title '%s' with linespoints axes x1y2, '' using 7 lc rgb '#227CDE' lw 2 title '%s' with linespoints axes x1y2, '' using 8 lc rgb '#55436E' lw 2 title '%s' with linespoints axes x1y2, '' using 9 lc rgb '#A7C4E1' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str(), annotations[6].c_str(), annotations[7].c_str());
 	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
    }else
-	   cout << endl << "Up to six evaluation tools for region size ratio images, exceeding six won't create images." << endl;
+	   cout << endl << "Up to eight evaluation tools for region size ratio images, exceeding six won't create images." << endl;
 
    string Add_Info = "#sizeRatio";
    for(size_t i=0; i<annotations.size(); i++){

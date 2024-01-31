@@ -45,6 +45,7 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 
 	if(max_valid_reg_thres>0) long_sv_data = getLongSVReg(sv_data, max_valid_reg_thres);
 	cout << "Total data size: " << sv_data.size() << endl;
+	allmetric.push_back(to_string(sv_data.size()));
 	outStatScreenFile << "Total data size: " << sv_data.size() << endl;
 	if(max_valid_reg_thres>0) {
 		cout << "Total long SV data size: " << long_sv_data.size() << endl;

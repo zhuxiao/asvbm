@@ -431,7 +431,14 @@ vector< vector<int32_t> > computeDifStatVec(vector<SV_pair*> &sv_pair_vec){
 	}
 	dif_stat_vec.push_back(negative_dif_stat_vec);
 	dif_stat_vec.push_back(positive_dif_stat_vec);
-
+	for(int j=3; j>=0; j--){
+		centerDistance.push_back(to_string(negative_dif_stat_vec[j]));
+	}
+	for(int j=0; j<=3; j++){
+		centerDistance.push_back(to_string(positive_dif_stat_vec[j]));
+	}
+	centerDistances.push_back(centerDistance);
+	centerDistance.clear();
 	return dif_stat_vec;
 }
 
@@ -526,7 +533,11 @@ vector<size_t> computeRatioStatVec(vector<SV_pair*> &sv_pair_vec, vector<double>
 			exit(1);
 		}
 	}
-
+	for(size_t j=0;j<ratio_stat_vec.size();j++){
+		sizeratio.push_back(to_string(ratio_stat_vec[j]));
+	}
+	sizeratios.push_back(sizeratio);
+	sizeratio.clear();
 	return ratio_stat_vec;
 }
 

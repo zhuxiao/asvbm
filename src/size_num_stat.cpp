@@ -9,6 +9,9 @@ void FolderInit(){
 	data1_4.clear();
 	MeticsValues_4.clear();
 	MeticsValues1_4.clear();
+	allmetric.clear();
+	centerDistance.clear();
+	sizeratio.clear();
 	outputInsideToolDirname = "";
 	refRegSizeStatDirname = "1_ref_reg_size_stat/";
 	numStatDirname = "2_num_stat/";
@@ -135,6 +138,7 @@ void computeSizeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector
 			file_prefix_tmp = file_prefix + "_TRA_BND_BP";
 		}
 		if(i<size_div_vec.size()+1) {
+			regionmetric.push_back(region[i]);
 			computeNumStat(sv_vec1, sv_vec2, file_prefix_tmp, fai, 4);
 			MeticsValues_4.push_back(data_4);
 			MeticsValues1_4.push_back(data1_4);
@@ -144,6 +148,8 @@ void computeSizeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector
 		}
 		else computeNumStatTra(sv_vec1, sv_vec2, file_prefix_tmp);
 	}
+	allregionmetrics.push_back(regionmetrics);
+	if(regionmetrics.size()>1) regionmetrics.erase(regionmetrics.begin()+1,regionmetrics.end());
 	fai_destroy(fai);
 }
 

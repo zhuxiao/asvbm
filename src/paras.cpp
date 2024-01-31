@@ -50,34 +50,48 @@ void showUsageStat(){
 	cout << "Usage:  sv_stat [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
 
 	cout << "Description:" << endl;
-	cout << "     USER_FILE    User called SV result file." << endl;
-	cout << "     BENCH_FILE   Benchmark SV file." << endl;
-	cout << "     REF_FILE     Reference file." << endl << endl;
+	cout << "   USER_FILE   User called SV result file." << endl;
+	cout << "   BENCH_FILE  Benchmark SV file." << endl;
+	cout << "   REF_FILE    Reference file." << endl << endl;
 
 	cout << "Options:" << endl;
-	cout << "     -m INT       valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
-	cout << "                  0 is for all variant size are valid, and while positive" << endl;
-	cout << "                  values are for the valid maximal region size, then longer" << endl;
-	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
-	cout << "     -L STR       Variant type matching pattern: [" << MATCHLEVEL_S << "]" << endl;
-	cout << "                  " << MATCHLEVEL_S << ": strict variant type matching" << endl;
-	cout << "                  " << MATCHLEVEL_L << ": treating duplications as insertions" << endl;
-	cout << "     -C STR       Chromosome set to be evaluated: [null]" << endl;
-	cout << "                  no decoy indicates not specifying the chromosome set for evaluation." << endl;
-	cout << "                  This parameter is used to specify the chromosomes to be evaluated." << endl;
-	cout << "                  Chromosome names should match the format within the VCF file. " <<endl;
-	cout << "                  Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
-	cout << "     -s INT       overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-	cout << "     -t INT       number of threads [0]. 0 for the maximal number of threads" << endl;
-	cout << "                  in machine" << endl;
-	cout << "     -T STR       Tool names [null]. 0 indicates that the tool name is not entered." << endl;
-	cout << "                  This parameter is used for comparing multiple datasets. The number" << endl;
-	cout << "                  of inputs should be consistent with the data set. Tool names are " <<endl;
-	cout << "                  separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
-	cout << "     -o FILE      output directory: [" << outputPathname << "]" << endl;
-	cout << "     -l FILE      file name for long SV regions: [" << longSVFilename << "]" << endl;
-	cout << "     -v           show version" << endl;
-	cout << "     -h           show this help message and exit" << endl;
+	cout << "   -m INT    valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
+	cout << "             0 is for all variant size are valid, and while positive" << endl;
+	cout << "             values are for the valid maximal region size, then longer" << endl;
+	cout << "             regions are omitted and saved to the file specified with '-l' option" << endl;
+	cout << "   -S        enable the strict type match mode which is disabled by default." << endl;
+	cout << "             There are two variation type match modes:" << endl;
+	cout << "             " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
+	cout << "             " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
+	cout << "             The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
+	cout << "   -C STR    Chromosomes to be processed: [null]" << endl;
+	cout << "             no decoy indicates not specifying the chromosome set for evaluation." << endl;
+	cout << "             This parameter is used to specify the chromosomes to be evaluated." << endl;
+	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
+	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
+	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
+	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
+	cout << "             in machine" << endl;
+	cout << "   -T STR    Tool names [null]. 0 indicates that the tool name is not entered." << endl;
+	cout << "             This parameter is used for comparing multiple datasets. The number" << endl;
+	cout << "             of inputs should be consistent with the data set. Tool names are " <<endl;
+	cout << "             separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
+	cout << "   -o FILE   output directory: [" << outputPathname << "]" << endl;
+	cout << "   -l FILE   file name of long SV regions: [" << longSVFilename << "]" << endl;
+	cout << "   -r FILE   file name of evaluation results to report: [" << htmlFilename << "]" << endl;
+	cout << "             Ensure the filename extension is '.html'." << endl;
+	cout << "   -v        show version information" << endl;
+	cout << "   -h        show this help message and exit" << endl << endl;
+
+	cout << "Example:" << endl;
+	cout << "   # run the evaluation on the user-called set for a single sample to allow match between DUPs as INSs" << endl;
+	cout << "   $ sv_stat -m 50000 user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+
+	cout << "   # run the evaluation on the user-called set for a single sample to perform the strict type matching by '-S' option" << endl;
+	cout << "   $ sv_stat -m 50000 -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+
+	cout << "   # run the evaluation on the user-called sets for multiple samples" << endl;
+	cout << "   $ sv_stat -m 50000 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 
 // parse the parameters for convert command
@@ -194,10 +208,10 @@ int parseStat(int argc, char **argv){
 	minSizeLargeSV = MIN_SIZE_LARGE_SV;
 	extendSizeLargeSV = EXTEND_SIZE_LARGE_SV;
 	svlenRatio = SVLEN_RATIO;
-	typeMatchLevel = MATCHLEVEL_S;
+	typeMatchLevel = MATCHLEVEL_L;
 	ToolNameStore = ChromosomeNames = "";
 
-	while( (opt = getopt(argc, argv, ":m:s:t:o:l:T:h:L:C:")) != -1 ){
+	while( (opt = getopt(argc, argv, ":m:s:t:r:o:l:T:h:C:L")) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
@@ -205,9 +219,10 @@ int parseStat(int argc, char **argv){
 			case 'o': outputPathname = optarg; break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
+			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
 			case 'h': showUsageStat(); exit(0);
-			case 'L': typeMatchLevel = optarg; break;
+			case 'L': typeMatchLevel = MATCHLEVEL_S; break;
 			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
 			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
 		}
@@ -233,12 +248,12 @@ int parseStat(int argc, char **argv){
 		showUsageStat();
 		return 1;
 	}
-	if(typeMatchLevel.compare("strict")==0 or typeMatchLevel.compare("loose")==0);
+	/*if(typeMatchLevel.compare("strict")==0 or typeMatchLevel.compare("loose")==0);
 	else {
 		cout << "Error: Specify a type matching mode for the option: -L" << endl;
 		showUsageStat();
 		return 1;
-	}
+	}*/
 	if(threadNum_tmp==0) num_threads = sysconf(_SC_NPROCESSORS_ONLN);
 	else num_threads = (threadNum_tmp>=sysconf(_SC_NPROCESSORS_ONLN)) ? sysconf(_SC_NPROCESSORS_ONLN) : threadNum_tmp;
 
@@ -361,6 +376,10 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 						outputInsideToolDirname = user_file.substr(lastSlashPos + 1);
 					}
 				}
+				alltoolnames.push_back(outputInsideToolDirname);
+				allmetric.push_back(outputInsideToolDirname);
+				centerDistance.push_back(outputInsideToolDirname);
+				sizeratio.push_back(outputInsideToolDirname);
 				outputInsideToolDirname = outputPathname + outputInsideToolDirname;
 				mkdir(outputInsideToolDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 				statScreenFilename = outputInsideToolDirname +'/' + statScreenFilename;
@@ -369,6 +388,10 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 			}
 		}
 	}else{
+		alltoolnames.push_back("method");
+		allmetric.push_back(acquiesce_count);
+		centerDistance.push_back(acquiesce_count);
+		sizeratio.push_back(acquiesce_count);
 		statScreenFilename = outputPathname + statScreenFilename;
 		outStatScreenFile.open(statScreenFilename);
 	}
@@ -473,7 +496,10 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 	cout << " Maximal region size: " << maxValidRegThres << endl;
 	cout << " Overlap extend size: " << extendSize << endl;
 	cout << "   Number of threads: " << num_threads << endl;
-	cout << "   Type match level: " << typeMatchLevel << endl;
+	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
+	cout << "   Type match level: " << typeMatchLevel << " (treat DUPLTCATION as INSERTION)" << endl;
+	else
+	cout << "   Type match level: " << typeMatchLevel << " (strict variant type matching)" << endl;
 	cout << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 	cout << "Long SV regions file: " << longSVFilename << endl << endl;
 
@@ -489,7 +515,10 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 	outStatScreenFile << " Maximal region size: " << maxValidRegThres << endl;
 	outStatScreenFile << " Overlap extend size: " << extendSize << endl;
 	outStatScreenFile << "   Number of threads: " << num_threads << endl;
-	outStatScreenFile << "    Type match level: " << typeMatchLevel << endl;
+	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
+	outStatScreenFile << "    Type match level: " << typeMatchLevel << " (treat DUPLTCATION as INSERTION)" << endl;
+	else
+	outStatScreenFile << "    Type match level: " << typeMatchLevel << " (strict variant type matching)" << endl;
 	outStatScreenFile << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 	outStatScreenFile << "Long SV regions file: " << longSVFilename << endl << endl;
 }

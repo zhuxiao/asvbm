@@ -14,6 +14,7 @@ extern string outputInsideToolDirname;
 extern string suboutputDirname;
 extern string suboutputDirnamePath;
 extern string outputBasicMetricschart;
+extern string outputBasicMetricschartPath;
 extern string outputDiffRangeBasicMetricschart;
 extern string SVsizeratiofile;
 extern string refRegSizeStatDirname;
@@ -21,6 +22,7 @@ extern string numStatDirname;
 extern string sizeDifStatDirname;
 extern string sizeNumStatDirname;
 
+extern string acquiesce_count;
 extern string program_cmd_str;
 extern string convertScreenFilename;
 extern string statScreenFilename;
@@ -32,6 +34,23 @@ extern int32_t extendSize;
 
 extern int32_t minSizeLargeSV;
 extern int32_t extendSizeLargeSV;
+
+extern vector<string> folderPng1;
+extern vector<string> folderPng3;
+extern vector<string> folderPng4;
+extern vector<string> folderPng5;
+extern vector<string> alltoolnames;
+extern vector<string> allmetric;
+extern vector< vector<string>> allmetrics;
+extern vector<string> centerDistance;
+extern vector< vector<string>> centerDistances;
+extern vector<string> sizeratio;
+extern vector< vector<string>> sizeratios;
+extern vector<string> region;
+extern vector<string> regionmetric;
+extern vector<vector<vector<string>>> allregionmetrics;
+extern vector< vector<string>> regionmetrics;
+
 extern float svlenRatio;
 extern vector<string> chromosomeSet;
 extern string typeMatchLevel;
@@ -64,6 +83,7 @@ extern string longSVFilename;
 extern string svSizeDifRatioFilename;
 extern string svSizeDifStatFilename;
 extern string svSizeRatioStatFilename;
+extern string htmlFilename;
 
 extern vector<size_t> size_div_vec;
 extern vector<double> ratio_div_vec;

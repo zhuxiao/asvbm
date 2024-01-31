@@ -17,8 +17,8 @@ using namespace std;
 #define Max_SeqLen    50000  //The maximum length of the sequence
 
 
-string Pathquerybackslash(string &filename);
-string PathqueryDot(string &filename);
+string Pathquerybackslash(string filename);
+string PathqueryDot(string filename);
 bool isExistChromosomeSet(string &chrname);
 bool isDecoyChr(string &chrname);
 void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename);

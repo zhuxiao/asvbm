@@ -14,6 +14,7 @@ string outputInsideToolDirname = "";
 string suboutputDirname = "convert";
 string suboutputDirnamePath;
 string outputBasicMetricschart = "figures";
+string outputBasicMetricschartPath;
 string outputDiffRangeBasicMetricschart = "different_ranges";
 string SVsizeratiofile = "sv_size_ratio";
 string refRegSizeStatDirname = "1_ref_reg_size_stat/";
@@ -21,6 +22,7 @@ string numStatDirname = "2_num_stat/";
 string sizeDifStatDirname = "3_size_dif_stat/";
 string sizeNumStatDirname = "4_size_num_stat/";
 
+string acquiesce_count = "count";
 string program_cmd_str = "";
 string convertScreenFilename = "convert_screen";
 string statScreenFilename = "stat_screen";
@@ -36,6 +38,22 @@ int32_t extendSizeLargeSV;
 vector<string> chromosomeSet;
 
 string typeMatchLevel;
+
+vector<string> folderPng1;
+vector<string> folderPng3;
+vector<string> folderPng4;
+vector<string> folderPng5;
+vector<string> alltoolnames;
+vector<string> allmetric;
+vector< vector<string>> allmetrics = {{"tool", "SVs_bench", "SVs_user", "SVs_filtered_user", "TP_bench", "TP_user", "FP", "FN", "recall", "precision", "F1 score"}};
+vector<string> centerDistance;
+vector< vector<string>> centerDistances = {{"tool", "-200--151", "-150--101", "-100--51", "-50--1", "0-50", "51-100", "101-150", "151-200"}};
+vector<string> sizeratio;
+vector< vector<string>> sizeratios = {{"tool", "0.0-0.5", "0.5-0.7", "0.7-1.2", "1.2-2.0", "2.0-5.0", "5.0-10.0", "10.0-50.0", "50.0-100.0", ">100.0"}};
+vector<string> region = {"1-100bp", "101-250bp", "251-500bp", "501-1000bp", "1001-5000bp", "5001-10000bp", ">10001bp"};
+vector<string> regionmetric;
+vector<vector<vector<string>>> allregionmetrics;
+vector< vector<string>> regionmetrics = {{"region", "TP_bench", "TP_user", "FP", "FN", "recall", "precision", "F1 score"}};
 
 float svlenRatio;
 vector<float> data;
@@ -67,6 +85,7 @@ string longSVFilename = "long_sv_reg.bed";
 string svSizeDifRatioFilename = "sv_size_dif_ratio";
 string svSizeDifStatFilename = "sv_size_dif_stat";
 string svSizeRatioStatFilename = "sv_size_ratio_stat";
+string htmlFilename = "sv_stat_reports.html";
 
 vector<size_t> size_div_vec = {100, 250, 500, 1000, 5000, 10000};
 vector<double> ratio_div_vec = {0.5, 0.7, 1.2, 2, 5, 10, 50, 100};

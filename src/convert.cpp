@@ -4,23 +4,25 @@
 #include <htslib/faidx.h>
 
 //Path query Dot
-string PathqueryDot(string &filename){
+string PathqueryDot(string filename){
 	string newfilename;
 	size_t lastDotPos = filename.find_last_of('.');
-	if(lastDotPos != string::npos and filename.substr(lastDotPos + 1).compare("bed")==0) newfilename = filename;
-	else newfilename = filename.substr(0, lastDotPos) + ".bed";
+	if(lastDotPos != string::npos and filename.substr(lastDotPos + 1).compare("bed") == 0)	return filename;
+	else
+		newfilename = filename.substr(0, lastDotPos) + ".bed";
 
 	return newfilename;
 }
 //Path query backslash
-string Pathquerybackslash(string &filename){
+string Pathquerybackslash(string filename){
 	string newfilename;
 	size_t lastSlashPos = filename.find_last_of('/');
 	if (lastSlashPos != std::string::npos and lastSlashPos < filename.length() - 1) {
 		newfilename =  filename.substr(lastSlashPos + 1);
-	}else newfilename = filename;
+		return newfilename;
+	}
 
-	return newfilename;
+	return filename;
 }
 
 // convert data
@@ -201,7 +203,7 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 				}
 
 				//Skip mutations with incomplete information
-				//if(sv_type_str.size()==0 and sv_len_str.size()==0 and endpos_str.size()==0)	continue;
+//				if(sv_type_str.size()==0 and sv_len_str.size()==0 and endpos_str.size()==0)	continue;
 
 				// get sv type and length
 				if(sv_type_str.size()==0){
