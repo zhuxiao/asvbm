@@ -396,7 +396,7 @@ The figure below displays the evaluation results of different detection methods,
 
 ------------------------------------------------------------------------------
 ## Contact
-If you have problems or some suggestions, please contact: xzhu@ytu.edu.cn without hesitation.
+If you have any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!.
 
 ---- Enjoy !!! -----
 
