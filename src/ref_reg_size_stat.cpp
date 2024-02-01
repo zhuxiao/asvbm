@@ -7,7 +7,7 @@ void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid
 	refRegSizeFilename_benchmark = "ref_reg_size_benchmark";
 	refRegSizeFilename_user = "ref_reg_size_user";
 
-	if(sv_files1.size()>1)	refRegSizeStatDirname = outputInsideToolDirname + '/' + refRegSizeStatDirname;
+	if(sv_files1.size()>=1)	refRegSizeStatDirname = outputInsideToolDirname + '/' + refRegSizeStatDirname;
 	else refRegSizeStatDirname = outputPathname + refRegSizeStatDirname;
 	mkdir(refRegSizeStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 

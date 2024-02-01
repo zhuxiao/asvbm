@@ -44,15 +44,20 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		GenerateSVsizeRatioFileGraph(sv_files1, tool_names, SVsizeratiofile);
 		//html
 		Generatehtml(outputBasicMetricschart);
-		cout << endl << "Details of the assessment results are saved in:" << outputPathname + htmlFilename<<endl;
 	}else{
 		outputBasicMetricschartPath = outputPathname + outputBasicMetricschart;
 		mkdir(outputBasicMetricschartPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		Histogram_drawing(MeticsValues,  outputPathname, outputBasicMetricschartPath);
 		Histogram_drawing(MeticsValues1,  outputPathname, outputBasicMetricschartPath);
 		Generatehtml(outputBasicMetricschart);
-		cout << endl << "Details of the assessment results are saved in:" << outputPathname + htmlFilename<<endl;
 	}
+	cout << endl << "Details of the assessment results are saved in:" << outputPathname + htmlFilename << endl;
+
+	cout << endl << "## More information ## " << endl;
+	cout << "For more detailed evaluation results, please refer to the generated result information in the respective folders." << endl;
+	cout << "For more detailed experiment information, please refer to the github repositories: https://github.com/zhuxiao/sv_stat and https://github.com/zhuxiao/sv_stat-experiments." << endl;
+	cout << "For more detailed evaluation results, please refer to the generated result information in the respective folders." << endl;
+	cout << "If you have any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!" << endl;
 }
 
 //Compare multiple data sets

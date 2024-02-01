@@ -79,19 +79,19 @@ void showUsageStat(){
 	cout << "   -o FILE   output directory: [" << outputPathname << "]" << endl;
 	cout << "   -l FILE   file name of long SV regions: [" << longSVFilename << "]" << endl;
 	cout << "   -r FILE   file name of evaluation results to report: [" << htmlFilename << "]" << endl;
-	cout << "             Ensure the filename extension is '.html'." << endl;
+	cout << "             Ensure that the filename extension is '.html'." << endl;
 	cout << "   -v        show version information" << endl;
 	cout << "   -h        show this help message and exit" << endl << endl;
 
 	cout << "Example:" << endl;
-	cout << "   # run the evaluation on the user-called set for a single sample to allow match between DUPs as INSs" << endl;
-	cout << "   $ sv_stat -m 50000 user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   # run the evaluation on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
+	cout << "   $ sv_stat -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
-	cout << "   # run the evaluation on the user-called set for a single sample to perform the strict type matching by '-S' option" << endl;
-	cout << "   $ sv_stat -m 50000 -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   # run the evaluation on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
+	cout << "   $ sv_stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
-	cout << "   # run the evaluation on the user-called sets for multiple samples" << endl;
-	cout << "   $ sv_stat -m 50000 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "   # run the evaluation on the user-called sets (tool1, tool2 and tool3) for multiple samples" << endl;
+	cout << "   $ sv_stat -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 
 // parse the parameters for convert command
@@ -263,7 +263,7 @@ int parseStat(int argc, char **argv){
 	chromosomeSet = split(ChromosomeNames,";");
 
 	opt = argc - optind; // the number of SAMs on the command line
-	if(tool_names.size()>1){ //use the -T parameter to enter multiple tool names
+	if(tool_names.size()>=1){ //use the -T parameter to enter multiple tool names
 		for(int i = optind; i<argc; i++){
 			if(i == argc-2) sv_file2 = argv[i];
 			else if(i == argc-1) ref_file = argv[i];
@@ -296,7 +296,7 @@ int parseStat(int argc, char **argv){
 	}
 	extend_total = mem_total<swap_total ? mem_total : swap_total;
 
-	cout << "mem_total=" << mem_total << ", swap_total=" << swap_total << ", extend_total=" << extend_total << endl;
+	//cout << "mem_total=" << mem_total << ", swap_total=" << swap_total << ", extend_total=" << extend_total << endl;
 
 	SVStatOp(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
 
@@ -312,7 +312,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 	suboutputDirnamePath = outputPathname + suboutputDirname;
 	mkdir(suboutputDirnamePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	//convert
-	if(sv_files1.size()>1){
+	if(sv_files1.size()>=1){
 		for(size_t i=0; i< sv_files1.size(); i++){
 			sv_file_name = sv_files1[i];
 			sv_file_name = PathqueryDot(sv_file_name);
@@ -346,7 +346,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 	}
 	outConvertScreenFile.close();
 
-	if(convert_sv_files.size()>1){	//multiple data sets are evaluated			sv_files1
+	if(convert_sv_files.size()>=1){	//multiple data sets are evaluated			sv_files1
 		for(string& sv_file1 : convert_sv_files){
 			SVStat(ref_file, sv_file1, convert_sv_file2_Path, convert_sv_files, tool_names);
 		}
@@ -354,14 +354,13 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 		SVStat(ref_file, sv_file_name_Path, convert_sv_file2_Path, sv_files1, tool_names);
 
 	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1);
-
 }
 
 // SV stat
 void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names){
 
 //	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-	if(sv_files1.size()>1){
+	if(sv_files1.size()>=1){
 		for(size_t i=1; i<=sv_files1.size();i++){
 			if(user_file == sv_files1.at(i-1)){
 				if(tool_names.size()>0) outputInsideToolDirname = tool_names.at(i-1);
@@ -423,7 +422,7 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 
 	outStatScreenFile.close();
 	//Evaluate multiple data sets and initialize the path for the next data save
-	if(sv_files1.size()>1)	FolderInit();
+	if(sv_files1.size()>=1)	FolderInit();
 }
 
 // print parameters for 'convert' command

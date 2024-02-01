@@ -6,7 +6,7 @@
 
 
 void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, string &outputPathname, vector<string> &sv_files1){
-	if(sv_files1.size()>1) numStatDirname = outputInsideToolDirname + '/' + numStatDirname;
+	if(sv_files1.size()>=1) numStatDirname = outputInsideToolDirname + '/' + numStatDirname;
 	else numStatDirname = outputPathname + numStatDirname;
 	mkdir(numStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 

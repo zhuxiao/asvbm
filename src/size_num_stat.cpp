@@ -22,7 +22,7 @@ void FolderInit(){
 
 void SVSizeNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, vector<string> &sv_files1){
 //	sizeNumStatDirname = outputPathname + sizeNumStatDirname;
-	if(sv_files1.size()>1) sizeNumStatDirname = outputInsideToolDirname + '/' + sizeNumStatDirname;
+	if(sv_files1.size()>=1) sizeNumStatDirname = outputInsideToolDirname + '/' + sizeNumStatDirname;
 	else sizeNumStatDirname = outputPathname + sizeNumStatDirname;
 //	sizeNumStatDirname = outputInsideToolDirname + '/' + sizeNumStatDirname;
 	mkdir(sizeNumStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -149,7 +149,7 @@ void computeSizeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector
 		else computeNumStatTra(sv_vec1, sv_vec2, file_prefix_tmp);
 	}
 	allregionmetrics.push_back(regionmetrics);
-	if(regionmetrics.size()>1) regionmetrics.erase(regionmetrics.begin()+1,regionmetrics.end());
+	if(regionmetrics.size()>=1) regionmetrics.erase(regionmetrics.begin()+1,regionmetrics.end());
 	fai_destroy(fai);
 }
 
