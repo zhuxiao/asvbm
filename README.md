@@ -183,7 +183,7 @@ Moreover, the overall simplified statistics will be output to the terminal scree
 Here, practical examples for the evaluation of single-sample and multiple samples are provided. For multi-sample evaluations, it is strongly recommended to use the "-T" parameter for better differentiation of different identification results. Evaluate the identification results of chr1 of the HG002 CCS data separately using cuteSV (v2.0.3), pbsv (v2.9.0), and Sniffles (v2.0.2).
 To evaluate the identification results for a single sample, please use the following command:
 ```sh
-$ sv_stat -m 50000 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
+$ sv_stat -m 50000 -T cuteSV cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 To evaluate the results of multiple identification outcomes, please use the following command:
 ```sh
