@@ -102,53 +102,67 @@ The help information are below:
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.8.0
+Version: 0.9.0
 
 Usage:  sv_stat [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
 Description:
-     USER_FILE    User called SV result file.
-     BENCH_FILE   Benchmark SV file.
-     REF_FILE     Reference file.
+   USER_FILE   User called SV result file.
+   BENCH_FILE  Benchmark SV file.
+   REF_FILE    Reference file.
 
 Options:
-     -m INT       valid maximal region size for statistics: [50000]
-                  0 is for all variant size are valid, and while positive
-                  values are for the valid maximal region size, then longer
-                  regions are omitted and saved to the file specified with '-l' option
-     -L STR       Variant type matching pattern: [strict]
-                  strict: strict variant type matching
-                  loose: treating duplications as insertions
-     -C STR       Chromosome set to be evaluated: [null]
-                  no decoy indicates not specifying the chromosome set for evaluation.
-                  This parameter is used to specify the chromosomes to be evaluated.
-                  Chromosome names should match the format within the VCF file. 
-                  Chromosome names are separated by ';'. Example: -C "1;2;3" 
-     -s INT       overlap extend size: [100]
-     -t INT       number of threads [0]. 0 for the maximal number of threads
-                  in machine
-     -T STR       Tool names [null]. 0 indicates that the tool name is not entered.
-                  This parameter is used for comparing multiple datasets. The number
-                  of inputs should be consistent with the data set. Tool names are 
-                  separated by ';'. Example: -T "tool1;tool2;tool3" 
-     -o FILE      output directory: [output]
-     -l FILE      file name for long SV regions: [long_sv_reg.bed]
-     -v           show version
-     -h           show this help message and exit
+   -m INT    valid maximal region size for statistics: [50000]
+             0 is for all variant size are valid, and while positive
+             values are for the valid maximal region size, then longer
+             regions are omitted and saved to the file specified with '-l' option
+   -S        enable the strict type match mode which is disabled by default.
+             There are two variation type match modes:
+             loose: allow type match between DUP and INS, which takes effect by '-S' option
+             strict: strict type match which is disabled by default
+             The default enabled match mode is 'loose' to allow the type match between DUP and INS.
+   -C STR    Chromosomes to be processed: [null]
+             no decoy indicates not specifying the chromosome set for evaluation.
+             This parameter is used to specify the chromosomes to be evaluated.
+             Chromosome names should match the format within the VCF file. 
+             Chromosome names are separated by ';'. Example: -C "1;2;3" 
+   -s INT    overlap extend size: [100]
+   -t INT    number of threads [0]. 0 for the maximal number of threads
+             in machine
+   -T STR    Tool names [null]. 0 indicates that the tool name is not entered.
+             This parameter is used for comparing multiple datasets. The number
+             of inputs should be consistent with the data set. Tool names are 
+             separated by ';'. Example: -T "tool1;tool2;tool3" 
+   -o FILE   output directory: [output]
+   -l FILE   file name of long SV regions: [long_sv_reg.bed]
+   -r FILE   file name of evaluation results to report: [sv_stat_reports.html]
+             Ensure that the filename extension is '.html'.
+   -v        show version information
+   -h        show this help message and exit
+
+Example:
+   # run the evaluation on the user-called set (method) for a single sample to allow match between DUPs as INSs
+   $ sv_stat -T method user_sv.vcf benchmark_sv.vcf ref.fa
+
+   # run the evaluation on the user-called set (method) for a single sample to perform the strict type matching by '-S' option
+   $ sv_stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa
+
+   # run the evaluation on the user-called sets (tool1, tool2 and tool3) for multiple samples
+   $ sv_stat -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 ```
 
 
 ### Use cases
 Invalid long user-called regions can be removed by using `-m` option as they are too long to be valid variant regions. The command could be:
 ```sh
-$ sv_stat -m 10000 user_sv.vcf benchmark_sv.vcf reference.fa
+$ sv_stat -m -T method 10000 user_sv.vcf benchmark_sv.vcf reference.fa
 ```
 Evaluating multiple identification result datasets can be achieved by using the '-T' option. Please use the following command:
 ```sh
 $ sv_stat -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
-## Draw statistical figuresreference.fa
+## Draw statistical figures
 There are 4 statistical categories for `stat` command results, figures can be drawn for more intuitive and detailed illustration for the four statistical categories:
 * __`1_ref_reg_size_stat`__: record the statistical graph of SV sizes in the user-called data set and the benchmark data set.
 * __`2_num_stat`__: generate the bar chart for the classification evaluation metrics.
@@ -213,8 +227,7 @@ Multisample evaluation statistical results. The evaluation of recognition result
       <th>0.612451</th>
     </tr>
   </tbody>
-</table>reference.fa
-
+</table>
 Moreover, for regions with overlapping variations, the quantities of region size ratio and center distance were statistically analyzed to provide a more intuitive presentation of evaluation information. Here, only a partial set of results is presented, and more detailed statistical outcomes can be reviewed in the respective files or graphical representations:
 
 <table>
