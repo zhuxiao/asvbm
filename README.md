@@ -155,7 +155,7 @@ Example:
 ### Use cases
 Invalid long user-called regions can be removed by using `-m` option as they are too long to be valid variant regions. The command could be:
 ```sh
-$ sv_stat -m -T method 10000 user_sv.vcf benchmark_sv.vcf reference.fa
+$ sv_stat -m 10000 -T method user_sv.vcf benchmark_sv.vcf reference.fa
 ```
 Evaluating multiple identification result datasets can be achieved by using the '-T' option. Please use the following command:
 ```sh
