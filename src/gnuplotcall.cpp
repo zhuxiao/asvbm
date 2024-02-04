@@ -275,7 +275,8 @@ void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathn
 	fprintf(gnuplotPipe, "set yrange [0:1]\n");
 	fprintf(gnuplotPipe, "set ytics 0.1\n");
 	fprintf(gnuplotPipe, "set style data histograms\n");
-	fprintf(gnuplotPipe, "plot '-' using 2:xtic(1) title 'Percentage'\n");
+//	fprintf(gnuplotPipe, "plot '-' using 2:xtic(1) title 'Percentage'\n");
+	fprintf(gnuplotPipe, "plot '-' using 2:xtic(1) title '%s'\n", method_name.c_str());
 
 	for (const auto& pair : dataV) {
 		fprintf(gnuplotPipe, "%s %lf\n", pair.first.c_str(), pair.second);
@@ -314,7 +315,8 @@ void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathna
 	    fprintf(gnuplotPipe, "set xtics nomirror font 'Times-Roman,12'\n");
 	    fprintf(gnuplotPipe, "set yrange [0:*]\n");
 	    fprintf(gnuplotPipe, "set style data histograms\n");
-	    fprintf(gnuplotPipe, "plot '-' using 2:xtic(1) title 'count'\n");
+//	    fprintf(gnuplotPipe, "plot '-' using 2:xtic(1) title 'count'\n");
+	    fprintf(gnuplotPipe, "plot '-' using 2:xtic(1) title '%s'\n", method_name.c_str());
 	    // Pass the data to GNUplot
 	    for (const auto& pair : dataV) {
 	        fprintf(gnuplotPipe, "%s %lf\n", pair.first.c_str(), pair.second);
@@ -446,7 +448,8 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 	gnuplotCommands << "set xtics nomirror\n";
 	gnuplotCommands << "set yrange [0:*]\n";
 	gnuplotCommands << "set multiplot layout 2, 1\n";
-	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb '#2278B4' title 'count'\n";
+//	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb '#2278B4' title 'count'\n";
+	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb '#2278B4' title '"<< method_name << "'\n";
 
 	fprintf(gnuplotPipe, "%s", gnuplotCommands.str().c_str());
 	fflush(gnuplotPipe);
@@ -463,7 +466,8 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 	gnuplotCommands << "set boxwidth 1.0 relative\n"; // Set the column width for the second diagram
 	gnuplotCommands << "set border linecolor rgb 'black' linewidth 2\n";
 //    gnuplotCommands << "set label 'Center distance difference' at graph 0.3, 0.9 left font 'Time New Roman,18\n"; // Add diagram notes to the second diagram
-	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb '#E20613'  title 'count'\n";
+//	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb '#E20613'  title 'count'\n";
+	gnuplotCommands << "plot '-' using 2:xtic(1) with boxes lc rgb '#E20613'  title '"<< method_name << "'\n";
 	fprintf(gnuplotPipe, "%s", gnuplotCommands.str().c_str());
 	fflush(gnuplotPipe);
 

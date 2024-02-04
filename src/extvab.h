@@ -23,6 +23,7 @@ extern string sizeDifStatDirname;
 extern string sizeNumStatDirname;
 
 extern string acquiesce_count;
+extern string method_name;
 extern string program_cmd_str;
 extern string convertScreenFilename;
 extern string statScreenFilename;

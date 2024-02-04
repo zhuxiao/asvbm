@@ -23,6 +23,7 @@ string sizeDifStatDirname = "3_size_dif_stat/";
 string sizeNumStatDirname = "4_size_num_stat/";
 
 string acquiesce_count = "method";
+string method_name = "method";
 string program_cmd_str = "";
 string convertScreenFilename = "convert_screen";
 string statScreenFilename = "stat_screen";
@@ -47,7 +48,7 @@ vector<string> alltoolnames;
 vector<string> allmetric;
 vector< vector<string>> allmetrics = {{"Tool", "#SVs_bench", "#SVs_user", "#SVs_filtered_user", "#TP_bench", "#TP_user", "#FP", "#FN", "Recall", "Precision", "F1 score"}};
 vector<string> centerDistance;
-vector< vector<string>> centerDistances = {{"tool", "-200--151", "-150--101", "-100--51", "-50--1", "0-50", "51-100", "101-150", "151-200"}};
+vector< vector<string>> centerDistances = {{"Tool", "-200--151", "-150--101", "-100--51", "-50--1", "0-50", "51-100", "101-150", "151-200"}};
 vector<string> sizeratio;
 vector< vector<string>> sizeratios = {{"Tool", "0.0-0.5", "0.5-0.7", "0.7-1.2", "1.2-2.0", "2.0-5.0", "5.0-10.0", "10.0-50.0", "50.0-100.0", ">100.0"}};
 vector<string> region = {"1-100bp", "101-250bp", "251-500bp", "501-1000bp", "1001-5000bp", "5001-10000bp", ">10000bp"};

@@ -354,6 +354,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 		SVStat(ref_file, sv_file_name_Path, convert_sv_file2_Path, sv_files1, tool_names);
 
 	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1);
+
 }
 
 // SV stat
@@ -376,6 +377,7 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 					}
 				}
 				alltoolnames.push_back(outputInsideToolDirname);
+				method_name = outputInsideToolDirname;
 				allmetric.push_back(outputInsideToolDirname);
 				centerDistance.push_back(outputInsideToolDirname);
 				sizeratio.push_back(outputInsideToolDirname);
