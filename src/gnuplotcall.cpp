@@ -125,9 +125,10 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     fprintf(gnuplotPipe, "set ytics 0.1\n");
     fprintf(gnuplotPipe, "set style data histograms\n");
 
+    // Set key (legend) font size
+    fprintf(gnuplotPipe, "set key font 'Times-Roman,10'\n");
     // Draw a bar chart, specifying the number of columns for each data column purple  olive magenta
     fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#568AC6' title 'Recall', '' using 3 lc rgb '#F08700' title 'Precision', '' using 4 lc rgb '#F06767' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Seqcons'\n", filenamePath.c_str());
-
     // Close the GNUplot pipeline
     pclose(gnuplotPipe);
 
@@ -789,6 +790,9 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 	fprintf(gnuplotPipe, "set yrange [0:1]\n");
 	fprintf(gnuplotPipe, "set ytics 0.1\n");
 	fprintf(gnuplotPipe, "set style data histograms\n");
+
+	// Set key (legend) font size
+	fprintf(gnuplotPipe, "set key font 'Times-Roman,10'\n");
 
 	// Draw a bar chart, specifying the number of columns for each data column
 	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Seqcons'\n", fileNames[0].c_str());

@@ -352,7 +352,7 @@ void Generatehtml(string figuresFilePath){
 			htmlFile <<"</div>\n";
 			++figure_num;
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-			htmlFile << "Figure (a) shows the statistical results of Recall, Precision, and F1 score; (b) shows the statistical results of #TP_benchmark, #TP_user,#FP and #FN.";
+			htmlFile << "Figure (a) shows the statistical results of Recall, Precision, F1 score and Seqcons; (b) shows the statistical results of #TP_benchmark, #TP_user,#FP and #FN.";
 			htmlFile <<"</div>\n";
 		}
 
