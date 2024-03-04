@@ -208,6 +208,7 @@ Multisample evaluation statistical results. The evaluation of recognition result
       <th>F1 score_user</th>
       <th>precision_benchmark</th>
       <th>F1 score_benchmark</th>
+      <th>Seqcons</th>
     </tr>
   </thead>
   <tbody>
@@ -225,6 +226,7 @@ Multisample evaluation statistical results. The evaluation of recognition result
       <th>0.608231</th>
       <th>0.749912k</th>
       <th>0.612451</th>
+       <th>0.923024</th>
     </tr>
   </tbody>
 </table>
@@ -310,6 +312,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>F1 score_user</th>
       <th>precision_benchmark</th>
       <th>F1 score_benchmark</th>
+      <th>Seqcons</th>
     </tr>
   </thead>
   <tbody>
@@ -324,6 +327,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.619306</th>
       <th>0.774057</th>
       <th>0.622849</th>
+      <th>0.912349</th>
     </tr>
     <tr>
     	  <th>101-250bp</th>
@@ -336,6 +340,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.548965</th>
       <th>0.681552</th>
       <th>0.556652</th>
+      <th>1.000000</th>
     </tr>
     <tr>
     	  <th>251-500bp</th>
@@ -348,6 +353,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.5724</th>
       <th>0.611364</th>
       <th>0.575196</th>
+      <th>1.000000</th>
     </tr>
     <tr>
     	  <th>501-1000bp</th>
@@ -360,6 +366,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.333589</th>
       <th>0.3625</th>
       <th>0.335907</th>
+      <th>1.000000</th>
     </tr>
     <tr>
     	  <th>1001-5000bp</th>
@@ -372,6 +379,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.4465</th>
       <th>0.479779</th>
       <th>0.448839</th>
+      <th>1.000000</th> 
     </tr>
     <tr>
     	  <th>5001-1000bp</th>
@@ -384,6 +392,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.455645</th>
       <th>0.70625</th>
       <th>0.455645</th>
+      <th>1.000000</th>
     </tr>
     <tr>
     	  <th>>=10001bp</th>
@@ -396,6 +405,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.218901</th>
       <th>0.367925</th>
       <th>0.217877</th>
+      <th>1.000000</th>
     </tr>
   </tbody>
 </table>
