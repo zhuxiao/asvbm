@@ -215,17 +215,17 @@ Multisample evaluation statistical results. The evaluation of recognition result
     <tr>
     <th>count</th>
     <th>74012</th>
-      <th>50315</th>
-      <th>50300</th>
-      <th>38307</th>
-      <th>35870</th>
-      <th>12775</th>
-      <th>35705</th>
-      <th>0.517578</th>
-      <th>0.737383</th>
-      <th>0.608231</th>
-      <th>0.749912k</th>
-      <th>0.612451</th>
+      <th>44937</th>
+      <th>44928</th>
+      <th>39442</th>
+      <th>36955</th>
+      <th>6413</th>
+      <th>34570</th>
+      <th>0.532914</th>
+      <th>0.852126</th>
+      <th>0.655735</th>
+      <th>0.860146k</th>
+      <th>0.658096</th>
        <th>0.923024</th>
     </tr>
   </tbody>
@@ -253,18 +253,18 @@ Moreover, for regions with overlapping variations, the quantities of region size
   <tbody>
     <tr>
     <th>region size ratio (count)</th>
-      <th>94</th>
-      <th>151</th>
-      <th>223</th>
-      <th>373</th>
-      <th>739</th>
-      <th>5387</th>
-      <th>26397</th>
-      <th>3646</th>
-      <th>1861</th>
-      <th>1358</th>
-      <th>711</th>
-      <th>475</th>
+      <th>140</th>
+      <th>181</th>
+      <th>203</th>
+      <th>345</th>
+      <th>696</th>
+      <th>5255</th>
+      <th>25892</th>
+      <th>3471</th>
+      <th>1689</th>
+      <th>1178</th>
+      <th>934</th>
+      <th>878</th>
     </tr>
   </tbody>
   <thead>
@@ -284,15 +284,15 @@ Moreover, for regions with overlapping variations, the quantities of region size
   <tbody>
     <tr>
     <th>center distance (count)</th>
-      <th>3700</th>
-      <th>285</th>
-      <th>37139</th>
-      <th>497</th>
-      <th>399</th>
-      <th>79</th>
-      <th>419</th>reference.fa
-      <th>201</th>
-      <th>1666</th>
+      <th>3883</th>
+      <th>290</th>
+      <th>37294</th>
+      <th>500</th>
+      <th>417</th>
+      <th>81</th>
+      <th>553</th>
+      <th>255</th>
+      <th>1738</th>
     </tr>
   </tbody>
 </table>
@@ -318,93 +318,93 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
   <tbody>
     <tr>
     	  <th>1-100bp</th>
-      <th>33423</th>
-      <th>31444</th>
-      <th>9756</th>
-      <th>30721</th>
-      <th>0.521062</th>
-      <th>0.763204</th>
-      <th>0.619306</th>
-      <th>0.774057</th>
-      <th>0.622849</th>
+      <th>33850</th>
+      <th>31715</th>
+      <th>5248</th>
+      <th>30294</th>
+      <th>0.527719</th>
+      <th>0.85802</th>
+      <th>0.653505</th>
+      <th>0.865773</th>
+      <th>0.655741</th>
       <th>0.912349</th>
     </tr>
     <tr>
     	  <th>101-250bp</th>
-      <th>1862</th>
-      <th>1681</th>
-      <th>870</th>
-      <th>2096</th>
-      <th>0.47044</th>
-      <th>0.658957</th>
-      <th>0.548965</th>
-      <th>0.681552</th>
-      <th>0.556652</th>
+      <th>1866</th>
+      <th>1686</th>
+      <th>546</th>
+      <th>2092</th>
+      <th>0.47145</th>
+      <th>0.755376</th>
+      <th>0.580559</th>
+      <th>0.773632</th>
+      <th>0.585871</th>
       <th>1.000000</th>
     </tr>
     <tr>
     	  <th>251-500bp</th>
-      <th>1614</th>
-      <th>1572</th>
-      <th>1026</th>
-      <th>1358</th>
-      <th>0.543069</th>
-      <th>0.605081</th>
-      <th>0.5724</th>
-      <th>0.611364</th>
-      <th>0.575196</th>
+      <th>1618</th>
+      <th>1577</th>
+      <th>891</th>
+      <th>1354</th>
+      <th>0.544415</th>
+      <th>0.638979</th>
+      <th>0.587918</th>
+      <th>0.644878</th>
+      <th>0.590403</th>
       <th>1.000000</th>
     </tr>
     <tr>
     	  <th>501-1000bp</th>
-      <th>348</th>
-      <th>340</th>
-      <th>612</th>
-      <th>764</th>
-      <th>0.31295</th>
-      <th>0.357143</th>
-      <th>0.333589</th>
-      <th>0.3625</th>
-      <th>0.335907</th>
+      <th>349</th>
+      <th>341</th>
+      <th>472</th>
+      <th>763</th>
+      <th>0.313849</th>
+      <th>0.419434</th>
+      <th>0.35904</th>
+      <th>0.425091</th>
+      <th>0.361097</th>
       <th>1.000000</th>
     </tr>
     <tr>
     	  <th>1001-5000bp</th>
       <th>522</th>
-      <th>511</th>
-      <th>566</th>
+      <th>512</th>
+      <th>166</th>
       <th>716</th>
       <th>0.421648</th>
-      <th>0.474466</th>
-      <th>0.4465</th>
-      <th>0.479779</th>
-      <th>0.448839</th>
+      <th>0.755162</th>
+      <th>0.541145</th>
+      <th>0.758721</th>
+      <th>0.542056</th>
       <th>1.000000</th> 
     </tr>
     <tr>
     	  <th>5001-1000bp</th>
       <th>113</th>
       <th>113</th>
-      <th>47</th>
+      <th>18</th>
       <th>223</th>
       <th>0.33631</th>
-      <th>0.70625</th>
-      <th>0.455645</th>
-      <th>0.70625</th>
-      <th>0.455645</th>
+      <th>0.862595</th>
+      <th>0.48394</th>
+      <th>0.862595</th>
+      <th>0.48394</th>
       <th>1.000000</th>
     </tr>
     <tr>
     	  <th>>=10001bp</th>
-      <th>40</th>
       <th>39</th>
-      <th>67</th>
+      <th>40</th>
+      <th>43</th>
       <th>213</th>
       <th>0.154762</th>
-      <th>0.373832</th>
-      <th>0.218901</th>
-      <th>0.367925</th>
-      <th>0.217877</th>
+      <th>0.481928</th>
+      <th>0.234287</th>
+      <th>0.47561</th>
+      <th>0.233533</th>
       <th>1.000000</th>
     </tr>
   </tbody>
