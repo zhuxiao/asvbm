@@ -20,7 +20,7 @@
 #define SEQ_CONSISTENCY				0.7f
 
 #define MAX_VALID_REG_THRES			50000
-#define EXTEND_SIZE					100  // 10
+#define EXTEND_SIZE					200  // 100
 
 #define MIN_SIZE_LARGE_SV			100
 #define EXTEND_SIZE_LARGE_SV		1000

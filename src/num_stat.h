@@ -28,7 +28,7 @@ void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int3
 void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, string &dirname);
 void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, string &file_prefix, faidx_t *fai, int Markers);
 
-void CollectData(float recall, float precision_user, float F1_score_user, vector<float> &Data, size_t num, int Markers);
+void CollectData(float recall, float precision_user, float F1_score_user, double seqcons, vector<float> &Data, size_t num, int Markers);
 void CollectData(int TP_user, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers);
 void computeLenStat(vector<SV_item*> &data, string &description_str);
 
@@ -52,6 +52,7 @@ bool isOverlappedPos(size_t startPos1, size_t endPos1, size_t startPos2, size_t 
 //int MINDistance(string seq1, string seq2);
 int32_t minDistance(const string &seq1, const string &seq2);
 double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai);
+void SeqConsNumStat(double consistency);
 void extractRefSeq(SV_item* item1, SV_item* item2, string &seq_new1, string &seq_new2, faidx_t *fai);
 size_t customHashFunction(const string& kmer, size_t kmerSize);
 double MinimizerMethodOp(string& seq1, string& seq2, string& aln_seq1, string& aln_seq2, string& AlignSeq, string& AlignSeq1);

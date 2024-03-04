@@ -77,6 +77,7 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	int32_t TP_benchmark, TP_user, FP, FN;
 	float recall, precision_benchmark, precision_user, F1_score_benchmark, F1_score_user, sv_num_per_reg, percent;
 	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
+	SeqconsSum = SeqconsNum = Seqcons = 0;
 
 	filename_intersect_user = file_prefix + "_intersect_user";
 	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
@@ -152,40 +153,47 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	if(TP_user>0) sv_num_per_reg = (float)TP_benchmark / TP_user;
 	else sv_num_per_reg = 0;
 
+	if(SeqconsNum != 0)	Seqcons = SeqconsSum/(double)SeqconsNum;
+	else	Seqcons = 0;
+//	cout << "11111111:" << Seqcons << "	num:" << SeqconsNum << " SeqconsSum:" << SeqconsSum << endl;
+
 	cout << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
 	cout << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
 //	cout << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Seqcons=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 
 	outStatScreenFile << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
 	outStatScreenFile << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
 //	outStatScreenFile << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Seqcons=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 	if(Markers == 2){
 		CollectData(TP_user, TP_benchmark, FP, FN, data1, 4, 2);
-		CollectData(recall, precision_user, F1_score_user, data, 3, 2);
+		CollectData(recall, precision_user, F1_score_user, Seqcons, data, 3, 2);
 	}
 	allmetric.clear();
 	if(Markers == 4){
 		CollectData(TP_user, TP_benchmark, FP, FN, data1_4, 4, 4);
-		CollectData(recall, precision_user, F1_score_user, data_4, 3, 4);
+		CollectData(recall, precision_user, F1_score_user, Seqcons, data_4, 3, 4);
 	}
 	regionmetric.clear();
 	destroyResultData(result);
 }
-void CollectData(float recall, float precision_user, float F1_score_user, vector<float> &Data, size_t num, int Markers){
+void CollectData(float recall, float precision_user, float F1_score_user, double seqcons, vector<float> &Data, size_t num, int Markers){
 	Data.push_back(recall);
 	Data.push_back(precision_user);
 	Data.push_back(F1_score_user);
+	Data.push_back(seqcons);
 	if(Markers==2){
 		allmetric.push_back(to_string(recall));
 		allmetric.push_back(to_string(precision_user));
 		allmetric.push_back(to_string(F1_score_user));
+		allmetric.push_back(to_string(seqcons));
 		allmetrics.push_back(allmetric);
 	}else if(Markers==4){
 		regionmetric.push_back(to_string(recall));
 		regionmetric.push_back(to_string(precision_user));
 		regionmetric.push_back(to_string(F1_score_user));
+		regionmetric.push_back(to_string(seqcons));
 		regionmetrics.push_back(regionmetric);
 	}
 //	if(Data.size()>num){
@@ -561,7 +569,7 @@ void* intersectSubset(void *arg){
 
 		for(k=0; k<2; k++){
 
-			if(k==0) extendsize_tmp = 2 * extendSize;
+			if(k==0) extendsize_tmp = 2 * extendSize;	//2 *
 			else{
 				svlen_1 = item1->sv_len;
 				if(svlen_1<0) svlen_1 = -svlen_1;
@@ -641,21 +649,30 @@ void* intersectSubset(void *arg){
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-												if (consistency >= SEQ_CONSISTENCY) flag = true;
+												if (consistency >= SEQ_CONSISTENCY) {
+													SeqConsNumStat(consistency);
+													flag = true;
+												}
 											}
 										}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 													flag = true;
 												}else{
 													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-													if (consistency >= SEQ_CONSISTENCY) flag = true;
+													if (consistency >= SEQ_CONSISTENCY) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
 												}
 										}else if(item1->sv_type == VAR_DEL and item2->sv_type == VAR_DEL){
 											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-												if (consistency >= SEQ_CONSISTENCY) flag = true;
+												if (consistency >= SEQ_CONSISTENCY) {
+													SeqConsNumStat(consistency);
+													flag = true;
+												}
 											}
 										}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){	//TRA,BND,TRA_BND
 											flag = true;
@@ -695,14 +712,20 @@ void* intersectSubset(void *arg){
 										}else{
 											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 											// determine the overlap flag according to consistency
-											if(consistency>=SEQ_CONSISTENCY) flag = true;
+											if(consistency>=SEQ_CONSISTENCY) {
+												SeqConsNumStat(consistency);
+												flag = true;
+											}
 										}
 									}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
 										if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-												if (consistency >= SEQ_CONSISTENCY) flag = true;
+												if (consistency >= SEQ_CONSISTENCY) {
+													SeqConsNumStat(consistency);
+													flag = true;
+												}
 											}
 									}else if(item1->sv_type==VAR_DEL and item2->sv_type==VAR_DEL){
 										if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
@@ -710,7 +733,10 @@ void* intersectSubset(void *arg){
 										}else{
 											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 											// determine the overlap flag according to consistency
-											if(consistency>=SEQ_CONSISTENCY) flag = true;
+											if(consistency>=SEQ_CONSISTENCY) {
+												SeqConsNumStat(consistency);
+												flag = true;
+											}
 										}
 									}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){
 										flag = true;
@@ -1176,6 +1202,12 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 //	consistency = 1-discrepancy_score;
 
 	return consistency;
+}
+
+void SeqConsNumStat(double consistency){
+	SeqconsSum += consistency;
+	SeqconsNum += 1;
+//	cout << "num: " << SeqconsNum << "value: " << consistency <<" SUM:"<< SeqconsSum << endl;
 }
 
 // extract the reference sequences

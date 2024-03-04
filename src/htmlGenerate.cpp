@@ -116,7 +116,7 @@ void Generatehtml(string figuresFilePath){
 			htmlFile << "</div>";
 		}
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "The evaluation metrics has two categories after filtering long SV regions: one category is used to highlight performance by metrics including Recall, Precision, and F1 score, and the other category presents benchmark results, which consists of TP_bench, TP_user, FP, FN. Visualizing these metrics through bar charts provides a more intuitive representation of the assessment results for the variation detection methods.";
+		htmlFile << "The evaluation metrics has two categories after filtering long SV regions: one category is used to highlight performance by metrics including Recall, Precision, F1 score, and sequence consistency (Seqcons) and the other category presents benchmark results, which consists of TP_bench, TP_user, FP, FN. Visualizing these metrics through bar charts provides a more intuitive representation of the assessment results for the variation detection methods.";
 		htmlFile << "</div>";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 0px; text-align: left;\">(1) The evaluation results of the user-called set are as follows:</h3>";
@@ -145,13 +145,13 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "</table>\n";
 
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "The table 1 shows the evaluation results of the variation identification result. Where #SVs_bench represents the number of identified structural variations (SVs) in the benchmark set, #SV_user represents the number of SVs in the called set, and #SV_filtered_user represents the number of SVs after filtering out large SVs. #TP stands for the number of True Positives, indicating correctly identified targets or events. #FP stands for the number of False Positives, representing falsely identified targets or events. #FN represents the number of False Negatives, referring to the targets or events that were missed or not identified correctly.\n";
+		htmlFile << "The table 1 shows the evaluation results of the variation identification result. Where #SVs_bench represents the number of identified structural variations (SVs) in the benchmark set, #SV_user represents the number of SVs in the called set, and #SV_filtered_user represents the number of SVs after filtering out large SVs. #TP stands for the number of True Positives, indicating correctly identified targets or events. #FP stands for the number of False Positives, representing falsely identified targets or events. #FN represents the number of False Negatives, referring to the targets or events that were missed or not identified correctly. Seqcons represents the sequence consistency, which refers to calculating the sequence consistency score for matched SV pairs that include sequences.\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 0px; text-align: left;\">(2) The evaluation results of two categorizes of metrics are shown in the figure:</h3>\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "Two categories of metrics are independently calculated: (a) one category includes Recall, Precision, and F1 Score; (b) the other category consists of #TP_bench, #TP_user, #FP, and #FN. The result statistics are as follows:\n";
+		htmlFile << "Two categories of metrics are independently calculated: (a) one category includes Recall, Precision, F1 Score, and Seqcons; (b) the other category consists of #TP_bench, #TP_user, #FP, and #FN. The result statistics are as follows:\n";
 		htmlFile << "</div>\n";
 //		htmlFile << "<h3>Figure 1. Evaluation results of the user-call set</h3>\n";
 		htmlFile << "<style>\n";
@@ -260,7 +260,7 @@ void Generatehtml(string figuresFilePath){
 				if(i == folderPng3.size()-1 and folderPng3.size()%2 ==1){
 					htmlFile << "<div style=\"display: flex; flex-wrap: wrap; justify-content: center; margin: 0 auto;\">\n";
 					htmlFile << "<h4 style=\"text-align:center; margin-top: 0px; margin-bottom: 5px;\">(" << static_cast<char>(asciiValue+ i) << ") " << allmetrics[i+1][0] << ":</h4>\n";
-					htmlFile << "<img src=\""<< folderPng3[i]  << "\" alt=\"result details\" style=\"width: 40%; margin: 10px;\">\n";
+					htmlFile << "<img src=\""<< folderPng3[i]  << "\" alt=\"result details\" style=\"width: 45%; margin: 10px;\">\n";
 					htmlFile << "</div>\n";
 					htmlFile << "</div>\n";
 					break;

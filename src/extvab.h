@@ -52,6 +52,9 @@ extern vector<string> regionmetric;
 extern vector<vector<vector<string>>> allregionmetrics;
 extern vector< vector<string>> regionmetrics;
 
+extern double Seqcons;
+extern double SeqconsSum;
+extern int32_t SeqconsNum;
 extern float svlenRatio;
 extern vector<string> chromosomeSet;
 extern string typeMatchLevel;
