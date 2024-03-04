@@ -102,7 +102,7 @@ The help information are below:
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variant Statistics Evaluation)
-Version: 0.9.0
+Version: 1.0.0
 
 Usage:  sv_stat [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
@@ -126,7 +126,7 @@ Options:
              This parameter is used to specify the chromosomes to be evaluated.
              Chromosome names should match the format within the VCF file. 
              Chromosome names are separated by ';'. Example: -C "1;2;3" 
-   -s INT    overlap extend size: [100]
+   -s INT    overlap extend size: [200]
    -t INT    number of threads [0]. 0 for the maximal number of threads
              in machine
    -T STR    Tool names [null]. 0 indicates that the tool name is not entered.
