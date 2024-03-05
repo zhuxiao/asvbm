@@ -211,7 +211,7 @@ int parseStat(int argc, char **argv){
 	typeMatchLevel = MATCHLEVEL_L;
 	ToolNameStore = ChromosomeNames = "";
 
-	while( (opt = getopt(argc, argv, ":m:s:t:r:o:l:T:h:C:L")) != -1 ){
+	while( (opt = getopt(argc, argv, ":m:s:t:r:o:l:T:h:C:S")) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
@@ -222,7 +222,7 @@ int parseStat(int argc, char **argv){
 			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
 			case 'h': showUsageStat(); exit(0);
-			case 'L': typeMatchLevel = MATCHLEVEL_S; break;
+			case 'S': typeMatchLevel = MATCHLEVEL_S; break;
 			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
 			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
 		}
