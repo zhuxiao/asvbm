@@ -35,7 +35,7 @@ HTSlib needs to be installed from source files.
 * RedHat / CentOS
 ```
 $ sudo yum check-update # Ensure the package list is up to date
-$ sudo yum install g++ gnuplot
+$ sudo yum install gcc-c++ gnuplot
 ```
 HTSlib needs to be installed from source files.
 
