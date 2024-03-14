@@ -242,7 +242,7 @@ Moreover, for regions with overlapping variations, the quantities of region size
       <th><b>-150--101</b></th>
       <th><b>-100--51</b></th>
       <th><b>-50--1</b></th>
-      <th><b>0-50</b></th>reference.fa
+      <th><b>0-50</b></th>
       <th><b>51-100</b></th>
       <th><b>101-150</b></th>
       <th><b>151-200</b></th>
