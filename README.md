@@ -19,31 +19,31 @@ When evaluating the performance of a tool, we rely on a set of quantitative metr
     <th style="text-align: center;">Definition</th>
   </tr>
     <tr>
-    <td>SVs_bench</td>
+    <td>#SVs_bench</td>
     <td>Number of SVs in the benchmark set</td>
   </tr>
   <tr>
-    <td>SVs_user</td>
+    <td>#SVs_user</td>
     <td>Number of SVs in the use set</td>
   </tr>
    <tr>
-    <td>SVs_filtered_user</td>
+    <td>#SVs_filtered_user</td>
     <td>Number of SVs in the filtered use set</td>
   </tr>
   <tr>
-    <td>TP_bench</td>
+    <td>#TP_bench</td>
     <td>Number of true positive variations in the benchmark set</td>
   </tr>
   <tr>
-    <td>TP_user</td>
+    <td>#TP_user</td>
     <td>Number of true positive variations in the use set</td>
   </tr>
   <tr>
-    <td>FP</td>
+    <td>#FP</td>
     <td>The number of falsely identified targets or events</td>
   </tr>
   <tr>
-    <td>FN</td>
+    <td>#FN</td>
     <td>The number of targets or events that were missed or not identified correctly</td>
   </tr>
   <tr>
