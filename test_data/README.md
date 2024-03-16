@@ -67,58 +67,105 @@ The evaluation results were as follows:
       <th>Recall</th>
       <th>precision</th>
       <th>F1 score</th>
+      <th>Seqcons</th>
     </tr>
   </thead>
   <tbody>
     <tr>
     <th>cuteSV</th>
       <th>3384</th>
-      <th>2828</th>
-      <th>2646</th>
-      <th>576</th>
-      <th>2569</th>
-      <th>0.52</th>
-      <th>0.82</th>
-      <th>0.64</th>
+      <th>2914</th>
+      <th>2734</th>
+      <th>488</th>
+      <th>2483</th>
+      <th>0.5399</th>
+      <th>0.8485</th>
+      <th>0.6599</th>
+      <th>0.9184</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>pbsv</th>
-    	  <th>3859</th>
-      <th>2677</th>
-      <th>2534</th>
-      <th>1240</th>
-      <th>2720</th>
-      <th>0.50</th>
-      <th>0.67</th>
-      <th>0.57</th>
+    	<th>3859</th>
+      <th>3241</th>
+      <th>3139</th>
+      <th>635</th>
+      <th>2156</th>
+      <th>0.6005</th>
+      <th>0.8317</th>
+      <th>0.6975</th>
+      <th>0.9662</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
-    <th>Sniffles</th>
+    <th>Sniffles2</th>
       <th>3972</th>
-      <th>3249</th>
-      <th>3080</th>
-      <th>785</th>
-      <th>2148</th>
-      <th>0.60</th>
-      <th>0.80</th>
-      <th>0.68</th>
+      <th>3318</th>
+      <th>3189</th>
+      <th>676</th>
+      <th>2079</th>
+      <th>0.6148</th>
+      <th>0.8251</th>
+      <th>0.7046</th>
+      <th>0.9220</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>asvclr</th>
-      <th>3489</th>
-      <th>3086</th>
-      <th>2934</th>
-      <th>555</th>
-      <th>2311</th>
-      <th>0.57</th>
-      <th>0.84</th>
-      <th>0.68</th>
+      <th>3893</th>
+      <th>3374</th>
+      <th>3276</th>
+      <th>617</th>
+      <th>2023</th>
+      <th>0.6252</th>
+      <th>0.8415</th>
+      <th>0.7174</th>
+      <th>0.9183</th>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+    <th>SVDSS</th>
+      <th>3318</th>
+      <th>2506</th>
+      <th>2759</th>
+      <th>559</th>
+      <th>2891</th>
+      <th>0.4643</th>
+      <th>0.8315</th>
+      <th>0.5959</th>
+      <th>0.9360</th>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+    <th>DeBreak</th>
+      <th>3429</th>
+      <th>3033</th>
+      <th>2854</th>
+      <th>467</th>
+      <th>2364</th>
+      <th>0.5620</th>
+      <th>0.8594</th>
+      <th>0.6796</th>
+      <th>0.9318</th>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+    <th>SVIM</th>
+      <th>11490</th>
+      <th>3504</th>
+      <th>3452</th>
+      <th>2384</th>
+      <th>1893</th>
+      <th>0.6493</th>
+      <th>0.5915</th>
+      <th>0.6190</th>
+      <th>0.9549</th>
     </tr>
   </tbody>
 </table>
@@ -144,52 +191,91 @@ The statistical results of center distance were shown as follows:
     <tr>
     <th>cuteSV</th>
       <th>18</th>
-      <th>34</th>
-      <th>53</th>
-      <th>374</th>
-      <th>2039</th>
-      <th>253</th>
-      <th>133</th>
-      <th>89</th>
+      <th>31</th>
+      <th>50</th>
+      <th>361</th>
+      <th>2009</th>
+      <th>238</th>
+      <th>117</th>
+      <th>77</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>pbsv</th>
-    	  <th>25</th>
-      <th>34</th>
-      <th>66</th>
-      <th>341</th>
-      <th>2425</th>
-      <th>190</th>
-      <th>126</th>
-      <th>93</th>
+    	  <th>23</th>
+      <th>30</th>
+      <th>55</th>
+      <th>334</th>
+      <th>2378</th>
+      <th>175</th>
+      <th>106</th>
+      <th>83</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
-    <th>Sniffles</th>
-      <th>29</th>
-      <th>46</th>
-      <th>61</th>
-      <th>260</th>
-      <th>2481</th>
-      <th>330</th>
-      <th>155</th>
-      <th>111</th>
+    <th>Sniffles2</th>
+      <th>28</th>
+      <th>43</th>
+      <th>56</th>
+      <th>250</th>
+      <th>2439</th>
+      <th>308</th>
+      <th>142</th>
+      <th>96</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>asvclr</th>
-      <th>11</th>
-      <th>19</th>
-      <th>39</th>
-      <th>342</th>
-      <th>2217</th>
-      <th>267</th>
-      <th>133</th>
-      <th>74</th>
+      <th>12</th>
+      <th>34</th>
+      <th>46</th>
+      <th>418</th>
+      <th>2250</th>
+      <th>279</th>
+      <th>168</th>
+      <th>100</th>
+    </tr>
+  </tbody>
+   <tbody>
+    <tr>
+    <th>SVDSS</th>
+      <th>22</th>
+      <th>27</th>
+      <th>82</th>
+      <th>871</th>
+      <th>1619</th>
+      <th>159</th>
+      <th>104</th>
+      <th>72</th>
+    </tr>
+  </tbody>
+   <tbody>
+    <tr>
+    <th>DeBreak</th>
+      <th>15</th>
+      <th>28</th>
+      <th>36</th>
+      <th>157</th>
+      <th>1881</th>
+      <th>379</th>
+      <th>175</th>
+      <th>149</th>
+    </tr>
+  </tbody>
+   <tbody>
+    <tr>
+    <th>SVIM</th>
+      <th>43</th>
+      <th>59</th>
+      <th>87</th>
+      <th>454</th>
+      <th>2594</th>
+      <th>278</th>
+      <th>178</th>
+      <th>131</th>
     </tr>
   </tbody>
 </table>
@@ -214,57 +300,99 @@ The statistical results of the region size ratio were shown as follows:
   <tbody>
     <tr>
     <th>cuteSV</th>
-      <th>256</th>
-      <th>18</th>
-      <th>2782</th>
-      <th>34</th>
-      <th>26</th>
-      <th>9</th>
-      <th>28</th>
+      <th>276</th>
       <th>16</th>
-      <th>145</th>
+      <th>2807</th>
+      <th>33</th>
+      <th>26</th>
+      <th>7</th>
+      <th>38</th>
+      <th>19</th>
+      <th>152</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>pbsv</th>
-    	  <th>293</th>
-      <th>29</th>
-      <th>2668</th>
-      <th>43</th>
-      <th>47</th>
-      <th>8</th>
-      <th>311</th>
-      <th>82</th>
-      <th>224</th>
+    	<th>310</th>
+      <th>21</th>
+      <th>2696</th>
+      <th>40</th>
+      <th>53</th>
+      <th>6</th>
+      <th>315</th>
+      <th>84</th>
+      <th>237</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
-    <th>Sniffles</th>
-      <th>330</th>
-      <th>30</th>
-      <th>3249</th>
-      <th>32</th>
-      <th>33</th>
-      <th>5</th>
-      <th>30</th>
-      <th>13</th>
-      <th>111</th>
+    <th>Sniffles2</th>
+      <th>342</th>
+      <th>23</th>
+      <th>3279</th>
+      <th>31</th>
+      <th>37</th>
+      <th>6</th>
+      <th>40</th>
+      <th>18</th>
+      <th>118</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>asvclr</th>
-      <th>254</th>
-      <th>20</th>
-      <th>2968</th>
-      <th>26</th>
-      <th>23</th>
+      <th>280</th>
+      <th>21</th>
+      <th>3086</th>
+      <th>41</th>
+      <th>35</th>
+      <th>10</th>
+      <th>54</th>
+      <th>37</th>
+      <th>239</th>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+    <th>SVDSS</th>
+      <th>347</th>
+      <th>25</th>
+      <th>2859</th>
+      <th>31</th>
+      <th>32</th>
       <th>3</th>
-      <th>15</th>
-      <th>12</th>
-      <th>2</th>
+      <th>27</th>
+      <th>18</th>
+      <th>9</th>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+    <th>DeBreak</th>
+      <th>125</th>
+      <th>17</th>
+      <th>1543</th>
+      <th>39</th>
+      <th>54</th>
+      <th>16</th>
+      <th>736</th>
+      <th>182</th>
+      <th>589</th>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+    <th>SVIM</th>
+      <th>571</th>
+      <th>25</th>
+      <th>3506</th>
+      <th>40</th>
+      <th>54</th>
+      <th>13</th>
+      <th>82</th>
+      <th>58</th>
+      <th>362</th>
     </tr>
   </tbody>
 </table>
@@ -282,78 +410,84 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>Recall</th>
       <th>precision</th>
       <th>F1 score</th>
+      <th>Seqcons</th>
     </tr>
   </thead>
   <tbody>
     <tr>
     	  <th>1-100bp</th>
-      <th>2780</th>
-      <th>2653</th>
-      <th>542</th>
-      <th>1941</th>
-      <th>0.59</th>
-      <th>0.83</th>
-      <th>0.69</th>
+      <th>2836</th>
+      <th>2754</th>
+      <th>532</th>
+      <th>1885</th>
+      <th>0.6007</th>
+      <th>0.8381</th>
+      <th>0.6998</th>
+      <th>0.9102</th>
     </tr>
     <tr>
     	  <th>101-250bp</th>
-      <th>112</th>
-      <th>104</th>
-      <th>19</th>
-      <th>31</th>
-      <th>0.46</th>
-      <th>0.85</th>
-      <th>0.60</th>
+      <th>119</th>
+      <th>111</th>
+      <th>73</th>
+      <th>124</th>
+      <th>0.4897</th>
+      <th>0.6033</th>
+      <th>0.5406</th>
     </tr>
     <tr>
     	  <th>251-500bp</th>
-      <th>120</th>
-      <th>118</th>
-      <th>2</th>
-      <th>96</th>
-      <th>0.56</th>
-      <th>0.98</th>
-      <th>0.71</th>
+      <th>126</th>
+      <th>124</th>
+      <th>136</th>
+      <th>90</th>
+      <th>0.5833</th>
+      <th>0.4769</th>
+      <th>0.5248</th>
+      <th>0.9922</th>
     </tr>
     <tr>
     	  <th>501-1000bp</th>
-      <th>30</th>
-      <th>30</th>
-      <th>6</th>
-      <th>46</th>
-      <th>0.40</th>
-      <th>0.83</th>
-      <th>0.54</th>
+      <th>31</th>
+      <th>31</th>
+      <th>41</th>
+      <th>45</th>
+      <th>0.4079</th>
+      <th>0.4306</th>
+      <th>0.4189</th>
     </tr>
     <tr>
     	  <th>1001-5000bp</th>
-      <th>16</th>
-      <th>15</th>
-      <th>0</th>
-      <th>76</th>
-      <th>0.17</th>
-      <th>1.0</th>
-      <th>0.30</th>
+      <th>41</th>
+      <th>43</th>
+      <th>22</th>
+      <th>51</th>
+      <th>0.4457</th>
+      <th>0.6615</th>
+      <th>0.5326</th>
+      <th>0.9997</th>
     </tr>
     <tr>
     	  <th>5001-1000bp</th>
+      <th>10</th>
+      <th>10</th>
       <th>9</th>
-      <th>9</th>
-      <th>1</th>
-      <th>17</th>
-      <th>0.35</th>
-      <th>0.90</th>
-      <th>0.50</th>
+      <th>16</th>
+      <th>0.3846</th>
+      <th>0.5263</th>
+      <th>0.4444</th>
+      <th>1.0000</th>
     </tr>
     <tr>
     	  <th>>=10001bp</th>
+      <th>4</th>
+      <th>4</th>
       <th>3</th>
-      <th>3</th>
-      <th>0</th>
-      <th>20</th>
-      <th>0.13</th>
-      <th>1.0</th>
-      <th>0.23</th>
+      <th>19</th>
+      <th>0.1739</th>
+      <th>0.5714</th>
+      <th>0.2667</th>
+      <th>1.0000</th>
     </tr>
   </tbody>
 </table>
