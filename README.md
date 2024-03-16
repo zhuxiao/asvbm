@@ -3,7 +3,8 @@ A tool for Structural Variation Statistics Evaluation
 
 -------------------
 SV_STAT is a tool for Structural Variation (SV) Statistics Evaluation. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the traditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), recall, precision and F1 score; and it then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their region centers, and it also computes the region size ratio for the two variant regions; and finally, it computes the statistics for variants with vary region sizes. A notable feature of SV_STAT is its capability to evaluate multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, SV_STAT supports multi-sample evaluation on the same benchmark set, providing a more intuitive display of the comparative results between samples.
-For more detailed experiment information, please refer to [sv_stat-experiments]https://github.com/zhuxiao/sv_stat-experiments/).
+
+For more detailed experiment information, please refer to [sv_stat-experiments](https://github.com/zhuxiao/sv_stat-experiments).
 
 ## Introduction
 SV_STAT is a comprehensive tool for evaluating the results of structural variant identification. Taking the VCF files as input, SV_STAT utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, mutual overlap, size similarity, and sequence consistency to provide an improved approach to structural variant matching. SV_STAT supports multi-sample evaluation and generates detailed graphical information. The workflow of SV_STAT is briefly explained in the following diagram:
