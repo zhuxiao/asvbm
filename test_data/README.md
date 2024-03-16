@@ -70,49 +70,7 @@ The evaluation results were as follows:
       <th>Seqcons</th>
     </tr>
   </thead>
-  <tbody>
-    <tr>
-    <th>cuteSV</th>
-      <th>3384</th>
-      <th>2914</th>
-      <th>2734</th>
-      <th>488</th>
-      <th>2483</th>
-      <th>0.5399</th>
-      <th>0.8485</th>
-      <th>0.6599</th>
-      <th>0.9184</th>
-    </tr>
-  </tbody>
-   <tbody>
-    <tr>
-    <th>pbsv</th>
-    	<th>3859</th>
-      <th>3241</th>
-      <th>3139</th>
-      <th>635</th>
-      <th>2156</th>
-      <th>0.6005</th>
-      <th>0.8317</th>
-      <th>0.6975</th>
-      <th>0.9662</th>
-    </tr>
-  </tbody>
-   <tbody>
-    <tr>
-    <th>Sniffles2</th>
-      <th>3972</th>
-      <th>3318</th>
-      <th>3189</th>
-      <th>676</th>
-      <th>2079</th>
-      <th>0.6148</th>
-      <th>0.8251</th>
-      <th>0.7046</th>
-      <th>0.9220</th>
-    </tr>
-  </tbody>
-   <tbody>
+    <tbody>
     <tr>
     <th>asvclr</th>
       <th>3893</th>
@@ -140,7 +98,7 @@ The evaluation results were as follows:
       <th>0.9360</th>
     </tr>
   </tbody>
-  <tbody>
+    <tbody>
     <tr>
     <th>DeBreak</th>
       <th>3429</th>
@@ -152,6 +110,48 @@ The evaluation results were as follows:
       <th>0.8594</th>
       <th>0.6796</th>
       <th>0.9318</th>
+    </tr>
+  </tbody>
+     <tbody>
+    <tr>
+    <th>Sniffles2</th>
+      <th>3972</th>
+      <th>3318</th>
+      <th>3189</th>
+      <th>676</th>
+      <th>2079</th>
+      <th>0.6148</th>
+      <th>0.8251</th>
+      <th>0.7046</th>
+      <th>0.9220</th>
+    </tr>
+  </tbody> 
+   <tbody>
+    <tr>
+    <th>pbsv</th>
+    	<th>3859</th>
+      <th>3241</th>
+      <th>3139</th>
+      <th>635</th>
+      <th>2156</th>
+      <th>0.6005</th>
+      <th>0.8317</th>
+      <th>0.6975</th>
+      <th>0.9662</th>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+    <th>cuteSV</th>
+      <th>3384</th>
+      <th>2914</th>
+      <th>2734</th>
+      <th>488</th>
+      <th>2483</th>
+      <th>0.5399</th>
+      <th>0.8485</th>
+      <th>0.6599</th>
+      <th>0.9184</th>
     </tr>
   </tbody>
   <tbody>
