@@ -2,7 +2,7 @@
 
 ## experiment description
 
-In this experiment, we conducted an individualized evaluation of the identification results for chromosome 1 (chr1) from the HG002 CCS (Consensus Circular Sequence) data by using four structural variant (SV) detection methods: cuteSV(v2.0.3), pbsv (v2.9.0), Sniffles(v2.0.2), asvclr(vxxx).  Subsequently, the identification results obtained from these four different detection methods were comprehensively evaluated against their benchmark sets through a multi-sample evaluation approach.
+In this experiment, we conducted an individualized evaluation of the identification results for chromosome 1 (chr1) from the HG002 CCS (Consensus Circular Sequence) data by using seven structural variant (SV) detection methods: cuteSV(v2.0.3), pbsv (v2.9.0), Sniffles2(v2.0.2), asvclr(v1.4.0), SVDSS(v1.0.5), DeBreak(v1.0.2), SVIM(v2.0.0). Here we will only focus on the evaluation results of insertion and deletion variants. Subsequently, the identification results obtained from these seven different detection methods were comprehensively evaluated against their benchmark sets through a multi-sample evaluation approach.
 
 ## data description and preparation
 
@@ -18,7 +18,10 @@ $ ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/NIST_SV
 
 ```
 ## Download source programs and test data
-$ wget -c https://github.com/zhuxiao/sv_stat/releases/download/0.8.0/sv_stat_0.8.0.tar.xz
+$ wget -c https://github.com/zhuxiao/sv_stat/releases/download/1.0.0/sv_stat_1.0.0.tar.xz
+$ tar -xf sv_stat_1.0.0.tar.xz
+$ cd sv_stat_1.0.0/
+$ ./autogen.sh
 ```
 The name of the chr1 file (reference) was renamed to test_chr1.fa. We uploaded the sequence of chr1 into three files, which can be downloaded and merged by following steps:
 ```
@@ -37,9 +40,16 @@ $ tar -xJf test_pbsv_chr1.vcf.tar.xz
 $ tar -xJf test_sniffles_chr1.vcf.tar.xz
 ## The identification results of chr1 by asvclr were extracted
 $ tar -xJf test_asvclr_chr1.vcf.tar.xz
+## The identification results of chr1 by SVDSS were extracted
+$ tar -xJf test_SVDSS_chr1.vcf.tar.xz
+## The identification results of chr1 by DeBreak were extracted
+$ cat test_DeBreak_chr1_tar_a* > test_DeBreak_chr1.tar.xz
+$ tar -xJf test_DeBreak_chr1.tar.xz
+## The identification results of chr1 by SVIM were extracted
+$ tar -xJf test_SVIM_chr1.tar.xz
 
 ## Evaluating the VCF files mentioned in the test data using SV_STAT, run the following command:
-$ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles;asvclr" test_data/test_cutesv_chr1.vcf test_data/test_pbsv_chr1.vcf test_data/test_sniffles_chr1.vcf test_data/test_asvclr_chr1.vcf test_data/test_chr1.fa
+$ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles2;asvclr;SVDSS;DeBreak;SVIM" -C "1" test_data/test_cutesv_chr1.vcf test_data/test_pbsv_chr1.vcf test_data/test_sniffles_chr1.vcf test_data/test_asvclr_chr1.vcf test_SVDSS_chr1.vcf test_DeBreak_chr1.vcf test_SVIM_chr1.vcf test_benchmark_chr1.vcf test_data/test_chr1.fa
 ```
 SV_STAT evaluated the provided identification set based on the input, generating corresponding file information. If needed, more detailed evaluation information can be obtained by running test data independently.
 
