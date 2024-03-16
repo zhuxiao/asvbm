@@ -13,6 +13,67 @@ SV_STAT is a comprehensive tool for evaluating the results of structural variant
 <img src="img/SV_STAT_workflow.png" alt= "SV_STAT workflow"> 
 </div>
 
+When evaluating the performance of a tool, we rely on a set of quantitative metrics to measure its accuracy and practicality. Here are some commonly used evaluation metrics  that can help us understand the different aspects of tool performance:
+<table>
+  <tr>
+    <th style="text-align: center;">Metric</th>
+    <th style="text-align: center;">Definition</th>
+  </tr>
+    <tr>
+    <td>SVs_bench</td>
+    <td>Number of SVs in the benchmark set</td>
+  </tr>
+  <tr>
+    <td>SVs_user</td>
+    <td>Number of SVs in the use set</td>
+  </tr>
+   <tr>
+    <td>SVs_filtered_user</td>
+    <td>Number of SVs in the filtered use set</td>
+  </tr>
+  <tr>
+    <td>TP_bench</td>
+    <td>Number of true positive variations in the benchmark set</td>
+  </tr>
+  <tr>
+    <td>TP_user</td>
+    <td>Number of true positive variations in the use set</td>
+  </tr>
+  <tr>
+    <td>FP</td>
+    <td>The number of falsely identified targets or events</td>
+  </tr>
+  <tr>
+    <td>FN</td>
+    <td>The number of targets or events that were missed or not identified correctly</td>
+  </tr>
+  <tr>
+    <td>Recall</td>
+    <td>TP_bench / (TP_bench + FN)</td>
+  </tr>
+  <tr>
+    <td>Precision</td>
+    <td>TP_user / (TP_user + FP)</td>
+  </tr>
+   <tr>
+    <td>F1 score</td>
+    <td>2 * ((Recall * Precision) / (Recall + Precision))</td>
+  </tr>
+  <tr>
+    <td>Seqcons</td>
+    <td>The sequence consistency score for matched SV pairs that include sequences</td>
+  </tr>
+   <tr>
+    <td>the center distance</td>
+    <td>The quantitative distribution of the center distances for overlapping variants</td>
+  </tr>
+  <tr>
+    <td>the region size ratio</td>
+    <td>The region size distribution of the center distances for overlapping variants</td>
+  </tr>
+</table>
+
+Additionally, structural variations within seven sub-intervals are evaluated individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and Seqcons are calculated.
 ## Prerequisites
 SV_STAT depends on the following libraries and tools:
 * HTSlib (http://www.htslib.org/download/)
