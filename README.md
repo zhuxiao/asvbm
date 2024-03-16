@@ -12,7 +12,7 @@ SV_STAT is a comprehensive tool for evaluating the results of structural variant
 <div align="center">
 <img src="img/SV_STAT_workflow.png" alt= "SV_STAT workflow"> 
 </div>
-
+</br>
 When evaluating the performance of a tool, we rely on a set of quantitative metrics to measure its accuracy and practicality. Here are some commonly used evaluation metrics  that can help us understand the different aspects of tool performance:
 <table>
   <tr>
