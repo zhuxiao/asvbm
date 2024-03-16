@@ -189,45 +189,6 @@ The statistical results of center distance were shown as follows:
   </thead>
   <tbody>
     <tr>
-    <th>cuteSV</th>
-      <th>18</th>
-      <th>31</th>
-      <th>50</th>
-      <th>361</th>
-      <th>2009</th>
-      <th>238</th>
-      <th>117</th>
-      <th>77</th>
-    </tr>
-  </tbody>
-   <tbody>
-    <tr>
-    <th>pbsv</th>
-    	  <th>23</th>
-      <th>30</th>
-      <th>55</th>
-      <th>334</th>
-      <th>2378</th>
-      <th>175</th>
-      <th>106</th>
-      <th>83</th>
-    </tr>
-  </tbody>
-   <tbody>
-    <tr>
-    <th>Sniffles2</th>
-      <th>28</th>
-      <th>43</th>
-      <th>56</th>
-      <th>250</th>
-      <th>2439</th>
-      <th>308</th>
-      <th>142</th>
-      <th>96</th>
-    </tr>
-  </tbody>
-   <tbody>
-    <tr>
     <th>asvclr</th>
       <th>12</th>
       <th>34</th>
@@ -265,6 +226,45 @@ The statistical results of center distance were shown as follows:
       <th>149</th>
     </tr>
   </tbody>
+     <tbody>
+    <tr>
+    <th>Sniffles2</th>
+      <th>28</th>
+      <th>43</th>
+      <th>56</th>
+      <th>250</th>
+      <th>2439</th>
+      <th>308</th>
+      <th>142</th>
+      <th>96</th>
+    </tr>
+  </tbody>
+   <tbody>
+    <tr>
+    <th>pbsv</th>
+    	  <th>23</th>
+      <th>30</th>
+      <th>55</th>
+      <th>334</th>
+      <th>2378</th>
+      <th>175</th>
+      <th>106</th>
+      <th>83</th>
+    </tr>
+  </tbody>
+  <tbody>
+    <tr>
+    <th>cuteSV</th>
+      <th>18</th>
+      <th>31</th>
+      <th>50</th>
+      <th>361</th>
+      <th>2009</th>
+      <th>238</th>
+      <th>117</th>
+      <th>77</th>
+    </tr>
+  </tbody>
    <tbody>
     <tr>
     <th>SVIM</th>
@@ -297,18 +297,60 @@ The statistical results of the region size ratio were shown as follows:
       <th>>100.0</th>
     </tr>
   </thead>
+     <tbody>
+    <tr>
+    <th>asvclr</th>
+      <th>280</th>
+      <th>21</th>
+      <th>3086</th>
+      <th>41</th>
+      <th>35</th>
+      <th>10</th>
+      <th>54</th>
+      <th>37</th>
+      <th>239</th>
+    </tr>
+  </tbody>
+   <tbody>
+    <tr>
+    <th>SVDSS</th>
+      <th>347</th>
+      <th>25</th>
+      <th>2859</th>
+      <th>31</th>
+      <th>32</th>
+      <th>3</th>
+      <th>27</th>
+      <th>18</th>
+      <th>9</th>
+    </tr>
+  </tbody>
+   <tbody>
+    <tr>
+    <th>DeBreak</th>
+      <th>125</th>
+      <th>17</th>
+      <th>1543</th>
+      <th>39</th>
+      <th>54</th>
+      <th>16</th>
+      <th>736</th>
+      <th>182</th>
+      <th>589</th>
+    </tr>
+  </tbody>
   <tbody>
     <tr>
-    <th>cuteSV</th>
-      <th>276</th>
-      <th>16</th>
-      <th>2807</th>
-      <th>33</th>
-      <th>26</th>
-      <th>7</th>
-      <th>38</th>
-      <th>19</th>
-      <th>152</th>
+    <th>Sniffles2</th>
+      <th>342</th>
+      <th>23</th>
+      <th>3279</th>
+      <th>31</th>
+      <th>37</th>
+      <th>6</th>
+      <th>40</th>
+      <th>18</th>
+      <th>118</th>
     </tr>
   </tbody>
    <tbody>
@@ -325,60 +367,18 @@ The statistical results of the region size ratio were shown as follows:
       <th>237</th>
     </tr>
   </tbody>
-   <tbody>
+    <tbody>
     <tr>
-    <th>Sniffles2</th>
-      <th>342</th>
-      <th>23</th>
-      <th>3279</th>
-      <th>31</th>
-      <th>37</th>
-      <th>6</th>
-      <th>40</th>
-      <th>18</th>
-      <th>118</th>
-    </tr>
-  </tbody>
-   <tbody>
-    <tr>
-    <th>asvclr</th>
-      <th>280</th>
-      <th>21</th>
-      <th>3086</th>
-      <th>41</th>
-      <th>35</th>
-      <th>10</th>
-      <th>54</th>
-      <th>37</th>
-      <th>239</th>
-    </tr>
-  </tbody>
-  <tbody>
-    <tr>
-    <th>SVDSS</th>
-      <th>347</th>
-      <th>25</th>
-      <th>2859</th>
-      <th>31</th>
-      <th>32</th>
-      <th>3</th>
-      <th>27</th>
-      <th>18</th>
-      <th>9</th>
-    </tr>
-  </tbody>
-  <tbody>
-    <tr>
-    <th>DeBreak</th>
-      <th>125</th>
-      <th>17</th>
-      <th>1543</th>
-      <th>39</th>
-      <th>54</th>
+    <th>cuteSV</th>
+      <th>276</th>
       <th>16</th>
-      <th>736</th>
-      <th>182</th>
-      <th>589</th>
+      <th>2807</th>
+      <th>33</th>
+      <th>26</th>
+      <th>7</th>
+      <th>38</th>
+      <th>19</th>
+      <th>152</th>
     </tr>
   </tbody>
   <tbody>
