@@ -97,7 +97,7 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "</head>\n";
 		htmlFile << "<body>\n";
 
-		htmlFile << "<h1>Evaluation Reports</h1>\n";
+		htmlFile << "<h1>Benchmarking Reports</h1>\n";
 		htmlFile << "<div class=\"command-container\">\n";
 		htmlFile << "<pre>SV_STAT command: " << "<br>$ " << program_cmd_str << "</pre>\n";
 		htmlFile << "</div>\n";
