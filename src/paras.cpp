@@ -1,6 +1,25 @@
 #include "paras.h"
 #include "global.h"
 
+// get the program version
+string getProgramVersion(const string &cmd_str){
+    FILE *stream;
+    char tmp[256], info[256] = {0};
+    string pg_version_str = "";
+
+    sprintf(tmp, "%s", cmd_str.c_str());
+    stream = popen(tmp, "r");
+    if(fread(info, 1, sizeof(info), stream)>0){
+        pg_version_str = info;
+        if(pg_version_str.at(pg_version_str.size()-1)=='\n') {
+            pg_version_str.erase(pg_version_str.size()-1); // Remove the newline character
+        }
+    }
+    pclose(stream);
+
+    return pg_version_str;
+}
+
 //show version
 void show_version(){
 	cout << PROG_VERSION << endl;

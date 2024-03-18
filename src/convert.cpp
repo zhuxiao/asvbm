@@ -220,8 +220,10 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 					if(sv_len_vec.size()==1){
 						sv_len_str = to_string(sv_len_vec.at(0));
 					}else{
-						sv_len_str1 = to_string(sv_len_vec.at(0));
-						sv_len_str2 = to_string(sv_len_vec.at(1));
+						if(sv_len_vec.size()!=0){
+							sv_len_str1 = to_string(sv_len_vec.at(0));
+							sv_len_str2 = to_string(sv_len_vec.at(1));
+						}else continue;
 					}
 				}
 				if(endpos_str.size()==0){

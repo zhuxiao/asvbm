@@ -27,6 +27,7 @@ using namespace std;
 #define PROG_VERSION	"1.0.0"
 
 
+
 void show_version();
 void showUsage();
 void showUsageConvert();
@@ -34,6 +35,7 @@ void showUsageStat();
 int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
 
+string getProgramVersion(const string &cmd_str);
 void convert(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format);
 //void SVStat(string &ref_file, string &user_file, string &benchmark_file);
 void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names);

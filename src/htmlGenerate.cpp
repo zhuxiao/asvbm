@@ -9,7 +9,7 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "<!DOCTYPE html>\n";
 		htmlFile << "<html>\n";
 		htmlFile << "<head>\n";
-		htmlFile << "  <title>Evaluation Reports</title>\n";
+		htmlFile << "  <title>Benchmarking Reports</title>\n";
 		htmlFile << "  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">\n";
 		htmlFile << "  <title>Table Example</title>\n";
 		htmlFile << "  <style>\n";
