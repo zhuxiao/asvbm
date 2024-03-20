@@ -434,6 +434,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.4897</th>
       <th>0.6033</th>
       <th>0.5406</th>
+      <th>0.9927</th>
     </tr>
     <tr>
     	  <th>251-500bp</th>
@@ -455,6 +456,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.4079</th>
       <th>0.4306</th>
       <th>0.4189</th>
+      <th>0.9988</th>
     </tr>
     <tr>
     	  <th>1001-5000bp</th>
