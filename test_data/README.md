@@ -2,16 +2,16 @@
 
 ## experiment description
 
-In this experiment, we conducted an individualized evaluation of the identification results for chromosome 1 (chr1) from the HG002 CCS (Consensus Circular Sequence) data by using seven structural variant (SV) detection methods: cuteSV(v2.0.3), pbsv (v2.9.0), Sniffles2(v2.0.2), asvclr(v1.4.0), SVDSS(v1.0.5), DeBreak(v1.0.2), SVIM(v2.0.0). Here we will only focus on the evaluation results of insertion and deletion variants. Subsequently, the identification results obtained from these seven different detection methods were comprehensively evaluated against their benchmark sets through a multi-sample evaluation approach.
+In this experiment, we conducted an individualized benchmarking of the identification results for chromosome 1 (chr1) from the HG002 CCS (Consensus Circular Sequence) data by using seven structural variants (SV) detection methods: cuteSV(v2.0.3), pbsv (v2.9.0), Sniffles2(v2.0.2), asvclr(v1.4.0), SVDSS(v1.0.5), DeBreak(v1.0.2), SVIM(v2.0.0). Here we will only focus on the benchmarking results of insertion and deletion variants. Subsequently, the identification results obtained from these seven different detection methods were comprehensively benchmarked against their benchmark sets through a multi-sample benchmarking approach.
 
 ## data description and preparation
 
 
-In this experiment evaluation, we used the chr1 of hg37 as reference, and human reference genome hs37d5 was downloaded as follows:
+In this experiment benchmarking, we used the chr1 of hg37 as reference, and human reference genome hs37d5 was downloaded as follows:
 ``` 
 $ ftp://ftp.1000genomes.ebi.ac.uk/vol1/ftp/technical/reference/phase2_reference_assembly_sequence/hs37d5.fa.gz. 
 ```
-We also used the chr1 of the benchmark set of HG002, and the deteiled information of the benchmark set (HG002_SVs_Tier1_v0.6.vcf) was downloaded as follows:
+We also used the chr1 of the benchmark set of HG002 and the detailed information of the benchmark set (HG002_SVs_Tier1_v0.6.vcf) was downloaded as follows:
 ```
 $ ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/NIST_SVs_Integration_v0.6
 ``` 
@@ -48,13 +48,13 @@ $ tar -xJf test_DeBreak_chr1.tar.xz
 ## The identification results of chr1 by SVIM were extracted
 $ tar -xJf test_SVIM_chr1.tar.xz
 
-## Evaluating the VCF files mentioned in the test data using SV_STAT, run the following command:
+## Benchmarking the VCF files mentioned in the test data using SV_STAT, run the following command:
 $ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles2;asvclr;SVDSS;DeBreak;SVIM" -C "1" test_data/test_cutesv_chr1.vcf test_data/test_pbsv_chr1.vcf test_data/test_sniffles_chr1.vcf test_data/test_asvclr_chr1.vcf test_SVDSS_chr1.vcf test_DeBreak_chr1.vcf test_SVIM_chr1.vcf test_benchmark_chr1.vcf test_data/test_chr1.fa
 ```
-SV_STAT evaluated the provided identification set based on the input, generating corresponding file information. If needed, more detailed evaluation information can be obtained by running test data independently.
+SV_STAT benchmarked the provided identification set based on the input, generating corresponding file information. If needed, more detailed benchmarking information can be obtained by running test data independently.
 
 ## result description
-The evaluation results were as follows:
+The benchmarking results were as follows:
 <table>
   <thead>
     <tr>
@@ -494,7 +494,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
   </tbody>
 </table>
 
-The comprehensive evaluation results of the four detection methods were shown in the figure as follows:
+The comprehensive benchmarking results of the four detection methods are shown in the figure as follows:
 
 <div style="text-align:center;">
 <img src="img/Performance comparison between different tools.png" alt= "Performance comparison between different tools" width= "400" heiht="300" style="margin-right:25px"> 
