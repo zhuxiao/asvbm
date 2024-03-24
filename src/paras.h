@@ -23,8 +23,8 @@ using namespace std;
 
 // program variables
 #define PROG_NAME		"SV_STAT"
-#define PROG_DESC		"A tool for Structural Variant Statistics Evaluation"
-#define PROG_VERSION	"1.0.0"
+#define PROG_DESC		"A tool for Structural Variant Statistics Benchmarking"
+#define PROG_VERSION	"1.0.1"
 
 
 

@@ -81,7 +81,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
 		}
 	}
     // Create a data file to hold the data
-	string filename = "evaluation_result";
+	string filename = "benchmarking_result";
 	string filenamePath = outputBasicMetricschart + '/'+ filename;
     ofstream dataFile(filenamePath);
     if (!dataFile.is_open()) {
@@ -100,7 +100,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     dataFile.close();
 
     // Set the file name to save
-    string outputFileName = "evaluation_result.png";
+    string outputFileName = "benchmarking_result.png";
     string outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
 
     // Create a pipe connection to GNUplot
@@ -258,7 +258,7 @@ void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathn
 	dataV.push_back(make_pair("Precision", MeticsValues[0][2]));
 	dataV.push_back(make_pair("Seqcons", MeticsValues[0][3]));
 
-	string outputFileName = "evaluation_result.png";
+	string outputFileName = "benchmarking_result.png";
 	string outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
 
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");

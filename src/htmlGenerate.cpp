@@ -103,7 +103,7 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "</div>\n";
 
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h2>1. Evaluation results</h2>";
+		htmlFile << "<h2>1. Benchmarking results</h2>";
 		if(typeMatchLevel.compare(MATCHLEVEL_L)==0){
 			htmlFile <<"</div>\n";
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
@@ -116,14 +116,14 @@ void Generatehtml(string figuresFilePath){
 			htmlFile << "</div>";
 		}
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "The evaluation metrics has two categories after filtering long SV regions: one category is used to highlight performance by metrics including Recall, Precision, F1 score, and sequence consistency (Seqcons) and the other category presents benchmark results, which consists of TP_bench, TP_user, FP, FN. Visualizing these metrics through bar charts provides a more intuitive representation of the assessment results for the variation detection methods.";
+		htmlFile << "The benchmarking metrics has two categories after filtering long SV regions: one category is used to highlight performance by metrics including Recall, Precision, F1 score, and sequence consistency (Seqcons) and the other category presents benchmark results, which consists of TP_bench, TP_user, FP, FN. Visualizing these metrics through bar charts provides a more intuitive representation of the benchmarking results for the variation detection methods.";
 		htmlFile << "</div>";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 0px; text-align: left;\">(1) The evaluation results of the user-called set are as follows:</h3>";
+		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 0px; text-align: left;\">(1) The benchmarking results of the user-called set are as follows:</h3>";
 		htmlFile << "</div>\n";
 		// Add h2 style for the first title
 		htmlFile << "<div style=\"text-align: center; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Table "<< table_num  <<" Structural Variation Detection Method Performance Evaluation</h4>\n";
+		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Table "<< table_num  <<" Structural Variation Detection Method Performance Benchmarking</h4>\n";
 		htmlFile << "</div>\n";
 		++table_num;
 		// Add first table
@@ -145,15 +145,15 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "</table>\n";
 
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "The table 1 shows the evaluation results of the variation identification result. Where #SVs_bench represents the number of identified structural variations (SVs) in the benchmark set, #SV_user represents the number of SVs in the called set, and #SV_filtered_user represents the number of SVs after filtering out large SVs. #TP stands for the number of True Positives, indicating correctly identified targets or events. #FP stands for the number of False Positives, representing falsely identified targets or events. #FN represents the number of False Negatives, referring to the targets or events that were missed or not identified correctly. Seqcons represents the sequence consistency, which refers to calculating the sequence consistency score for matched SV pairs that include sequences.\n";
+		htmlFile << "The table 1 shows the benchmarking results of the variation identification result. Where #SVs_bench represents the number of identified structural variations (SVs) in the benchmark set, #SV_user represents the number of SVs in the called set, and #SV_filtered_user represents the number of SVs after filtering out large SVs. #TP stands for the number of True Positives, indicating correctly identified targets or events. #FP stands for the number of False Positives, representing falsely identified targets or events. #FN represents the number of False Negatives, referring to the targets or events that were missed or not identified correctly. Seqcons represents the sequence consistency, which refers to calculating the sequence consistency score for matched SV pairs that include sequences.\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 0px; text-align: left;\">(2) The evaluation results of two categorizes of metrics are shown in the figure:</h3>\n";
+		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 0px; text-align: left;\">(2) The benchmarking results of two categorizes of metrics are shown in the figure:</h3>\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		htmlFile << "Two categories of metrics are independently calculated: (a) one category includes Recall, Precision, F1 Score, and Seqcons; (b) the other category consists of #TP_bench, #TP_user, #FP, and #FN. The result statistics are as follows:\n";
 		htmlFile << "</div>\n";
-//		htmlFile << "<h3>Figure 1. Evaluation results of the user-call set</h3>\n";
+//		htmlFile << "<h3>Figure 1. Benchmarking results of the user-call set</h3>\n";
 		htmlFile << "<style>\n";
 		htmlFile << "    .image-container {\n";
 		htmlFile << "    display: flex; /* Use flexbox for layout */\n";
@@ -171,12 +171,12 @@ void Generatehtml(string figuresFilePath){
 		// Add image container
 		htmlFile << "<div class=\"image-container\">\n";
 		htmlFile <<"<h4 style=\" margin-left: 40px;\">(a)</h4>\n";
-		htmlFile << "  <img src=\""<< figuresFilePath  << "/evaluation_result.png\" alt=\"Benchmark results between different tools\">\n";
+		htmlFile << "  <img src=\""<< figuresFilePath  << "/benchmarking_result.png\" alt=\"Benchmark results between different tools\">\n";
 		htmlFile <<"<h4 style=\" margin-left: 10px;\">(b)</h4>\n";
 		htmlFile << "  <img src=\""<< figuresFilePath  << "/result_classification.png\" alt=\"Performance comparison between different tools\">\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: center; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure "<< figure_num  <<" Evaluation results of the user-call set</h4>\n";
+		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure "<< figure_num  <<" Benchmarking results of the user-call set</h4>\n";
 		htmlFile <<"</div>\n";
 		++figure_num;
 
@@ -290,15 +290,15 @@ void Generatehtml(string figuresFilePath){
 		++figure_num;
 
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h2>3. Evaluation results for metrics of different SV size regions</h2>\n";
+		htmlFile << "<h2>3. Benchmarking results for metrics of different SV size regions</h2>\n";
 		htmlFile <<"</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "The SV identification results typically contain variations of various sizes, and categorize these variations into different size ranges could be used to explore the identification results more detailed in a fine-grained manner, and could provide new insights into the sensitivity of SV callers to variations of different sizes. Detailed evaluation results are presented in the table as follows：\n";
+		htmlFile << "The SV identification results typically contain variations of various sizes, and categorize these variations into different size ranges could be used to explore the identification results more detailed in a fine-grained manner, and could provide new insights into the sensitivity of SV callers to variations of different sizes. Detailed benchmarking results are presented in the table as follows：\n";
 		htmlFile << "</div>\n";
 		if(folderPng5.size()>0){
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-			htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(1) Evaluation results for metrics of different SV size regions with different methods</h3>";
-			htmlFile <<"Variations are categorized into seven size regions and metrics are computed for comprehensive evaluation for different detection methods within each region. The evaluation results are as follows:\n";
+			htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(1) Benchmarking results for metrics of different SV size regions with different methods</h3>";
+			htmlFile <<"Variations are categorized into seven size regions and metrics are computed for comprehensive benchmarking for different detection methods within each region. The benchmarking results are as follows:\n";
 			htmlFile << "</div>\n";
 			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 				htmlFile << "  <img src=\""<< folderPng5[0] << "\" alt=\"different_range.png\" style=\"width: 50%;\">\n";
@@ -308,7 +308,7 @@ void Generatehtml(string figuresFilePath){
 			htmlFile <<"</div>\n";
 			++figure_num;
 		}
-		//The metric evaluation results of cutesv in different SV regions
+		//The metric benchmarking results of cutesv in different SV regions
 		for (size_t tableIndex = 0; tableIndex < allregionmetrics.size(); ++tableIndex) {
 //			("<<tableIndex+1 <<")
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
@@ -319,7 +319,7 @@ void Generatehtml(string figuresFilePath){
 			}
 			htmlFile << "</div>\n";
 			// Add h2 style for the title of each table
-			htmlFile << "<h3> Table "<< table_num  <<"  The metric evaluation results of " << alltoolnames[tableIndex] << " in different SV regions</h3>\n";
+			htmlFile << "<h3> Table "<< table_num  <<"  The metric benchmarking results of " << alltoolnames[tableIndex] << " in different SV regions</h3>\n";
 			++table_num;
 			htmlFile << "<table border=\"1\">\n";
 			// Add header line
@@ -339,7 +339,7 @@ void Generatehtml(string figuresFilePath){
 			}
 			htmlFile << "</table>\n";
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-			htmlFile << "<h4>Evaluation results for metrics of different SV size regions show as following figures:</h4>";
+			htmlFile << "<h4>Benchmarking results for metrics of different SV size regions show as following figures:</h4>";
 			htmlFile << "</div>\n";
 			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 			htmlFile <<"<h4 style=\" margin-left: 80px;\">(a)</h4>\n";
@@ -397,23 +397,23 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		htmlFile << "<ul>\n";
-		htmlFile << "<li>For more detailed evaluation results, please refer to the generated result information in the respective folders.</li>\n";
+		htmlFile << "<li>For more detailed benchmarking results, please refer to the generated result information in the respective folders.</li>\n";
 		htmlFile << "<li>For more detailed experiment information, please refer to the github repositories: " << " <a href=\"https://github.com/zhuxiao/sv_stat\" target=\"_blank\">sv_stat</a>" <<  " and <a href=\"https://github.com/zhuxiao/sv_stat-experiments\" target=\"_blank\">sv_stat-experiments</a>.</li>\n";
 		htmlFile << "<li>If you have any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!</li>\n";
 		htmlFile << "</ul>\n";
-		htmlFile << "-------------------------- This is the end of the Evaluation Reports. --------------------------\n";
+		htmlFile << "-------------------------- This is the end of the Benchmarking Reports. --------------------------\n";
 		htmlFile << "</div>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "<h2>2. Evaluation results</h2>";
+//		htmlFile << "<h2>2. Benchmarking results</h2>";
 //		htmlFile <<"</div>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "Categorizing the evaluation metrics into two categories after filtering long SV regions: one highlighting performance metrics including recall, precision, and F1 score, and the other presenting benchmark results, encompassing TP_bench, TP_user, FP, FN.   Visualizing these metrics through bar charts offers a more intuitive representation of the assessment results for the detection method.";
+//		htmlFile << "Categorizing the benchmarking metrics into two categories after filtering long SV regions: one highlighting performance metrics including recall, precision, and F1 score, and the other presenting benchmark results, encompassing TP_bench, TP_user, FP, FN.   Visualizing these metrics through bar charts offers a more intuitive representation of the assessment results for the detection method.";
 //		htmlFile << "</div>";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">The evaluation results of the user-called set are as follows:</h4>";
+//		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">The benchmarking results of the user-called set are as follows:</h4>";
 //		htmlFile << "</div>\n";
 //		// Add h2 style for the first title
-//		htmlFile << "<h3>Table 1 Structural Variation Detection Method Performance Evaluation</h3>\n";
+//		htmlFile << "<h3>Table 1 Structural Variation Detection Method Performance Benchmarking</h3>\n";
 //		// Add first table
 //		htmlFile << "<table border=\"1\">\n";
 //		// Add header line
@@ -432,12 +432,12 @@ void Generatehtml(string figuresFilePath){
 //		}
 //		htmlFile << "</table>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "The table 1 shows the evaluation results of the structural variation detection method. Where SVs_bench represents the quantity of structural variations (SVs) in the benchmark set, SV_user represents the quantity of SVs in the called set, and SV_user_filtered represents the quantity of SVs after filtering out large SVs. TP stands for True Positive, indicating the count of correctly identified targets or events. FP stands for False Positive, representing the count of falsely identified targets or events. FN represents False Negative, referring to the count of targets or events that were missed or not identified correctly.\n";
+//		htmlFile << "The table 1 shows the benchmarking results of the structural variation detection method. Where SVs_bench represents the quantity of structural variations (SVs) in the benchmark set, SV_user represents the quantity of SVs in the called set, and SV_user_filtered represents the quantity of SVs after filtering out large SVs. TP stands for True Positive, indicating the count of correctly identified targets or events. FP stands for False Positive, representing the count of falsely identified targets or events. FN represents False Negative, referring to the count of targets or events that were missed or not identified correctly.\n";
 //		htmlFile << "</div>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">The evaluation results of two categorizes of metrics are shown in the figure:</h4>\n";
+//		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">The benchmarking results of two categorizes of metrics are shown in the figure:</h4>\n";
 //		htmlFile << "</div>\n";
-////		htmlFile << "<h3>Figure 1. Evaluation results of the user-call set</h3>\n";
+////		htmlFile << "<h3>Figure 1. Benckmarking results of the user-call set</h3>\n";
 //		htmlFile << "<style>\n";
 //		htmlFile << "    .image-container {\n";
 //		htmlFile << "    display: flex; /* Use flexbox for layout */\n";
@@ -454,11 +454,11 @@ void Generatehtml(string figuresFilePath){
 //		htmlFile << "</style>\n";
 //		// Add image container
 //		htmlFile << "<div class=\"image-container\">\n";
-//		htmlFile << "  <img src=\""<< figuresFilePath  << "/evaluation_result.png\" alt=\"Benchmark results between different tools\">\n";
+//		htmlFile << "  <img src=\""<< figuresFilePath  << "/benchmarking_result.png\" alt=\"Benchmark results between different tools\">\n";
 //		htmlFile << "  <img src=\""<< figuresFilePath  << "/result_classification.png\" alt=\"Performance comparsion between different tools\">\n";
 //		htmlFile << "</div>\n";
 //		htmlFile << "<div style=\"text-align: center; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure 1. Evaluation results of the user-call set</h4>\n";
+//		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure 1. Benchmarking results of the user-call set</h4>\n";
 //		htmlFile <<"</div>\n";
 
 //		// Add h2 style for the second title
@@ -564,19 +564,19 @@ void Generatehtml(string figuresFilePath){
 //			htmlFile << "</div>\n";
 //		}
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "<h2>4. Evaluation results for metrics of different SV size regions</h2>\n";
+//		htmlFile << "<h2>4. Benchmarking results for metrics of different SV size regions</h2>\n";
 //		htmlFile <<"</div>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "The SV identification results typically contain variations of various sizes, and categorize these variations into different size ranges could be used to explore the identification results more detailed in a fine-grained manner, and could provide new insights into the sensitivity of SV callers to variations of different sizes. Detailed evaluation results are presented in the table as follows：\n";
+//		htmlFile << "The SV identification results typically contain variations of various sizes, and categorize these variations into different size ranges could be used to explore the identification results more detailed in a fine-grained manner, and could provide new insights into the sensitivity of SV callers to variations of different sizes. Detailed benchmarking results are presented in the table as follows：\n";
 //		htmlFile << "</div>\n";
-//		//The metric evaluation results of cutesv in different SV regions
+//		//The metric benchmarking results of cutesv in different SV regions
 //		for (size_t tableIndex = 0; tableIndex < allregionmetrics.size(); ++tableIndex) {
 ////			("<<tableIndex+1 <<")
 //			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 //			htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">("<<tableIndex+1 <<") The user-called set ("<< alltoolnames[tableIndex] <<") of basic metrics results statistics</h3>";
 //			htmlFile << "</div>\n";
 //			// Add h2 style for the title of each table
-//			htmlFile << "<h3> Table "<<(size_t)1 + tableIndex << " The metric evaluation results of " << alltoolnames[tableIndex] << " in different SV regions</h3>\n";
+//			htmlFile << "<h3> Table "<<(size_t)1 + tableIndex << " The metric benchmarking results of " << alltoolnames[tableIndex] << " in different SV regions</h3>\n";
 //			htmlFile << "<table border=\"1\">\n";
 //			// Add header line
 //			htmlFile << "  <tr>\n";
@@ -595,7 +595,7 @@ void Generatehtml(string figuresFilePath){
 //			}
 //			htmlFile << "</table>\n";
 //			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//			htmlFile << "<h4>Evaluation results for metrics of different SV size regions show as follow with figures:</h4>";
+//			htmlFile << "<h4>Benchmarking results for metrics of different SV size regions show as follow with figures:</h4>";
 //			htmlFile << "</div>\n";
 //			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 //				htmlFile << "  <img src=\""<< folderPng4[2*tableIndex] << "\" alt=\" calculation_result.png\" style=\"width: 30%;\">\n";
@@ -605,21 +605,21 @@ void Generatehtml(string figuresFilePath){
 //
 //		if(folderPng5.size()>0){
 //			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//			htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">("<< allregionmetrics.size() +1 <<") Evaluation results for metrics of different SV size regions with different methods</h3>";
-//			htmlFile <<"Variations are categorized into seven size regions and metrics are computed for comprehensive evaluation for different detection methods within each region. The evaluation results are as follows:\n";
+//			htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">("<< allregionmetrics.size() +1 <<") Benchmarking results for metrics of different SV size regions with different methods</h3>";
+//			htmlFile <<"Variations are categorized into seven size regions and metrics are computed for comprehensive benchmarking for different detection methods within each region. The benchmarking results are as follows:\n";
 //			htmlFile << "</div>\n";
 //			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 //				htmlFile << "  <img src=\""<< folderPng5[0] << "\" alt=\"different_range.png\" style=\"width: 50%;\">\n";
 //			htmlFile << "</div>\n";
 //		}
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "For more detailed evaluation results, please refer to the generated result information in the respective folders.<br>\n";
+//		htmlFile << "For more detailed benchmarking results, please refer to the generated result information in the respective folders.<br>\n";
 //		htmlFile << "</div>\n";
-//		htmlFile << "<h2>5. Evaluation Results with Bar Chart </h2>\n";
+//		htmlFile << "<h2>5. Benchmarking Results with Bar Chart </h2>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile <<"Categorizing the evaluation metrics into two categories: one highlighting performance metrics including recall, precision, and F1 score, and the other presenting benchmark results, encompassing TP_bench, TP_user, FP, FN.   Visualizing these metrics through bar charts offers a more intuitive representation of the assessment results for the detection method. The evaluation results are shown in the figure:\n";
+//		htmlFile <<"Categorizing the evaluation metrics into two categories: one highlighting performance metrics including recall, precision, and F1 score, and the other presenting benchmark results, encompassing TP_bench, TP_user, FP, FN.   Visualizing these metrics through bar charts offers a more intuitive representation of the assessment results for the detection method. The benchmarking results are shown in the figure:\n";
 //		htmlFile << "</div>\n";
-//		htmlFile << "<h3>Comprehensive evaluation results</h3>\n";
+//		htmlFile << "<h3>Comprehensive benchmarking results</h3>\n";
 //		htmlFile << "<style>\n";
 //		htmlFile << "    .image-container {\n";
 //		htmlFile << "    display: flex; /* Use flexbox for layout */\n";
@@ -636,7 +636,7 @@ void Generatehtml(string figuresFilePath){
 //		htmlFile << "</style>\n";
 //		// Add image container
 //		htmlFile << "<div class=\"image-container\">\n";
-//		htmlFile << "  <img src=\""<< figuresFilePath  << "/evaluation_result.png\" alt=\"Benchmark results between different tools\">\n";
+//		htmlFile << "  <img src=\""<< figuresFilePath  << "/benchmarking_result.png\" alt=\"Benchmark results between different tools\">\n";
 //		htmlFile << "  <img src=\""<< figuresFilePath  << "/result_classification.png\" alt=\"Performance comparsion between different tools\">\n";
 //		htmlFile << "</div>\n";
 

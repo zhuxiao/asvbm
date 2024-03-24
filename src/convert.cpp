@@ -948,6 +948,7 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 	item->alt_seq = alt_seq;
 	item->overlapped = false;
 	item->validFlag = true;
+//	item->seqcons = "-";
 	return item;
 }
 

@@ -84,8 +84,8 @@ void showUsageStat(){
 	cout << "             " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
 	cout << "             The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
 	cout << "   -C STR    Chromosomes to be processed: [null]" << endl;
-	cout << "             no decoy indicates not specifying the chromosome set for evaluation." << endl;
-	cout << "             This parameter is used to specify the chromosomes to be evaluated." << endl;
+	cout << "             no decoy indicates not specifying the chromosome set for benchmarking." << endl;
+	cout << "             This parameter is used to specify the chromosomes to be benchmarked." << endl;
 	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
 	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
@@ -97,19 +97,19 @@ void showUsageStat(){
 	cout << "             separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
 	cout << "   -o FILE   output directory: [" << outputPathname << "]" << endl;
 	cout << "   -l FILE   file name of long SV regions: [" << longSVFilename << "]" << endl;
-	cout << "   -r FILE   file name of evaluation results to report: [" << htmlFilename << "]" << endl;
+	cout << "   -r FILE   file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
 	cout << "             Ensure that the filename extension is '.html'." << endl;
 	cout << "   -v        show version information" << endl;
 	cout << "   -h        show this help message and exit" << endl << endl;
 
 	cout << "Example:" << endl;
-	cout << "   # run the evaluation on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
+	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
 	cout << "   $ sv_stat -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
-	cout << "   # run the evaluation on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
+	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
 	cout << "   $ sv_stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
-	cout << "   # run the evaluation on the user-called sets (tool1, tool2 and tool3) for multiple samples" << endl;
+	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple samples" << endl;
 	cout << "   $ sv_stat -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 

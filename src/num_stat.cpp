@@ -554,8 +554,8 @@ void* intersectSubset(void *arg){
 
 	subset1 = overlap_opt->subset1;
 	subset2 = overlap_opt->subset2;
-	for(i=0; i<subset1.size(); i++) subset1.at(i)->overlapped = false;
-	for(i=0; i<subset2.size(); i++) subset2.at(i)->overlapped = false;
+	for(i=0; i<subset1.size(); i++) {subset1.at(i)->overlapped = false; subset1.at(i)->seqcons = "-";}
+	for(i=0; i<subset2.size(); i++) {subset2.at(i)->overlapped = false;	subset2.at(i)->seqcons = "-";}
 
 	start_idx = end_idx = -1;
 	for(i=0; i<subset1.size(); i++){
@@ -649,6 +649,7 @@ void* intersectSubset(void *arg){
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+												item1->seqcons = item2->seqcons = to_string(consistency);
 												if (consistency >= SEQ_CONSISTENCY) {
 													SeqConsNumStat(consistency);
 													flag = true;
@@ -659,6 +660,7 @@ void* intersectSubset(void *arg){
 													flag = true;
 												}else{
 													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+													item1->seqcons = item2->seqcons = to_string(consistency);
 													if (consistency >= SEQ_CONSISTENCY) {
 														SeqConsNumStat(consistency);
 														flag = true;
@@ -669,6 +671,7 @@ void* intersectSubset(void *arg){
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+												item1->seqcons = item2->seqcons = to_string(consistency);
 												if (consistency >= SEQ_CONSISTENCY) {
 													SeqConsNumStat(consistency);
 													flag = true;
@@ -711,6 +714,7 @@ void* intersectSubset(void *arg){
 											flag = true;
 										}else{
 											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+											item1->seqcons = item2->seqcons = to_string(consistency);
 											// determine the overlap flag according to consistency
 											if(consistency>=SEQ_CONSISTENCY) {
 												SeqConsNumStat(consistency);
@@ -722,6 +726,7 @@ void* intersectSubset(void *arg){
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+												item1->seqcons = item2->seqcons = to_string(consistency);
 												if (consistency >= SEQ_CONSISTENCY) {
 													SeqConsNumStat(consistency);
 													flag = true;
@@ -732,6 +737,7 @@ void* intersectSubset(void *arg){
 											flag = true;
 										}else{
 											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+											item1->seqcons = item2->seqcons = to_string(consistency);
 											// determine the overlap flag according to consistency
 											if(consistency>=SEQ_CONSISTENCY) {
 												SeqConsNumStat(consistency);
@@ -813,6 +819,7 @@ SV_item* itemdup(SV_item* item){
 	for(size_t i=0; i<4; i++) item_new->traOverlappedArr[i] = item->traOverlappedArr[i];
 	item_new->ref_seq = item->ref_seq;
 	item_new->alt_seq = item->alt_seq;
+	item_new->seqcons = item->seqcons;
 	return item_new;
 }
 

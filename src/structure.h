@@ -36,6 +36,7 @@ typedef struct {
 	size_t sv_type;
 	int32_t sv_len;
 	string ref_seq, alt_seq;
+	string seqcons;		//-
 }SV_item;
 
 struct Minimizer {
