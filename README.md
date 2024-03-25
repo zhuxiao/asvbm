@@ -72,7 +72,7 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
   </tr>
 </table>
 
-Additionally, structural variations within seven sub-intervals are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and Seqcons are calculated.
+Additionally, structural variations within seven sub-intervals are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence identity are calculated.
 ## Prerequisites
 SV_STAT depends on the following libraries and tools:
 * HTSlib (http://www.htslib.org/download/)
@@ -270,7 +270,7 @@ Multisample benchmarking statistical results. The benchmarking of recognition re
       <th>F1 score_user</th>
       <th>precision_benchmark</th>
       <th>F1 score_benchmark</th>
-      <th>Seqcons</th>
+      <th>Identitys</th>
     </tr>
   </thead>
   <tbody>
@@ -374,7 +374,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>F1 score_user</th>
       <th>precision_benchmark</th>
       <th>F1 score_benchmark</th>
-      <th>Seqcons</th>
+      <th>Identity</th>
     </tr>
   </thead>
   <tbody>
