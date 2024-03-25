@@ -7,7 +7,7 @@ SV_STAT is a tool for Structural Variation (SV) Statistics Benchmarking. SV_STAT
 For more detailed experiment information, please refer to [sv_stat-experiments](https://github.com/zhuxiao/sv_stat-experiments).
 
 ## Introduction
-SV_STAT is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, SV_STAT utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, mutual overlap, size similarity, and sequence consistency to provide an improved approach to structural variant matching. SV_STAT supports multi-sample benchmarking and generates detailed graphical information. The workflow of SV_STAT is briefly explained in the following diagram:
+SV_STAT is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, SV_STAT utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, mutual overlap, size similarity, and sequence identity to provide an improved approach to structural variant matching. SV_STAT supports multi-sample benchmarking and generates detailed graphical information. The workflow of SV_STAT is briefly explained in the following diagram:
 
 <div align="center">
 <img src="img/SV_STAT_workflow.png" alt= "SV_STAT workflow"> 
@@ -59,8 +59,8 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
     <td>2 * ((Recall * Precision) / (Recall + Precision))</td>
   </tr>
   <tr>
-    <td>Seqcons</td>
-    <td>The sequence consistency score for matched SV pairs that include sequences</td>
+    <td>Identity</td>
+    <td>The sequence identity for matched SV pairs that include sequences</td>
   </tr>
    <tr>
     <td>the center distance</td>
