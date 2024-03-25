@@ -46,7 +46,7 @@ vector<string> folderPng4;
 vector<string> folderPng5;
 vector<string> alltoolnames;
 vector<string> allmetric;
-vector< vector<string>> allmetrics = {{"Tool", "#SVs_bench", "#SVs_user", "#SVs_filtered_user", "#TP_bench", "#TP_user", "#FP", "#FN", "Recall", "Precision", "F1 score", "Seqcons"}};
+vector< vector<string>> allmetrics = {{"Tool", "#SVs_bench", "#SVs_user", "#SVs_filtered_user", "#TP_bench", "#TP_user", "#FP", "#FN", "Recall", "Precision", "F1 score", "Identity"}};
 vector<string> centerDistance;
 vector< vector<string>> centerDistances = {{"Tool", "-200--151", "-150--101", "-100--51", "-50--1", "0-50", "51-100", "101-150", "151-200"}};
 vector<string> sizeratio;

@@ -128,7 +128,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     // Set key (legend) font size
     fprintf(gnuplotPipe, "set key font 'Times-Roman,10'\n");
     // Draw a bar chart, specifying the number of columns for each data column purple  olive magenta
-    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#568AC6' title 'Recall', '' using 3 lc rgb '#F08700' title 'Precision', '' using 4 lc rgb '#F06767' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Seqcons'\n", filenamePath.c_str());
+    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#568AC6' title 'Recall', '' using 3 lc rgb '#F08700' title 'Precision', '' using 4 lc rgb '#F06767' title 'F1-score', '' using 5 lc rgb '#BBBB6D' title 'Seq identity'\n", filenamePath.c_str());
     // Close the GNUplot pipeline
     pclose(gnuplotPipe);
 
@@ -254,9 +254,9 @@ void AddfileInformation(string &FileNamePath, string &Info){
 void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathname, string &outputBasicMetricschart){
 	vector<pair<string, float>> dataV;
 	dataV.push_back(make_pair("Recall", MeticsValues[0][0]));
-	dataV.push_back(make_pair("F1-score", MeticsValues[0][1]));
-	dataV.push_back(make_pair("Precision", MeticsValues[0][2]));
-	dataV.push_back(make_pair("Seqcons", MeticsValues[0][3]));
+	dataV.push_back(make_pair("Precision", MeticsValues[0][1]));
+	dataV.push_back(make_pair("F1-score", MeticsValues[0][2]));
+	dataV.push_back(make_pair("Identity", MeticsValues[0][3]));
 
 	string outputFileName = "benchmarking_result.png";
 	string outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
@@ -537,7 +537,7 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 	fprintf(gnuplotPipe, "set style data histograms\n");
 
 	// Draw a bar chart, specifying the number of columns for each data column
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#3E4998' title 'Recall', '' using 3 lc rgb '#D95F02' title 'Precision', '' using 4 lc rgb '#E7298A' title 'F1 score', '' using 5 lc rgb '#5D94A4' title 'Seqcons'\n", filenamePath.c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#3E4998' title 'Recall', '' using 3 lc rgb '#D95F02' title 'Precision', '' using 4 lc rgb '#E7298A' title 'F1-score', '' using 5 lc rgb '#5D94A4' title 'Identity'\n", filenamePath.c_str());
 //    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
 	// Close the GNUplot pipeline
 	pclose(gnuplotPipe);

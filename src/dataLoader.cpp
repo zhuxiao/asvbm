@@ -192,7 +192,7 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 		exit(1);
 	}
 
-	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt\tseqcons";
+	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt\tSeq_Identity";
 	outfile << line << endl;
 
 	for(size_t i=0; i<data.size(); i++){

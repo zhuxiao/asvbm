@@ -160,12 +160,12 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	cout << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
 	cout << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
 //	cout << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Seqcons=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Seq_identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 
 	outStatScreenFile << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
 	outStatScreenFile << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
 //	outStatScreenFile << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Seqcons=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Seq_identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 	if(Markers == 2){
 		CollectData(TP_user, TP_benchmark, FP, FN, data1, 4, 2);
 		CollectData(recall, precision_user, F1_score_user, Seqcons, data, 3, 2);
