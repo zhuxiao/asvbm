@@ -67,7 +67,7 @@ The benchmarking results were as follows:
       <th>Recall</th>
       <th>precision</th>
       <th>F1 score</th>
-      <th>Seqcons</th>
+      <th>Identity</th>
     </tr>
   </thead>
     <tbody>
@@ -410,7 +410,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>Recall</th>
       <th>precision</th>
       <th>F1 score</th>
-      <th>Seqcons</th>
+      <th>Identity</th>
     </tr>
   </thead>
   <tbody>
