@@ -54,7 +54,7 @@ vector< vector<string>> sizeratios = {{"Tool", "0.0-0.5", "0.5-0.7", "0.7-1.2", 
 vector<string> region = {"1-100bp", "101-250bp", "251-500bp", "501-1000bp", "1001-5000bp", "5001-10000bp", ">10000bp"};
 vector<string> regionmetric;
 vector<vector<vector<string>>> allregionmetrics;
-vector< vector<string>> regionmetrics = {{"Region", "#TP_bench", "#TP_user", "#FP", "#FN", "Recall", "Precision", "F1 score", "Seqcons"}};
+vector< vector<string>> regionmetrics = {{"Region", "#TP_bench", "#TP_user", "#FP", "#FN", "Recall", "Precision", "F1 score", "Identity"}};
 
 double Seqcons;
 double SeqconsSum;
