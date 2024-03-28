@@ -15,7 +15,7 @@ SV_STAT is a comprehensive tool for benchmarking the results of structural varia
 When benchmarking the performance of a tool, we rely on a set of quantitative metrics to measure its accuracy and practicality. Here are some commonly used benchmarking metrics  that can help us understand the different aspects of tool performance:
 <table>
   <tr>
-    <th style="text-align: center;">Metric</th>
+    <th style="text-align: center;">Metrics</th>
     <th style="text-align: center;">Definition</th>
   </tr>
     <tr>
