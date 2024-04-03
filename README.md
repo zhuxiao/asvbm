@@ -44,7 +44,7 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
   </tr>
   <tr>
     <td>#FN</td>
-    <td>The number of targets or events that were missed or not identified correctly</td>
+    <td>The number of targets or events that were missed or incorrectly identified</td>
   </tr>
   <tr>
     <td>Recall</td>
