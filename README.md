@@ -1,8 +1,8 @@
 # SV_STAT
-A tool for Structural Variation Statistics Benchmarking
+A tool for Structural Variants Statistics Benchmarking
 
 -------------------
-SV_STAT is a tool for Structural Variation (SV) Statistics Benchmarking. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the traditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their region centers, and it also computes the region size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of SV_STAT is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, SV_STAT supports multi-sample benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples.
+SV_STAT is a tool for Structural Variants (SV) Statistics Benchmarking. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the traditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their region centers, and it also computes the region size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of SV_STAT is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, SV_STAT supports multi-sample benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples.
 
 For more detailed experiment information, please refer to [sv_stat-experiments](https://github.com/zhuxiao/sv_stat-experiments).
 
@@ -72,7 +72,7 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
   </tr>
 </table>
 
-Additionally, structural variations within seven sub-intervals are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence identity are calculated.
+Additionally, SVs within seven sub-intervals are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence identity are calculated.
 ## Prerequisites
 SV_STAT depends on the following libraries and tools:
 * HTSlib (http://www.htslib.org/download/)
