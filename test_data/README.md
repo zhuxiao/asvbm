@@ -49,7 +49,7 @@ $ tar -xJf test_DeBreak_chr1.tar.xz
 $ tar -xJf test_SVIM_chr1.tar.xz
 
 ## Benchmarking the VCF files mentioned in the test data using SV_STAT, run the following command:
-$ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles2;asvclr;SVDSS;DeBreak;SVIM" -C "1" test_data/test_cutesv_chr1.vcf test_data/test_pbsv_chr1.vcf test_data/test_sniffles_chr1.vcf test_data/test_asvclr_chr1.vcf test_SVDSS_chr1.vcf test_DeBreak_chr1.vcf test_SVIM_chr1.vcf test_benchmark_chr1.vcf test_data/test_chr1.fa
+$ sv_stat -m 50000 -T "ASVCLR;SVDSS;DeBreak;Sniffles2;pbsv;cuteSV;SVIM" -C "1" test_data/test_ASVCLR_chr1.vcf test_data/test_SVDSS_chr1.vcf test_data/test_DeBreak_chr1.vcf test_data/test_Sniffles2_chr1.vcf test_pbsv_chr1.vcf test_cuteSV_chr1.vcf test_SVIM_chr1.vcf test_benchmark_chr1.vcf test_data/test_chr1.fa
 ```
 SV_STAT benchmarked the provided identification set based on the input, generating corresponding file information. If needed, more detailed benchmarking information can be obtained by running test data independently.
 
