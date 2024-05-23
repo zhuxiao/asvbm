@@ -2,7 +2,7 @@
 
 ## experiment description
 
-In this experiment, we conducted an individualized benchmarking of the identification results for chromosome 1 (chr1) from the HG002 CCS (Consensus Circular Sequence) data by using seven structural variants (SV) detection methods: cuteSV(v2.0.3), pbsv (v2.9.0), Sniffles2(v2.0.2), asvclr(v1.4.0), SVDSS(v1.0.5), DeBreak(v1.0.2), SVIM(v2.0.0). Here we will only focus on the benchmarking results of insertion and deletion variants. Subsequently, the identification results obtained from these seven different detection methods were comprehensively benchmarked against their benchmark sets through a multi-sample benchmarking approach.
+In this experiment, we conducted an individualized benchmarking of the identification results for chromosome 1 (chr1) from the HG002 CCS (Consensus Circular Sequence) data by using seven structural variants (SV) detection methods: cuteSV(v2.0.3), pbsv (v2.9.0), Sniffles2(v2.0.2), ASVCLR(v1.4.1), SVDSS(v1.0.5), DeBreak(v1.0.2), SVIM(v2.0.0). Here we will only focus on the benchmarking results of insertion and deletion variants. Subsequently, the identification results obtained from these seven different detection methods were comprehensively benchmarked against their benchmark sets through a multi-sample benchmarking approach.
 
 ## data description and preparation
 
@@ -18,9 +18,9 @@ $ ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/NIST_SV
 
 ```
 ## Download source programs and test data
-$ wget -c https://github.com/zhuxiao/sv_stat/releases/download/1.0.0/sv_stat_1.0.0.tar.xz
-$ tar -xf sv_stat_1.0.0.tar.xz
-$ cd sv_stat_1.0.0/
+$ wget -c https://github.com/zhuxiao/sv_stat/releases/download/1.0.1/sv_stat_1.0.1.tar.xz
+$ tar -xf sv_stat_1.0.1.tar.xz
+$ cd sv_stat_1.0.1/
 $ ./autogen.sh
 ```
 The name of the chr1 file (reference) was renamed to test_chr1.fa. We uploaded the sequence of chr1 into three files, which can be downloaded and merged by following steps:
@@ -72,58 +72,58 @@ The benchmarking results were as follows:
   </thead>
     <tbody>
     <tr>
-    <th>asvclr</th>
-      <th>3893</th>
-      <th>3374</th>
-      <th>3276</th>
-      <th>617</th>
-      <th>2023</th>
-      <th>0.6252</th>
-      <th>0.8415</th>
-      <th>0.7174</th>
-      <th>0.9183</th>
+    <th>ASVCLR</th>
+      <th>3998</th>
+      <th>3392</th>
+      <th>3394</th>
+      <th>604</th>
+      <th>2005</th>
+      <th>0.6285</th>
+      <th>0.8489</th>
+      <th>0.7223</th>
+      <th>0.9724</th>
     </tr>
   </tbody>
   <tbody>
     <tr>
     <th>SVDSS</th>
       <th>3318</th>
-      <th>2506</th>
+      <th>2505</th>
       <th>2759</th>
       <th>559</th>
       <th>2891</th>
       <th>0.4643</th>
       <th>0.8315</th>
       <th>0.5959</th>
-      <th>0.9360</th>
+      <th>0.9739</th>
     </tr>
   </tbody>
     <tbody>
     <tr>
     <th>DeBreak</th>
-      <th>3429</th>
-      <th>3033</th>
-      <th>2854</th>
-      <th>467</th>
-      <th>2364</th>
-      <th>0.5620</th>
-      <th>0.8594</th>
-      <th>0.6796</th>
-      <th>0.9318</th>
+      <th>3675</th>
+      <th>3240</th>
+      <th>3049</th>
+      <th>504</th>
+      <th>2157</th>
+      <th>0.6003</th>
+      <th>0.8581</th>
+      <th>0.7065</th>
+      <th>1.0000</th>
     </tr>
   </tbody>
      <tbody>
     <tr>
     <th>Sniffles2</th>
       <th>3972</th>
-      <th>3318</th>
-      <th>3189</th>
-      <th>676</th>
-      <th>2079</th>
+      <th>3317</th>
+      <th>3188</th>
+      <th>677</th>
+      <th>2080</th>
       <th>0.6148</th>
       <th>0.8251</th>
       <th>0.7046</th>
-      <th>0.9220</th>
+      <th>0.9709</th>
     </tr>
   </tbody> 
    <tbody>
@@ -137,7 +137,7 @@ The benchmarking results were as follows:
       <th>0.6005</th>
       <th>0.8317</th>
       <th>0.6975</th>
-      <th>0.9662</th>
+      <th>0.9818</th>
     </tr>
   </tbody>
   <tbody>
@@ -151,21 +151,21 @@ The benchmarking results were as follows:
       <th>0.5399</th>
       <th>0.8485</th>
       <th>0.6599</th>
-      <th>0.9184</th>
+      <th>0.9720</th>
     </tr>
   </tbody>
   <tbody>
     <tr>
     <th>SVIM</th>
       <th>11490</th>
-      <th>3504</th>
+      <th>3502</th>
       <th>3452</th>
       <th>2384</th>
-      <th>1893</th>
+      <th>1895</th>
       <th>0.6493</th>
       <th>0.5915</th>
       <th>0.6190</th>
-      <th>0.9549</th>
+      <th>0.9776</th>
     </tr>
   </tbody>
 </table>
@@ -189,93 +189,93 @@ The statistical results of center distance were shown as follows:
   </thead>
   <tbody>
     <tr>
-    <th>asvclr</th>
-      <th>12</th>
-      <th>34</th>
-      <th>46</th>
-      <th>418</th>
-      <th>2250</th>
-      <th>279</th>
-      <th>168</th>
-      <th>100</th>
+    <th>ASVCLR</th>
+      <th>19</th>
+      <th>18</th>
+      <th>55</th>
+      <th>459</th>
+      <th>2388</th>
+      <th>278</th>
+      <th>132</th>
+      <th>81</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>SVDSS</th>
-      <th>22</th>
-      <th>27</th>
-      <th>82</th>
-      <th>871</th>
-      <th>1619</th>
-      <th>159</th>
-      <th>104</th>
-      <th>72</th>
+      <th>15</th>
+      <th>21</th>
+      <th>69</th>
+      <th>383</th>
+      <th>2108</th>
+      <th>178</th>
+      <th>102</th>
+      <th>75/th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>DeBreak</th>
-      <th>15</th>
-      <th>28</th>
-      <th>36</th>
-      <th>157</th>
-      <th>1881</th>
-      <th>379</th>
-      <th>175</th>
-      <th>149</th>
+      <th>8</th>
+      <th>20</th>
+      <th>48</th>
+      <th>223</th>
+      <th>2376</th>
+      <th>281</th>
+      <th>115</th>
+      <th>71</th>
     </tr>
   </tbody>
      <tbody>
     <tr>
     <th>Sniffles2</th>
-      <th>28</th>
-      <th>43</th>
-      <th>56</th>
-      <th>250</th>
-      <th>2439</th>
-      <th>308</th>
-      <th>142</th>
-      <th>96</th>
+      <th>16</th>
+      <th>30</th>
+      <th>55</th>
+      <th>204</th>
+      <th>2522</th>
+      <th>315</th>
+      <th>140</th>
+      <th>85</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>pbsv</th>
-    	  <th>23</th>
-      <th>30</th>
-      <th>55</th>
-      <th>334</th>
-      <th>2378</th>
+    	  <th>17</th>
+      <th>25</th>
+      <th>45</th>
+      <th>337</th>
+      <th>2462</th>
       <th>175</th>
-      <th>106</th>
-      <th>83</th>
+      <th>84</th>
+      <th>62</th>
     </tr>
   </tbody>
   <tbody>
     <tr>
     <th>cuteSV</th>
-      <th>18</th>
-      <th>31</th>
-      <th>50</th>
-      <th>361</th>
-      <th>2009</th>
-      <th>238</th>
-      <th>117</th>
-      <th>77</th>
+      <th>16</th>
+      <th>27</th>
+      <th>45</th>
+      <th>331</th>
+      <th>2105</th>
+      <th>230</th>
+      <th>108</th>
+      <th>68</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>SVIM</th>
-      <th>43</th>
-      <th>59</th>
-      <th>87</th>
-      <th>454</th>
-      <th>2594</th>
-      <th>278</th>
-      <th>178</th>
-      <th>131</th>
+      <th>37</th>
+      <th>58</th>
+      <th>79</th>
+      <th>438</th>
+      <th>2738</th>
+      <th>273</th>
+      <th>143</th>
+      <th>108</th>
     </tr>
   </tbody>
 </table>
@@ -299,105 +299,105 @@ The statistical results of the region size ratio were shown as follows:
   </thead>
      <tbody>
     <tr>
-    <th>asvclr</th>
-      <th>280</th>
-      <th>21</th>
-      <th>3086</th>
-      <th>41</th>
-      <th>35</th>
-      <th>10</th>
-      <th>54</th>
-      <th>37</th>
-      <th>239</th>
+    <th>AVCRL</th>
+      <th>186</th>
+      <th>40</th>
+      <th>3477</th>
+      <th>86</th>
+      <th>83</th>
+      <th>15</th>
+      <th>20</th>
+      <th>2</th>
+      <th>1</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>SVDSS</th>
-      <th>347</th>
-      <th>25</th>
-      <th>2859</th>
-      <th>31</th>
-      <th>32</th>
-      <th>3</th>
-      <th>27</th>
-      <th>18</th>
-      <th>9</th>
+      <th>178</th>
+      <th>43</th>
+      <th>2943</th>
+      <th>78</th>
+      <th>89</th>
+      <th>10</th>
+      <th>10</th>
+      <th>0</th>
+      <th>0</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>DeBreak</th>
-      <th>125</th>
-      <th>17</th>
-      <th>1543</th>
-      <th>39</th>
-      <th>54</th>
-      <th>16</th>
-      <th>736</th>
-      <th>182</th>
-      <th>589</th>
+      <th>134</th>
+      <th>27</th>
+      <th>3185</th>
+      <th>83</th>
+      <th>84</th>
+      <th>11</th>
+      <th>13</th>
+      <th>0</th>
+      <th>2</th>
     </tr>
   </tbody>
   <tbody>
     <tr>
     <th>Sniffles2</th>
-      <th>342</th>
-      <th>23</th>
-      <th>3279</th>
-      <th>31</th>
-      <th>37</th>
-      <th>6</th>
-      <th>40</th>
-      <th>18</th>
-      <th>118</th>
+      <th>206</th>
+      <th>43</th>
+      <th>3446</th>
+      <th>89</th>
+      <th>84</th>
+      <th>13</th>
+      <th>13</th>
+      <th>0</th>
+      <th>0</th>
     </tr>
   </tbody>
    <tbody>
     <tr>
     <th>pbsv</th>
-    	<th>310</th>
-      <th>21</th>
-      <th>2696</th>
-      <th>40</th>
-      <th>53</th>
-      <th>6</th>
-      <th>315</th>
-      <th>84</th>
-      <th>237</th>
+    	<th>224</th>
+      <th>51</th>
+      <th>3219</th>
+      <th>128</th>
+      <th>103</th>
+      <th>16</th>
+      <th>20</th>
+      <th>1</th>
+      <th>0</th>
     </tr>
   </tbody>
     <tbody>
     <tr>
     <th>cuteSV</th>
-      <th>276</th>
-      <th>16</th>
-      <th>2807</th>
-      <th>33</th>
-      <th>26</th>
-      <th>7</th>
-      <th>38</th>
-      <th>19</th>
-      <th>152</th>
+      <th>219</th>
+      <th>39</th>
+      <th>2947</th>
+      <th>79</th>
+      <th>71</th>
+      <th>10</th>
+      <th>8</th>
+      <th>0</th>
+      <th>1</th>
     </tr>
   </tbody>
   <tbody>
     <tr>
     <th>SVIM</th>
-      <th>571</th>
+      <th>527</th>
+      <th>64</th>
+      <th>3787</th>
+      <th>122</th>
+      <th>128</th>
+      <th>27</th>
+      <th>23</th>
+      <th>0</th>
       <th>25</th>
-      <th>3506</th>
-      <th>40</th>
-      <th>54</th>
-      <th>13</th>
-      <th>82</th>
-      <th>58</th>
-      <th>362</th>
     </tr>
   </tbody>
 </table>
 
-Additionally, basic metrics for different structural variant (SV) size ranges were computed, primarily categorized into the following seven intervals. The results of asvclr were showed as follows:
+Additionally, basic metrics for different structural variant (SV) size ranges were computed, primarily categorized into the following seven intervals. The results of ASVCLR were shown as follows:
 
 <table>
   <thead>
@@ -416,36 +416,36 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
   <tbody>
     <tr>
     	  <th>1-100bp</th>
-      <th>2836</th>
-      <th>2754</th>
-      <th>532</th>
-      <th>1885</th>
-      <th>0.6007</th>
-      <th>0.8381</th>
-      <th>0.6998</th>
-      <th>0.9102</th>
+      <th>2862</th>
+      <th>2857</th>
+      <th>529</th>
+      <th>1859</th>
+      <th>0.6062</th>
+      <th>0.8438</th>
+      <th>0.7055</th>
+      <th>0.9708</th>
     </tr>
     <tr>
     	  <th>101-250bp</th>
-      <th>119</th>
-      <th>111</th>
-      <th>73</th>
-      <th>124</th>
-      <th>0.4897</th>
-      <th>0.6033</th>
-      <th>0.5406</th>
-      <th>0.9927</th>
+      <th>121</th>
+      <th>113</th>
+      <th>68</th>
+      <th>122</th>
+      <th>0.4979</th>
+      <th>0.6243</th>
+      <th>0.5540</th>
+      <th>0.9915</th>
     </tr>
     <tr>
     	  <th>251-500bp</th>
-      <th>126</th>
-      <th>124</th>
-      <th>136</th>
-      <th>90</th>
-      <th>0.5833</th>
+      <th>129</th>
+      <th>127</th>
+      <th>133</th>
+      <th>87</th>
+      <th>0.5972</th>
       <th>0.4769</th>
       <th>0.5248</th>
-      <th>0.9922</th>
+      <th>0.9917</th>
     </tr>
     <tr>
     	  <th>501-1000bp</th>
