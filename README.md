@@ -163,7 +163,7 @@ For the second item, there is a insertion of size 87 base pairs at the 1142381 l
 The help information are below:
 ```sh
 $ sv_stat
-Program: SV_STAT (A tool for Structural Variant Statistics Benchmarking)
+Program: SV_STAT (A tool for Structural Variants Statistics Benchmarking)
 Version: 1.0.1
 
 Usage:  sv_stat [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
@@ -209,7 +209,7 @@ Example:
    # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option
    $ sv_stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa
 
-   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple samples
+   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets
    $ sv_stat -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 ```
 
