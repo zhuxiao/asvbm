@@ -2,7 +2,7 @@
 A tool for Structural Variants Statistics Benchmarking
 
 -------------------
-SV_STAT is a tool for Structural Variants (SV) Statistics Benchmarking. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the traditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their region centers, and it also computes the region size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of SV_STAT is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, SV_STAT supports multi-sample benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples.
+SV_STAT is a tool for Structural Variants (SV) Statistics Benchmarking. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the traditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also computes the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of SV_STAT is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, SV_STAT supports multi-sample benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples.
 
 For more detailed experiment information, please refer to [sv_stat-experiments](https://github.com/zhuxiao/sv_stat-experiments).
 
@@ -292,7 +292,7 @@ Multisample benchmarking statistical results. The benchmarking of recognition re
     </tr>
   </tbody>
 </table>
-Moreover, for regions with overlapping variations, the quantities of region size ratio and center distance were statistically analyzed to provide a more intuitive presentation of benchmarking information. Here, only a partial set of results is presented, and more detailed statistical outcomes can be reviewed in the respective files or graphical representations:
+Moreover, for regions with overlapping variations, the quantities of variant size ratio and breakpoint distance were statistically analyzed to provide a more intuitive presentation of benchmarking information. Here, only a partial set of results is presented, and more detailed statistical outcomes can be reviewed in the respective files or graphical representations:
 
 <table>
   <thead>
@@ -314,7 +314,7 @@ Moreover, for regions with overlapping variations, the quantities of region size
   </thead>
   <tbody>
     <tr>
-    <th>region size ratio (count)</th>
+    <th>variant size ratio (count)</th>
       <th>140</th>
       <th>181</th>
       <th>203</th>
@@ -345,7 +345,7 @@ Moreover, for regions with overlapping variations, the quantities of region size
   </thead>
   <tbody>
     <tr>
-    <th>center distance (count)</th>
+    <th>breakpoint distance (count)</th>
       <th>3883</th>
       <th>290</th>
       <th>37294</th>
