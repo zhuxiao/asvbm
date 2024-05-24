@@ -63,12 +63,12 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
     <td>The sequence identity for matched SV pairs that include sequences</td>
   </tr>
    <tr>
-    <td>the center distance</td>
-    <td>The quantitative distribution of the center distances for overlapping variants</td>
+    <td>the breakpoint distance</td>
+    <td>The quantitative distribution of the breakpoint distance for overlapping variants</td>
   </tr>
   <tr>
-    <td>the region size ratio</td>
-    <td>The region size distribution of the center distances for overlapping variants</td>
+    <td>the variant size ratio</td>
+    <td>The region size distribution of the variant size ratio for overlapping variants</td>
   </tr>
 </table>
 
