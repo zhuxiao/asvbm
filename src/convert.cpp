@@ -211,8 +211,8 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 					if(sv_type_vec.size()==1){
 						sv_type_str = sv_type_vec.at(0);
 					}else{
-							sv_type_str1 = sv_type_vec.at(0);
-							sv_type_str2 = sv_type_vec.at(1);
+						sv_type_str1 = sv_type_vec.at(0);
+						sv_type_str2 = sv_type_vec.at(1);
 					}
 				}
 				if(sv_len_str.size()==0){
@@ -872,6 +872,7 @@ bool isSeq(string &seq){
 			case 'd':
 			case 'B':
 			case 'b':
+			case '*':
 				//flag = true;
 				break;
 			case ',':
@@ -948,7 +949,7 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 	item->alt_seq = alt_seq;
 	item->overlapped = false;
 	item->validFlag = true;
-//	item->seqcons = "-";
+	item->seqcons = "-";
 	return item;
 }
 
@@ -1036,7 +1037,8 @@ void removeSNVItems(string &snv_filename, vector<SV_item*> &sv_item_vec){
 	outConvertScreenFile << ">>>>>>>>> Remove snv items <<<<<<<<<" << endl;
 	outConvertScreenFile << "Before removing snv items, data size: " << sv_item_vec.size() << endl;
 
-	snv_filename = outputPathname + snv_filename;
+//	snv_filename = outputPathname + snv_filename;
+	snv_filename = suboutputDirnamePath + "/" + snv_filename;
 	snv_file.open(snv_filename);
 	if(!snv_file.is_open()){
 		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << snv_filename << endl;
@@ -1050,7 +1052,7 @@ void removeSNVItems(string &snv_filename, vector<SV_item*> &sv_item_vec){
 	snv_num = 0;
 	for(i=0; i<sv_item_vec.size(); ){
 		item = sv_item_vec.at(i);
-		if(item->sv_len == 0){
+		if(item->sv_len == 0 and item->sv_type == VAR_SNV){
 			sv_type_str = "SNV";
 			line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq;
 

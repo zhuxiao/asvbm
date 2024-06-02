@@ -5,6 +5,8 @@
 #include <cstring>
 #include <fstream>
 #include <vector>
+#include <iomanip>
+#include <sstream>
 
 #include "structure.h"
 

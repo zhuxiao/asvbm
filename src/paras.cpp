@@ -109,7 +109,7 @@ void showUsageStat(){
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
 	cout << "   $ sv_stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
-	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple samples" << endl;
+	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
 	cout << "   $ sv_stat -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 
@@ -338,6 +338,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 			//path
 			sv_file_name = Pathquerybackslash(sv_file_name);
 			mate_filename = to_string(i)+ "_" + mateItemFilename;
+//			snv_filename = to_string(i)+ "_" + snvFilename;
 			sv_file_name_Path = suboutputDirnamePath + "/" + sv_file_name;
 			convertVcf(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename);
 			convert_sv_files.push_back(sv_file_name_Path);
@@ -345,6 +346,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 		//benchmark
 		convert_sv_file2 = PathqueryDot(sv_file2);
 		mate_filename = "Benckmark_" + mateItemFilename;
+//		snv_filename = "Benckmark_" + snvFilename;
 		convert_sv_file2 = Pathquerybackslash(convert_sv_file2);
 		convert_sv_file2_Path = suboutputDirnamePath + "/" + convert_sv_file2;
 		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename);

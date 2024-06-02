@@ -22,12 +22,12 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 
 	cout << endl <<"############# Stage 5: Generate comparison graph information: #############" << endl << endl;
 	if(sv_files1.size()>1){
-		string newInfo = "tool Recall Precision F1-score Seqcons";
-		string newInfo1 = "tool TP_user TP_benchmark FP FN";
+//		string newInfo = "tool Recall Precision F1-score Seqcons";
+//		string newInfo1 = "tool TP_user TP_benchmark FP FN";
 		outputBasicMetricschartPath = outputPathname + outputBasicMetricschart;
 		mkdir(outputBasicMetricschartPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		multipledataset(MeticsValues, sv_files1, tool_names, outputBasicMetricschartPath, newInfo);
-		multipledataset(MeticsValues1, sv_files1, tool_names, outputBasicMetricschartPath, newInfo1);
+		multipledataset(MeticsValues, sv_files1, tool_names, outputBasicMetricschartPath);
+		multipledataset(MeticsValues1, sv_files1, tool_names, outputBasicMetricschartPath);
 
 		outputDiffRangeBasicMetricschart = outputBasicMetricschartPath + '/' + outputDiffRangeBasicMetricschart;
 		mkdir(outputDiffRangeBasicMetricschart.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -36,7 +36,7 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		//Draw a multi-graph mode
 		vector<string> filenames;
 		GenerateFileOp(outputDiffRangeBasicMetricschart, tool_names, filenames, sv_files1);
-		GenerateMultiBarCharts(outputDiffRangeBasicMetricschart, filenames, newInfo);
+		GenerateMultiBarCharts(outputDiffRangeBasicMetricschart, filenames, tool_names, sv_files1);
 
 		//sv information comparison of different sizes
 		SVsizeratiofile = outputBasicMetricschartPath + '/' + SVsizeratiofile;
@@ -51,19 +51,20 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		Histogram_drawing(MeticsValues1,  outputPathname, outputBasicMetricschartPath);
 		Generatehtml(outputBasicMetricschart);
 	}
-	cout << endl << "Details of the assessment results are saved in:" << outputPathname + htmlFilename << endl;
+	cout << endl << "Details of the benchmarking results are saved in:" << outputPathname + htmlFilename << endl;
 
 	cout << endl << "## More information ## " << endl;
-	cout << "For more detailed evaluation results, please refer to the generated result information in the respective folders." << endl;
+	cout << "For more detailed benchmarking results, please refer to the generated result information in the respective folders." << endl;
 	cout << "For more detailed experiment information, please refer to the github repositories: https://github.com/zhuxiao/sv_stat and https://github.com/zhuxiao/sv_stat-experiments." << endl;
 //	cout << "For more detailed evaluation results, please refer to the generated result information in the respective folders." << endl;
 	cout << "If you have any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!" << endl;
 }
 
 //Compare multiple data sets
-void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart, string &newInfo){
+void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart){
     // Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
 	vector<string> scenarios;
+	vector<string> metrics = { "Identity", "Recall", "Precision", "F1-score"};
 	if(tool_names.size()>1) scenarios = tool_names;
 	else {
 		for(size_t i=0; i<sv_files1.size();i++){
@@ -90,14 +91,35 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     }
 
     // Write data to a file
-    for (size_t i = 0; i < scenarios.size(); i++) {
+    /*for (size_t i = 0; i < scenarios.size(); i++) {
         dataFile << scenarios[i];
         for (size_t j = 0; j < 4; j++) {
             dataFile << " " << MeticsValues[i][j];
         }
         dataFile << endl;
+    }*/
+    for (size_t i = 0; i < 4; i++) {
+	   dataFile << metrics[i];
+	   for (size_t j = 0; j < scenarios.size(); j++) {
+		   dataFile << " " << MeticsValues[j][i];
+	   }
+	   dataFile << endl;
     }
     dataFile.close();
+
+    string Info;
+    if(tool_names.size()>1)	Info = "Tool";
+	else	Info = "callsets";
+    string plotCommand ="plot '" + filenamePath + "'";
+    for(size_t i = 0; i<scenarios.size(); i++){
+    	Info += " " + scenarios[i];
+    	if(i==0)
+    		plotCommand += " using " + to_string(i+2) + ":xtic(1) title '" + scenarios[i] + "'";
+    	else
+    		plotCommand += " '' using " + to_string(i+2) + " title '" + scenarios[i] + "'";
+    	if(i<scenarios.size()-1)
+    		plotCommand += ",";
+    }
 
     // Set the file name to save
     string outputFileName = "benchmarking_result.png";
@@ -116,7 +138,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     fprintf(gnuplotPipe, "set output '%s'\n", outputFileNamePath.c_str()); // Set output file name
     fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
     fprintf(gnuplotPipe, "set title 'Performance comparison between different tools' font 'Times-Roman,14'\n");
-    fprintf(gnuplotPipe, "set xlabel 'Tool name' font 'Times-Roman,12'\n");
+    fprintf(gnuplotPipe, "set xlabel 'Metrics' font 'Times-Roman,12'\n");
     fprintf(gnuplotPipe, "set ylabel 'Percentage' font 'Times-Roman,12'\n");
     fprintf(gnuplotPipe, "set style fill solid\n");
     fprintf(gnuplotPipe, "set boxwidth 1.0\n"); // Set the bar width
@@ -124,23 +146,27 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     fprintf(gnuplotPipe, "set yrange [0:1]\n");
     fprintf(gnuplotPipe, "set ytics 0.1\n");
     fprintf(gnuplotPipe, "set style data histograms\n");
+//    fprintf(gnuplotPipe, "set key outside right top vertical font 'Times-Roman,10'\n");
+//	fprintf(gnuplotPipe, "set rmargin 12\n");
 
     // Set key (legend) font size
     fprintf(gnuplotPipe, "set key font 'Times-Roman,10'\n");
     // Draw a bar chart, specifying the number of columns for each data column purple  olive magenta
-    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#568AC6' title 'Recall', '' using 3 lc rgb '#F08700' title 'Precision', '' using 4 lc rgb '#F06767' title 'F1-score', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", filenamePath.c_str());
+//    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#568AC6' title 'Recall', '' using 3 lc rgb '#F08700' title 'Precision', '' using 4 lc rgb '#F06767' title 'F1-score', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", filenamePath.c_str());
+    fprintf(gnuplotPipe, "%s\n", plotCommand.c_str());
     // Close the GNUplot pipeline
     pclose(gnuplotPipe);
 
-    AddfileInformation(filenamePath, newInfo);
+    AddfileInformation(filenamePath, Info);
     cout << "Performance metrics results between different data sets are saved in: " << outputFileNamePath << endl;
 
 }
 
 //stat 5
-void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart, string &newInfo){
+void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart){
     // Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
 	vector<string> scenarios;
+	vector<string> metrics = {"TP.bench", "TP.user", "FP", "FN"};
 	if(tool_names.size()>1) scenarios = tool_names;
 	//Note to be modified to remove '/'
 	else {
@@ -167,14 +193,25 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
         return ;
     }
     // Write data to a file
-    for (size_t i = 0; i < scenarios.size(); i++) {
-        dataFile << scenarios[i];
-        for (size_t j = 0; j < 4; j++) {
-            dataFile << " " << MeticsValues[i][j];
+    for (size_t i = 0; i < 4; i++) {
+        dataFile << metrics[i];
+        for (size_t j = 0; j < scenarios.size(); j++) {
+            dataFile << " " << MeticsValues[j][i];
         }
         dataFile << endl;
     }
     dataFile.close();
+    string Info = "Tool";
+    string plotCommand ="plot '" + filenamePath + "'";
+	for(size_t i = 0; i<scenarios.size(); i++){
+		Info += " " + scenarios[i];
+		if(i==0)
+			plotCommand += " using " + to_string(i+2) + ":xtic(1) title '" + scenarios[i] + "'";
+		else
+			plotCommand += " '' using " + to_string(i+2) + " title '" + scenarios[i] + "'";
+		if(i<scenarios.size()-1)
+			plotCommand += ",";
+	}
 
     // Set the file name to save
     string outputFileName = "result_classification.png";
@@ -193,7 +230,7 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
     fprintf(gnuplotPipe, "set output '%s'\n", outputFileNamePath.c_str()); // Set output file name
     fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
     fprintf(gnuplotPipe, "set title 'Benchmark results between different tools' font 'Times-Roman,14'\n");
-    fprintf(gnuplotPipe, "set xlabel 'Tool name' font 'Times-Roman,12'\n");
+    fprintf(gnuplotPipe, "set xlabel 'Metrics' font 'Times-Roman,12'\n");
     fprintf(gnuplotPipe, "set ylabel 'Count' font 'Times-Roman,12'\n");
     fprintf(gnuplotPipe, "set style fill solid\n");
     fprintf(gnuplotPipe, "set boxwidth 1.0\n"); // Set the bar width
@@ -202,12 +239,13 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
     fprintf(gnuplotPipe, "set style data histograms\n");
 
     // Draw a bar chart, specifying the number of columns for each data column purple blue green red
-    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#6FBE47' title 'TP.user', '' using 3 lc rgb '#FF6847' title 'TP.bench', '' using 4 lc rgb '#FDD700' title 'FP', '' using 5 lc rgb '#AB6520' title 'FN'\n", filenamePath.c_str());
-//    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
+    //fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#6FBE47' title 'TP.user', '' using 3 lc rgb '#FF6847' title 'TP.bench', '' using 4 lc rgb '#FDD700' title 'FP', '' using 5 lc rgb '#AB6520' title 'FN'\n", filenamePath.c_str());
+    fprintf(gnuplotPipe, "%s\n", plotCommand.c_str());
+    //fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
 
     // Close the GNUplot pipeline
     pclose(gnuplotPipe);
-    AddfileInformation(filenamePath, newInfo);
+    AddfileInformation(filenamePath, Info);
     cout << endl << "The classification of results between different data sets is saved in: " << outputFileNamePath << endl;
 }
 
@@ -253,10 +291,10 @@ void AddfileInformation(string &FileNamePath, string &Info){
 //stat 2
 void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathname, string &outputBasicMetricschart){
 	vector<pair<string, float>> dataV;
-	dataV.push_back(make_pair("Recall", MeticsValues[0][0]));
-	dataV.push_back(make_pair("Precision", MeticsValues[0][1]));
-	dataV.push_back(make_pair("F1-score", MeticsValues[0][2]));
-	dataV.push_back(make_pair("Identity", MeticsValues[0][3]));
+	dataV.push_back(make_pair("Identity", MeticsValues[0][0]));
+	dataV.push_back(make_pair("Recall", MeticsValues[0][1]));
+	dataV.push_back(make_pair("Precision", MeticsValues[0][2]));
+	dataV.push_back(make_pair("F1-score", MeticsValues[0][3]));
 
 	string outputFileName = "benchmarking_result.png";
 	string outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
@@ -380,7 +418,7 @@ void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinena
 //stat 3
 void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 	string filename1 = "sv_size_ratio_stat_long_filtered", filename2 = "sv_size_dif_stat_long_filtered", filename_pngPath_tmp;
-	string title1 = "SV size difference ratio", title2 = "Center distance difference";
+	string title1 = "Variant size ratio", title2 = "Breakpoint distance deviation";
 	string fileNamePath1 = sizeDifStatDirname + filename1, fileNamePath2 = sizeDifStatDirname + filename2;
 	string filename_png = "result_details.png";
 	string filename_pngPath = sizeDifStatDirname + filename_png;
@@ -481,14 +519,14 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 
 	pclose(gnuplotPipe);
 
-	cout << "\n" <<"Statistical results of center distance and area size ratio are saved in:" << filename_pngPath << endl;
+	cout << "\n" <<"Statistical results of breakpoint distance and variation region size ratio are saved in:" << filename_pngPath << endl;
 }
 
 //stat 4
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > MeticsValues_4){
 	string filename, filenamePath, outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 	// Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
-	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-5000bp","5001-10000bp",">10000bp"};
+	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500", "2501-5000bp", "5001-10000bp",">10000bp"};
 
 	// Create a data file to hold the data
 	filename = "calculation_result";
@@ -537,20 +575,20 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 	fprintf(gnuplotPipe, "set style data histograms\n");
 
 	// Draw a bar chart, specifying the number of columns for each data column
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#3E4998' title 'Recall', '' using 3 lc rgb '#D95F02' title 'Precision', '' using 4 lc rgb '#E7298A' title 'F1-score', '' using 5 lc rgb '#5D94A4' title 'Identity'\n", filenamePath.c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#3E4998' title 'Identity', '' using 3 lc rgb '#D95F02' title 'Recall', '' using 4 lc rgb '#E7298A' title 'Precision', '' using 5 lc rgb '#5D94A4' title 'F1-score'\n", filenamePath.c_str());
 //    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
 	// Close the GNUplot pipeline
 	pclose(gnuplotPipe);
-	string newInfo = "Range Recall Precision F1-score Seqcons";
+	string newInfo = "Range Identity Recall Precision F1-score";
 	AddfileInformation(filenamePath, newInfo);
-	cout << endl << "Statistical results of indicators with different SV sizes are saved in: " << outputFileNamePath << endl;
+	cout << endl << "Statistical results of basic metrics with different SV sizes are saved in: " << outputFileNamePath << endl;
 }
 
 //stat 4
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > MeticsValues1_4){
 	string filename, filenamePath, outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 // Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
-	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-5000bp","5001-10000bp",">10000bp"};
+	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500", "2501-5000bp", "5001-10000bp",">10000bp"};
 
 	// Create a data file to hold the data
 	filename = "quantitative_statistics";
@@ -603,9 +641,9 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > Me
 
 	// Close the GNUplot pipeline
 	pclose(gnuplotPipe);
-	string newInfo = "Range TP_user TP_bench FP FN";
+	string newInfo = "Range TP_bench TP_user FP FN";
 	AddfileInformation(filenamePath, newInfo);
-	cout << "Quantitative statistics of indicators with different SV sizes are saved in: " << outputFileNamePath << endl << endl;
+	cout << "Quantitative statistics of basic metrics with different SV sizes are saved in: " << outputFileNamePath << endl << endl;
 }
 
 void ComparisonofMetricsindifferentranges(string &DiffRangeStatDirname, vector< vector<float> > meticsvalues, vector<string> &tool_names, string &FileName, string &outputfilename, vector<string> &sv_files1){
@@ -710,16 +748,19 @@ void GenerateFileOp(string &DiffRangeStatDirname, vector<string> &tool_names, ve
 	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr2, MeticsValues4_2, filenames, sv_files1);
 	string FileNameStr3 = "501-1000";
 	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr3, MeticsValues4_3, filenames, sv_files1);
-	string FileNameStr4 = "1001-5000";
+	string FileNameStr4 = "1001-2500";
 	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr4, MeticsValues4_4, filenames, sv_files1);
-	string FileNameStr5 = "5001-10000";
+	string FileNameStr5 = "2501-5000";
 	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr5, MeticsValues4_5, filenames, sv_files1);
-	string FileNameStr6 = "greaterthan10001";
+	string FileNameStr6 = "5001-10000";
 	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr6, MeticsValues4_6, filenames, sv_files1);
+	string FileNameStr7 = "greaterthan10001";
+	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr7, MeticsValues4_7, filenames, sv_files1);
 }
 //stat 5
 void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, string &FileName, vector< vector<float> > meticsvalues, vector<string> &filenames, vector<string> &sv_files1){
 	vector<string> scenarios;
+	vector<string> metrics = {"Identity", "Recall", "Precision", "F1-score"};
 	if(tool_names.size()>1) scenarios = tool_names;
 	//Note to be modified to remove '/'’
 	else {
@@ -747,10 +788,10 @@ void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, stri
 		return ;
 	}
 	// Write data to a file
-	for (size_t i = 0; i < scenarios.size(); i++) {
-		dataFile << scenarios[i];
-		for (size_t j = 0; j < 4; j++) {
-			dataFile << " " << meticsvalues[i][j];
+	for (size_t i = 0; i < 4; i++) {
+		dataFile << metrics[i];
+		for (size_t j = 0; j < scenarios.size(); j++) {
+			dataFile << " " << meticsvalues[j][i];
 		}
 		dataFile << endl;
 	}
@@ -759,15 +800,34 @@ void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, stri
 }
 
 //NEW stat 5
-void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fileNames, string Header_line) {
+void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fileNames, vector<string> &tool_names, vector<string> &sv_files1) {
 	string outputFileName, outputFileNamePath, outputFileNamePath_tmp;
+	vector<string> scenarios;
 	outputFileName = "different_range.png";
 	outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
 	outputFileNamePath_tmp=getContentAfterSlash(outputFileNamePath);
 	folderPng5.push_back(outputFileNamePath_tmp);
+
+	if(tool_names.size()>1) scenarios = tool_names;
+	else {
+		for(size_t i=0; i<sv_files1.size();i++){
+			size_t lastSlashPos = sv_files1.at(i).find_last_of('/');
+			string str;
+			if (lastSlashPos == string::npos) {
+				// If '/' is not found, the entire string is printed
+				 str = sv_files1.at(i-1);
+			} else {
+				// When '/' is reached, the part after '/' is printed
+				str = sv_files1.at(i).substr(lastSlashPos + 1);
+			}
+			replaceUnderscoreWithDot(str);
+			scenarios.push_back(str);
+		}
+	}
+
 	vector<string> titles =  {
 			        "1-100 bp", "101-250 bp", "251-500 bp",
-			        "501-1000 bp", "1001-5000 bp", "5001-10000 bp", ">=10001 bp"
+			        "501-1000 bp", "1001-2500 bp",  "2501-5000 bp", "5001-10000 bp", ">=10001 bp"
 			    };
 	//// Open the Gnuplot pipeline
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");
@@ -782,7 +842,7 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 	fprintf(gnuplotPipe, "set multiplot layout 4, 2\n");
 
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[0].c_str());
-	fprintf(gnuplotPipe, "set xlabel 'Tool Name'\n");
+	fprintf(gnuplotPipe, "set xlabel 'Metrics'\n");
 	fprintf(gnuplotPipe, "set ylabel 'Percentage'\n");
 	fprintf(gnuplotPipe, "set style fill solid\n");
 	fprintf(gnuplotPipe, "set boxwidth 1.0\n"); // Set the bar width
@@ -794,7 +854,30 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 	// Set key (legend) font size
 	fprintf(gnuplotPipe, "set key font 'Times-Roman,10'\n");
 
-	// Draw a bar chart, specifying the number of columns for each data column
+	string Info;
+	if(tool_names.size()>1)	Info = "Tool";
+	else	Info = "callsets";
+	for(size_t i = 0; i < 8; i++){
+		string plotCommand ="plot '" + fileNames[i] + "'";
+		for(size_t j = 0; j < scenarios.size(); j++){
+			if(i == 0)
+				Info += " " + scenarios[j];
+			if(j == 0)
+				plotCommand += " using " + to_string(j+2) + ":xtic(1) title '" + scenarios[j] + "'";
+			else
+				plotCommand += " '' using " + to_string(j+2) + " title '" + scenarios[j] + "'";
+			if(j < scenarios.size()-1)
+				plotCommand += ",";
+		}
+		if(i==0)
+			fprintf(gnuplotPipe, "%s\n", plotCommand.c_str());
+		else{
+			fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[i].c_str());
+			fprintf(gnuplotPipe, "%s\n", plotCommand.c_str());
+		}
+	}
+
+/*	// Draw a bar chart, specifying the number of columns for each data column
 	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[0].c_str());
 //    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
 
@@ -820,7 +903,7 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 
 	//Fig7
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[6].c_str());
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[6].c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[6].c_str());*/
 
 	// Disable the multi-image mode
     fprintf(gnuplotPipe, "unset multiplot\n");
@@ -830,7 +913,7 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
     pclose(gnuplotPipe);
     cout << endl << "The comparison of metrics in different ranges is saved in:" <<outputFileNamePath<< endl;
     for(size_t i=0; i<fileNames.size(); i++){
-    	AddfileInformation(fileNames[i], Header_line);
+    	AddfileInformation(fileNames[i], Info);
     }
 }
 

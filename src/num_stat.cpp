@@ -179,21 +179,24 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	destroyResultData(result);
 }
 void CollectData(float recall, float precision_user, float F1_score_user, double seqcons, vector<float> &Data, size_t num, int Markers){
+	Data.push_back(seqcons);
 	Data.push_back(recall);
 	Data.push_back(precision_user);
 	Data.push_back(F1_score_user);
-	Data.push_back(seqcons);
+//	Data.push_back(seqcons);
 	if(Markers==2){
+		allmetric.push_back(to_string(seqcons));
 		allmetric.push_back(to_string(recall));
 		allmetric.push_back(to_string(precision_user));
 		allmetric.push_back(to_string(F1_score_user));
-		allmetric.push_back(to_string(seqcons));
+//		allmetric.push_back(to_string(seqcons));
 		allmetrics.push_back(allmetric);
 	}else if(Markers==4){
+		regionmetric.push_back(to_string(seqcons));
 		regionmetric.push_back(to_string(recall));
 		regionmetric.push_back(to_string(precision_user));
 		regionmetric.push_back(to_string(F1_score_user));
-		regionmetric.push_back(to_string(seqcons));
+//		regionmetric.push_back(to_string(seqcons));
 		regionmetrics.push_back(regionmetric);
 	}
 //	if(Data.size()>num){
@@ -202,8 +205,8 @@ void CollectData(float recall, float precision_user, float F1_score_user, double
 //	}
 }
 void CollectData(int TP_user, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers){
-	Data.push_back(TP_user);
 	Data.push_back(TP_benchmark);
+	Data.push_back(TP_user);
 	Data.push_back(FP);
 	Data.push_back(FN);
 	if(Markers==2){
@@ -649,10 +652,45 @@ void* intersectSubset(void *arg){
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= SEQ_CONSISTENCY) {
-													SeqConsNumStat(consistency);
-													flag = true;
+												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= SEQ_CONSISTENCY) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+													if(stod(item2->seqcons) < consistency){
+														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+														if(item1->seqcons.compare("-") == 0)
+															item1->seqcons = item2->seqcons = to_string(consistency);
+														else{
+															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															item2->seqcons = to_string(consistency);
+														}
+														if (consistency >= SEQ_CONSISTENCY) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else{
+														if (consistency >= SEQ_CONSISTENCY) {
+															if(item1->seqcons.compare("-") ==0)
+																item1->seqcons = to_string(consistency);
+															else{
+																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															}
+															flag = true;
+														}
+													}
+												}else{
+													if(item1->seqcons.compare("-") == 0)
+														item1->seqcons = item2->seqcons = to_string(consistency);
+													else{
+														if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+														item2->seqcons = to_string(consistency);
+													}
+													if (consistency >= SEQ_CONSISTENCY) {
+														flag = true;
+													}
 												}
 											}
 										}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
@@ -660,10 +698,54 @@ void* intersectSubset(void *arg){
 													flag = true;
 												}else{
 													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= SEQ_CONSISTENCY) {
-														SeqConsNumStat(consistency);
-														flag = true;
+//													item1->seqcons = item2->seqcons = to_string(consistency);
+//													if (consistency >= SEQ_CONSISTENCY) {
+//														SeqConsNumStat(consistency);
+//														flag = true;
+//													}
+													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= SEQ_CONSISTENCY) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+														if(stod(item2->seqcons) < consistency){
+															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//															item1->seqcons = item2->seqcons = to_string(consistency);
+															if(item1->seqcons.compare("-") == 0)
+																item1->seqcons = item2->seqcons = to_string(consistency);
+															else{
+																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+																item2->seqcons = to_string(consistency);
+															}
+															if (consistency >= SEQ_CONSISTENCY) {
+																SeqConsNumStat(consistency);
+																flag = true;
+															}
+														}else{
+															if (consistency >= SEQ_CONSISTENCY) {
+//																item1->seqcons = to_string(consistency);
+																if(item1->seqcons.compare("-") ==0)
+																	item1->seqcons = to_string(consistency);
+																else{
+																	if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+																}
+																flag = true;
+															}
+														}
+													}else{
+//														item1->seqcons = item2->seqcons = to_string(consistency);
+														if(item1->seqcons.compare("-") == 0)
+															item1->seqcons = item2->seqcons = to_string(consistency);
+														else{
+															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															item2->seqcons = to_string(consistency);
+														}
+														if (consistency >= SEQ_CONSISTENCY) {
+//															item1->seqcons = item2->seqcons = to_string(consistency);
+															flag = true;
+														}
 													}
 												}
 										}else if(item1->sv_type == VAR_DEL and item2->sv_type == VAR_DEL){
@@ -671,10 +753,48 @@ void* intersectSubset(void *arg){
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= SEQ_CONSISTENCY) {
-													SeqConsNumStat(consistency);
-													flag = true;
+//												item1->seqcons = item2->seqcons = to_string(consistency);
+//												if (consistency >= SEQ_CONSISTENCY) {
+//													SeqConsNumStat(consistency);
+//													flag = true;
+//												}
+												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= SEQ_CONSISTENCY) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+													if(stod(item2->seqcons) < consistency){
+														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														item1->seqcons = item2->seqcons = to_string(consistency);
+														if(item1->seqcons.compare("-") == 0)
+															item1->seqcons = item2->seqcons = to_string(consistency);
+														else{
+															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															item2->seqcons = to_string(consistency);
+														}
+														if (consistency >= SEQ_CONSISTENCY) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else{
+														if (consistency >= SEQ_CONSISTENCY) {
+//															item1->seqcons = to_string(consistency);
+															if(item1->seqcons.compare("-") ==0)
+																item1->seqcons = to_string(consistency);
+															else{
+																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															}
+															flag = true;
+														}
+													}
+												}else{
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= SEQ_CONSISTENCY) {
+//														item1->seqcons = item2->seqcons = to_string(consistency);
+														flag = true;
+													}
 												}
 											}
 										}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){	//TRA,BND,TRA_BND
@@ -714,11 +834,37 @@ void* intersectSubset(void *arg){
 											flag = true;
 										}else{
 											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-											item1->seqcons = item2->seqcons = to_string(consistency);
-											// determine the overlap flag according to consistency
-											if(consistency>=SEQ_CONSISTENCY) {
-												SeqConsNumStat(consistency);
-												flag = true;
+//											item1->seqcons = item2->seqcons = to_string(consistency);
+//											// determine the overlap flag according to consistency
+//											if(consistency>=SEQ_CONSISTENCY) {
+//												SeqConsNumStat(consistency);
+//												flag = true;
+//											}
+											if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+												item1->seqcons = item2->seqcons = to_string(consistency);
+												if (consistency >= SEQ_CONSISTENCY) {
+													SeqConsNumStat(consistency);
+													flag = true;
+												}
+											}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+												if(stod(item2->seqcons) < consistency){
+													SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= SEQ_CONSISTENCY) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
+												}else{
+													if (consistency >= SEQ_CONSISTENCY) {
+														item1->seqcons = to_string(consistency);
+														flag = true;
+													}
+												}
+											}else{
+												item1->seqcons = item2->seqcons = to_string(consistency);
+												if (consistency >= SEQ_CONSISTENCY) {
+													flag = true;
+												}
 											}
 										}
 									}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
@@ -726,10 +872,37 @@ void* intersectSubset(void *arg){
 												flag = true;
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= SEQ_CONSISTENCY) {
-													SeqConsNumStat(consistency);
-													flag = true;
+//												item1->seqcons = item2->seqcons = to_string(consistency);
+//												if (consistency >= SEQ_CONSISTENCY) {
+//													SeqConsNumStat(consistency);
+//													flag = true;
+//												}
+												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= SEQ_CONSISTENCY) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+													if(stod(item2->seqcons) < consistency){
+														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= SEQ_CONSISTENCY) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else{
+														if (consistency >= SEQ_CONSISTENCY) {
+															item1->seqcons = to_string(consistency);
+															flag = true;
+														}
+													}
+												}else{
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= SEQ_CONSISTENCY) {
+//														item1->seqcons = item2->seqcons = to_string(consistency);
+														flag = true;
+													}
 												}
 											}
 									}else if(item1->sv_type==VAR_DEL and item2->sv_type==VAR_DEL){
@@ -737,11 +910,38 @@ void* intersectSubset(void *arg){
 											flag = true;
 										}else{
 											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-											item1->seqcons = item2->seqcons = to_string(consistency);
-											// determine the overlap flag according to consistency
-											if(consistency>=SEQ_CONSISTENCY) {
-												SeqConsNumStat(consistency);
-												flag = true;
+//											item1->seqcons = item2->seqcons = to_string(consistency);
+//											// determine the overlap flag according to consistency
+//											if(consistency>=SEQ_CONSISTENCY) {
+//												SeqConsNumStat(consistency);
+//												flag = true;
+//											}
+											if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+												item1->seqcons = item2->seqcons = to_string(consistency);
+												if (consistency >= SEQ_CONSISTENCY) {
+													SeqConsNumStat(consistency);
+													flag = true;
+												}
+											}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+												if(stod(item2->seqcons) < consistency){
+													SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= SEQ_CONSISTENCY) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
+												}else{
+													if (consistency >= SEQ_CONSISTENCY) {
+														item1->seqcons = to_string(consistency);
+														flag = true;
+													}
+												}
+											}else{
+												item1->seqcons = item2->seqcons = to_string(consistency);
+												if (consistency >= SEQ_CONSISTENCY) {
+//													item1->seqcons = item2->seqcons = to_string(consistency);
+													flag = true;
+												}
 											}
 										}
 									}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){
@@ -802,6 +1002,12 @@ void* intersectSubset(void *arg){
 	delete overlap_opt;
 
 	return NULL;
+}
+
+// upper the sequence
+void upperSeq(string &seq){
+	for(size_t i=0; i<seq.size(); i++)
+		if(seq[i]>='a' and seq[i]<='z') seq[i] -= 32;
 }
 
 SV_item* itemdup(SV_item* item){
@@ -1139,16 +1345,26 @@ int32_t minDistance(const string &seq1, const string &seq2) {
 }
 
 double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
-	string seq1, seq2, aln_seq1, aln_seq2,  AlignSeq,  AlignSeq1;
-	double consistency;
+	string seq1, seq2, aln_seq1, aln_seq2,  AlignSeq,  AlignSeq1, aln_seq3, aln_seq4;
+	double consistency,consistency_tmp1, consistency_tmp2;
 	vector<Minimizer> minimizers, minimizers1;
-	seq1 = seq2 = aln_seq1 = aln_seq2 = "";
+	seq1 = seq2 = aln_seq1 = aln_seq2 = aln_seq3 = aln_seq4 = "";
 
 	if(item1->sv_type == VAR_INS and item2->sv_type == VAR_INS){
 		if(item1->alt_seq.size() < MAX_SEQ_LEN and item2->alt_seq.size() < MAX_SEQ_LEN) {
 			seq1 = item1->alt_seq;	seq2 = item2->alt_seq;
+			upperSeq(seq1);
+			upperSeq(seq2);
+//			cout << "seq1: "<< seq1 << endl;
+//			cout << "seq2: "<< seq2 << endl;
 			needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
-			consistency = calculate_consistency(aln_seq1, aln_seq2);
+			consistency_tmp1 = calculate_consistency(aln_seq1, aln_seq2);
+			extractRefSeq(item1, item2, seq1, seq2, fai);
+			needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq3, aln_seq4);
+			consistency_tmp2 = calculate_consistency(aln_seq3, aln_seq4);
+			consistency = (consistency_tmp1 > consistency_tmp2) ? consistency_tmp1 : consistency_tmp2;
+//			cout << "seq1: "<< seq1 << endl;
+//			cout << "seq2: "<< seq2 << endl;
 			if(consistency >= SEQ_CONSISTENCY)	return consistency;
 			else{
 				int distance = minDistance(seq1, seq2);
@@ -1158,6 +1374,8 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 			}
 		}else{
 			seq1 = item1->alt_seq;	seq2 = item2->alt_seq;
+			upperSeq(seq1);
+			upperSeq(seq2);
 			consistency = MinimizerMethodOp(seq1, seq2, aln_seq1, aln_seq2, AlignSeq, AlignSeq1);
 			if(consistency >= SEQ_CONSISTENCY)	return consistency;
 			else	seq1 = seq2 = aln_seq1 = aln_seq2 = AlignSeq = AlignSeq1 = "";
@@ -1169,6 +1387,8 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 //	cout<<"exactSeq2:"<<seq2<<endl;
 	//Determine which one to execute based on the sequence size
 	if(seq1.size() >= MAX_SEQ_LEN or seq2.size() >= MAX_SEQ_LEN){
+		upperSeq(seq1);
+		upperSeq(seq2);
 		consistency = MinimizerMethodOp(seq1, seq2, aln_seq1, aln_seq2, AlignSeq, AlignSeq1);
 		/*//Find minimizer
 		minimizers = findMinimizers(seq1, WINDOWSIZE, KMERSIZE);
@@ -1189,6 +1409,8 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 			consistency = calculate_consistency(AlignSeq, AlignSeq1);*/
 	}else{
 	// compute the optimal match result by NW alignment
+		upperSeq(seq1);
+		upperSeq(seq2);
 		needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 	// compute the consistency according to alignment result
 		consistency = calculate_consistency(aln_seq1, aln_seq2);

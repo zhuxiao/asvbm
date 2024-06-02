@@ -165,4 +165,5 @@ void InformationStorage(size_t num, vector<float> &Data){
 	else if (num == 4) MeticsValues4_4.push_back(Data);
 	else if (num == 5) MeticsValues4_5.push_back(Data);
 	else if (num == 6) MeticsValues4_6.push_back(Data);
+	else if (num == 7) MeticsValues4_7.push_back(Data);
 }

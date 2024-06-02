@@ -74,6 +74,7 @@ extern vector< vector<float> > MeticsValues4_3;
 extern vector< vector<float> > MeticsValues4_4;
 extern vector< vector<float> > MeticsValues4_5;
 extern vector< vector<float> > MeticsValues4_6;
+extern vector< vector<float> > MeticsValues4_7;
 
 extern vector<vector<int>> SizeRatioV;
 extern vector<vector<double>> SizeRatio_V;

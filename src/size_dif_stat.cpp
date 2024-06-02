@@ -127,7 +127,7 @@ void* computeOverlapSVPairSubset(void *arg){
 	overlapWork_opt *overlap_opt = (overlapWork_opt *)arg;
 	SV_item *item1, *item2;
 	size_t i, j, k;
-	int32_t mid_loc1, mid_loc2, reg_size1, reg_size2;
+	int32_t reg_size1, reg_size2; //mid_loc1, mid_loc2,
 	double dif_size, size_ratio, dif_rmse;
 	vector<size_t> overlap_type_vec;
 	vector<SV_item*> subset1, subset2;
@@ -218,7 +218,7 @@ void* computeOverlapSVPairSubset(void *arg){
 						if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
 							end_idx = j;
 
-							if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
+							if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA and item1->sv_type!=VAR_SNV and item2->sv_type!=VAR_SNV){
 								pair_item = new SV_pair();
 								pair_item->sv_item1 = item1;
 								pair_item->sv_item2 = item2;
@@ -248,7 +248,7 @@ void* computeOverlapSVPairSubset(void *arg){
 								if(item1->sv_type==item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){
 									end_idx = j;
 
-									if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA){
+									if(item1->sv_type!=VAR_TRA and item2->sv_type!=VAR_TRA and item1->sv_type!=VAR_SNV and item2->sv_type!=VAR_SNV){
 										pair_item = new SV_pair();
 										pair_item->sv_item1 = item1;
 										pair_item->sv_item2 = item2;
@@ -302,16 +302,25 @@ void* computeOverlapSVPairSubset(void *arg){
 		pair_item = sv_pair_vec.at(i);
 		item1 = pair_item->sv_item1;
 		item2 = pair_item->sv_item2;
-		mid_loc1 = (double)(item1->startPos + item1->endPos) / 2;
-		mid_loc2 = (double)(item2->startPos + item2->endPos) / 2;
+//		mid_loc1 = (double)(item1->startPos + item1->endPos) / 2;
+//		mid_loc2 = (double)(item2->startPos + item2->endPos) / 2;
+//		if(item1->sv_type == VAR_INS and item2->sv_type == VAR_INS){
+//			reg_size1 = item1->startPos;
+//			reg_size2 = item2->startPos;
+//		}else if(item1->sv_type == VAR_DUP or item2->sv_type == VAR_DUP){
+//			reg_size1 = item1->startPos;
+//			reg_size2 = item2->startPos;
+//		}else{
 		reg_size1 = item1->endPos - item1->startPos + 1;
 		reg_size2 = item2->endPos - item2->startPos + 1;
-
-		dif_size = mid_loc1 - mid_loc2;
+//		}
+//		dif_size = mid_loc1 - mid_loc2;
+		dif_size = item1->startPos - item2->startPos;
 		dif_rmse = reg_size1 - reg_size2;
 		if(dif_rmse<0) dif_rmse = -dif_rmse;
 		if(dif_rmse<MIN_DIF_SIZE) size_ratio = 1;
-		else size_ratio = (double)reg_size1 / reg_size2;
+//		else size_ratio = (double)reg_size1 / reg_size2;
+		else size_ratio = (double)item1->sv_len / item2->sv_len;
 		pair_item->dif_size = dif_size;
 		pair_item->size_ratio = size_ratio;
 		pair_item->dif_rmse = dif_rmse;

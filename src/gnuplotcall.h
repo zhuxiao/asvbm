@@ -15,8 +15,8 @@ using namespace std;
 void replaceUnderscoreWithDot(string& str);
 string getContentAfterSlash(const string& inputString);
 void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vector<string> &tool_names, string &outputBasicMetricschart, vector< vector<float> > MeticsValues, vector< vector<int> > MeticsValues1);
-void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart, string &newInfo);
-void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart, string &newInfo);
+void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart);
+void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart);
 void AddfileInformation(string &FileNamePath, string &Info);
 void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathname, string &outputBasicMetricschart);
 void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathname, string &outputBasicMetricschart);
@@ -31,6 +31,6 @@ void GenerateFileOp(string &DiffRangeStatDirname, vector<string> &tool_names, ve
 void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, string &FileName, vector< vector<float> > meticsvalues, vector<string> &filenames, vector<string> &sv_files1);
 
 
-void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fileNames, string Header_line);
+void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fileNames, vector<string> &tool_names, vector<string> &sv_files1);
 
 void GenerateSVsizeRatioFileGraph(vector<string> svfilesV, vector<string> toolnameV, string &FileSavingPath);

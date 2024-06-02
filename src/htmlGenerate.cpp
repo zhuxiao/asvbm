@@ -185,11 +185,11 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "<h2>2. Statistical results of deviations for overlapping variants</h2>\n";
 		htmlFile <<"</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "For variations that overlap between the user-called set and the benchmark set, the deviations between them are quantified by calculating the center distance and the region size ratio of the overlapping variations.<br>";
-		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(1) Deviation of the center distance</h3>";
-		htmlFile << "As the center distance approaches 0, the deviation decreases, indicating a more precise identification result. Statistics results for eight size regions are presented in Table 2:";
+		htmlFile << "For variations that overlap between the user-called set and the benchmark set, the deviations between them are quantified by calculating the breakpoint distance and the variant size ratio of the overlapping variations.<br>";
+		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(1) Deviation of the breakpoint distance</h3>";
+		htmlFile << "As the breakpoint distance approaches 0, the deviation decreases, indicating a more precise identification result. Statistics results for eight size regions are presented in Table 2:";
 		htmlFile << "</div>\n";
-		htmlFile << "<h3>Table "<< table_num  <<" Statistical results of center distance deviation</h3>\n";
+		htmlFile << "<h3>Table "<< table_num  <<" Statistical results of breakpoint distance deviation</h3>\n";
 		++table_num;
 		// Add second table
 		htmlFile << "<table border=\"1\">\n";
@@ -209,11 +209,11 @@ void Generatehtml(string figuresFilePath){
 		}
 		htmlFile << "</table>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(2) Deviation of the region size ratio</h3>";
-		htmlFile << "Calculating the region size ratio for two overlapping variations based on the length of SVs, the closer the ratio is to 1, the smaller the deviation, indicating a more precise and accurate identification result. Statistics results for nine size regions are presented in Table 3:";
+		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(2) Deviation of the variant size ratio</h3>";
+		htmlFile << "Calculating the variant size ratio for two overlapping variations based on the length of SVs, the closer the ratio is to 1, the smaller the deviation, indicating a more precise and accurate identification result. Statistics results for nine size regions are presented in Table 3:";
 		htmlFile << "</div>\n";
 		// Add h2 style for the third title
-		htmlFile << "<h3>Table "<< table_num  <<" Statistical results of deviation of the region size ratio</h3>\n";
+		htmlFile << "<h3>Table "<< table_num  <<" Statistical results of deviation of the variant region size ratio</h3>\n";
 		++table_num;
 		// Add third table
 		htmlFile << "<table border=\"1\">\n";
@@ -298,7 +298,7 @@ void Generatehtml(string figuresFilePath){
 		if(folderPng5.size()>0){
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 			htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(1) Benchmarking results for metrics of different SV size regions with different methods</h3>";
-			htmlFile <<"Variations are categorized into seven size regions and metrics are computed for comprehensive benchmarking for different detection methods within each region. The benchmarking results are as follows:\n";
+			htmlFile <<"Variations are categorized into eight size regions and metrics are computed for comprehensive benchmarking for different detection methods within each region. The benchmarking results are as follows:\n";
 			htmlFile << "</div>\n";
 			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 				htmlFile << "  <img src=\""<< folderPng5[0] << "\" alt=\"different_range.png\" style=\"width: 50%;\">\n";
@@ -348,7 +348,7 @@ void Generatehtml(string figuresFilePath){
 			htmlFile << "  <img src=\""<< folderPng4[2*tableIndex+1]  << "\" alt=\" quantitative_Statistics.png\" style=\"width: 28%;\">\n";
 			htmlFile << "</div>\n";
 			htmlFile << "<div style=\"text-align: center; margin: 0 auto; width: 50%;\">\n";
-			htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure "<< figure_num  <<" Result statistics of different SV size region</h4>\n";
+			htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure "<< figure_num  <<" Result statistics of different SV size ranges</h4>\n";
 			htmlFile <<"</div>\n";
 			++figure_num;
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
@@ -357,7 +357,7 @@ void Generatehtml(string figuresFilePath){
 		}
 
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h2>4. Quantitative statistics</h2>\n";
+		htmlFile << "<h2>4. SV size distribution statistics</h2>\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		//htmlFile << "The benchmark set：<br>";
