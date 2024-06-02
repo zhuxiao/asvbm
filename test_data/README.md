@@ -459,15 +459,26 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.9988</th>
     </tr>
     <tr>
-    	  <th>1001-5000bp</th>
-      <th>41</th>
-      <th>43</th>
+    	  <th>1001-2500bp</th>
+      <th>28</th>
+      <th>33</th>
+      <th>15</th>
+      <th>33</th>
+      <th>0.4590</th>
+      <th>0.6875</th>
+      <th>0.5505</th>
+      <th>0.9969</th>
+    </tr>
+        <tr>
+    	  <th>2501-5000bp</th>
+      <th>14</th>
       <th>22</th>
-      <th>51</th>
-      <th>0.4457</th>
-      <th>0.6615</th>
-      <th>0.5326</th>
-      <th>0.9997</th>
+      <th>3</th>
+      <th>17</th>
+      <th>0.4516</th>
+      <th>0.8800</th>
+      <th>0.5969</th>
+      <th>0.9999</th>
     </tr>
     <tr>
     	  <th>5001-1000bp</th>
