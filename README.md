@@ -7,7 +7,7 @@ SV_STAT is a tool for Structural Variants (SV) Statistics Benchmarking. SV_STAT 
 For more detailed experiment information, please refer to [sv_stat-experiments](https://github.com/zhuxiao/sv_stat-experiments).
 
 ## Introduction
-SV_STAT is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, SV_STAT utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, mutual overlap, size similarity, and sequence identity to provide an improved approach to structural variant matching. SV_STAT supports multi-sample benchmarking and generates detailed graphical information. The workflow of SV_STAT is briefly explained in the following diagram:
+SV_STAT is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, SV_STAT utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, reciprocal overlap, size similarity, and sequence identity to provide an improved approach to structural variant matching. SV_STAT supports multiple user callsets benchmarking and generates detailed graphical information. The workflow of SV_STAT is briefly explained in the following diagram:
 
 <div align="center">
 <img src="img/SV_STAT_workflow.png" alt= "SV_STAT workflow"> 
@@ -288,7 +288,7 @@ Multisample benchmarking statistical results. The benchmarking of recognition re
       <th>0.655735</th>
       <th>0.860146k</th>
       <th>0.658096</th>
-       <th>0.923024</th>
+       <th>0.975151</th>
     </tr>
   </tbody>
 </table>
@@ -315,18 +315,18 @@ Moreover, for regions with overlapping variations, the quantities of variant siz
   <tbody>
     <tr>
     <th>variant size ratio (count)</th>
-      <th>140</th>
-      <th>181</th>
-      <th>203</th>
-      <th>345</th>
-      <th>696</th>
-      <th>5255</th>
-      <th>25892</th>
-      <th>3471</th>
-      <th>1689</th>
-      <th>1178</th>
-      <th>934</th>
-      <th>878</th>
+      <th>151</th>
+      <th>172</th>
+      <th>182</th>
+      <th>276</th>
+      <th>604</th>
+      <th>4750</th>
+      <th>27134</th>
+      <th>3410</th>
+      <th>1541</th>
+      <th>1107</th>
+      <th>825</th>
+      <th>795</th>
     </tr>
   </tbody>
   <thead>
@@ -370,10 +370,8 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>FP</th>
       <th>FN</th>
       <th>Recall</th>
-      <th>precision_user</th>
-      <th>F1 score_user</th>
-      <th>precision_benchmark</th>
-      <th>F1 score_benchmark</th>
+      <th>precision</th>
+      <th>F1 score</th>
       <th>Identity</th>
     </tr>
   </thead>
@@ -387,8 +385,6 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.527719</th>
       <th>0.85802</th>
       <th>0.653505</th>
-      <th>0.865773</th>
-      <th>0.655741</th>
       <th>0.912349</th>
     </tr>
     <tr>
@@ -400,8 +396,6 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.47145</th>
       <th>0.755376</th>
       <th>0.580559</th>
-      <th>0.773632</th>
-      <th>0.585871</th>
       <th>1.000000</th>
     </tr>
     <tr>
@@ -413,8 +407,6 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.544415</th>
       <th>0.638979</th>
       <th>0.587918</th>
-      <th>0.644878</th>
-      <th>0.590403</th>
       <th>1.000000</th>
     </tr>
     <tr>
@@ -426,21 +418,28 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.313849</th>
       <th>0.419434</th>
       <th>0.35904</th>
-      <th>0.425091</th>
-      <th>0.361097</th>
       <th>1.000000</th>
     </tr>
     <tr>
-    	  <th>1001-5000bp</th>
-      <th>522</th>
-      <th>512</th>
-      <th>166</th>
-      <th>716</th>
-      <th>0.421648</th>
-      <th>0.755162</th>
-      <th>0.541145</th>
-      <th>0.758721</th>
-      <th>0.542056</th>
+    	  <th>1001-2500bp</th>
+      <th>349</th>
+      <th>342</th>
+      <th>129</th>
+      <th>486</th>
+      <th>0.417964</th>
+      <th>0.726115</th>
+      <th>0.530540</th>
+      <th>1.000000</th> 
+    </tr>
+      <tr>
+    	  <th>2501-5000bp</th>
+      <th>169</th>
+      <th>169</th>
+      <th>38</th>
+      <th>234</th>
+      <th>0.419355</th>
+      <th>0.816425</th>
+      <th>0.554098</th>
       <th>1.000000</th> 
     </tr>
     <tr>
@@ -450,8 +449,6 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>18</th>
       <th>223</th>
       <th>0.33631</th>
-      <th>0.862595</th>
-      <th>0.48394</th>
       <th>0.862595</th>
       <th>0.48394</th>
       <th>1.000000</th>
@@ -465,8 +462,6 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>0.154762</th>
       <th>0.481928</th>
       <th>0.234287</th>
-      <th>0.47561</th>
-      <th>0.233533</th>
       <th>1.000000</th>
     </tr>
   </tbody>
