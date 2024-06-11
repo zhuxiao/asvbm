@@ -191,7 +191,7 @@ Options:
    -s INT    overlap extend size: [200]
    -t INT    number of threads [0]. 0 for the maximal number of threads
              in machine
-   -T STR    Tool names [null]. 0 indicates that the tool name is not entered.
+   -T STR    Tool names [null].
              This parameter is used for comparing multiple datasets. The number
              of inputs should be consistent with the data set. Tool names are 
              separated by ';'. Example: -T "tool1;tool2;tool3" 
