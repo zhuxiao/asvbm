@@ -526,7 +526,7 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > MeticsValues_4){
 	string filename, filenamePath, outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 	// Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
-	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500", "2501-5000bp", "5001-10000bp",">10000bp"};
+	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500bp", "2501-5000bp", "5001-10000bp",">10000bp"};
 
 	// Create a data file to hold the data
 	filename = "calculation_result";
@@ -588,7 +588,7 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > MeticsValues1_4){
 	string filename, filenamePath, outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 // Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
-	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500", "2501-5000bp", "5001-10000bp",">10000bp"};
+	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500bp", "2501-5000bp", "5001-10000bp",">10000bp"};
 
 	// Create a data file to hold the data
 	filename = "quantitative_statistics";
