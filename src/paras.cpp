@@ -91,7 +91,7 @@ void showUsageStat(){
 	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
 	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "             in machine" << endl;
-	cout << "   -T STR    Tool names [null]. 0 indicates that the tool name is not entered." << endl;
+	cout << "   -T STR    Tool names [null]." << endl;
 	cout << "             This parameter is used for comparing multiple datasets. The number" << endl;
 	cout << "             of inputs should be consistent with the data set. Tool names are " <<endl;
 	cout << "             separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
