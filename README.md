@@ -2,7 +2,7 @@
 A tool for Structural Variant Statistics Benchmarking
 
 -------------------
-SV_STAT is a tool for Structural Variants (SV) Statistics Benchmarking. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the traditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), sequence identity, recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also computes the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of SV_STAT is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, SV_STAT supports multi-sample benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples.
+SV_STAT is a tool for Structural Variants (SV) Statistics Benchmarking. SV_STAT uses a user-called SV set and a benchmark data set as input. It first computes the traditional metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), sequence identity, recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of SV_STAT is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, SV_STAT supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples.
 
 For more detailed experiment information, please refer to [sv_stat-experiments](https://github.com/zhuxiao/sv_stat-experiments).
 
@@ -130,7 +130,7 @@ docker run -it --name xxx -v `pwd`:/data_test sv_stat_test ./sv_stat -m 50000 -T
 ```
 The -v argument mounts the current directory as /data_test in the Docker image. The output should also appear in the current directory.
 
-The complete list of dependencies / packages to install beforehand can be found in the Dockerfile(xxx).
+The complete list of dependencies/packages to install beforehand can be found in the Dockerfile(xxx).
 
 ## File format description
 
@@ -156,11 +156,11 @@ chr1	841980	843383	INV	1404	A	ACGT...
 chr1	3327738	3329244	DUP	3013	C	CATG...	
 chr1	1	481701	chr2	4273477	4539804	TRA	0	-	-
 ```		
-For the second item, there is a insertion of size 87 base pairs at the 1142381 location of chr1, and for the fifth item, it is a translocation between chr1:1-481701 and chr2:4273477-4539804, and the 0 in the last second column means the SV_len which will be 0 for translocations or translocation breakpoints.
+For the second item, there is an insertion of size 87 base pairs at the 1142381 location of chr1, and for the fifth item, it is a translocation between chr1:1-481701 and chr2:4273477-4539804, and the 0 in the last second column means the SV_len which will be 0 for translocations or translocation breakpoints.
 
 
 ## General usage
-The help information are below:
+The help information is below:
 ```sh
 $ sv_stat
 Program: SV_STAT (A tool for Structural Variants Statistics Benchmarking)
@@ -215,7 +215,7 @@ Example:
 
 
 ### Use cases
-Invalid long user-called regions can be removed by using `-m` option as they are too long to be valid variant regions. The command could be:
+Invalid long user-called regions can be removed by using the `-m` option as they are too long to be valid variant regions. The command could be:
 ```sh
 $ sv_stat -m 10000 -T method user_sv.vcf benchmark_sv.vcf reference.fa
 ```
@@ -225,7 +225,7 @@ $ sv_stat -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf
 ```
 
 ## Draw statistical figures
-There are 4 statistical categories for `stat` command results, figures can be drawn for more intuitive and detailed illustration for the four statistical categories:
+There are 4 statistical categories for `stat` command results, figures can be drawn for a more intuitive and detailed illustration of the four statistical categories:
 * __`1_ref_reg_size_stat`__: record the statistical graph of SV sizes in the user-called data set and the benchmark data set.
 * __`2_num_stat`__: generate the bar chart for the classification benchmarking metrics.
 * __`3_size_dif_stat`__: record statistical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
@@ -237,7 +237,7 @@ The detailed benchmarking information for the 4 statistical categories for `stat
 * __`1_ref_reg_size_stat`__: variant region size statistics (and the statistical figures) in reference.
 * __`2_num_stat`__: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
 * __`3_size_dif_stat`__: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
-* __`4_size_num_stat`__: the classical number statistics (and the statistical figures) for variants with vary region lengths.
+* __`4_size_num_stat`__: the classical number statistics (and the statistical figures) for variants with various region lengths.
 Moreover, the overall simplified statistics will be output to the terminal screen, and these screen results will be saved to the file `stat_screen` in the output directory.
 
 
@@ -249,7 +249,7 @@ $ sv_stat -m 50000 -T cuteSV cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 To benchmark the results of multiple identification outcomes, please use the following command:
 ```sh
-$ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles" cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
+$ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles2" cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 
 Multisample benchmarking statistical results. The benchmarking of recognition results will primarily generate the following information. This example compares a run result of cuteSV 2.0.3 on NA24385, with the benchmark dataset being the high-confidence HG002 dataset created by the Genome in a Bottle Consortium (GIAB). More specific information can be found in the respective file:
