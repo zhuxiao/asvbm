@@ -1,16 +1,16 @@
-# SV_STAT
-A tool for Structural Variant Statistics Benchmarking
+# ASVBM
+A tool for Allele-aware Structural Variant statistics Benchmarking for Multiple callsets
 
 -------------------
-SV_STAT is a tool for Structural Variants (SV) Statistics Benchmarking. SV_STAT uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), sequence identity, recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of SV_STAT is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, SV_STAT supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples.
+ASVBM is a tool for Structural Variants (SV) Statistics Benchmarking. ASVBM uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), sequence identity, recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of ASVBM is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, ASVBM supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples.
 
-For more detailed experiment information, please refer to [sv_stat-experiments](https://github.com/zhuxiao/sv_stat-experiments).
+For more detailed experiment information, please refer to [asvbm-experiments](https://github.com/zhuxiao/asvbm-experiments).
 
 ## Introduction
-SV_STAT is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, SV_STAT utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, reciprocal overlap, size similarity, and sequence identity to provide an improved approach to structural variant matching. SV_STAT supports multiple user callsets benchmarking and generates detailed graphical information. The workflow of SV_STAT is briefly explained in the following diagram:
+ASVBM is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, ASVBM utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, reciprocal overlap, size similarity, and sequence identity to provide an improved approach to structural variant matching. ASVBM supports multiple user callsets benchmarking and generates detailed graphical information. The workflow of ASVBM is briefly explained in the following diagram:
 
 <div align="center">
-<img src="img/SV_STAT_workflow.png" alt= "SV_STAT workflow"> 
+<img src="img/ASVBM_workflow.png" alt= "ASVBM workflow"> 
 </div>
 When benchmarking the performance of a tool, we rely on a set of quantitative metrics to measure its accuracy and practicality. Here are some commonly used benchmarking metrics  that can help us understand the different aspects of tool performance:
 <table>
@@ -74,23 +74,27 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
 
 Additionally, SVs within seven sub-intervals are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence identity are calculated.
 ## Prerequisites
-SV_STAT depends on the following libraries and tools:
+ASVBM depends on the following libraries and tools:
 * HTSlib (http://www.htslib.org/download/)
 * g++ (v4.7 or higher which supports c++11)
 * gnuplot (v5.4 http://gnuplot.info/download.html)
 
-The above library and tools should be installed before compiling SV_STAT.
+The above library and tools should be installed before compiling ASVBM.
 
 ## Download and install ##
 
-You can "install" SV_STAT in two different ways:
+You can "install" ASVBM in two different ways:
 ### Compilation from Source
 
-#### Dependencies for SV_STAT
+#### Dependencies for ASVBM
 * Debian / Ubuntu 
 ```
 $ sudo apt update  # Ensure the package list is up to date
 $ sudo apt install g++ gnuplot
+$ sudo apt install -y r-base r-base-dev
+# Install the UpSetR package
+$ R
+$ install.packages("UpSetR")
 ```
 HTSlib needs to be installed from source files.
 
@@ -98,18 +102,22 @@ HTSlib needs to be installed from source files.
 ```
 $ sudo yum check-update # Ensure the package list is up to date
 $ sudo yum install gcc-c++ gnuplot
+$ sudo yum install R
+# Install the UpSetR package
+$ R
+$ install.packages("UpSetR")
 ```
 HTSlib needs to be installed from source files.
 
-#### Compiling SV_STAT
+#### Compiling ASVBM
 
 The binary file can be generated by typing:
 ```sh
-$ git clone https://github.com/zhuxiao/sv_stat
-$ cd sv_stat/
+$ git clone https://github.com/zhuxiao/ASVBM
+$ cd ASVBM/
 $ ./autogen.sh
 ```
-And the binary file `sv_stat` will be output into the folder `bin` in this package directory.
+And the binary file `ASVBM` will be output into the folder `bin` in this package directory.
 
 ### Install from Docker
 Clone this repository and build a Docker image as follows. A pre-built docker image can be found here: https://hub.docker.com/xxx.  It can be obtained by running:
@@ -122,11 +130,11 @@ If the current directory contains a clone of the hap.py repository, hap.py can b
 
 
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test sv_stat_test ./sv_stat -m 50000 /data_test/reference.fa /data_test/user_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./ASVBM -m 50000 /data_test/reference.fa /data_test/user_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
 ```
 or
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test sv_stat_test ./sv_stat -m 50000 -T "tool1;tool2;tool3" /data_test/reference.fa /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./ASVBM -m 50000 -T "tool1;tool2;tool3" /data_test/reference.fa /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
 ```
 The -v argument mounts the current directory as /data_test in the Docker image. The output should also appear in the current directory.
 
@@ -134,7 +142,7 @@ The complete list of dependencies/packages to install beforehand can be found in
 
 ## File format description
 
-Before using SV_STAT, both the user-called SV set and the benchmark data set are in the extended bed file format with the first 7 columns are below:
+Before using ASVBM, both the user-called SV set and the benchmark data set are in the extended bed file format with the first 7 columns are below:
 ```sh
 chromosome	start_ref_pos	end_ref_pos	SV_type	SV_len	Ref	Alt
 ```
@@ -142,13 +150,13 @@ Ensure that the first five columns of the CSV file meet the following format whe
 ```sh
 chromosome,start_ref_pos,end_ref_pos,SV_type,SV_len,Ref,Alt
 ```
-For translocations, the file format should be bedpe before using SV_STAT, and the first 10 columns are listed as below:
+For translocations, the file format should be bedpe before using ASVBM, and the first 10 columns are listed as below:
 ```sh
 chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	SV_type	SV_len	Ref	Alt
 ```
 The SV_type can be TRA or BND, and the SV_len will be 0.
 
-Note that: In SV_STAT, all variant types, including translocations, can be stored together in the same file as the input, for example:
+Note that: In ASVBM, all variant types, including translocations, can be stored together in the same file as the input, for example:
 ```sh
 chr1	1167806	1168012	DEL	-206	ATCG...	A
 chr1	1142384	1142384	INS	87	T	TCGA...	
@@ -162,11 +170,11 @@ For the second item, there is an insertion of size 87 base pairs at the 1142381 
 ## General usage
 The help information is below:
 ```sh
-$ sv_stat
-Program: SV_STAT (A tool for Structural Variants Statistics Benchmarking)
+$ ASVBM
+Program: ASVBM (A tool for Structural Variants Statistics Benchmarking)
 Version: 1.0.1
 
-Usage:  sv_stat [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
+Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
 Description:
    USER_FILE   User called SV result file.
@@ -197,35 +205,35 @@ Options:
              separated by ';'. Example: -T "tool1;tool2;tool3" 
    -o FILE   output directory: [output]
    -l FILE   file name of long SV regions: [long_sv_reg.bed]
-   -r FILE   file name of benchmarking results to report: [sv_stat_reports.html]
+   -r FILE   file name of benchmarking results to report: [ASVBM_reports.html]
              Ensure that the filename extension is '.html'.
    -v        show version information
    -h        show this help message and exit
 
 Example:
    # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs
-   $ sv_stat -T method user_sv.vcf benchmark_sv.vcf ref.fa
+   $ asvbm -T method user_sv.vcf benchmark_sv.vcf ref.fa
 
    # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option
-   $ sv_stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa
+   $ asvbm -T method -S user_sv.vcf benchmark_sv.vcf ref.fa
 
    # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets
-   $ sv_stat -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
+   $ asvbm -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 ```
 
 
 ### Use cases
 Invalid long user-called regions can be removed by using the `-m` option as they are too long to be valid variant regions. The command could be:
 ```sh
-$ sv_stat -m 10000 -T method user_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm -m 10000 -T method user_sv.vcf benchmark_sv.vcf reference.fa
 ```
 Benchmarking multiple identification result datasets can be achieved by using the '-T' option. Please use the following command:
 ```sh
-$ sv_stat -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
 ## Draw statistical figures
-There are 4 statistical categories for `stat` command results, figures can be drawn for a more intuitive and detailed illustration of the four statistical categories:
+There are 4 statistical categories for `asvbm` command results, figures can be drawn for a more intuitive and detailed illustration of the four statistical categories:
 * __`1_ref_reg_size_stat`__: record the statistical graph of SV sizes in the user-called data set and the benchmark data set.
 * __`2_num_stat`__: generate the bar chart for the classification benchmarking metrics.
 * __`3_size_dif_stat`__: record statistical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
@@ -245,11 +253,11 @@ Moreover, the overall simplified statistics will be output to the terminal scree
 Here, practical examples for the benchmarking of single-sample and multiple samples are provided. For multi-sample benchmarking, it is strongly recommended to use the "-T" parameter for better differentiation of different identification results. Benchmark the identification results of chr1 of the HG002 CCS data separately using cuteSV (v2.0.3), pbsv (v2.9.0), and Sniffles (v2.0.2).
 To benchmark the identification results for a single sample, please use the following command:
 ```sh
-$ sv_stat -m 50000 -T cuteSV cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm -m 50000 -T cuteSV cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 To benchmark the results of multiple identification outcomes, please use the following command:
 ```sh
-$ sv_stat -m 50000 -T "cuteSV;pbsv;Sniffles2" cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm -m 50000 -T "cuteSV;pbsv;Sniffles2" cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 
 Multisample benchmarking statistical results. The benchmarking of recognition results will primarily generate the following information. This example compares a run result of cuteSV 2.0.3 on NA24385, with the benchmark dataset being the high-confidence HG002 dataset created by the Genome in a Bottle Consortium (GIAB). More specific information can be found in the respective file:
