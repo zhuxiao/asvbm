@@ -287,16 +287,16 @@ Multisample benchmarking statistical results. The benchmarking of recognition re
     <th>74012</th>
       <th>44937</th>
       <th>44928</th>
-      <th>39442</th>
-      <th>36955</th>
-      <th>6413</th>
-      <th>34570</th>
-      <th>0.532914</th>
-      <th>0.852126</th>
-      <th>0.655735</th>
+      <th>39438</th>
+      <th>36953</th>
+      <th>6416</th>
+      <th>34574</th>
+      <th>0.532860</th>
+      <th>0.852057</th>
+      <th>0.655674</th>
       <th>0.860146k</th>
       <th>0.658096</th>
-       <th>0.975151</th>
+       <th>0.975146</th>
     </tr>
   </tbody>
 </table>
