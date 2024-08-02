@@ -171,8 +171,8 @@ For the second item, there is an insertion of size 87 base pairs at the 1142381 
 The help information is below:
 ```sh
 $ ASVBM
-Program: ASVBM (A tool for Structural Variants Statistics Benchmarking)
-Version: 1.0.1
+Program: ASVBM (A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
+Version: 1.1.0
 
 Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
@@ -205,7 +205,7 @@ Options:
              separated by ';'. Example: -T "tool1;tool2;tool3" 
    -o FILE   output directory: [output]
    -l FILE   file name of long SV regions: [long_sv_reg.bed]
-   -r FILE   file name of benchmarking results to report: [ASVBM_reports.html]
+   -r FILE   file name of benchmarking results to report: [asvbm_reports.html]
              Ensure that the filename extension is '.html'.
    -v        show version information
    -h        show this help message and exit
