@@ -1,11 +1,11 @@
 CXXFLAGS = -O0 -g -Wall -fmessage-length=0 -std=c++11
 
-OBJS = sv_stat_main.o paras.o dataLoader.o convert.o ref_reg_size_stat.o \
+OBJS = asvbm_main.o paras.o dataLoader.o convert.o ref_reg_size_stat.o \
 	   num_stat.o size_dif_stat.o size_num_stat.o util.o meminfo.o gnuplotcall.o htmlGenerate.o
 
 LIBS += -lhts -lpthread
 
-TARGET = sv_stat
+TARGET = asvbm
 
 all: $(TARGET) clean
 

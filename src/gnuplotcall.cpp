@@ -42,6 +42,20 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		SVsizeratiofile = outputBasicMetricschartPath + '/' + SVsizeratiofile;
 		mkdir(SVsizeratiofile.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		GenerateSVsizeRatioFileGraph(sv_files1, tool_names, SVsizeratiofile);
+		//Rscript.R
+		//outputBasicMetricschartPath (figures 路径)
+		RscriptGeneration(outputBasicMetricschartPath);
+		//UpSetR
+		outputUpSetRchart = outputBasicMetricschartPath + '/' + outputUpSetRchart;
+		mkdir(outputUpSetRchart.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		TPfilemanipulation(outputUpSetRchart);
+		//run Rscript.R
+		RunRscriptoperation(outputBasicMetricschartPath, outputUpSetRchart);
+
+		//Common FN
+		outputCommonFN = outputPathname + outputCommonFN;
+		mkdir(outputCommonFN.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		findCommonFN(outputCommonFN, FNfilesPath);
 		//html
 		Generatehtml(outputBasicMetricschart);
 	}else{
@@ -51,7 +65,7 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		Histogram_drawing(MeticsValues1,  outputPathname, outputBasicMetricschartPath);
 		Generatehtml(outputBasicMetricschart);
 	}
-	cout << endl << "Details of the benchmarking results are saved in:" << outputPathname + htmlFilename << endl;
+	cout << endl << "Details of the benchmarking results are saved in: " << outputPathname + htmlFilename << endl;
 
 	cout << endl << "## More information ## " << endl;
 	cout << "For more detailed benchmarking results, please refer to the generated result information in the respective folders." << endl;
@@ -158,7 +172,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
     pclose(gnuplotPipe);
 
     AddfileInformation(filenamePath, Info);
-    cout << "Performance metrics results between different data sets are saved in: " << outputFileNamePath << endl;
+    cout << "The performance metrics result between the user callsets is saved in: " << outputFileNamePath << endl;
 
 }
 
@@ -246,7 +260,7 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
     // Close the GNUplot pipeline
     pclose(gnuplotPipe);
     AddfileInformation(filenamePath, Info);
-    cout << endl << "The classification of results between different data sets is saved in: " << outputFileNamePath << endl;
+    cout << endl << "The classification of result between different data sets is saved in: " << outputFileNamePath << endl;
 }
 
 //Modifying File Information
@@ -1073,31 +1087,31 @@ void GenerateSVsizeRatioFileGraph(vector<string> svfilesV, vector<string> toolna
 //	   fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title '%s', '' using 3 lc rgb 'red' title '%s' \n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str());
 	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str());
 	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 \n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str());
-	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+	   cout << endl << "The identification results of the SVs region size ratio of different tools is saved to: " << outputFileNamePath << endl;
    }else if(svfilesV.size()==3){
 	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str());
 	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str());
-	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+	   cout << endl << "The identification results of the SVs region size ratio of different tools is saved to: " << outputFileNamePath << endl;
    }else if(svfilesV.size()==4){
 	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str());
 	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str());
-	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+	   cout << endl << "The identification results of the SVs region size ratio of different tools is saved to: " << outputFileNamePath << endl;
    }else if(svfilesV.size()==5){
 	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram, '' using ($6+0.2) lc rgb '#FAB833' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str());
 	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb '#FAB833' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str());
-	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+	   cout << endl << "The identification results of the SVs region size ratio of different tools is saved to: " << outputFileNamePath << endl;
    }else if(svfilesV.size()==6){
 	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram, '' using ($6+0.2) lc rgb '#FAB833' title '%s' with histogram, '' using ($7+0.2) lc rgb '#227CDE' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str());
 	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb '#FAB833' lw 2 title '%s' with linespoints axes x1y2, '' using 7 lc rgb '#227CDE' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str());
-	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+	   cout << endl << "The identification results of the SVs region size ratio of different tools is saved to: " << outputFileNamePath << endl;
    }else if(svfilesV.size()==7){
 	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram, '' using ($6+0.2) lc rgb '#FAB833' title '%s' with histogram, '' using ($7+0.2) lc rgb '#227CDE' title '%s' with histogram, '' using ($8+0.2) lc rgb '#55436E' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str(), annotations[6].c_str());
 	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb '#FAB833' lw 2 title '%s' with linespoints axes x1y2, '' using 7 lc rgb '#227CDE' lw 2 title '%s' with linespoints axes x1y2, '' using 8 lc rgb '#55436E' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str(), annotations[6].c_str());
-	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+	   cout << endl << "The identification results of the SVs region size ratio of different tools is saved to: " << outputFileNamePath << endl;
    }else if(svfilesV.size()==8){
 	   fprintf(gnuplotPipe, "plot '%s' using ($2-0.2):xtic(1) lc rgb '#E31919' title '%s' with histogram, '' using ($3+0.2):xtic(1) lc rgb '#9BC21B' title '%s' with histogram, '' using ($4+0.2) lc rgb '#B93DB9' title '%s' with histogram, '' using ($5+0.2) lc rgb '#D18D0F' title '%s' with histogram, '' using ($6+0.2) lc rgb '#FAB833' title '%s' with histogram, '' using ($7+0.2) lc rgb '#227CDE' title '%s' with histogram, '' using ($8+0.2) lc rgb '#55436E' title '%s' with histogram, '' using ($9+0.2) lc rgb '#A7C4E1' title '%s' with histogram,\\\n", filenamePath.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str(), annotations[6].c_str(), annotations[7].c_str());
 	   fprintf(gnuplotPipe, "     '%s' using 2:xtic(1) lc rgb '#E31919' lw 2 title '%s' with linespoints axes x1y2, '' using 3 lc rgb '#9BC21B' lw 2 title '%s' with linespoints axes x1y2 , '' using 4 lc rgb '#B93DB9' lw 2 title '%s' with linespoints axes x1y2, '' using 5 lc rgb '#D18D0F' lw 2 title '%s' with linespoints axes x1y2, '' using 6 lc rgb '#FAB833' lw 2 title '%s' with linespoints axes x1y2, '' using 7 lc rgb '#227CDE' lw 2 title '%s' with linespoints axes x1y2, '' using 8 lc rgb '#55436E' lw 2 title '%s' with linespoints axes x1y2, '' using 9 lc rgb '#A7C4E1' lw 2 title '%s' with linespoints axes x1y2\n", filename1Path.c_str(), annotations[0].c_str(), annotations[1].c_str(), annotations[2].c_str(), annotations[3].c_str(), annotations[4].c_str(), annotations[5].c_str(), annotations[6].c_str(), annotations[7].c_str());
-	   cout << endl << "The identification results of the SVs region size ratio of different tools are saved in" << outputFileNamePath << endl;
+	   cout << endl << "The identification results of the SVs region size ratio of different tools is saved to: " << outputFileNamePath << endl;
    }else
 	   cout << endl << "Up to eight evaluation tools for region size ratio images, exceeding six won't create images." << endl;
 
@@ -1107,5 +1121,207 @@ void GenerateSVsizeRatioFileGraph(vector<string> svfilesV, vector<string> toolna
    }
    AddfileInformation(filenamePath, Add_Info);
    AddfileInformation(filename1Path, Add_Info);
+}
+
+void RscriptGeneration(string &filePath){
+	string RscriptfilePath, Rscriptcode;
+//	string filename = "UpSetR.R";
+	RscriptfilePath = filePath + "/" + Rscriptfilename;
+	Rscriptcode = "library(UpSetR)\n"
+				"\n"
+				"args <- commandArgs(trailingOnly = TRUE)\n"
+				"\n"
+				"show_help <- function() {\n"
+				"  cat(\"Usage: RScript NewInput.R -i <input_folder> [-n <names>] [-o <output_file>]\\n\")\n"
+				"  cat(\"Arguments:\\n\")\n"
+				"  cat(\"  -i <input_folder>  : Path to the input folder containing the data files.\\n\")\n"
+				"  cat(\"  -n <names>         : Semi-colon separated list of names for the sets.\\n\")\n"
+				"  cat(\"  -o <output_file>   : Path to the output PNG file. If not specified, default is 'upset_plot.png' in the input folder.\\n\")\n"
+				"  cat(\"  -h                 : Show this help message and exit.\\n\")\n"
+				"}\n"
+				"if (\"-h\" %in% args) {\n"
+				"  show_help()\n"
+				"  quit(save = \"no\", status = 0)\n"
+				"}\n"
+				"\n"
+				"if (length(args) == 0 || !(\"-i\" %in% args)) {\n"
+				"  stop(\"Use the -i parameter to specify the folder path. Use -h to get help information.\")\n"
+				"}\n"
+				"\n"
+				"input_folder <- args[which(args == \"-i\") + 1]\n"
+				"\n"
+				"if (!dir.exists(input_folder)) {\n"
+				"  stop(\"The specified folder does not exist.\")\n"
+				"}\n"
+				"\n"
+				"file_paths <- list.files(path = input_folder, full.names = TRUE)\n"
+				"\n"
+				"file_paths <- file_paths[!grepl(\"\\\\.png$\", file_paths)]\n"
+				"\n"
+				"set_list <- list()\n"
+				"\n"
+				"for (i in 1:length(file_paths)) {\n"
+				"  data <- tryCatch({\n"
+				"    read.table(file_paths[i], header = FALSE, comment.char = \"#\")\n"
+				"  }, error = function(e) {\n"
+				"    stop(paste(\"Error reading file:\", file_paths[i], \"\\nError message:\", e))\n"
+				"  })\n"
+				"  \n"
+				"  if (ncol(data) < 2) {\n"
+				"    stop(paste(\"The file does not have at least two columns of data:\", file_paths[i]))\n"
+				"  }\n"
+				"  \n"
+				"  data <- data[, 2]\n"
+				"  \n"
+				"  set_list[[i]] <- data\n"
+				"}\n"
+				"\n"
+				"if (\"-n\" %in% args) {\n"
+				"  names_arg <- args[which(args == \"-n\") + 1]\n"
+				"  set_names <- unlist(strsplit(names_arg, \";\"))\n"
+				"  \n"
+				"  if (length(file_paths) != length(set_names)) {\n"
+				"    stop(\"The number of files does not match the number of collection names\")\n"
+				"  }\n"
+				"  \n"
+				"  names(set_list) <- set_names\n"
+				"} else {\n"
+				"  file_names <- basename(file_paths)\n"
+				"  names(set_list) <- file_names\n"
+				"}\n"
+				"\n"
+				"if (\"-o\" %in% args) {\n"
+				"  \n"
+				"  output_file <- args[which(args == \"-o\") + 1]\n"
+				"  \n"
+				"  if (dir.exists(output_file)) {\n"
+				"    stop(\"The output path should be a file path, not a folder path.\")\n"
+				"  }\n"
+				"} else {\n"
+				"  output_file <- file.path(input_folder, \"upset_plot.png\")\n"
+				"}\n"
+				"\n"
+				"graphics.off()\n"
+				"dpi <- 300\n"
+				"png(output_file, width = 3200, height = 2000, res = dpi)\n"
+				"if(length(set_list)>=6){\n"
+				"  size= 2-length(set_list)*(1/5.8)\n"
+				"  pointsize=2\n"
+				"} else{\n"
+				"  size=1.8-(length(set_list)-2)*0.2\n"
+				"  \n"
+				"  pointsize= 8-length(set_list)*0.5\n"
+				"}\n"
+				"s=upset(fromList(set_list),\n"
+				"      nsets = length(set_list),\n"
+				"      order.by = \"freq\",\n"
+				"      main.bar.color = \"black\",\n"
+				"      sets.bar.color = \"black\",\n"
+				"      matrix.color = \"black\",\n"
+				"      keep.order = TRUE,\n"
+				"      mb.ratio = c(0.7, 0.3), \n"
+				"      text.scale = c(size+0.2, 1.5, size+0.1, size, size+0.2, size),\n"
+				"      point.size = pointsize\n"
+				")\n"
+				"s\n";
+	ofstream outfile(RscriptfilePath);
+	if(outfile.is_open()){
+		outfile << Rscriptcode;
+		outfile.close();
+	}else{
+		cerr << "Failed to open the Rscriptfile file, RscriptfilePath: "<< RscriptfilePath << " ." << endl;
+	}
+}
+
+void TPfilemanipulation(string &filePath){
+	int cmdretuern;
+	string path, path_tmp, path1, path1_tmp, RscriptCmd;
+	string command = "ln -s ";
+	for(size_t i=0; i<TPfilesPath.size(); i++){
+		path = TPfilesPath[i];
+		size_t pos = path.find('/');
+		if (pos != std::string::npos && pos + 1 < path.length()) {
+			path_tmp = path.substr(pos + 1);
+			path_tmp = "../../" + path_tmp;
+		}
+		command = command + path_tmp + " " + filePath + "/" + SVcallernames[i];
+		cmdretuern = system(command.c_str());
+		if(cmdretuern!=0){
+			cout << "Failed to create symbolic link!" << endl;
+		}else{
+			command= "ln -s ";
+		}
+	}
+	path1 = filePath;
+	size_t pos1 = path1.find('/');
+	if (pos1 != std::string::npos && pos1 + 1 < path1.length()) {
+		path1_tmp = path1.substr(pos1 + 1);
+	}
+	RscriptfilenamePath = path1_tmp + "/" + RscriptfilePNGname;
+}
+
+void RunRscriptoperation(string &RscriptPath, string &TPfilesPath){
+	int runcmdreturn;
+	string runcommand, Rscriptpath, TPfilespath, Rscriptpath_tmp;
+	Rscriptpath = RscriptPath, TPfilespath = TPfilesPath;
+	RscriptfilePNGnamePath = TPfilesPath + "/" + RscriptfilePNGname;
+	/*size_t pos = Rscriptpath.find('/');
+	if (pos != std::string::npos && pos + 1 < Rscriptpath.length()) {
+		Rscriptpath_tmp = Rscriptpath.substr(pos + 1);
+	}*/
+	Rscriptpath_tmp = Rscriptpath + "/" + Rscriptfilename;
+	/*size_t pos1 = TPfilespath.find('/');
+	if (pos1 != std::string::npos && pos1 + 1 < TPfilespath.length()) {
+		TPfilespath_tmp = TPfilespath.substr(pos1 + 1);
+	}*/
+	runcommand = "Rscript " + Rscriptpath_tmp + " -i " + TPfilespath + " -o " + RscriptfilePNGnamePath;
+	runcmdreturn = system(runcommand.c_str());
+	if(runcmdreturn!=0){
+		cout << "Rscript running exception causes UpSet diagram drawing failure!" << endl;
+	}else{
+//		cout << "Rscript of Upset plot runs successfully!" << endl;
+		//remove Rscript file
+		if(std::remove(Rscriptpath_tmp.c_str()) == 0);
+//			cout << "File deleted successfully!" << endl;
+		else
+			cout << "Error deleting file" << endl;
+	}
+	cout << endl << "The upset plot generated by TP_bench for multiple user callsets is saved to: " << RscriptfilePNGnamePath << endl;
+}
+
+void findCommonFN(string& outputFile, vector<string>& inputFiles) {
+    string outputFilename = "bench_low_quality_variant";
+    outputFile = outputFile + "/" + outputFilename;
+	unordered_map<string, int> lineCounts;
+    vector<string> lineOrder;
+    int fileCount = inputFiles.size();
+
+    for (const auto& inputFile : inputFiles) {
+        ifstream infile(inputFile);
+        if (!infile.is_open()) {
+            cerr << "Could not open the file " << inputFile << endl;
+            continue;
+        }
+        string line;
+        while (getline(infile, line)) {
+            // Use the entire line as the key
+            if (lineCounts[line] == 0) {
+                lineOrder.push_back(line);
+            }
+            lineCounts[line]++;
+        }
+        infile.close();
+    }
+    ofstream outfile(outputFile);
+    if (!outfile.is_open()) {
+        cerr << "Could not open the output file " << outputFile << endl;
+        return;
+    }
+    for (const auto& key : lineOrder) {
+        if ((int)lineCounts[key] == fileCount) {
+            outfile << key << endl;
+        }
+    }
+    outfile.close();
 }
 

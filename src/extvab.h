@@ -14,8 +14,10 @@ extern string outputInsideToolDirname;
 extern string suboutputDirname;
 extern string suboutputDirnamePath;
 extern string outputBasicMetricschart;
+extern string outputCommonFN;
 extern string outputBasicMetricschartPath;
 extern string outputDiffRangeBasicMetricschart;
+extern string outputUpSetRchart;
 extern string SVsizeratiofile;
 extern string refRegSizeStatDirname;
 extern string numStatDirname;
@@ -27,6 +29,10 @@ extern string method_name;
 extern string program_cmd_str;
 extern string convertScreenFilename;
 extern string statScreenFilename;
+extern string Rscriptfilename;
+extern string RscriptfilenamePath;
+extern string RscriptfilePNGname;
+extern string RscriptfilePNGnamePath;
 extern ofstream outConvertScreenFile;
 extern ofstream outStatScreenFile;
 
@@ -80,6 +86,9 @@ extern vector<vector<int>> SizeRatioV;
 extern vector<vector<double>> SizeRatio_V;
 
 extern vector<string> SVSizeRatioFile;
+extern vector<string> SVcallernames;
+extern vector<string> TPfilesPath;
+extern vector<string> FNfilesPath;
 
 extern int32_t maxValidRegThres;
 extern string snvFilename;

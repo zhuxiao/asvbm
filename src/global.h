@@ -14,8 +14,10 @@ string outputInsideToolDirname = "";
 string suboutputDirname = "convert";
 string suboutputDirnamePath;
 string outputBasicMetricschart = "figures";
+string outputCommonFN = "shared_FN";
 string outputBasicMetricschartPath;
 string outputDiffRangeBasicMetricschart = "different_ranges";
+string outputUpSetRchart = "UpSetR";
 string SVsizeratiofile = "sv_size_ratio";
 string refRegSizeStatDirname = "1_ref_reg_size_stat/";
 string numStatDirname = "2_num_stat/";
@@ -27,6 +29,10 @@ string method_name = "method";
 string program_cmd_str = "";
 string convertScreenFilename = "convert_screen";
 string statScreenFilename = "stat_screen";
+string Rscriptfilename = "UpSetR.R";
+string RscriptfilePNGname = "upset_plot.png";
+string RscriptfilePNGnamePath;
+string RscriptfilenamePath;
 ofstream outConvertScreenFile;
 ofstream outStatScreenFile;
 
@@ -82,6 +88,9 @@ vector<vector<int>> SizeRatioV = {{},{},{},{},{},{},{},{},{}};
 vector<vector<double>> SizeRatio_V = {{},{},{},{},{},{},{},{},{}};
 
 vector<string> SVSizeRatioFile;
+vector<string> SVcallernames;
+vector<string> TPfilesPath;
+vector<string> FNfilesPath;
 
 int32_t maxValidRegThres;
 string mateItemFilename = "duplicated_mate_items.bed";
@@ -90,7 +99,7 @@ string longSVFilename = "long_sv_reg.bed";
 string svSizeDifRatioFilename = "sv_size_dif_ratio";
 string svSizeDifStatFilename = "sv_size_dif_stat";
 string svSizeRatioStatFilename = "sv_size_ratio_stat";
-string htmlFilename = "sv_stat_reports.html";
+string htmlFilename = "asvbm_reports.html";
 
 vector<size_t> size_div_vec = {100, 250, 500, 1000, 2500, 5000, 10000};
 vector<double> ratio_div_vec = {0.5, 0.7, 1.2, 2, 5, 10, 50, 100};

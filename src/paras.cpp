@@ -66,7 +66,7 @@ void showUsageStat(){
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
-	cout << "Usage:  sv_stat [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
+	cout << "Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
 
 	cout << "Description:" << endl;
 	cout << "   USER_FILE   User called SV result file." << endl;
@@ -104,13 +104,13 @@ void showUsageStat(){
 
 	cout << "Example:" << endl;
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
-	cout << "   $ sv_stat -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
-	cout << "   $ sv_stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
-	cout << "   $ sv_stat -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "   $ asvbm -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 
 // parse the parameters for convert command
@@ -385,7 +385,7 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 	if(sv_files1.size()>=1){
 		for(size_t i=1; i<=sv_files1.size();i++){
 			if(user_file == sv_files1.at(i-1)){
-				if(tool_names.size()>0) outputInsideToolDirname = tool_names.at(i-1);
+				if(tool_names.size()>0) {outputInsideToolDirname = tool_names.at(i-1);	SVcallernames.push_back(tool_names.at(i-1));}
 				else{
 					//Instead of entering the tool name, use the data set name as the name of the output file
 					size_t lastSlashPos = user_file.find_last_of('/');
@@ -396,6 +396,7 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 						// When '/' is reached, the part after '/' is printed
 						outputInsideToolDirname = user_file.substr(lastSlashPos + 1);
 					}
+					SVcallernames.push_back(outputInsideToolDirname);
 				}
 				alltoolnames.push_back(outputInsideToolDirname);
 				method_name = outputInsideToolDirname;

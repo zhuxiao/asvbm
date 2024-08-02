@@ -128,7 +128,10 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	output2File(filename_intersect_benchmark, result.at(1), outStatScreenFile);
 	output2File(filename_private_user, result.at(2), outStatScreenFile);
 	output2File(filename_private_benchmark, result.at(3), outStatScreenFile);
-
+	if(Markers==2){
+		TPfilesPath.push_back(filename_intersect_benchmark);
+		FNfilesPath.push_back(filename_private_benchmark);
+	}
 	//TP_user = user_data.size() - result.at(0).size();
 	//TP_benchmark = user_data.size() - result.at(1).size();
 	TP_user = result.at(0).size();

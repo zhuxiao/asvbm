@@ -22,9 +22,9 @@
 using namespace std;
 
 // program variables
-#define PROG_NAME		"SV_STAT"
-#define PROG_DESC		"A tool for Structural Variants Statistics Benchmarking"
-#define PROG_VERSION	"1.0.1"
+#define PROG_NAME		"ASVBM"
+#define PROG_DESC		"A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets"
+#define PROG_VERSION	"1.1.0"
 
 
 

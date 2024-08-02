@@ -8,6 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <map>
+#include <unordered_map>
 #include "htmlGenerate.h"
 
 using namespace std;
@@ -34,3 +35,8 @@ void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, stri
 void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fileNames, vector<string> &tool_names, vector<string> &sv_files1);
 
 void GenerateSVsizeRatioFileGraph(vector<string> svfilesV, vector<string> toolnameV, string &FileSavingPath);
+
+void RscriptGeneration(string &filePath);
+void TPfilemanipulation(string &filePath);
+void RunRscriptoperation(string &RscriptPath, string &TPfilesPath);
+void findCommonFN(string& outputFile, vector<string>& inputFiles);

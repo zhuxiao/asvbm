@@ -89,7 +89,9 @@ vector< vector<SV_item*> > sizeDivideSV(vector<SV_item*> &sv_data, vector<size_t
 		item = sv_data.at(i);
 		idx = -1;
 		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND){ // INS, DEL, DUP, INV
-			dist = item->endPos - item->startPos + 1;
+			if(item->sv_type == VAR_INS)	dist = item->sv_len;
+			else	dist = item->endPos - item->startPos + 1;
+//			dist = item->endPos - item->startPos + 1;
 			for(j=0; j<size_div_vec.size(); j++){
 				div_pos = size_div_vec.at(j);
 				if(dist<(int32_t)div_pos){ idx = j; break; }
