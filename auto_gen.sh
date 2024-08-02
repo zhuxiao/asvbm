@@ -4,6 +4,6 @@
 	fi
 	cd src/
 	make
-	mv -f sv_stat ../bin
+	mv -f asvbm ../bin
 	cd ../
 
