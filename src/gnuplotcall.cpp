@@ -69,7 +69,7 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 
 	cout << endl << "## More information ## " << endl;
 	cout << "For more detailed benchmarking results, please refer to the generated result information in the respective folders." << endl;
-	cout << "For more detailed experiment information, please refer to the github repositories: https://github.com/zhuxiao/sv_stat and https://github.com/zhuxiao/sv_stat-experiments." << endl;
+	cout << "For more detailed experiment information, please refer to the github repositories: https://github.com/zhuxiao/asvbm and https://github.com/zhuxiao/asvbm-experiments." << endl;
 //	cout << "For more detailed evaluation results, please refer to the generated result information in the respective folders." << endl;
 	cout << "If you have any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!" << endl;
 }
