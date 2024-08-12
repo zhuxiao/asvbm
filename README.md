@@ -167,7 +167,7 @@ For the second item, there is an insertion of size 87 base pairs at the 1142381 
 The help information is below:
 ```sh
 $ ASVBM
-Program: ASVBM (A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
+Program: ASVBM (A tool for Allele-aware Structural Variants istics Benchmarking for Multiple callsets)
 Version: 1.1.0
 
 Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
@@ -178,7 +178,7 @@ Description:
    REF_FILE    Reference file.
 
 Options:
-   -m INT    valid maximal region size for statistics: [50000]
+   -m INT    valid maximal region size for istics: [50000]
              0 is for all variant size are valid, and while positive
              values are for the valid maximal region size, then longer
              regions are omitted and saved to the file specified with '-l' option
@@ -228,16 +228,16 @@ Benchmarking multiple identification result datasets can be achieved by using th
 $ asvbm -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
-## Draw statistical figures
-There are 4 statistical categories for `asvbm` command results, figures can be drawn for a more intuitive and detailed illustration of the four statistical categories:
-* __`1_ref_reg_size_stat`__: record the statistical graph of SV sizes in the user-called data set and the benchmark data set.
-* __`2_num_stat`__: generate the bar chart for the classification benchmarking metrics.
-* __`3_size_dif_stat`__: record statistical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
-* __`4_size_num_stat`__: generate a bar chart of classification benchmarking metrics for variants with varying region sizes.
+## Draw istical figures
+There are 4 istical categories for `asvbm` command results, figures can be drawn for a more intuitive and detailed illustration of the four istical categories:
+* __`1_ref_reg_size_`__: record the istical graph of SV sizes in the user-called data set and the benchmark data set.
+* __`2_num_`__: generate the bar chart for the classification benchmarking metrics.
+* __`3_size_dif_`__: record istical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
+* __`4_size_num_`__: generate a bar chart of classification benchmarking metrics for variants with varying region sizes.
 Additionally, when benchmarking user-called sets from multiple tools, classification benchmarking metric charts will be generated and saved in a 'figures' folder.
 
 ## Output Result Description
-The detailed benchmarking information for the 4 statistical categories for `stat` command results, which is saved into the following 4 folders respectively:
+The detailed benchmarking information for the 4 statistical categories for `asvbm` command results, which is saved into the following 4 folders respectively:
 * __`1_ref_reg_size_stat`__: variant region size statistics (and the statistical figures) in reference.
 * __`2_num_stat`__: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
 * __`3_size_dif_stat`__: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
