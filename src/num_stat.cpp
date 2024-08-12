@@ -983,7 +983,14 @@ void* intersectSubset(void *arg){
 		item2 = subset2.at(i);
 		item = itemdup(item2);
 		if(item2->overlapped) intersect_vec_benchmark.push_back(item);
-		else private_vec_benchmark.push_back(item);
+		else{ private_vec_benchmark.push_back(item);
+			auto it = benchmarklineMap.find(item->lineInfo);
+			    if (it != benchmarklineMap.end()) {
+			        ++it->second;
+			    } else {
+			        cout << "Record not found: " << item->lineInfo << std::endl;
+			    }
+		}
 	}
 
 	for(i=0; i<subset1.size(); i++){
@@ -1029,6 +1036,7 @@ SV_item* itemdup(SV_item* item){
 	item_new->ref_seq = item->ref_seq;
 	item_new->alt_seq = item->alt_seq;
 	item_new->seqcons = item->seqcons;
+	item_new->lineInfo = item->lineInfo;
 	return item_new;
 }
 

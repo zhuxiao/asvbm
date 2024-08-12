@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <map>
 #include <unordered_map>
+#include <algorithm>
 #include "htmlGenerate.h"
 
 using namespace std;
@@ -39,4 +40,6 @@ void GenerateSVsizeRatioFileGraph(vector<string> svfilesV, vector<string> toolna
 void RscriptGeneration(string &filePath);
 void TPfilemanipulation(string &filePath);
 void RunRscriptoperation(string &RscriptPath, string &TPfilesPath);
+void GenerateSharedFNfile(string& outputFile);
 void findCommonFN(string& outputFile, vector<string>& inputFiles);
+void SvNumberDistributionGraph(const vector<string> &fileNamesPaths, string& svdistributionDirPath);

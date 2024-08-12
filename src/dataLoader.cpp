@@ -148,6 +148,18 @@ SV_item *constructSVItem(string &line){
 
 		item->ref_seq = str_vec.at(5);
 		item->alt_seq = str_vec.at(6);
+		if (str_vec.size() > 8) {
+			std::ostringstream oss;
+			for (size_t i = 8; i < str_vec.size(); ++i) {
+				oss << str_vec[i];
+				if (i != str_vec.size() - 1) {
+					oss << "	";
+				}
+			}
+			item->lineInfo = oss.str();
+		} else {
+			item->lineInfo = "-";
+		}
 	}
 
 	return item;
@@ -192,7 +204,7 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 		exit(1);
 	}
 
-	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt\tInfo";
+	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt\tInfo\tLine";
 	outfile << line << endl;
 
 	for(size_t i=0; i<data.size(); i++){
@@ -219,18 +231,18 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND){
 			if(item->seqcons.compare("-")!=0 and item->seqcons.compare("")!=0){
 				ss << setprecision(4) << stod(item->seqcons);
-				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "Identity=" + ss.str();
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "Identity=" + ss.str() + "\t" + item->lineInfo;
 			}else{
 				if(item->seqcons.compare("")!=0)
-					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + item->seqcons;
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + item->seqcons + "\t" + item->lineInfo;
 				else
-					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "-";
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "-" + "\t" + item->lineInfo;
 			}
 		}else{
 			if(item->seqcons.compare("-")!=0)
-				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "Identity=" + item->seqcons;
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "Identity=" + item->seqcons + "\t" + item->lineInfo;
 			else
-				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + item->seqcons;
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + item->seqcons + "\t" + item->lineInfo;
 		}
 			outfile << line << endl;
 	}

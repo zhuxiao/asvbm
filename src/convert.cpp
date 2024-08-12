@@ -26,9 +26,9 @@ string Pathquerybackslash(string filename){
 }
 
 // convert data
-void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
+void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label){
 	ifstream infile;
-	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str;
+	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str, lineInfo;
 	vector<string> str_vec, sv_type_vec;
 	size_t start_pos, endpos, start_pos2, endpos2;
 	int32_t sv_len = 0, refseq_len_tmp;
@@ -50,6 +50,7 @@ void convertBed(const string &infilename, const string &outfilename, const strin
 	while(getline(infile, line)){
 		if(line.size()){
 			if(line.at(0)!='#'){
+				lineInfo = line;
 				str_vec = split(line, "\t");
 
 				chrname = str_vec.at(0);
@@ -88,7 +89,7 @@ void convertBed(const string &infilename, const string &outfilename, const strin
 				if(alt_seq.compare("N")==0 or alt_seq.compare(".")==0 or alt_seq.compare("0")==0 or alt_seq.size()>=Max_SeqLen)
 					alt_seq = "-";
 
-				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
+				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq, lineInfo, label);
 				sv_item_vec.push_back(sv_item);
 			}
 		}
@@ -131,10 +132,10 @@ bool isDecoyChr(string &chrname){
 	return flag;
 }
 // convert vcf result
-void convertVcf(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
+void convertVcf(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label){
 	ifstream infile;
 	string line, chrname, start_pos_str, endpos_str, endpos_str_1, endpos_str_2, chrname2, start_pos_str2, endpos_str2, sv_type_str, sv_type_str1, sv_type_str2, sv_len_str, sv_len_str1, sv_len_str2, bnd_str, bnd_pos_str, str_tmp;
-	string ref_seq, alt_seq, reg_str;
+	string ref_seq, alt_seq, reg_str, lineInfo;
 	size_t start_pos, endpos, endpos_1, endpos_2, start_pos2, endpos2;
 	size_t i, end_pos_ref, end_pos_ref1, end_pos_ref2;
 	int32_t sv_len, sv_len1, sv_len2, ref_seq_len, refseq_len_tmp;
@@ -159,7 +160,8 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 	while(getline(infile, line)){
 		if(line.size()){
 			if(line.at(0)!='#'){
-
+				lineInfo = line;
+				if(label.compare("benchmark")==0)	benchmarklineMap[lineInfo] = 0;
 				str_vec = split(line, "\t");
 
 				// get locations
@@ -279,7 +281,7 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 							free(seq);
 						}
 						if(alt_seq.size()>=Max_SeqLen or sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0 or alt_seq.compare(".")==0) alt_seq="-";
-						sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
+						sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq, lineInfo, label);
 						sv_item_vec.push_back(sv_item);
 					}else{
 						start_pos = stoi(start_pos_str);
@@ -295,8 +297,8 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 
 						ref_seq = alt_seq = "-";
 
-						sv_item1 = allocateSVItem(chrname, start_pos, endpos_1, chrname2, start_pos2, endpos2, sv_type_str1, sv_len1, ref_seq, alt_seq);
-						sv_item2 = allocateSVItem(chrname, start_pos, endpos_2, chrname2, start_pos2, endpos2, sv_type_str2, sv_len2, ref_seq, alt_seq);
+						sv_item1 = allocateSVItem(chrname, start_pos, endpos_1, chrname2, start_pos2, endpos2, sv_type_str1, sv_len1, ref_seq, alt_seq, lineInfo, label);
+						sv_item2 = allocateSVItem(chrname, start_pos, endpos_2, chrname2, start_pos2, endpos2, sv_type_str2, sv_len2, ref_seq, alt_seq, lineInfo, label);
 						sv_item_vec.push_back(sv_item1);
 						sv_item_vec.push_back(sv_item2);
 					}
@@ -304,6 +306,8 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 					cout << line << endl;
 					cout << "missing SVTYPE information" << endl;
 				}
+			}else{
+				if(label.compare("benchmark")==0)	benchmarkannotationLines.push_back(line);
 			}
 		}
 	}
@@ -324,9 +328,9 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 }
 
 // convert data
-void convertCsv(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
+void convertCsv(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label){
 	ifstream infile;
-	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str;
+	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str, lineInfo;
 	vector<string> str_vec, sv_type_vec;
 	size_t start_pos, endpos, start_pos2, endpos2;
 	int32_t sv_len = 0, refseq_len_tmp;
@@ -347,7 +351,7 @@ void convertCsv(const string &infilename, const string &outfilename, const strin
 	// convert
 	while(getline(infile, line)){
 		if(line.size()>0){
-
+			lineInfo = line;
 			if(line.at(0)!='#'){
 				str_vec = split(line, ",");
 				if(str_vec.at(0).size()>0){
@@ -390,7 +394,7 @@ void convertCsv(const string &infilename, const string &outfilename, const strin
 						alt_seq = "-";
 
 					//sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len);
-					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
+					sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq, lineInfo, label);
 					sv_item_vec.push_back(sv_item);
 				}
 			}
@@ -412,9 +416,9 @@ void convertCsv(const string &infilename, const string &outfilename, const strin
 }
 
 // convert data
-void convertNm(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename){
+void convertNm(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label){
 	ifstream infile;
-	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str;
+	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str, lineInfo;
 	vector<string> str_vec, sv_type_vec;
 	int32_t sv_len, ref_seq_len, start_pos, endpos, start_pos2, endpos2, refseq_len_tmp;
 	vector<int32_t> sv_len_vec;
@@ -436,6 +440,7 @@ void convertNm(const string &infilename, const string &outfilename, const string
 	// convert
 	while(getline(infile, line)){
 		if(line.size()>0){
+			lineInfo = line;
 			if(line.at(0)!='#'){
 				str_vec = split(line, "\t");
 
@@ -482,7 +487,7 @@ void convertNm(const string &infilename, const string &outfilename, const string
 				}
 				if(alt_seq.size()>=Max_SeqLen) alt_seq="-";
 
-				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq);
+				sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq, lineInfo, label);
 				sv_item_vec.push_back(sv_item);
 			}
 		}
@@ -905,7 +910,7 @@ bool isComma(string &seq){
 }
 
 // allocate SV item
-SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len, string &ref_seq, string &alt_seq){
+SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string &chrname2, size_t startPos2, size_t endPos2, string &sv_type_str, int32_t sv_len, string &ref_seq, string &alt_seq, string &line, string &tab){
 	size_t sv_type;
 
 	if(sv_type_str.compare("UNC")==0){
@@ -950,6 +955,7 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 	item->overlapped = false;
 	item->validFlag = true;
 	item->seqcons = "-";
+	if(tab.compare("benchmark")==0)	item->lineInfo = line; else item->lineInfo = "-";
 	return item;
 }
 

@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <unordered_map>
 
 using namespace std;
 
@@ -19,6 +20,8 @@ extern string outputBasicMetricschartPath;
 extern string outputDiffRangeBasicMetricschart;
 extern string outputUpSetRchart;
 extern string SVsizeratiofile;
+extern string SVdistributionDirname;
+extern string SVdistributionPath;
 extern string refRegSizeStatDirname;
 extern string numStatDirname;
 extern string sizeDifStatDirname;
@@ -57,6 +60,9 @@ extern vector<string> region;
 extern vector<string> regionmetric;
 extern vector<vector<vector<string>>> allregionmetrics;
 extern vector< vector<string>> regionmetrics;
+extern vector<string> regSizeFiles;
+extern unordered_map<std::string, int> benchmarklineMap;
+extern vector<string> benchmarkannotationLines;
 
 extern double Seqcons;
 extern double SeqconsSum;

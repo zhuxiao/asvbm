@@ -5,6 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <fstream>
+#include <unordered_map>
 
 using namespace std;
 
@@ -14,11 +15,13 @@ string outputInsideToolDirname = "";
 string suboutputDirname = "convert";
 string suboutputDirnamePath;
 string outputBasicMetricschart = "figures";
-string outputCommonFN = "shared_FN";
+string outputCommonFN = "SharedFN_RefinedBenchmark";
 string outputBasicMetricschartPath;
 string outputDiffRangeBasicMetricschart = "different_ranges";
 string outputUpSetRchart = "UpSetR";
 string SVsizeratiofile = "sv_size_ratio";
+string SVdistributionDirname = "sv_distribution";
+string SVdistributionPath;
 string refRegSizeStatDirname = "1_ref_reg_size_stat/";
 string numStatDirname = "2_num_stat/";
 string sizeDifStatDirname = "3_size_dif_stat/";
@@ -61,6 +64,9 @@ vector<string> region = {"1-100bp", "101-250bp", "251-500bp", "501-1000bp", "100
 vector<string> regionmetric;
 vector<vector<vector<string>>> allregionmetrics;
 vector< vector<string>> regionmetrics = {{"Region", "#TP_bench", "#TP_user", "#FP", "#FN", "Identity", "Recall", "Precision", "F1 score"}};
+vector<string> regSizeFiles;
+unordered_map<std::string, int> benchmarklineMap;
+vector<string> benchmarkannotationLines;
 
 double Seqcons;
 double SeqconsSum;

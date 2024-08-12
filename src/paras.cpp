@@ -183,7 +183,7 @@ int parseConvert(int argc, char **argv)
 }
 
 void convert(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format){
-
+	string label = "benchmark";
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
 	convertScreenFilename = outputPathname + convertScreenFilename;
@@ -201,13 +201,13 @@ void convert(string &infilename, string &outfilename, string &reffilename, strin
 
 	outfilename = outputPathname + outfilename;
 	if(sv_format.compare("bed")==0)
-		convertBed(infilename, outfilename, reffilename, mate_filename, snv_filename);
+		convertBed(infilename, outfilename, reffilename, mate_filename, snv_filename , label);
 	else if(sv_format.compare("vcf")==0)
-		convertVcf(infilename, outfilename, reffilename, mate_filename, snv_filename);
+		convertVcf(infilename, outfilename, reffilename, mate_filename, snv_filename, label);
 	else if(sv_format.compare("csv")==0)
-		convertCsv(infilename, outfilename, reffilename, mate_filename, snv_filename);
+		convertCsv(infilename, outfilename, reffilename, mate_filename, snv_filename, label);
 	else if(sv_format.compare("nm")==0)  // private usage: nm
-		convertNm(infilename, outfilename, reffilename, mate_filename, snv_filename);
+		convertNm(infilename, outfilename, reffilename, mate_filename, snv_filename, label);
 
 	outConvertScreenFile.close();
 }
@@ -326,6 +326,7 @@ int parseStat(int argc, char **argv){
 void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names){
 	string sv_file_name, mate_filename, snv_filename, convert_sv_file2;
 	string sv_file_name_Path, convert_sv_file2_Path;
+	string label = "benchmark", label1 = "user";
 	vector<string> convert_sv_files;
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	suboutputDirnamePath = outputPathname + suboutputDirname;
@@ -340,7 +341,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 			mate_filename = to_string(i)+ "_" + mateItemFilename;
 //			snv_filename = to_string(i)+ "_" + snvFilename;
 			sv_file_name_Path = suboutputDirnamePath + "/" + sv_file_name;
-			convertVcf(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename);
+			convertVcf(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
 			convert_sv_files.push_back(sv_file_name_Path);
 		}
 		//benchmark
@@ -349,7 +350,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 //		snv_filename = "Benckmark_" + snvFilename;
 		convert_sv_file2 = Pathquerybackslash(convert_sv_file2);
 		convert_sv_file2_Path = suboutputDirnamePath + "/" + convert_sv_file2;
-		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename);
+		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
 	}else{
 		sv_file_name = sv_file1;
 		sv_file_name = PathqueryDot(sv_file_name);
@@ -357,13 +358,13 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 		//path
 		sv_file_name = Pathquerybackslash(sv_file_name);
 		sv_file_name_Path = suboutputDirnamePath + "/" + sv_file_name;
-		convertVcf(sv_file1, sv_file_name_Path, ref_file, mate_filename, snv_filename);
+		convertVcf(sv_file1, sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
 		//benchmark
 		convert_sv_file2 = PathqueryDot(sv_file2);
 		mate_filename = "Benckmark_" + mateItemFilename;
 		convert_sv_file2 = Pathquerybackslash(convert_sv_file2);
 		convert_sv_file2_Path = suboutputDirnamePath + "/" + convert_sv_file2;
-		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename);
+		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
 	}
 	outConvertScreenFile.close();
 

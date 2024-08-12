@@ -55,7 +55,13 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		//Common FN
 		outputCommonFN = outputPathname + outputCommonFN;
 		mkdir(outputCommonFN.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-		findCommonFN(outputCommonFN, FNfilesPath);
+		GenerateSharedFNfile(outputCommonFN);
+//		findCommonFN(outputCommonFN, FNfilesPath);
+		//SV distribution plot
+		SVdistributionDirname = outputBasicMetricschartPath + '/' + SVdistributionDirname;
+		mkdir(SVdistributionDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+		//plot
+		SvNumberDistributionGraph(regSizeFiles, SVdistributionDirname);
 		//html
 		Generatehtml(outputBasicMetricschart);
 	}else{
@@ -396,6 +402,7 @@ void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinena
     }else if(refRegSizeFinename.compare("ref_reg_size_user")== 0 and max_valid_reg_thres > 0){
 	    fileName = refRegSizeFinename + "_long_filtered";
 	    fileNamePath = refRegSizeFinename_tmp;
+	    regSizeFiles.push_back(fileNamePath);
 	    filePathstr_tmp = getContentAfterSlash(fileNamePath) + ".png";
 	    folderPng1.push_back(filePathstr_tmp);
     }
@@ -417,6 +424,7 @@ void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinena
 	fprintf(gnuplotPipe, "set ylabel 'Count'\n");
 	fprintf(gnuplotPipe, "set xrange [-100:100]\n");
 	fprintf(gnuplotPipe, "set terminal png  size 800,600\n");
+//	fprintf(gnuplotPipe, "set terminal pngcairo size 800,600 dpi 300\n");
 	fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
 	fprintf(gnuplotPipe, "set output '%s.png'\n", fileNamePath.c_str());
 
@@ -544,7 +552,7 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 
 	// Create a data file to hold the data
 	filename = "calculation_result";
-	filenamePath = sizeNumStatDirname + '/'+ filename;
+	filenamePath = sizeNumStatDirname + filename;
 	ofstream dataFile(filenamePath);
 	if (!dataFile.is_open()) {
 		cerr << "Unable to create data file: " << filenamePath << endl;
@@ -563,7 +571,7 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 
 	// Set the file name to save
 	outputFileName = "calculation_result.png";
-	outputFileNamePath = sizeNumStatDirname + '/' + outputFileName;
+	outputFileNamePath = sizeNumStatDirname + outputFileName;
 	outputFileNamePath_tmp = getContentAfterSlash(outputFileNamePath);
 	folderPng4.push_back(outputFileNamePath_tmp);
 	// Create a pipe connection to GNUplot
@@ -1325,3 +1333,134 @@ void findCommonFN(string& outputFile, vector<string>& inputFiles) {
     outfile.close();
 }
 
+// Helper function to extract chromosome and position
+std::pair<std::string, int> parseChromPos(const std::string& variantInfo) {
+    size_t firstTab = variantInfo.find('\t');
+    size_t secondTab = variantInfo.find('\t', firstTab + 1);
+
+    // Extract chromosome and position
+    std::string chrom = variantInfo.substr(0, firstTab); // Chromosome is a string
+    int pos = std::stoi(variantInfo.substr(firstTab + 1, secondTab - firstTab - 1)); // Position is an integer
+
+    return {chrom, pos};
+}
+
+// Sorting function for the vector
+bool numericSort(const std::pair<std::string, int>& lhs, const std::pair<std::string, int>& rhs) {
+    auto lhsParsed = parseChromPos(lhs.first);
+    auto rhsParsed = parseChromPos(rhs.first);
+
+    if (lhsParsed.first == rhsParsed.first) {
+        return lhsParsed.second < rhsParsed.second; // Sort by position if chromosome is the same
+    }
+    return lhsParsed.first < rhsParsed.first; // Otherwise sort by chromosome
+}
+
+//Shared FN
+void GenerateSharedFNfile(string& outputFile){
+	string outputFilename = "bench_low_quality_variant.vcf";
+	outputFilename = outputFile + "/" + outputFilename;
+	string outputBenchfilename = "Refined_benchmark.vcf";
+	outputBenchfilename = outputFile + "/" + outputBenchfilename;
+
+	vector<std::pair<std::string, int>> sortedVec(benchmarklineMap.begin(), benchmarklineMap.end());
+//	sort(sortedVec.begin(), sortedVec.end(), [](const std::pair<std::string, int>& lhs, const std::pair<std::string, int>& rhs) {
+//	    return lhs.first < rhs.first;
+//	});
+	std::sort(sortedVec.begin(), sortedVec.end(), numericSort);
+
+	ofstream outFile(outputFilename);
+	if (!outFile) {
+		cerr << "Unable to open output file!" << endl;
+		return;
+	}
+	// Write the header lines to the output file
+	for (const auto& headerLine : benchmarkannotationLines) {
+		outFile << headerLine << endl;
+	}
+
+	for (const auto& pair : sortedVec) {
+		if (pair.second == int(2 * SVcallernames.size())) {
+			outFile << pair.first << endl;
+		}
+	 }
+
+	outFile.close();
+	cout << endl << "The result has been output to: " << outputFilename << endl;
+	//benchmark
+	ofstream outFile1(outputBenchfilename);
+	if (!outFile1) {
+		cerr << "Unable to open output file!" << endl;
+		return;
+	}
+	// Write the header lines to the benchmark file
+	for (const auto& headerLine : benchmarkannotationLines) {
+		outFile1 << headerLine << endl;
+	}
+
+	for (const auto& pair : sortedVec) {
+		if (pair.second < int(2 * SVcallernames.size())) {
+			outFile1 << pair.first << endl;
+		}
+	 }
+	outFile1.close();
+	cout << endl << "The refined benchmark set has been saved to: " << outputBenchfilename << endl;
+}
+
+//sv distribution
+void SvNumberDistributionGraph(const vector<string> &fileNamesPaths, string& svdistributionDirPath) {
+	string path;
+	SVdistributionPath = svdistributionDirPath + "/" + "sv_distribution.png";
+    // Check if each file can be opened
+    for (const auto &fileNamePath : fileNamesPaths) {
+        ifstream inputFile(fileNamePath.c_str(), ios::in);
+        if (!inputFile) {
+            cerr << "Unable to open data file: " << fileNamePath << endl;
+            return;
+        }
+        inputFile.close();
+    }
+
+    FILE* gnuplotPipe = popen("gnuplot -persist", "w");
+    if (!gnuplotPipe) {
+        cerr << "Unable to start GNUplot." << endl;
+        return;
+    }
+
+    // Set the GNUplot options
+    fprintf(gnuplotPipe, "set title 'SV distribution'\n");
+    fprintf(gnuplotPipe, "set xlabel 'SV size'\n");
+    fprintf(gnuplotPipe, "set ylabel 'Count'\n");
+    fprintf(gnuplotPipe, "set xrange [-100:100]\n");
+    fprintf(gnuplotPipe, "set terminal png size 1000,800\n");
+//    fprintf(gnuplotPipe, "set terminal pngcairo size 1000,800 dpi 300\n");
+    fprintf(gnuplotPipe, "set border linecolor rgb 'black' linewidth 2\n");
+    fprintf(gnuplotPipe, "set output '%s'\n", SVdistributionPath.c_str());
+//    fprintf(gnuplotPipe, "set output 'output_combined.png'\n");
+
+    // Plot each file with its corresponding label
+	string plotCommand = "plot ";
+	for (size_t i = 0; i < fileNamesPaths.size(); ++i) {
+//		plotCommand += "'" + fileNamesPaths[i] + "' every ::2 using 1:2 with linespoints pt 2 linewidth 2 title '" + SVcallernames[i] + "'";
+		plotCommand += "'" + fileNamesPaths[i] + "' every 5::2 using 1:2 with lines lw 2 title '" + SVcallernames[i] + "'";
+		if (i != fileNamesPaths.size() - 1) {
+			plotCommand += ", ";
+		}
+	}
+    plotCommand += "\n";
+    fprintf(gnuplotPipe, "%s", plotCommand.c_str());
+
+    // Close GNUplot
+    fflush(gnuplotPipe);
+    pclose(gnuplotPipe);
+
+   //output
+    cout << endl << "The SV distribution statistics of multiple user callsets are saved as: " << SVdistributionPath << endl;
+    //get HTML PNGPath
+    path = SVdistributionPath;
+	size_t pos = path.find('/');
+	if (pos != std::string::npos && pos + 1 < path.length()) {
+		path = path.substr(pos + 1);
+	}
+	SVdistributionPath = path;
+}
