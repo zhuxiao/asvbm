@@ -142,27 +142,23 @@ The complete list of dependencies/packages to install beforehand can be found in
 
 ## File format description
 
-Before using ASVBM, both the user-called SV set and the benchmark data set are in the extended bed file format with the first 7 columns are below:
+Before using ASVBM, both the user-called SV set and the benchmark data set are in the extended bed file format with the first 8 columns are below:
 ```sh
-chromosome	start_ref_pos	end_ref_pos	SV_type	SV_len	Ref	Alt
-```
-Ensure that the first five columns of the CSV file meet the following format when converting it to the extended BED file format: 
-```sh
-chromosome,start_ref_pos,end_ref_pos,SV_type,SV_len,Ref,Alt
+chromosome	start_ref_pos	end_ref_pos	SV_type	SV_len	Ref	Alt Info
 ```
 For translocations, the file format should be bedpe before using ASVBM, and the first 10 columns are listed as below:
 ```sh
-chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	SV_type	SV_len	Ref	Alt
+chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	SV_type	SV_len	Ref	Alt Info
 ```
 The SV_type can be TRA or BND, and the SV_len will be 0.
 
 Note that: In ASVBM, all variant types, including translocations, can be stored together in the same file as the input, for example:
 ```sh
-chr1	1167806	1168012	DEL	-206	ATCG...	A
-chr1	1142384	1142384	INS	87	T	TCGA...	
-chr1	841980	843383	INV	1404	A	ACGT...
-chr1	3327738	3329244	DUP	3013	C	CATG...	
-chr1	1	481701	chr2	4273477	4539804	TRA	0	-	-
+chr1	1167806	1168012	DEL	-206	ATCG...	A -
+chr1	1142384	1142384	INS	87	T	TCGA...	-
+chr1	841980	843383	INV	1404	A	ACGT... -
+chr1	3327738	3329244	DUP	3013	C	CATG... -
+chr1	1	481701	chr2	4273477	4539804	TRA	0	-	- -
 ```		
 For the second item, there is an insertion of size 87 base pairs at the 1142381 location of chr1, and for the fifth item, it is a translocation between chr1:1-481701 and chr2:4273477-4539804, and the 0 in the last second column means the SV_len which will be 0 for translocations or translocation breakpoints.
 
