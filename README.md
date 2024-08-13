@@ -144,11 +144,11 @@ The complete list of dependencies/packages to install beforehand can be found in
 
 Before using ASVBM, both the user-called SV set and the benchmark data set are in the extended bed file format with the first 8 columns are below:
 ```sh
-chromosome	start_ref_pos	end_ref_pos	SV_type	SV_len	Ref	Alt Info
+chromosome	start_ref_pos	end_ref_pos	SV_type	SV_len	Ref	Alt  Info
 ```
 For translocations, the file format should be bedpe before using ASVBM, and the first 10 columns are listed as below:
 ```sh
-chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	SV_type	SV_len	Ref	Alt Info
+chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	SV_type	SV_len	Ref	Alt  Info
 ```
 The SV_type can be TRA or BND, and the SV_len will be 0.
 
