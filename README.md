@@ -167,7 +167,7 @@ For the second item, there is an insertion of size 87 base pairs at the 1142381 
 The help information is below:
 ```sh
 $ ASVBM
-Program: ASVBM (A tool for Allele-aware Structural Variants istics Benchmarking for Multiple callsets)
+Program: ASVBM (A tool for Allele-aware Structural Variants statistics Benchmarking for Multiple callsets)
 Version: 1.1.0
 
 Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
