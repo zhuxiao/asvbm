@@ -17,7 +17,7 @@
 #define RELIEF_FACTOR				0.1
 
 //Sequence consistency condition setting
-#define SEQ_CONSISTENCY				0.7f
+#define SEQ_CONSISTENCY				0.9f
 
 #define MAX_VALID_REG_THRES			50000
 #define EXTEND_SIZE					200  // 100

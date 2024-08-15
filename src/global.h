@@ -99,6 +99,7 @@ vector<string> TPfilesPath;
 vector<string> FNfilesPath;
 
 int32_t maxValidRegThres;
+double percentSeqIdentity;
 string mateItemFilename = "duplicated_mate_items.bed";
 string snvFilename = "snv_items.bed";
 string longSVFilename = "long_sv_reg.bed";

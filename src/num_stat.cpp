@@ -657,11 +657,11 @@ void* intersectSubset(void *arg){
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														if(item1->seqcons.compare("-") == 0)
@@ -670,12 +670,12 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= SEQ_CONSISTENCY) {
+														if (consistency >= percentSeqIdentity) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= SEQ_CONSISTENCY) {
+														if (consistency >= percentSeqIdentity) {
 															if(item1->seqcons.compare("-") ==0)
 																item1->seqcons = to_string(consistency);
 															else{
@@ -691,7 +691,7 @@ void* intersectSubset(void *arg){
 														if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 														item2->seqcons = to_string(consistency);
 													}
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 														flag = true;
 													}
 												}
@@ -702,17 +702,17 @@ void* intersectSubset(void *arg){
 												}else{
 													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 //													item1->seqcons = item2->seqcons = to_string(consistency);
-//													if (consistency >= SEQ_CONSISTENCY) {
+//													if (consistency >= percentSeqIdentity) {
 //														SeqConsNumStat(consistency);
 //														flag = true;
 //													}
 													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= SEQ_CONSISTENCY) {
+														if (consistency >= percentSeqIdentity) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
-													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
 														if(stod(item2->seqcons) < consistency){
 															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //															item1->seqcons = item2->seqcons = to_string(consistency);
@@ -722,12 +722,12 @@ void* intersectSubset(void *arg){
 																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 																item2->seqcons = to_string(consistency);
 															}
-															if (consistency >= SEQ_CONSISTENCY) {
+															if (consistency >= percentSeqIdentity) {
 																SeqConsNumStat(consistency);
 																flag = true;
 															}
 														}else{
-															if (consistency >= SEQ_CONSISTENCY) {
+															if (consistency >= percentSeqIdentity) {
 //																item1->seqcons = to_string(consistency);
 																if(item1->seqcons.compare("-") ==0)
 																	item1->seqcons = to_string(consistency);
@@ -745,7 +745,7 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= SEQ_CONSISTENCY) {
+														if (consistency >= percentSeqIdentity) {
 //															item1->seqcons = item2->seqcons = to_string(consistency);
 															flag = true;
 														}
@@ -757,17 +757,17 @@ void* intersectSubset(void *arg){
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 //												item1->seqcons = item2->seqcons = to_string(consistency);
-//												if (consistency >= SEQ_CONSISTENCY) {
+//												if (consistency >= percentSeqIdentity) {
 //													SeqConsNumStat(consistency);
 //													flag = true;
 //												}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //														item1->seqcons = item2->seqcons = to_string(consistency);
@@ -777,12 +777,12 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= SEQ_CONSISTENCY) {
+														if (consistency >= percentSeqIdentity) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= SEQ_CONSISTENCY) {
+														if (consistency >= percentSeqIdentity) {
 //															item1->seqcons = to_string(consistency);
 															if(item1->seqcons.compare("-") ==0)
 																item1->seqcons = to_string(consistency);
@@ -794,7 +794,7 @@ void* intersectSubset(void *arg){
 													}
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 //														item1->seqcons = item2->seqcons = to_string(consistency);
 														flag = true;
 													}
@@ -839,33 +839,33 @@ void* intersectSubset(void *arg){
 											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 //											item1->seqcons = item2->seqcons = to_string(consistency);
 //											// determine the overlap flag according to consistency
-//											if(consistency>=SEQ_CONSISTENCY) {
+//											if(consistency>=percentSeqIdentity) {
 //												SeqConsNumStat(consistency);
 //												flag = true;
 //											}
 											if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= SEQ_CONSISTENCY) {
+												if (consistency >= percentSeqIdentity) {
 													SeqConsNumStat(consistency);
 													flag = true;
 												}
-											}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+											}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
 												if(stod(item2->seqcons) < consistency){
 													SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
 												}else{
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 														item1->seqcons = to_string(consistency);
 														flag = true;
 													}
 												}
 											}else{
 												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= SEQ_CONSISTENCY) {
+												if (consistency >= percentSeqIdentity) {
 													flag = true;
 												}
 											}
@@ -876,33 +876,33 @@ void* intersectSubset(void *arg){
 											}else{
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 //												item1->seqcons = item2->seqcons = to_string(consistency);
-//												if (consistency >= SEQ_CONSISTENCY) {
+//												if (consistency >= percentSeqIdentity) {
 //													SeqConsNumStat(consistency);
 //													flag = true;
 //												}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= SEQ_CONSISTENCY) {
+														if (consistency >= percentSeqIdentity) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= SEQ_CONSISTENCY) {
+														if (consistency >= percentSeqIdentity) {
 															item1->seqcons = to_string(consistency);
 															flag = true;
 														}
 													}
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 //														item1->seqcons = item2->seqcons = to_string(consistency);
 														flag = true;
 													}
@@ -915,33 +915,33 @@ void* intersectSubset(void *arg){
 											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
 //											item1->seqcons = item2->seqcons = to_string(consistency);
 //											// determine the overlap flag according to consistency
-//											if(consistency>=SEQ_CONSISTENCY) {
+//											if(consistency>=percentSeqIdentity) {
 //												SeqConsNumStat(consistency);
 //												flag = true;
 //											}
 											if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= SEQ_CONSISTENCY) {
+												if (consistency >= percentSeqIdentity) {
 													SeqConsNumStat(consistency);
 													flag = true;
 												}
-											}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= SEQ_CONSISTENCY){
+											}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
 												if(stod(item2->seqcons) < consistency){
 													SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
 												}else{
-													if (consistency >= SEQ_CONSISTENCY) {
+													if (consistency >= percentSeqIdentity) {
 														item1->seqcons = to_string(consistency);
 														flag = true;
 													}
 												}
 											}else{
 												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= SEQ_CONSISTENCY) {
+												if (consistency >= percentSeqIdentity) {
 //													item1->seqcons = item2->seqcons = to_string(consistency);
 													flag = true;
 												}
@@ -1376,11 +1376,11 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 			consistency = (consistency_tmp1 > consistency_tmp2) ? consistency_tmp1 : consistency_tmp2;
 //			cout << "seq1: "<< seq1 << endl;
 //			cout << "seq2: "<< seq2 << endl;
-			if(consistency >= SEQ_CONSISTENCY)	return consistency;
+			if(consistency >= percentSeqIdentity)	return consistency;
 			else{
 				int distance = minDistance(seq1, seq2);
 				consistency =  1 - ((double)distance / (seq1.length() + seq2.length()));
-				if(consistency >= SEQ_CONSISTENCY) return consistency;
+				if(consistency >= percentSeqIdentity) return consistency;
 				else seq1 = seq2 = aln_seq1 = aln_seq2 = "";
 			}
 		}else{
@@ -1388,7 +1388,7 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 			upperSeq(seq1);
 			upperSeq(seq2);
 			consistency = MinimizerMethodOp(seq1, seq2, aln_seq1, aln_seq2, AlignSeq, AlignSeq1);
-			if(consistency >= SEQ_CONSISTENCY)	return consistency;
+			if(consistency >= percentSeqIdentity)	return consistency;
 			else	seq1 = seq2 = aln_seq1 = aln_seq2 = AlignSeq = AlignSeq1 = "";
 		}
 	}
@@ -1427,10 +1427,10 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 		consistency = calculate_consistency(aln_seq1, aln_seq2);
 	}
 //	consistency = 0.9;
-	/*if(item1->sv_type == VAR_INS and consistency < SEQ_CONSISTENCY){
+	/*if(item1->sv_type == VAR_INS and consistency < percentSeqIdentity){
 			cout<<"111111111111: "<<item1->chrname<<" :"<<item1->startPos<<endl;
 		}*/
-	if(consistency < SEQ_CONSISTENCY and seq1.size() <= EDLIBLEN){
+	if(consistency < percentSeqIdentity and seq1.size() <= EDLIBLEN){
 		int distance = minDistance(seq1, seq2);
 		consistency =  1 - ((double)distance / (seq1.length() + seq2.length()));
 	}

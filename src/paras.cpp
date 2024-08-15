@@ -89,6 +89,8 @@ void showUsageStat(){
 	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
 	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
+	cout << "   -p FLOAT  percent sequence identity: [" << SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -P FLOAT  percent size ratio: [" << SVLEN_RATIO << "]" << endl;
 	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "             in machine" << endl;
 	cout << "   -T STR    Tool names [null]." << endl;
@@ -222,6 +224,7 @@ int parseStat(int argc, char **argv){
 	if (argc < 2) { showUsageStat(); return 1; }
 
 	maxValidRegThres = MAX_VALID_REG_THRES;
+	percentSeqIdentity = SEQ_CONSISTENCY;
 	extendSize = EXTEND_SIZE;
 	threadNum_tmp = 0;
 	minSizeLargeSV = MIN_SIZE_LARGE_SV;
@@ -230,12 +233,14 @@ int parseStat(int argc, char **argv){
 	typeMatchLevel = MATCHLEVEL_L;
 	ToolNameStore = ChromosomeNames = "";
 
-	while( (opt = getopt(argc, argv, ":m:s:t:r:o:l:T:h:C:S")) != -1 ){
+	while( (opt = getopt(argc, argv, ":m:s:t:r:o:p:P:l:T:h:C:S")) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
 			case 't': threadNum_tmp = stoi(optarg); break;
 			case 'o': outputPathname = optarg; break;
+			case 'p': percentSeqIdentity = stod(optarg); break;
+			case 'P': svlenRatio = stod(optarg); break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
 			case 'r': htmlFilename = optarg; break;
@@ -512,13 +517,15 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
-	cout << "############# Parameters for 'stat' command: #############" << endl;
+	cout << "############# Parameters for 'ASVBM' command: #############" << endl;
 	cout << "      Reference file: " << ref_file << endl;
 	cout << " User-called SV file: " << user_file << endl;
 	cout << "   Benchmark SV file: " << benchmark_file << endl;
 
 	cout << " Maximal region size: " << maxValidRegThres << endl;
 	cout << " Overlap extend size: " << extendSize << endl;
+	cout << " Percent sequence identity: " << percentSeqIdentity << endl;
+	cout << " Percent size ratio: " << svlenRatio << endl;
 	cout << "   Number of threads: " << num_threads << endl;
 	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
 	cout << "   Type match level: " << typeMatchLevel << " (treat DUPLTCATION as INSERTION)" << endl;
@@ -538,6 +545,8 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 
 	outStatScreenFile << " Maximal region size: " << maxValidRegThres << endl;
 	outStatScreenFile << " Overlap extend size: " << extendSize << endl;
+	outStatScreenFile << " Percent sequence identity: " << percentSeqIdentity << endl;
+	outStatScreenFile << " Percent size ratio: " << svlenRatio << endl;
 	outStatScreenFile << "   Number of threads: " << num_threads << endl;
 	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
 	outStatScreenFile << "    Type match level: " << typeMatchLevel << " (treat DUPLTCATION as INSERTION)" << endl;

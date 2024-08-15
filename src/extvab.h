@@ -97,6 +97,7 @@ extern vector<string> TPfilesPath;
 extern vector<string> FNfilesPath;
 
 extern int32_t maxValidRegThres;
+extern double percentSeqIdentity;
 extern string snvFilename;
 extern string mateItemFilename;
 extern string longSVFilename;
