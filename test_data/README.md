@@ -1,4 +1,4 @@
-# SV_STAT experiments
+# ASVBM experiments
 
 ## experiment description
 
@@ -18,15 +18,19 @@ $ ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/NIST_SV
 
 ```
 ## Download source programs and test data
-$ wget -c https://github.com/zhuxiao/sv_stat/releases/download/1.0.1/sv_stat_1.0.1.tar.xz
-$ tar -xf sv_stat_1.0.1.tar.xz
-$ cd sv_stat_1.0.1/
+$ wget -c https://github.com/zhuxiao/asvbm/releases/download/1.1.0/asvbm_1.1.0.tar.xz
+$ tar -xf asvbm_1.1.0.tar.xz
+$ cd asvbm_1.1.0/
 $ ./autogen.sh
+$ sudo apt install -y r-base r-base-dev
+# Install the UpSetR package
+$ R
+$ install.packages("UpSetR")
 ```
 The name of the chr1 file (reference) was renamed to test_chr1.fa. We uploaded the sequence of chr1 into three files, which can be downloaded and merged by following steps:
 ```
 ## Merge chr1 references and extract it
-$ cd sv_stat/test_data/
+$ cd asvbm_1.1.0/test_data/
 $ cat test_chr1.fa.tar.xz_* > test_chr1.fa.tar.xz
 $ tar -xJf test_chr1.fa.tar.xz
 ```
@@ -48,10 +52,10 @@ $ tar -xJf test_DeBreak_chr1.tar.xz
 ## The identification results of chr1 by SVIM were extracted
 $ tar -xJf test_SVIM_chr1.tar.xz
 
-## Benchmarking the VCF files mentioned in the test data using SV_STAT, run the following command:
-$ sv_stat -m 50000 -T "ASVCLR;SVDSS;DeBreak;Sniffles2;pbsv;cuteSV;SVIM" -C "1" test_data/test_ASVCLR_chr1.vcf test_data/test_SVDSS_chr1.vcf test_data/test_DeBreak_chr1.vcf test_data/test_Sniffles2_chr1.vcf test_pbsv_chr1.vcf test_cuteSV_chr1.vcf test_SVIM_chr1.vcf test_benchmark_chr1.vcf test_data/test_chr1.fa
+## Benchmarking the VCF files mentioned in the test data using ASVBM, run the following command:
+$ asvbm -m 50000 -T "ASVCLR;SVDSS;DeBreak;Sniffles2;pbsv;cuteSV;SVIM" -C "1" -p 0.7 test_data/test_ASVCLR_chr1.vcf test_data/test_SVDSS_chr1.vcf test_data/test_DeBreak_chr1.vcf test_data/test_Sniffles2_chr1.vcf test_pbsv_chr1.vcf test_cuteSV_chr1.vcf test_SVIM_chr1.vcf test_benchmark_chr1.vcf test_data/test_chr1.fa
 ```
-SV_STAT benchmarked the provided identification set based on the input, generating corresponding file information. If needed, more detailed benchmarking information can be obtained by running test data independently.
+ASVBM benchmarked the provided identification set based on the input, generating corresponding file information. If needed, more detailed benchmarking information can be obtained by running test data independently.
 
 ## result description
 The benchmarking results were as follows:
