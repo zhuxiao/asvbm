@@ -232,10 +232,10 @@ $ asvbm -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf b
 
 ## Draw istical figures
 There are 4 istical categories for `asvbm` command results, figures can be drawn for a more intuitive and detailed illustration of the four istical categories:
-* __`1_ref_reg_size_`__: record the istical graph of SV sizes in the user-called data set and the benchmark data set.
-* __`2_num_`__: generate the bar chart for the classification benchmarking metrics.
-* __`3_size_dif_`__: record istical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
-* __`4_size_num_`__: generate a bar chart of classification benchmarking metrics for variants with varying region sizes.
+* __`1_ref_reg_size_stat`__: record the istical graph of SV sizes in the user-called data set and the benchmark data set.
+* __`2_num_stat`__: generate the bar chart for the classification benchmarking metrics.
+* __`3_size_dif_stat`__: record istical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
+* __`4_size_num_stat`__: generate a bar chart of classification benchmarking metrics for variants with varying region sizes.
 Additionally, when benchmarking user-called sets from multiple tools, classification benchmarking metric charts will be generated and saved in a 'figures' folder.
 
 ## Output Result Description
@@ -246,6 +246,15 @@ The detailed benchmarking information for the 4 statistical categories for `asvb
 * __`4_size_num_stat`__: the classical number statistics (and the statistical figures) for variants with various region lengths.
 Moreover, the overall simplified statistics will be output to the terminal screen, and these screen results will be saved to the file `stat_screen` in the output directory.
 
+The multiple user callsets benchmarking results of the  `asvbm` command output the following information:
+
+| Main Folder                 | Subfolder                                                    |
+| --------------------------- | ------------------------------------------------------------ |
+| user callset 1              | 1_ref_reg_size_stat; 2_num_stat; 3_size_dif_stat; 4_size_num_stat |
+| **...**                     | **...**                                                      |
+| user callset n              | 1_ref_reg_size_stat; 2_num_stat; 3_size_dif_stat; 4_size_num_stat |
+| figures                     | Upset; benchmarking results;                                 |
+| SharedFN & RefinedBenchmark | bench_low_quality_variant.vcf; Refined_benchmark.vcf;        |
 
 ## Example Usage
 Here, practical examples for the benchmarking of single-sample and multiple samples are provided. For multi-sample benchmarking, it is strongly recommended to use the "-T" parameter for better differentiation of different identification results. Benchmark the identification results of chr1 of the HG002 CCS data separately using cuteSV (v2.0.3), pbsv (v2.9.0), and Sniffles (v2.0.2).
