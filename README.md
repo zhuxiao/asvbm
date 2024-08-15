@@ -167,7 +167,7 @@ For the second item, there is an insertion of size 87 base pairs at the 1142381 
 The help information is below:
 ```sh
 $ ASVBM
-Program: ASVBM (A tool for Allele-aware Structural Variants statistics Benchmarking for Multiple callsets)
+Program: ASVBM (A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
 Version: 1.1.0
 
 Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
@@ -178,7 +178,7 @@ Description:
    REF_FILE    Reference file.
 
 Options:
-   -m INT    valid maximal region size for istics: [50000]
+   -m INT    valid maximal region size for statistics: [50000]
              0 is for all variant size are valid, and while positive
              values are for the valid maximal region size, then longer
              regions are omitted and saved to the file specified with '-l' option
@@ -193,6 +193,8 @@ Options:
              Chromosome names should match the format within the VCF file. 
              Chromosome names are separated by ';'. Example: -C "1;2;3" 
    -s INT    overlap extend size: [200]
+   -p FLOAT  percent sequence identity: [0.9]
+   -P FLOAT  percent size ratio: [0.7]
    -t INT    number of threads [0]. 0 for the maximal number of threads
              in machine
    -T STR    Tool names [null].
@@ -249,11 +251,11 @@ Moreover, the overall simplified statistics will be output to the terminal scree
 Here, practical examples for the benchmarking of single-sample and multiple samples are provided. For multi-sample benchmarking, it is strongly recommended to use the "-T" parameter for better differentiation of different identification results. Benchmark the identification results of chr1 of the HG002 CCS data separately using cuteSV (v2.0.3), pbsv (v2.9.0), and Sniffles (v2.0.2).
 To benchmark the identification results for a single sample, please use the following command:
 ```sh
-$ asvbm -m 50000 -T cuteSV cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm -m 50000 -T "cuteSV" -p 0.7 -P 0.7 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 To benchmark the results of multiple identification outcomes, please use the following command:
 ```sh
-$ asvbm -m 50000 -T "cuteSV;pbsv;Sniffles2" cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm -m 50000 -T "cuteSV;pbsv;Sniffles2" -p 0.7 cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 
 Multisample benchmarking statistical results. The benchmarking of recognition results will primarily generate the following information. This example compares a run result of cuteSV 2.0.3 on NA24385, with the benchmark dataset being the high-confidence HG002 dataset created by the Genome in a Bottle Consortium (GIAB). More specific information can be found in the respective file:
@@ -363,7 +365,7 @@ Moreover, for regions with overlapping variations, the quantities of variant siz
   </tbody>
 </table>
 
-Additionally, basic metrics for different structural variant (SV) size ranges were computed, primarily categorized into the following seven intervals. The results are displayed below:
+Additionally, basic metrics for different structural variant (SV) size ranges were computed, primarily categorized into the following eight intervals. The results are displayed below:
 
 <table>
   <thead>
