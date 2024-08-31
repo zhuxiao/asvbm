@@ -63,7 +63,9 @@ extern vector< vector<string>> regionmetrics;
 extern vector<string> regSizeFiles;
 extern unordered_map<std::string, int> benchmarklineMap;
 extern vector<string> benchmarkannotationLines;
+extern bool sign;
 
+extern vector<string> ResultdataPath;
 extern double Seqcons;
 extern double SeqconsSum;
 extern int32_t SeqconsNum;

@@ -67,7 +67,9 @@ vector< vector<string>> regionmetrics = {{"Region", "#TP_bench", "#TP_user", "#F
 vector<string> regSizeFiles;
 unordered_map<std::string, int> benchmarklineMap;
 vector<string> benchmarkannotationLines;
+bool sign;
 
+vector<string> ResultdataPath;
 double Seqcons;
 double SeqconsSum;
 int32_t SeqconsNum;

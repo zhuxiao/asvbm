@@ -1380,13 +1380,14 @@ void GenerateSharedFNfile(string& outputFile){
 	}
 
 	for (const auto& pair : sortedVec) {
-		if (pair.second == int(2 * SVcallernames.size())) {
+		if (pair.second == int(SVcallernames.size())) {
 			outFile << pair.first << endl;
 		}
 	 }
 
 	outFile.close();
-	cout << endl << "The result has been output to: " << outputFilename << endl;
+	cout << endl << "The result of the shared FN records has been output to: " << outputFilename << endl;
+
 	//benchmark
 	ofstream outFile1(outputBenchfilename);
 	if (!outFile1) {
@@ -1399,7 +1400,7 @@ void GenerateSharedFNfile(string& outputFile){
 	}
 
 	for (const auto& pair : sortedVec) {
-		if (pair.second < int(2 * SVcallernames.size())) {
+		if (pair.second != int(SVcallernames.size())) {
 			outFile1 << pair.first << endl;
 		}
 	 }

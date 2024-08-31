@@ -124,13 +124,17 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	outStatScreenFile << out_str << endl;
 
 	// output to file
-	output2File(filename_intersect_user, result.at(0), outStatScreenFile);
 	output2File(filename_intersect_benchmark, result.at(1), outStatScreenFile);
+	output2File(filename_intersect_user, result.at(0), outStatScreenFile);
 	output2File(filename_private_user, result.at(2), outStatScreenFile);
 	output2File(filename_private_benchmark, result.at(3), outStatScreenFile);
 	if(Markers==2){
 		TPfilesPath.push_back(filename_intersect_benchmark);
 		FNfilesPath.push_back(filename_private_benchmark);
+		ResultdataPath.push_back(filename_intersect_benchmark);
+		ResultdataPath.push_back(filename_intersect_user);
+		ResultdataPath.push_back(filename_private_user);
+		ResultdataPath.push_back(filename_private_benchmark);
 	}
 	//TP_user = user_data.size() - result.at(0).size();
 	//TP_benchmark = user_data.size() - result.at(1).size();
@@ -181,6 +185,168 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	regionmetric.clear();
 	destroyResultData(result);
 }
+
+void computeNumStatFromFile(vector<SV_item*> TPbench_data, vector<SV_item*> TPuser_data, vector<SV_item*> FP_data, vector<SV_item*> FN_data, string &file_prefix, int32_t endpos, int Markers){
+	vector<SV_item*> sub_TP_bench, sub_TP_user,sub_FN, sub_FP;
+	int32_t TP_benchmark, TP_user, FP, FN;
+	float recall, precision_benchmark, precision_user, F1_score_benchmark, F1_score_user, sv_num_per_reg, percent;
+	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
+	int32_t startpos;
+	SV_item *item;
+	SeqconsSum = SeqconsNum = Seqcons = 0;
+
+	filename_intersect_user = file_prefix + "_intersect_user";
+	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
+	filename_private_user = file_prefix + "_private_user";
+	filename_private_benchmark = file_prefix + "_private_benchmark";
+
+	// compute intersection
+//	result = intersect(user_data, benchmark_data, fai);
+	for(size_t i=0; i<=size_div_vec.size(); ++i){
+		if(size_div_vec[i] == (size_t)endpos){
+			if(i==0)	startpos = 1;
+			else if(sign) startpos = size_div_vec[i] + 1;
+			else if(i==size_div_vec.size()-1){
+				if((size_t)endpos == size_div_vec[size_div_vec.size()-1]) sign = true;
+				startpos = size_div_vec[i-1]+1;
+			}else	startpos = size_div_vec[i-1] + 1;
+			break;
+		}
+	}
+	//TP_bench
+	for(size_t i=0;i<TPbench_data.size();i++){
+		if(startpos < endpos){
+			item = TPbench_data[i];
+			if(item->sv_len >= startpos and item->sv_len <= endpos){
+				sub_TP_bench.push_back(item);
+				if(item->seqcons.compare("-")!=0){
+					double value = stod((item->seqcons).substr((item->seqcons).find('=') + 1));
+					SeqconsSum += value;
+					SeqconsNum += 1;
+				}
+			}
+		}else{
+			item = TPbench_data[i];
+			if(item->sv_len >= startpos){
+				sub_TP_bench.push_back(item);
+				if(item->seqcons.compare("-")!=0){
+					double value = stod((item->seqcons).substr((item->seqcons).find('=') + 1));
+					SeqconsSum += value;
+					SeqconsNum += 1;
+				}
+			}
+		}
+	}
+	//TP_user
+	for(size_t i=0;i<TPuser_data.size();i++){
+		if(startpos < endpos){
+			item = TPuser_data[i];
+			if(item->sv_len >= startpos and item->sv_len <= endpos)	sub_TP_user.push_back(item);
+		}else{
+			item = TPuser_data[i];
+			if(item->sv_len >= startpos)	sub_TP_user.push_back(item);
+		}
+	}
+	//FP
+	for(size_t i=0;i<FP_data.size();i++){
+		if(startpos < endpos){
+			item = FP_data[i];
+			if(item->sv_len >= startpos and item->sv_len <= endpos)	sub_FP.push_back(item);
+		}else{
+			item = FP_data[i];
+			if(item->sv_len >= startpos)	sub_FP.push_back(item);
+		}
+	}
+	//FN
+	for(size_t i=0;i<FN_data.size();i++){
+		if(startpos < endpos){
+			item = FN_data[i];
+			if(item->sv_len >= startpos and item->sv_len <= endpos)	sub_FN.push_back(item);
+		}else{
+			item = FN_data[i];
+			if(item->sv_len >= startpos)	sub_FN.push_back(item);
+		}
+	}
+
+	if(sub_TP_user.size() + sub_FP.size()>0) percent = (double)sub_TP_user.size() / (sub_TP_user.size() + sub_FP.size());
+	else percent = 0;
+	out_str = "User intersection data size: " + to_string(sub_TP_user.size()) + ", percent: " + to_string(percent);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
+
+	if(sub_TP_bench.size() + sub_FN.size()>0) percent = (double)sub_TP_bench.size() / (sub_TP_bench.size() + sub_FN.size());
+	else percent = 0;
+	out_str = "Benchmark intersection data size: " + to_string(sub_TP_bench.size()) + ", percent: " + to_string(percent);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
+
+	if(sub_TP_user.size() + sub_FP.size()>0) percent = (double)sub_FP.size()/(sub_TP_user.size() + sub_FP.size());
+	else percent = 0;
+	out_str = "User private data size: " + to_string(sub_FP.size()) + ", percent: " + to_string(percent);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
+
+	if(sub_TP_bench.size() + sub_FN.size()>0) percent = (double)sub_FN.size()/(sub_TP_bench.size() + sub_FN.size());
+	else percent = 0;
+	out_str = "Benchmark private data size: " + to_string(sub_FN.size()) + ", percent: " + to_string(percent);
+	cout << out_str << endl;
+	outStatScreenFile << out_str << endl;
+
+	// output to file
+	output2File(filename_intersect_benchmark, sub_TP_bench, outStatScreenFile);
+	output2File(filename_intersect_user, sub_TP_user, outStatScreenFile);
+	output2File(filename_private_user, sub_FP, outStatScreenFile);
+	output2File(filename_private_benchmark, sub_FN, outStatScreenFile);
+//	if(Markers==2){
+//		TPfilesPath.push_back(filename_intersect_benchmark);
+//		FNfilesPath.push_back(filename_private_benchmark);
+//	}
+	//TP_user = user_data.size() - result.at(0).size();
+	//TP_benchmark = user_data.size() - result.at(1).size();
+	TP_user = sub_TP_user.size();
+	TP_benchmark = sub_TP_bench.size();
+	FP = sub_FP.size();
+	FN = sub_FN.size();
+
+	if(TP_benchmark+FN>0) recall = (float)TP_benchmark / (TP_benchmark+FN);
+	else recall = 0;
+	//precision_user = (float)TP_user / user_data.size();
+	if(TP_user+FP>0) precision_user = (float)TP_user / (TP_user + FP);
+	else precision_user = 0;
+	//precision_benchmark = (float)TP_benchmark / user_data.size();
+	if(TP_benchmark+FP>0) precision_benchmark = (float)TP_benchmark / (TP_benchmark + FP);
+	else precision_benchmark = 0;
+
+	if(recall+precision_user>0) F1_score_user = 2.0 * (recall * precision_user) / (recall + precision_user);
+	else F1_score_user = 0;
+	if(recall+precision_benchmark>0) F1_score_benchmark = 2.0 * (recall * precision_benchmark) / (recall + precision_benchmark);
+	else F1_score_benchmark = 0;
+
+	if(TP_user>0) sv_num_per_reg = (float)TP_benchmark / TP_user;
+	else sv_num_per_reg = 0;
+
+	if(SeqconsNum != 0)	Seqcons = SeqconsSum/(double)SeqconsNum;
+	else	Seqcons = 0;
+
+	cout << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
+	cout << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
+	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+
+	outStatScreenFile << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
+	outStatScreenFile << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
+	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	if(Markers == 2){
+		CollectData(TP_user, TP_benchmark, FP, FN, data1, 4, 2);
+		CollectData(recall, precision_user, F1_score_user, Seqcons, data, 3, 2);
+	}
+	allmetric.clear();
+	if(Markers == 4){
+		CollectData(TP_user, TP_benchmark, FP, FN, data1_4, 4, 4);
+		CollectData(recall, precision_user, F1_score_user, Seqcons, data_4, 3, 4);
+	}
+	regionmetric.clear();
+}
+
 void CollectData(float recall, float precision_user, float F1_score_user, double seqcons, vector<float> &Data, size_t num, int Markers){
 	Data.push_back(seqcons);
 	Data.push_back(recall);
