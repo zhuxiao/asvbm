@@ -130,7 +130,7 @@ If the current directory contains a clone of the asvbm repository, asvbm can be 
 
 
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./ASVBM -m 50000 /data_test/reference.fa /data_test/user_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm -m 50000 /data_test/reference.fa /data_test/user_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
 ```
 or
 ```sh
