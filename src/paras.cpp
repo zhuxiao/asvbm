@@ -91,6 +91,8 @@ void showUsageStat(){
 	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
 	cout << "   -i FLOAT  minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
 	cout << "   -a FLOAT  minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+	cout << "             This parameter is used for the sequence identity threshold for matching " << endl;
+	cout << "             allelic variants in regions with highly similar sequences." << endl;
 	cout << "   -p FLOAT  minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
 	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "             in machine" << endl;
