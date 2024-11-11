@@ -130,11 +130,11 @@ If the current directory contains a clone of the asvbm repository, asvbm can be 
 
 
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm -m 50000 /data_test/reference.fa /data_test/user_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm -m 50000 /data_test/user_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
 ```
 or
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm -m 50000 -T "tool1;tool2;tool3" /data_test/reference.fa /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm -m 50000 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
 ```
 The -v argument mounts the current directory as /data_test in the Docker image. The output should also appear in the current directory.
 
