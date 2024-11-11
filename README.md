@@ -126,7 +126,7 @@ Clone this repository and build a Docker image as follows. A pre-built docker im
 $ docker pull xxx
 ```
 
-If the current directory contains a clone of the hap.py repository, hap.py can be run in Docker as follows:
+If the current directory contains a clone of the asvbm repository, asvbm can be run in Docker as follows:
 
 
 ```sh
@@ -134,7 +134,7 @@ docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./ASVBM -m 50000 /data_
 ```
 or
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./ASVBM -m 50000 -T "tool1;tool2;tool3" /data_test/reference.fa /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm -m 50000 -T "tool1;tool2;tool3" /data_test/reference.fa /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf -o /data_test/test
 ```
 The -v argument mounts the current directory as /data_test in the Docker image. The output should also appear in the current directory.
 
@@ -168,7 +168,7 @@ The help information is below:
 ```sh
 $ ASVBM
 Program: ASVBM (A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
-Version: 1.1.0
+Version: 1.2.0
 
 Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
@@ -193,8 +193,9 @@ Options:
              Chromosome names should match the format within the VCF file. 
              Chromosome names are separated by ';'. Example: -C "1;2;3" 
    -s INT    overlap extend size: [200]
-   -p FLOAT  percent sequence identity: [0.9]
-   -P FLOAT  percent size ratio: [0.7]
+   -i FLOAT  minimal sequence identity for variant match: [0.7]
+   -a FLOAT  minimal sequence identity for allelic variants match: [0.7]
+   -p FLOAT  minimal percent size ratio for variant match: [0.7]
    -t INT    number of threads [0]. 0 for the maximal number of threads
              in machine
    -T STR    Tool names [null].
