@@ -195,6 +195,8 @@ Options:
    -s INT    overlap extend size: [200]
    -i FLOAT  minimal sequence identity for variant match: [0.7]
    -a FLOAT  minimal sequence identity for allelic variants match: [0.7]
+             This parameter is used for the sequence identity threshold for matching 
+             allelic variants in regions with highly similar sequences.
    -p FLOAT  minimal percent size ratio for variant match: [0.7]
    -t INT    number of threads [0]. 0 for the maximal number of threads
              in machine
