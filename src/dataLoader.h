@@ -23,5 +23,9 @@ void destroyData(vector<SV_item*> &sv_vec);
 
 vector<SV_item*> getLongSVReg(vector<SV_item*> &dataset, int32_t thres);
 void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfile);
+void output3File(const string &filename, vector<SV_item*> &data, ofstream &logfile);
+
+bool checkForFileInPath(const string& path, const string& target_file);
+void outputvcfFile(const string &filename, vector<SV_item*> &data);
 
 #endif /* SRC_DATALOADER_H_ */

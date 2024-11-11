@@ -89,8 +89,9 @@ void showUsageStat(){
 	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
 	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-	cout << "   -p FLOAT  percent sequence identity: [" << SEQ_CONSISTENCY << "]" << endl;
-	cout << "   -P FLOAT  percent size ratio: [" << SVLEN_RATIO << "]" << endl;
+	cout << "   -i FLOAT  minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -a FLOAT  minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -p FLOAT  minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
 	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "             in machine" << endl;
 	cout << "   -T STR    Tool names [null]." << endl;
@@ -225,6 +226,7 @@ int parseStat(int argc, char **argv){
 
 	maxValidRegThres = MAX_VALID_REG_THRES;
 	percentSeqIdentity = SEQ_CONSISTENCY;
+	percentAlleleSeqIdentity = ALLELE_SEQ_CONSISTENCY;
 	extendSize = EXTEND_SIZE;
 	threadNum_tmp = 0;
 	minSizeLargeSV = MIN_SIZE_LARGE_SV;
@@ -233,14 +235,15 @@ int parseStat(int argc, char **argv){
 	typeMatchLevel = MATCHLEVEL_L;
 	ToolNameStore = ChromosomeNames = "";
 
-	while( (opt = getopt(argc, argv, ":m:s:t:r:o:p:P:l:T:h:C:S")) != -1 ){
+	while( (opt = getopt(argc, argv, ":m:s:t:r:o:i:a:p:l:T:h:C:S")) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
 			case 't': threadNum_tmp = stoi(optarg); break;
 			case 'o': outputPathname = optarg; break;
-			case 'p': percentSeqIdentity = stod(optarg); break;
-			case 'P': svlenRatio = stod(optarg); break;
+			case 'i': percentSeqIdentity = stod(optarg); break;
+			case 'p': svlenRatio = stod(optarg); break;
+			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
 			case 'r': htmlFilename = optarg; break;
@@ -372,6 +375,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
 	}
 	outConvertScreenFile.close();
+	usersets_num = 0;
 
 	if(convert_sv_files.size()>=1){	//multiple data sets are evaluated			sv_files1
 		for(string& sv_file1 : convert_sv_files){
@@ -524,13 +528,14 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 
 	cout << " Maximal region size: " << maxValidRegThres << endl;
 	cout << " Overlap extend size: " << extendSize << endl;
-	cout << " Percent sequence identity: " << percentSeqIdentity << endl;
-	cout << " Percent size ratio: " << svlenRatio << endl;
+	cout << "  Percent size ratio: " << svlenRatio << endl;
+	cout << "   Sequence identity: " << percentSeqIdentity << endl;
+	cout << "Allelic seq identity: " << percentAlleleSeqIdentity << endl;
 	cout << "   Number of threads: " << num_threads << endl;
 	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
-	cout << "   Type match level: " << typeMatchLevel << " (treat DUPLTCATION as INSERTION)" << endl;
+	cout << "    Type match level: " << typeMatchLevel << " (allow type match between DUPLICTION and INSERTION)" << endl;
 	else
-	cout << "   Type match level: " << typeMatchLevel << " (strict variant type matching)" << endl;
+	cout << "    Type match level: " << typeMatchLevel << " (strict variant type match)" << endl;
 	cout << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 	cout << "Long SV regions file: " << longSVFilename << endl << endl;
 
@@ -545,8 +550,9 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 
 	outStatScreenFile << " Maximal region size: " << maxValidRegThres << endl;
 	outStatScreenFile << " Overlap extend size: " << extendSize << endl;
-	outStatScreenFile << " Percent sequence identity: " << percentSeqIdentity << endl;
-	outStatScreenFile << " Percent size ratio: " << svlenRatio << endl;
+	outStatScreenFile << "  Percent size ratio: " << svlenRatio << endl;
+	outStatScreenFile << "   Sequence identity: " << percentSeqIdentity << endl;
+	outStatScreenFile << "Allelic seq identity: " << percentAlleleSeqIdentity << endl;
 	outStatScreenFile << "   Number of threads: " << num_threads << endl;
 	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
 	outStatScreenFile << "    Type match level: " << typeMatchLevel << " (treat DUPLTCATION as INSERTION)" << endl;

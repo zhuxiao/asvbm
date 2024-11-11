@@ -52,7 +52,7 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2);
 bool isOverlappedPos(size_t startPos1, size_t endPos1, size_t startPos2, size_t endPos2);
 //int MINDistance(string seq1, string seq2);
 int32_t minDistance(const string &seq1, const string &seq2);
-double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai);
+double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, double SeqIdentity);
 void SeqConsNumStat(double consistency);
 void extractRefSeq(SV_item* item1, SV_item* item2, string &seq_new1, string &seq_new2, faidx_t *fai);
 size_t customHashFunction(const string& kmer, size_t kmerSize);

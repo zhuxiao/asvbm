@@ -17,7 +17,8 @@
 #define RELIEF_FACTOR				0.1
 
 //Sequence consistency condition setting
-#define SEQ_CONSISTENCY				0.9f
+#define SEQ_CONSISTENCY				0.7f
+#define ALLELE_SEQ_CONSISTENCY		0.7f
 
 #define MAX_VALID_REG_THRES			50000
 #define EXTEND_SIZE					200  // 100
@@ -42,6 +43,8 @@
 //MatchLevel
 #define MATCHLEVEL_S				"strict"
 #define MATCHLEVEL_L				"loose"
+
+#define ALLELIC_DISTANCE			50
 
 // breakpoints
 #define ONE_OVERLAP_ONE_BP			2

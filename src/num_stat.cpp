@@ -77,12 +77,18 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	int32_t TP_benchmark, TP_user, FP, FN;
 	float recall, precision_benchmark, precision_user, F1_score_benchmark, F1_score_user, sv_num_per_reg, percent;
 	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
+	string filename_TP_user, filename_TP_bench, filename_FP, filename_FN;
 	SeqconsSum = SeqconsNum = Seqcons = 0;
 
 	filename_intersect_user = file_prefix + "_intersect_user";
 	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
 	filename_private_user = file_prefix + "_private_user";
 	filename_private_benchmark = file_prefix + "_private_benchmark";
+
+	filename_TP_user = file_prefix + "_TP_user.vcf";
+	filename_TP_bench = file_prefix + "_TP_bench.vcf";
+	filename_FP = file_prefix + "_FP.vcf";
+	filename_FN = file_prefix + "_FN.vcf";
 
 	// compute intersection
 	result = intersect(user_data, benchmark_data, fai);
@@ -124,10 +130,19 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	outStatScreenFile << out_str << endl;
 
 	// output to file
-	output2File(filename_intersect_benchmark, result.at(1), outStatScreenFile);
-	output2File(filename_intersect_user, result.at(0), outStatScreenFile);
-	output2File(filename_private_user, result.at(2), outStatScreenFile);
-	output2File(filename_private_benchmark, result.at(3), outStatScreenFile);
+	output3File(filename_intersect_benchmark, result.at(1), outStatScreenFile);
+	output3File(filename_intersect_user, result.at(0), outStatScreenFile);
+	output3File(filename_private_user, result.at(2), outStatScreenFile);
+	output3File(filename_private_benchmark, result.at(3), outStatScreenFile);
+
+	if(usersets_num <= (int32_t)SVcallernames.size()){
+		outputvcfFile(filename_TP_bench, result.at(1));
+		outputvcfFile(filename_TP_user, result.at(0));
+		outputvcfFile(filename_FP, result.at(2));
+		outputvcfFile(filename_FN, result.at(3));
+		usersets_num +=1;
+	}
+
 	if(Markers==2){
 		TPfilesPath.push_back(filename_intersect_benchmark);
 		FNfilesPath.push_back(filename_private_benchmark);
@@ -812,15 +827,182 @@ void* intersectSubset(void *arg){
 							else svlenRatio_tmp1 = (float)sv_len2 / sv_len1;
 
 							flag = false;
+							bool alleleflag = false;
 							if(svlenRatio_tmp1>=svlenRatio){
 								if(item1->sv_type==item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){
+									if(i!=subset1.size()-1 and j!=subset2.size()-1){
+
+										if((subset1.at(i+1)->startPos - item1->startPos <= ALLELIC_DISTANCE and subset1.at(i+1)->sv_type == item1->sv_type) or (i>0 and item1->startPos - subset1.at(i-1)->startPos <= ALLELIC_DISTANCE and subset1.at(i-1)->sv_type == item1->sv_type))	alleleflag = true;
+
+										if((subset2.at(j+1)->startPos - item2->startPos <= ALLELIC_DISTANCE and subset2.at(j+1)->sv_type == item2->sv_type) or (j>0 and item2->startPos - subset2.at(j-1)->startPos <= ALLELIC_DISTANCE and subset2.at(j-1)->sv_type == item2->sv_type))	alleleflag = true; //or item2->startPos - subset2.at(j-1)->startPos <=10
+									}else{
+										if(i>0 and item1->startPos - subset1.at(i-1)->startPos <= ALLELIC_DISTANCE and subset1.at(i-1)->sv_type == item1->sv_type)	alleleflag = true;
+										if(j>0 and item2->startPos - subset2.at(j-1)->startPos <= ALLELIC_DISTANCE and subset2.at(j-1)->sv_type == item2->sv_type)	alleleflag = true;
+									}
+									if(alleleflag){
 										if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV)) and typeMatchLevel == MATCHLEVEL_S){ //or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)
 //											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0 or item1->alt_seq.length()<(size_t)(sv_len1-1) or item1->alt_seq.length()>(size_t)(sv_len1+1)
 //												or item2->alt_seq.length()<(size_t)(sv_len2-1) or item2->alt_seq.length()>(size_t)(sv_len2+1)) {
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= percentAlleleSeqIdentity) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+													if(stod(item2->seqcons) < consistency){
+														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+														if(item1->seqcons.compare("-") == 0)
+															item1->seqcons = item2->seqcons = to_string(consistency);
+														else{
+															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															item2->seqcons = to_string(consistency);
+														}
+														if (consistency >= percentAlleleSeqIdentity) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else{
+														if (consistency >= percentAlleleSeqIdentity) {
+															if(item1->seqcons.compare("-") ==0)
+																item1->seqcons = to_string(consistency);
+															else{
+																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															}
+															flag = true;
+														}
+													}
+												}else{
+													if(item1->seqcons.compare("-") == 0)
+														item1->seqcons = item2->seqcons = to_string(consistency);
+													else{
+														if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+														item2->seqcons = to_string(consistency);
+													}
+													if (consistency >= percentAlleleSeqIdentity) {
+														flag = true;
+													}
+												}
+											}
+										}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
+											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
+													flag = true;
+												}else{
+													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+//													item1->seqcons = item2->seqcons = to_string(consistency);
+//													if (consistency >= percentSeqIdentity) {
+//														SeqConsNumStat(consistency);
+//														flag = true;
+//													}
+													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= percentAlleleSeqIdentity) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+														if(stod(item2->seqcons) < consistency){
+															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//															item1->seqcons = item2->seqcons = to_string(consistency);
+															if(item1->seqcons.compare("-") == 0)
+																item1->seqcons = item2->seqcons = to_string(consistency);
+															else{
+																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+																item2->seqcons = to_string(consistency);
+															}
+															if (consistency >= percentAlleleSeqIdentity) {
+																SeqConsNumStat(consistency);
+																flag = true;
+															}
+														}else{
+															if (consistency >= percentAlleleSeqIdentity) {
+//																item1->seqcons = to_string(consistency);
+																if(item1->seqcons.compare("-") ==0)
+																	item1->seqcons = to_string(consistency);
+																else{
+																	if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+																}
+																flag = true;
+															}
+														}
+													}else{
+//														item1->seqcons = item2->seqcons = to_string(consistency);
+														if(item1->seqcons.compare("-") == 0)
+															item1->seqcons = item2->seqcons = to_string(consistency);
+														else{
+															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															item2->seqcons = to_string(consistency);
+														}
+														if (consistency >= percentAlleleSeqIdentity) {
+//															item1->seqcons = item2->seqcons = to_string(consistency);
+															flag = true;
+														}
+													}
+												}
+										}else if(item1->sv_type == VAR_DEL and item2->sv_type == VAR_DEL){
+											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
+												flag = true;
+											}else{
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+//												item1->seqcons = item2->seqcons = to_string(consistency);
+//												if (consistency >= percentSeqIdentity) {
+//													SeqConsNumStat(consistency);
+//													flag = true;
+//												}
+												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= percentAlleleSeqIdentity) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+													if(stod(item2->seqcons) < consistency){
+														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														item1->seqcons = item2->seqcons = to_string(consistency);
+														if(item1->seqcons.compare("-") == 0)
+															item1->seqcons = item2->seqcons = to_string(consistency);
+														else{
+															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															item2->seqcons = to_string(consistency);
+														}
+														if (consistency >= percentAlleleSeqIdentity) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else{
+														if (consistency >= percentAlleleSeqIdentity) {
+//															item1->seqcons = to_string(consistency);
+															if(item1->seqcons.compare("-") ==0)
+																item1->seqcons = to_string(consistency);
+															else{
+																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
+															}
+															flag = true;
+														}
+													}
+												}else{
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= percentAlleleSeqIdentity) {
+//														item1->seqcons = item2->seqcons = to_string(consistency);
+														flag = true;
+													}
+												}
+											}
+										}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){	//TRA,BND,TRA_BND
+											flag = true;
+										}
+									}else{
+										if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV)) and typeMatchLevel == MATCHLEVEL_S){ //or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)
+//											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0 or item1->alt_seq.length()<(size_t)(sv_len1-1) or item1->alt_seq.length()>(size_t)(sv_len1+1)
+//												or item2->alt_seq.length()<(size_t)(sv_len2-1) or item2->alt_seq.length()>(size_t)(sv_len2+1)) {
+											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
+												flag = true;
+											}else{
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
 													if (consistency >= percentSeqIdentity) {
@@ -866,7 +1048,7 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 													flag = true;
 												}else{
-													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
 //													item1->seqcons = item2->seqcons = to_string(consistency);
 //													if (consistency >= percentSeqIdentity) {
 //														SeqConsNumStat(consistency);
@@ -921,7 +1103,7 @@ void* intersectSubset(void *arg){
 											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
 //												item1->seqcons = item2->seqcons = to_string(consistency);
 //												if (consistency >= percentSeqIdentity) {
 //													SeqConsNumStat(consistency);
@@ -969,6 +1151,7 @@ void* intersectSubset(void *arg){
 										}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){	//TRA,BND,TRA_BND
 											flag = true;
 										}
+									}
 								}
 								if(flag){
 									item1->overlapped = true;
@@ -995,57 +1178,151 @@ void* intersectSubset(void *arg){
 							else svlenRatio_tmp = (float)svlen_2 / svlen_1;
 
 							flag = false;
+							bool alleleflag1 = false;
 							if(svlenRatio_tmp>=svlenRatio){
 								if(item1->sv_type==item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){ // or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)
-									// compute the sequence consistency
-									if(((item1->sv_type==VAR_INS and item2->sv_type==VAR_INS) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_INV and item2->sv_type==VAR_INV)) and typeMatchLevel == MATCHLEVEL_S){ //(item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS) or
-										if (item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
-											flag = true;
-										}else{
-											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-//											item1->seqcons = item2->seqcons = to_string(consistency);
-//											// determine the overlap flag according to consistency
-//											if(consistency>=percentSeqIdentity) {
-//												SeqConsNumStat(consistency);
-//												flag = true;
-//											}
-											if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
-												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= percentSeqIdentity) {
-													SeqConsNumStat(consistency);
-													flag = true;
-												}
-											}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
-												if(stod(item2->seqcons) < consistency){
-													SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+									if(i!=subset1.size()-1 and j!=subset2.size()-1){
+
+											if((subset1.at(i+1)->startPos - item1->startPos <= ALLELIC_DISTANCE and subset1.at(i+1)->sv_type == item1->sv_type) or (i>0 and item1->startPos - subset1.at(i-1)->startPos <= ALLELIC_DISTANCE and subset1.at(i-1)->sv_type == item1->sv_type))	alleleflag1 = true; //or item1->startPos - subset1.at(i-1)->startPos <=10
+
+											if((subset2.at(j+1)->startPos - item2->startPos <= ALLELIC_DISTANCE and subset2.at(j+1)->sv_type == item2->sv_type) or (j>0 and item2->startPos - subset2.at(j-1)->startPos <= ALLELIC_DISTANCE and subset2.at(j-1)->sv_type == item2->sv_type))	alleleflag1 = true;
+									}else{
+										if(i>0 and item1->startPos - subset1.at(i-1)->startPos <= ALLELIC_DISTANCE and subset1.at(i-1)->sv_type == item1->sv_type)	alleleflag1 = true;
+										if(j>0 and item2->startPos - subset2.at(j-1)->startPos <= ALLELIC_DISTANCE and subset2.at(j-1)->sv_type == item2->sv_type)	alleleflag1 = true;
+									}
+									if(alleleflag1){
+										// compute the sequence consistency
+										if(((item1->sv_type==VAR_INS and item2->sv_type==VAR_INS) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_INV and item2->sv_type==VAR_INV)) and typeMatchLevel == MATCHLEVEL_S){ //(item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS) or
+											if (item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
+												flag = true;
+											}else{
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+	//											item1->seqcons = item2->seqcons = to_string(consistency);
+	//											// determine the overlap flag according to consistency
+	//											if(consistency>=percentSeqIdentity) {
+	//												SeqConsNumStat(consistency);
+	//												flag = true;
+	//											}
+												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentAlleleSeqIdentity) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+													if(stod(item2->seqcons) < consistency){
+														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= percentAlleleSeqIdentity) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else{
+														if (consistency >= percentAlleleSeqIdentity) {
+															item1->seqcons = to_string(consistency);
+															flag = true;
+														}
+													}
 												}else{
-													if (consistency >= percentSeqIdentity) {
-														item1->seqcons = to_string(consistency);
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= percentAlleleSeqIdentity) {
 														flag = true;
 													}
 												}
-											}else{
-												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= percentSeqIdentity) {
-													flag = true;
-												}
 											}
-										}
-									}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
-										if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
+										}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
+											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
+													flag = true;
+												}else{
+													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+	//												item1->seqcons = item2->seqcons = to_string(consistency);
+	//												if (consistency >= percentSeqIdentity) {
+	//													SeqConsNumStat(consistency);
+	//													flag = true;
+	//												}
+													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= percentSeqIdentity) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+														if(stod(item2->seqcons) < consistency){
+															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+															item1->seqcons = item2->seqcons = to_string(consistency);
+															if (consistency >= percentAlleleSeqIdentity) {
+																SeqConsNumStat(consistency);
+																flag = true;
+															}
+														}else{
+															if (consistency >= percentAlleleSeqIdentity) {
+																item1->seqcons = to_string(consistency);
+																flag = true;
+															}
+														}
+													}else{
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= percentAlleleSeqIdentity) {
+	//														item1->seqcons = item2->seqcons = to_string(consistency);
+															flag = true;
+														}
+													}
+												}
+										}else if(item1->sv_type==VAR_DEL and item2->sv_type==VAR_DEL){
+											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-//												item1->seqcons = item2->seqcons = to_string(consistency);
-//												if (consistency >= percentSeqIdentity) {
-//													SeqConsNumStat(consistency);
-//													flag = true;
-//												}
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+	//											item1->seqcons = item2->seqcons = to_string(consistency);
+	//											// determine the overlap flag according to consistency
+	//											if(consistency>=percentSeqIdentity) {
+	//												SeqConsNumStat(consistency);
+	//												flag = true;
+	//											}
+												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= percentAlleleSeqIdentity) {
+														SeqConsNumStat(consistency);
+														flag = true;
+													}
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+													if(stod(item2->seqcons) < consistency){
+														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= percentAlleleSeqIdentity) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else{
+														if (consistency >= percentAlleleSeqIdentity) {
+															item1->seqcons = to_string(consistency);
+															flag = true;
+														}
+													}
+												}else{
+													item1->seqcons = item2->seqcons = to_string(consistency);
+													if (consistency >= percentAlleleSeqIdentity) {
+	//													item1->seqcons = item2->seqcons = to_string(consistency);
+														flag = true;
+													}
+												}
+											}
+										}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){
+											flag = true;
+										}
+									}else{
+										// compute the sequence consistency
+										if(((item1->sv_type==VAR_INS and item2->sv_type==VAR_INS) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_INV and item2->sv_type==VAR_INV)) and typeMatchLevel == MATCHLEVEL_S){ //(item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS) or
+											if (item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
+												flag = true;
+											}else{
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+		//											item1->seqcons = item2->seqcons = to_string(consistency);
+		//											// determine the overlap flag according to consistency
+		//											if(consistency>=percentSeqIdentity) {
+		//												SeqConsNumStat(consistency);
+		//												flag = true;
+		//											}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
 													if (consistency >= percentSeqIdentity) {
@@ -1069,54 +1346,92 @@ void* intersectSubset(void *arg){
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
 													if (consistency >= percentSeqIdentity) {
-//														item1->seqcons = item2->seqcons = to_string(consistency);
 														flag = true;
 													}
 												}
 											}
-									}else if(item1->sv_type==VAR_DEL and item2->sv_type==VAR_DEL){
-										if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
-											flag = true;
-										}else{
-											consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai);
-//											item1->seqcons = item2->seqcons = to_string(consistency);
-//											// determine the overlap flag according to consistency
-//											if(consistency>=percentSeqIdentity) {
-//												SeqConsNumStat(consistency);
-//												flag = true;
-//											}
-											if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
-												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= percentSeqIdentity) {
-													SeqConsNumStat(consistency);
+										}else if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV) or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)) and typeMatchLevel == MATCHLEVEL_L){
+											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 													flag = true;
+												}else{
+													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+		//												item1->seqcons = item2->seqcons = to_string(consistency);
+		//												if (consistency >= percentSeqIdentity) {
+		//													SeqConsNumStat(consistency);
+		//													flag = true;
+		//												}
+													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= percentSeqIdentity) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
+														if(stod(item2->seqcons) < consistency){
+															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+															item1->seqcons = item2->seqcons = to_string(consistency);
+															if (consistency >= percentSeqIdentity) {
+																SeqConsNumStat(consistency);
+																flag = true;
+															}
+														}else{
+															if (consistency >= percentSeqIdentity) {
+																item1->seqcons = to_string(consistency);
+																flag = true;
+															}
+														}
+													}else{
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= percentSeqIdentity) {
+		//														item1->seqcons = item2->seqcons = to_string(consistency);
+															flag = true;
+														}
+													}
 												}
-											}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
-												if(stod(item2->seqcons) < consistency){
-													SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+										}else if(item1->sv_type==VAR_DEL and item2->sv_type==VAR_DEL){
+											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
+												flag = true;
+											}else{
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+		//											item1->seqcons = item2->seqcons = to_string(consistency);
+		//											// determine the overlap flag according to consistency
+		//											if(consistency>=percentSeqIdentity) {
+		//												SeqConsNumStat(consistency);
+		//												flag = true;
+		//											}
+												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
 													if (consistency >= percentSeqIdentity) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
+													if(stod(item2->seqcons) < consistency){
+														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+														item1->seqcons = item2->seqcons = to_string(consistency);
+														if (consistency >= percentSeqIdentity) {
+															SeqConsNumStat(consistency);
+															flag = true;
+														}
+													}else{
+														if (consistency >= percentSeqIdentity) {
+															item1->seqcons = to_string(consistency);
+															flag = true;
+														}
+													}
 												}else{
+													item1->seqcons = item2->seqcons = to_string(consistency);
 													if (consistency >= percentSeqIdentity) {
-														item1->seqcons = to_string(consistency);
+		//													item1->seqcons = item2->seqcons = to_string(consistency);
 														flag = true;
 													}
 												}
-											}else{
-												item1->seqcons = item2->seqcons = to_string(consistency);
-												if (consistency >= percentSeqIdentity) {
-//													item1->seqcons = item2->seqcons = to_string(consistency);
-													flag = true;
-												}
 											}
+										}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){
+											flag = true;
 										}
-									}else if((item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA) or(item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or(item1->sv_type == VAR_INV_TRA and item2->sv_type == VAR_INV_TRA)){
-										flag = true;
 									}
-								}
+							}
 								if(flag){
 									item1->overlapped = true;
 									item2->overlapped = true;
@@ -1521,7 +1836,7 @@ int32_t minDistance(const string &seq1, const string &seq2) {
 	return result;
 }
 
-double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
+double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, double SeqIdentity){
 	string seq1, seq2, aln_seq1, aln_seq2,  AlignSeq,  AlignSeq1, aln_seq3, aln_seq4;
 	double consistency,consistency_tmp1, consistency_tmp2;
 	vector<Minimizer> minimizers, minimizers1;
@@ -1539,14 +1854,16 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 			extractRefSeq(item1, item2, seq1, seq2, fai);
 			needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq3, aln_seq4);
 			consistency_tmp2 = calculate_consistency(aln_seq3, aln_seq4);
+//			if(consistency_tmp1 > consistency_tmp2)
+//				cout << "chr: " << item1->chrname << " startPos: " << item1->startPos << " SVtype: " << item1->sv_type << "SVLen: " << item1->sv_len << " item2_startpos: " << item2->startPos << " consistency_tmp1:" <<consistency_tmp1<<" consistency_tmp2:" << consistency_tmp2 << endl;
 			consistency = (consistency_tmp1 > consistency_tmp2) ? consistency_tmp1 : consistency_tmp2;
 //			cout << "seq1: "<< seq1 << endl;
 //			cout << "seq2: "<< seq2 << endl;
-			if(consistency >= percentSeqIdentity)	return consistency;
+			if(consistency >= SeqIdentity)	return consistency;
 			else{
 				int distance = minDistance(seq1, seq2);
 				consistency =  1 - ((double)distance / (seq1.length() + seq2.length()));
-				if(consistency >= percentSeqIdentity) return consistency;
+				if(consistency >= SeqIdentity) return consistency;
 				else seq1 = seq2 = aln_seq1 = aln_seq2 = "";
 			}
 		}else{
@@ -1554,7 +1871,7 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 			upperSeq(seq1);
 			upperSeq(seq2);
 			consistency = MinimizerMethodOp(seq1, seq2, aln_seq1, aln_seq2, AlignSeq, AlignSeq1);
-			if(consistency >= percentSeqIdentity)	return consistency;
+			if(consistency >= SeqIdentity)	return consistency;
 			else	seq1 = seq2 = aln_seq1 = aln_seq2 = AlignSeq = AlignSeq1 = "";
 		}
 	}
@@ -1596,7 +1913,7 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai){
 	/*if(item1->sv_type == VAR_INS and consistency < percentSeqIdentity){
 			cout<<"111111111111: "<<item1->chrname<<" :"<<item1->startPos<<endl;
 		}*/
-	if(consistency < percentSeqIdentity and seq1.size() <= EDLIBLEN){
+	if(consistency < SeqIdentity and seq1.size() <= EDLIBLEN){
 		int distance = minDistance(seq1, seq2);
 		consistency =  1 - ((double)distance / (seq1.length() + seq2.length()));
 	}
@@ -1641,8 +1958,13 @@ void extractRefSeq(SV_item* item1, SV_item* item2, string &seq_new1, string &seq
 
 	startpos1 = item1->startPos;
 	startpos2 = item2->startPos;
-	endpos1 = item1->endPos;
-	endpos2 = item2->endPos;
+	if((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DEL || item2->sv_type == VAR_DEL)){
+		endpos1 = item1->startPos + item1->ref_seq.length() - 1;
+		endpos2 = item2->startPos + item2->ref_seq.length() - 1;
+	}else{
+		endpos1 = item1->endPos;
+		endpos2 = item2->endPos;
+	}
 	/*if(startpos1<=startpos2)
 		s = startpos1;
 	else

@@ -1,5 +1,6 @@
 #include <vector>
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <iostream>
 #include "extvab.h"
@@ -7,4 +8,5 @@
 
 using namespace std;
 
+string escapeHtml(const std::string& str);
 void Generatehtml(string figuresFilePath);

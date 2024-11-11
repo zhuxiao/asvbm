@@ -30,6 +30,7 @@ extern string sizeNumStatDirname;
 extern string acquiesce_count;
 extern string method_name;
 extern string program_cmd_str;
+extern string all_cmd_program;
 extern string convertScreenFilename;
 extern string statScreenFilename;
 extern string Rscriptfilename;
@@ -63,6 +64,7 @@ extern vector< vector<string>> regionmetrics;
 extern vector<string> regSizeFiles;
 extern unordered_map<std::string, int> benchmarklineMap;
 extern vector<string> benchmarkannotationLines;
+extern vector <vector<string>> usersetsannotationLines;
 extern bool sign;
 
 extern vector<string> ResultdataPath;
@@ -100,6 +102,7 @@ extern vector<string> FNfilesPath;
 
 extern int32_t maxValidRegThres;
 extern double percentSeqIdentity;
+extern double percentAlleleSeqIdentity;
 extern string snvFilename;
 extern string mateItemFilename;
 extern string longSVFilename;
@@ -110,6 +113,7 @@ extern string htmlFilename;
 
 extern vector<size_t> size_div_vec;
 extern vector<double> ratio_div_vec;
+extern int32_t usersets_num;
 
 extern pthread_mutex_t mtx_overlap;
 

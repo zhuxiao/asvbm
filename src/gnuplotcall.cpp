@@ -29,7 +29,7 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		multipledataset(MeticsValues, sv_files1, tool_names, outputBasicMetricschartPath);
 		multipledataset(MeticsValues1, sv_files1, tool_names, outputBasicMetricschartPath);
 
-		outputDiffRangeBasicMetricschart = outputBasicMetricschartPath + '/' + outputDiffRangeBasicMetricschart;
+		outputDiffRangeBasicMetricschart = outputBasicMetricschartPath + "/" + outputDiffRangeBasicMetricschart;
 		mkdir(outputDiffRangeBasicMetricschart.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		//Draw multiple single graph patterns
 //		ComparisonofMetricsindifferentrangesOp(outputDiffRangeBasicMetricschart, tool_names, sv_files1);
@@ -39,14 +39,14 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		GenerateMultiBarCharts(outputDiffRangeBasicMetricschart, filenames, tool_names, sv_files1);
 
 		//sv information comparison of different sizes
-		SVsizeratiofile = outputBasicMetricschartPath + '/' + SVsizeratiofile;
+		SVsizeratiofile = outputBasicMetricschartPath + "/" + SVsizeratiofile;
 		mkdir(SVsizeratiofile.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		GenerateSVsizeRatioFileGraph(sv_files1, tool_names, SVsizeratiofile);
 		//Rscript.R
 		//outputBasicMetricschartPath (figures 路径)
 		RscriptGeneration(outputBasicMetricschartPath);
 		//UpSetR
-		outputUpSetRchart = outputBasicMetricschartPath + '/' + outputUpSetRchart;
+		outputUpSetRchart = outputBasicMetricschartPath + "/" + outputUpSetRchart;
 		mkdir(outputUpSetRchart.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		TPfilemanipulation(outputUpSetRchart);
 		//run Rscript.R
@@ -58,7 +58,7 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 		GenerateSharedFNfile(outputCommonFN);
 //		findCommonFN(outputCommonFN, FNfilesPath);
 		//SV distribution plot
-		SVdistributionDirname = outputBasicMetricschartPath + '/' + SVdistributionDirname;
+		SVdistributionDirname = outputBasicMetricschartPath + "/" + SVdistributionDirname;
 		mkdir(SVdistributionDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 		//plot
 		SvNumberDistributionGraph(regSizeFiles, SVdistributionDirname);
@@ -317,7 +317,7 @@ void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathn
 	dataV.push_back(make_pair("F1-score", MeticsValues[0][3]));
 
 	string outputFileName = "benchmarking_result.png";
-	string outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
+	string outputFileNamePath = outputBasicMetricschart + "/" + outputFileName;
 
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");
 	if (!gnuplotPipe) {
@@ -357,7 +357,7 @@ void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathna
 	    dataV.push_back(make_pair("FN", MeticsValues1[0][3]));
 
 	    outputFileName = "result_classification.png";
-	    outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
+	    outputFileNamePath = outputBasicMetricschart + "/" + outputFileName;
 	    // Create a pipe connection to GNUplot
 	    FILE* gnuplotPipe = popen("gnuplot -persist", "w");
 	    if (!gnuplotPipe) {
@@ -614,7 +614,7 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > Me
 
 	// Create a data file to hold the data
 	filename = "quantitative_statistics";
-	filenamePath = sizeNumStatDirname + '/'+ filename;
+	filenamePath = sizeNumStatDirname + "/" + filename;
 	ofstream dataFile(filenamePath);
 	if (!dataFile.is_open()) {
 		cerr << "Unable to create data file: " << filenamePath << endl;
@@ -633,7 +633,7 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > Me
 
 	// Set the file name to save
 	outputFileName = "quantitative_Statistics.png";
-	outputFileNamePath = sizeNumStatDirname + '/' + outputFileName;
+	outputFileNamePath = sizeNumStatDirname + outputFileName;
 	outputFileNamePath_tmp=getContentAfterSlash(outputFileNamePath);
 	folderPng4.push_back(outputFileNamePath_tmp);
 	// Create a pipe connection to GNUplot
@@ -690,7 +690,7 @@ void ComparisonofMetricsindifferentranges(string &DiffRangeStatDirname, vector< 
 
 	// Create a data file to hold the data
 	string filename = FileName;
-	string filenamePath = DiffRangeStatDirname + '/'+ filename;
+	string filenamePath = DiffRangeStatDirname + "/" + filename;
 	ofstream dataFile(filenamePath);
 	if (!dataFile.is_open()) {
 		cerr << "Unable to create data file" << endl;
@@ -709,7 +709,7 @@ void ComparisonofMetricsindifferentranges(string &DiffRangeStatDirname, vector< 
 
 	// Set the file name to save
 	string outputFileName = outputfilename;
-	string outputFileNamePath = DiffRangeStatDirname + '/' + outputFileName;
+	string outputFileNamePath = DiffRangeStatDirname + "/" + outputFileName;
 
 	// Create a pipe connection to GNUplot
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");
@@ -803,7 +803,7 @@ void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, stri
 	string title = "Range:" + FileName;
 	// Create a data file to hold the data
 	string filename = FileName;
-	string filenamePath = DiffRangeStatDirname + '/'+ filename;
+	string filenamePath = DiffRangeStatDirname + "/" + filename;
 	ofstream dataFile(filenamePath);
 	if (!dataFile.is_open()) {
 		cerr << "Unable to create data file: " << filenamePath << endl;
@@ -826,7 +826,7 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 	string outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 	vector<string> scenarios;
 	outputFileName = "different_range.png";
-	outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
+	outputFileNamePath = outputBasicMetricschart + "/" + outputFileName;
 	outputFileNamePath_tmp=getContentAfterSlash(outputFileNamePath);
 	folderPng5.push_back(outputFileNamePath_tmp);
 
@@ -1011,9 +1011,9 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 void GenerateSVsizeRatioFileGraph(vector<string> svfilesV, vector<string> toolnameV, string &FileSavingPath) {
     vector<string> annotations;
     string filename = "sv_size_ratio", filename1 = "sv_quantity_ratio", filenamePath, filename1Path, outputFileNamePath, outputFileName = "sv_size_ratio.png";
-    filenamePath = FileSavingPath + '/' + filename;
-    filename1Path =  FileSavingPath + '/' + filename1;
-    outputFileNamePath = FileSavingPath + '/' +outputFileName;
+    filenamePath = FileSavingPath + "/" + filename;
+    filename1Path =  FileSavingPath + "/" + filename1;
+    outputFileNamePath = FileSavingPath + "/" +outputFileName;
 
     if (toolnameV.size() > 0) {
     	annotations = toolnameV;
@@ -1333,19 +1333,36 @@ void findCommonFN(string& outputFile, vector<string>& inputFiles) {
     outfile.close();
 }
 
-// Helper function to extract chromosome and position
-std::pair<std::string, int> parseChromPos(const std::string& variantInfo) {
+/*// Helper function to extract chromosome and position
+std::pair<string, int> parseChromPos(const string& variantInfo) {
     size_t firstTab = variantInfo.find('\t');
     size_t secondTab = variantInfo.find('\t', firstTab + 1);
 
     // Extract chromosome and position
-    std::string chrom = variantInfo.substr(0, firstTab); // Chromosome is a string
-    int pos = std::stoi(variantInfo.substr(firstTab + 1, secondTab - firstTab - 1)); // Position is an integer
+    string chrom = variantInfo.substr(0, firstTab); // Chromosome is a string
+    int pos = stoi(variantInfo.substr(firstTab + 1, secondTab - firstTab - 1)); // Position is an integer
 
     return {chrom, pos};
+}*/
+
+// Helper function to convert chromosome to numeric format for sorting
+int chromToInt(const string& chrom) {
+    string chromStr = chrom;
+    if (chromStr.rfind("chr", 0) == 0) { // Check if "chr" prefix exists
+        chromStr = chromStr.substr(3); // Remove "chr" prefix
+    }
+
+    if (chromStr == "X") return 23;
+    if (chromStr == "Y") return 24;
+    if (chromStr == "MT" || chromStr == "M") return 25; // Handle mitochondrial DNA
+    try {
+        return stoi(chromStr); // Convert numeric chromosome strings directly
+    } catch (...) {
+        return 26; // Unknown chromosomes will be sorted to the end
+    }
 }
 
-// Sorting function for the vector
+/*// Sorting function for the vector
 bool numericSort(const std::pair<std::string, int>& lhs, const std::pair<std::string, int>& rhs) {
     auto lhsParsed = parseChromPos(lhs.first);
     auto rhsParsed = parseChromPos(rhs.first);
@@ -1354,20 +1371,44 @@ bool numericSort(const std::pair<std::string, int>& lhs, const std::pair<std::st
         return lhsParsed.second < rhsParsed.second; // Sort by position if chromosome is the same
     }
     return lhsParsed.first < rhsParsed.first; // Otherwise sort by chromosome
+}*/
+
+// Helper function to extract chromosome and position from a variant line
+pair<string, int> parseChromPos(const string& variantInfo) {
+    size_t firstTab = variantInfo.find('\t');
+    size_t secondTab = variantInfo.find('\t', firstTab + 1);
+
+    // Extract chromosome and position
+    string chrom = variantInfo.substr(0, firstTab); // Chromosome is a string
+    int pos = stoi(variantInfo.substr(firstTab + 1, secondTab - firstTab - 1)); // Position is an integer
+
+    return {chrom, pos};
+}
+
+// Sorting function for the vector, based on chromosome and position
+bool numericSort(const pair<string, int>& lhs, const pair<string, int>& rhs) {
+    auto lhsParsed = parseChromPos(lhs.first);
+    auto rhsParsed = parseChromPos(rhs.first);
+
+    int lhsChrom = chromToInt(lhsParsed.first);
+    int rhsChrom = chromToInt(rhsParsed.first);
+
+    if (lhsChrom == rhsChrom) {
+        return lhsParsed.second < rhsParsed.second; // Sort by position if chromosome is the same
+    }
+    return lhsChrom < rhsChrom; // Otherwise sort by chromosome
 }
 
 //Shared FN
-void GenerateSharedFNfile(string& outputFile){
-	string outputFilename = "bench_low_quality_variant.vcf";
-	outputFilename = outputFile + "/" + outputFilename;
-	string outputBenchfilename = "Refined_benchmark.vcf";
-	outputBenchfilename = outputFile + "/" + outputBenchfilename;
+/*void GenerateSharedFNfile(string& outputFile){
+	string outputFilename = outputFile + "/" + "bench_low_quality_variant.vcf";
+	string outputBenchfilename = outputFile + "/" + "Refined_benchmark.vcf";
 
 	vector<std::pair<std::string, int>> sortedVec(benchmarklineMap.begin(), benchmarklineMap.end());
-//	sort(sortedVec.begin(), sortedVec.end(), [](const std::pair<std::string, int>& lhs, const std::pair<std::string, int>& rhs) {
+//	sort(sortedVec.begin(), sortedVec.end(), [](const pair<std::string, int>& lhs, const pair<std::string, int>& rhs) {
 //	    return lhs.first < rhs.first;
 //	});
-	std::sort(sortedVec.begin(), sortedVec.end(), numericSort);
+	sort(sortedVec.begin(), sortedVec.end(), numericSort);
 
 	ofstream outFile(outputFilename);
 	if (!outFile) {
@@ -1406,6 +1447,50 @@ void GenerateSharedFNfile(string& outputFile){
 	 }
 	outFile1.close();
 	cout << endl << "The refined benchmark set has been saved to: " << outputBenchfilename << endl;
+}*/
+
+// Shared FN generation function
+void GenerateSharedFNfile(string& outputFile) {
+    string outputFilename = outputFile + "/" + "bench_low_quality_variant.vcf";
+    string outputBenchfilename = outputFile + "/" + "Refined_benchmark.vcf";
+
+    // Assume benchmarklineMap is of type map<string, int>
+    vector<pair<string, int>> sortedVec(benchmarklineMap.begin(), benchmarklineMap.end());
+    sort(sortedVec.begin(), sortedVec.end(), numericSort);
+
+    // Writing to the output file
+    ofstream outFile(outputFilename);
+    if (!outFile) {
+        cerr << "Unable to open output file!" << endl;
+        return;
+    }
+    for (const auto& headerLine : benchmarkannotationLines) {
+        outFile << headerLine << endl;
+    }
+    for (const auto& pair : sortedVec) {
+        if (pair.second == int(SVcallernames.size())) {
+            outFile << pair.first << endl;
+        }
+    }
+    outFile.close();
+    cout << endl << "The result of the shared FN records has been output to: " << outputFilename << endl;
+
+    // Writing to the benchmark file
+    ofstream outFile1(outputBenchfilename);
+    if (!outFile1) {
+        cerr << "Unable to open output file!" << endl;
+        return;
+    }
+    for (const auto& headerLine : benchmarkannotationLines) {
+        outFile1 << headerLine << endl;
+    }
+    for (const auto& pair : sortedVec) {
+        if (pair.second != int(SVcallernames.size())) {
+            outFile1 << pair.first << endl;
+        }
+    }
+    outFile1.close();
+    cout << endl << "The refined benchmark set has been saved to: " << outputBenchfilename << endl;
 }
 
 //sv distribution

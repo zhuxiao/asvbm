@@ -263,3 +263,159 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 	outfile.close();
 }
 
+void output3File(const string &filename, vector<SV_item*> &data, ofstream &logfile){
+	ofstream outfile;
+	string line, sv_type_str;
+	SV_item *item;
+
+	outfile.open(filename);
+	if(!outfile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << filename << endl;
+		exit(1);
+	}
+
+	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt\tInfo\tLine";
+	outfile << line << endl;
+
+	for(size_t i=0; i<data.size(); i++){
+		item = data.at(i);
+
+		switch(item->sv_type){
+			case VAR_UNC: sv_type_str = "UNC"; break;
+			case VAR_INS: sv_type_str = "INS"; break;
+			case VAR_DEL: sv_type_str = "DEL"; break;
+			case VAR_DUP: sv_type_str = "DUP"; break;
+			case VAR_INV: sv_type_str = "INV"; break;
+			case VAR_TRA: sv_type_str = "TRA"; break;
+			case VAR_BND: sv_type_str = "BND"; break;
+			case VAR_INV_TRA: sv_type_str = "INVTRA"; break;
+			case VAR_MIX: sv_type_str = "MIX"; break;
+			case VAR_MNP: sv_type_str = "MNP"; break;
+			case VAR_SNV: sv_type_str = "SNV"; break;
+			case VAR_CNV: sv_type_str = "CNV"; break;
+			default:
+				cerr << "line=" << __LINE__ << ", invalid sv type: " << item->sv_type << endl;
+				exit(1);
+		}
+		stringstream ss;
+		string seqcons_filtered;
+		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND){
+			if(item->seqcons.compare("-")!=0 and item->seqcons.compare("")!=0){
+				for(char c: item->seqcons){
+					if(isdigit(c) or c=='.'){
+						seqcons_filtered+=c;
+					}
+				}
+				if(!seqcons_filtered.empty()){
+					ss << setprecision(4) << stod(seqcons_filtered);
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "Identity=" + ss.str() + "\t" + "-";
+				}
+			}else{
+				if(item->seqcons.compare("")!=0)
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + item->seqcons + "\t" + "-";
+				else
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "-" + "\t" + "-";
+			}
+		}else{
+			if(item->seqcons.compare("-")!=0)
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "Identity=" + item->seqcons + "\t" + "-";
+			else
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + item->seqcons + "\t" + "-";
+		}
+			outfile << line << endl;
+	}
+
+	cout << data.size() << " items were saved to " << filename << endl;
+	logfile << data.size() << " items were saved to " << filename << endl;
+	cout << endl;
+
+	outfile.close();
+}
+
+bool checkForFileInPath(const string& path, const string& target_file) {
+	size_t pos = path.find_last_of("/\\");
+	std::string last_layer = (pos == std::string::npos) ? path : path.substr(pos + 1);
+
+	return last_layer.find(target_file) != std::string::npos;
+}
+
+void outputvcfFile(const string &filename, vector<SV_item*> &data){
+	ofstream outfile;
+	string line, sv_type_str;
+	SV_item *item;
+
+	outfile.open(filename);
+	if(!outfile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << filename << endl;
+		exit(1);
+	}
+
+//	line = "#chr\tstartPos\tendPos\tSVType\tSVLen\tRef\tAlt\tInfo\tLine";
+	if(checkForFileInPath(filename, "num_stat_TP_bench.vcf") or checkForFileInPath(filename, "num_stat_FN.vcf")){
+		for (const auto& headerLine1 : benchmarkannotationLines) {
+			outfile << headerLine1 << endl;
+		}
+	}else{
+		for (const auto& headerLine : usersetsannotationLines[usersets_num]) {
+			outfile << headerLine << endl;
+		}
+	}
+
+	for(size_t i=0; i<data.size(); i++){
+		item = data.at(i);
+
+		switch(item->sv_type){
+			case VAR_UNC: sv_type_str = "UNC"; break;
+			case VAR_INS: sv_type_str = "INS"; break;
+			case VAR_DEL: sv_type_str = "DEL"; break;
+			case VAR_DUP: sv_type_str = "DUP"; break;
+			case VAR_INV: sv_type_str = "INV"; break;
+			case VAR_TRA: sv_type_str = "TRA"; break;
+			case VAR_BND: sv_type_str = "BND"; break;
+			case VAR_INV_TRA: sv_type_str = "INVTRA"; break;
+			case VAR_MIX: sv_type_str = "MIX"; break;
+			case VAR_MNP: sv_type_str = "MNP"; break;
+			case VAR_SNV: sv_type_str = "SNV"; break;
+			case VAR_CNV: sv_type_str = "CNV"; break;
+			default:
+				cerr << "line=" << __LINE__ << ", invalid sv type: " << item->sv_type << endl;
+				exit(1);
+		}
+		/*stringstream ss;
+		string seqcons_filtered;*/
+		if(item->sv_type!=VAR_TRA and item->sv_type!=VAR_BND){
+			/*if(item->seqcons.compare("-")!=0 and item->seqcons.compare("")!=0){
+				for(char c: item->seqcons){
+					if(isdigit(c) or c=='.'){
+						seqcons_filtered+=c;
+					}
+				}
+				if(!seqcons_filtered.empty()){
+					ss << setprecision(4) << stod(seqcons_filtered);
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "Identity=" + ss.str() + "\t" + item->lineInfo;
+				}
+			}else{
+				if(item->seqcons.compare("")!=0)
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + item->seqcons + "\t" + item->lineInfo;
+				else
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "-" + "\t" + item->lineInfo;
+			}*/
+			line = item->lineInfo;
+		}else{
+			/*if(item->seqcons.compare("-")!=0)
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "Identity=" + item->seqcons + "\t" + item->lineInfo;
+			else
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + item->seqcons + "\t" + item->lineInfo;
+			*/
+			line = item->lineInfo;
+		}
+			outfile << line << endl;
+	}
+
+	/*cout << data.size() << " items were saved to " << filename << endl;
+	logfile << data.size() << " items were saved to " << filename << endl;*/
+//	cout << endl;
+
+	outfile.close();
+}
+

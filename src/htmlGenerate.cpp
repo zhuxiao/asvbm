@@ -1,9 +1,27 @@
 #include "htmlGenerate.h"
 
+
+std::string escapeHtml(const std::string& str) {
+    std::ostringstream escaped;
+    for (char ch : str) {
+        switch (ch) {
+            case '&':  escaped << "&amp;";    break;
+            case '\"': escaped << "&quot;";   break;
+            case '\'': escaped << "&#39;";    break;
+            case '<':  escaped << "&lt;";     break;
+            case '>':  escaped << "&gt;";     break;
+            default:   escaped << ch;        break;
+        }
+    }
+    return escaped.str();
+}
+
 void Generatehtml(string figuresFilePath){
 	int32_t table_num = 1, figure_num = 1;
 	string HtmlFilePath = outputPathname + '/' + htmlFilename;
 	ofstream htmlFile(HtmlFilePath);
+
+//	std::string escaped_cmd_str = escapeHtml(all_cmd_program);
 
 	if (htmlFile.is_open()) {
 		htmlFile << "<!DOCTYPE html>\n";
@@ -99,7 +117,7 @@ void Generatehtml(string figuresFilePath){
 
 		htmlFile << "<h1>Benchmarking Reports</h1>\n";
 		htmlFile << "<div class=\"command-container\">\n";
-		htmlFile << "<pre>ASVBM command: " << "<br>$ " << program_cmd_str << "</pre>\n";
+		htmlFile << "<pre>ASVBM command: " << "<br>$ " << all_cmd_program << "</pre>\n";
 		htmlFile << "</div>\n";
 
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";

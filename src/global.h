@@ -30,6 +30,7 @@ string sizeNumStatDirname = "4_size_num_stat/";
 string acquiesce_count = "method";
 string method_name = "method";
 string program_cmd_str = "";
+string all_cmd_program = "";
 string convertScreenFilename = "convert_screen";
 string statScreenFilename = "stat_screen";
 string Rscriptfilename = "UpSetR.R";
@@ -67,6 +68,7 @@ vector< vector<string>> regionmetrics = {{"Region", "#TP_bench", "#TP_user", "#F
 vector<string> regSizeFiles;
 unordered_map<std::string, int> benchmarklineMap;
 vector<string> benchmarkannotationLines;
+vector <vector<string>> usersetsannotationLines;
 bool sign;
 
 vector<string> ResultdataPath;
@@ -102,6 +104,7 @@ vector<string> FNfilesPath;
 
 int32_t maxValidRegThres;
 double percentSeqIdentity;
+double percentAlleleSeqIdentity;
 string mateItemFilename = "duplicated_mate_items.bed";
 string snvFilename = "snv_items.bed";
 string longSVFilename = "long_sv_reg.bed";
@@ -112,6 +115,7 @@ string htmlFilename = "asvbm_reports.html";
 
 vector<size_t> size_div_vec = {100, 250, 500, 1000, 2500, 5000, 10000};
 vector<double> ratio_div_vec = {0.5, 0.7, 1.2, 2, 5, 10, 50, 100};
+int32_t usersets_num = 0;
 
 pthread_mutex_t mtx_overlap = PTHREAD_MUTEX_INITIALIZER;
 

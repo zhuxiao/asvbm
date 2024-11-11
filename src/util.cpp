@@ -135,6 +135,25 @@ string getProgramCmdStr(int argc, char *argv[]){
 	return program_cmd_str;
 }
 
+std::string getAllProgramCmdStr(int argc, char *argv[]) {
+    std::string program_cmd = argv[0];
+
+    for (int i = 1; i < argc; i++) {
+        std::string arg = argv[i];
+
+        if ((arg == "-T" || arg == "-C") && i + 1 < argc) {
+            program_cmd += " " + arg + " \"" + std::string(argv[i + 1]) + "\"";
+            i++;
+        } else {
+            if (arg.find(' ') != std::string::npos || arg.find(';') != std::string::npos) {
+                arg = "\"" + arg + "\"";
+            }
+            program_cmd += " " + arg;
+        }
+    }
+    return program_cmd;
+}
+
 bool isDigitString(string &str){
 	bool flag = true;
 	for (unsigned i = 0; i < str.size(); i++)

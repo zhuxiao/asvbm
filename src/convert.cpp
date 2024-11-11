@@ -146,6 +146,7 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 	SV_item *sv_item, *sv_item1, *sv_item2;
 	char *seq;
 	faidx_t *fai;
+	vector<string> userannotationLines;
 
 	fai = fai_load(reffilename.c_str());
 	is_svlen_flag = false;
@@ -308,6 +309,7 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 				}
 			}else{
 				if(label.compare("benchmark")==0)	benchmarkannotationLines.push_back(line);
+				if(label.compare("user")==0)	{ userannotationLines.push_back(line);}
 			}
 		}
 	}
@@ -325,6 +327,8 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 
 	// release memory
 	releaseSVItemVec(sv_item_vec);
+	usersetsannotationLines.push_back(userannotationLines);
+	usersets_num += 1;
 }
 
 // convert data
@@ -955,7 +959,9 @@ SV_item *allocateSVItem(string &chrname, size_t startPos, size_t endPos, string 
 	item->overlapped = false;
 	item->validFlag = true;
 	item->seqcons = "-";
-	if(tab.compare("benchmark")==0)	item->lineInfo = line; else item->lineInfo = "-";
+	if(tab.compare("benchmark")==0)	item->lineInfo = line;
+	else if(tab.compare("user")==0)	item->lineInfo = line;
+	else item->lineInfo = "-";
 	return item;
 }
 

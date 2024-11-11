@@ -4,6 +4,7 @@
 int main(int argc, char *argv[]){
 
 	program_cmd_str = getProgramCmdStr(argc, argv);
+	all_cmd_program = getAllProgramCmdStr(argc, argv);
 
 	if (argc < 2) { showUsageStat(); return 1; }
 	string gnuplot_version = getProgramVersion("gnuplot --version");

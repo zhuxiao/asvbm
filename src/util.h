@@ -14,6 +14,7 @@ string double2Str(double num, int32_t fixedPrecision);
 bool isBase(const char ch);
 void printSV(vector<SV_item*> &data);
 string getProgramCmdStr(int argc, char *argv[]);
+string getAllProgramCmdStr(int argc, char *argv[]);
 bool isDigitString(string &str);
 void reverseSeq(string &seq);
 void reverseComplement(string &seq);

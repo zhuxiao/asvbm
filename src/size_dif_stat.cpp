@@ -406,7 +406,7 @@ vector< vector<int32_t> > computeDifStatVec(vector<SV_pair*> &sv_pair_vec){
 			if(maxValue<item->dif_size) maxValue = item->dif_size;
 		}
 
-		if(minValue<0){
+		if(minValue<=0){
 			tmp = -minValue;
 			if(tmp<=MAX_DIF_SIZE) negative_vec_size = (tmp - 1) / SUB_DIF_REG_SIZE + 1;
 			else negative_vec_size = (MAX_DIF_SIZE - 1) / SUB_DIF_REG_SIZE + 2;
@@ -418,8 +418,10 @@ vector< vector<int32_t> > computeDifStatVec(vector<SV_pair*> &sv_pair_vec){
 		}else positive_vec_size = 0;
 
 		// push back items
-		for(i=0; i<negative_vec_size; i++) negative_dif_stat_vec.push_back(0);
-		for(i=0; i<positive_vec_size; i++) positive_dif_stat_vec.push_back(0);
+		negative_vec_size = 20;
+		positive_vec_size = 20;
+		for(i=0; i<negative_vec_size; i++) negative_dif_stat_vec.push_back(0);	//negative_vec_size
+		for(i=0; i<positive_vec_size; i++) positive_dif_stat_vec.push_back(0);	//positive_vec_size
 
 		// update vector
 		for(i=0; i<sv_pair_vec.size(); i++){
@@ -441,10 +443,14 @@ vector< vector<int32_t> > computeDifStatVec(vector<SV_pair*> &sv_pair_vec){
 	dif_stat_vec.push_back(negative_dif_stat_vec);
 	dif_stat_vec.push_back(positive_dif_stat_vec);
 	for(int j=3; j>=0; j--){
+//		if(j<negative_dif_stat_vec.size())
 		centerDistance.push_back(to_string(negative_dif_stat_vec[j]));
+//		else	centerDistance.push_back(to_string(0));
 	}
 	for(int j=0; j<=3; j++){
+//		if(j<positive_dif_stat_vec.size())
 		centerDistance.push_back(to_string(positive_dif_stat_vec[j]));
+//		else centerDistance.push_back(to_string(0));
 	}
 	centerDistances.push_back(centerDistance);
 	centerDistance.clear();
