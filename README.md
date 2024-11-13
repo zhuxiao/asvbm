@@ -120,7 +120,7 @@ $ ./autogen.sh
 And the binary file `ASVBM` will be output into the folder `bin` in this package directory.
 
 ### Install from Docker
-Clone this repository and build a Docker image as follows. A pre-built docker image can be found here: https://hub.docker.com/xxx.  It can be obtained by running:
+Clone this repository ([Docker](https://github.com/zhuxiao/asvbm/tree/master/Docker)) and build a Docker image as follows. A pre-built docker image can be found here: https://hub.docker.com/xxx.  It can be obtained by running:
 
 ```sh
 $ docker pull xxx
