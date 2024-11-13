@@ -31,7 +31,7 @@
 #define WINDOWSIZE					10
 #define KMERSIZE					15
 #define EDLIBLEN					20000
-#define MAX_SEQ_LEN					20000
+#define MAX_SEQ_LEN					10000
 
 #define SVLEN_RATIO					0.7f
 

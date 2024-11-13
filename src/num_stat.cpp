@@ -1103,7 +1103,11 @@ void* intersectSubset(void *arg){
 											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
 												flag = true;
 											}else{
+//												auto start = chrono::high_resolution_clock::now();
 												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+//												auto end = chrono::high_resolution_clock::now();
+//												chrono::duration<double> duration = end - start;
+//												cout << "Execution time: " << duration.count() << " seconds" << endl;
 //												item1->seqcons = item2->seqcons = to_string(consistency);
 //												if (consistency >= percentSeqIdentity) {
 //													SeqConsNumStat(consistency);
@@ -2444,6 +2448,8 @@ void LongSequenceSplitAlignment(vector<Minimizer>& minimizers, vector<Minimizer>
         else {
             Exact_len = minimizers[i].position - (minimizers[i - 1].position + k);
             Exact_len1 = minimizers1[i].position - (minimizers1[i - 1].position + k);
+            if(Exact_len < 0) Exact_len = 0;
+            if(Exact_len1 < 0) Exact_len1 = 0;
             seq = sequence.substr(minimizers[i-1].position + k, Exact_len);
             seq1 = sequence1.substr(minimizers1[i - 1].position + k, Exact_len1);
         }
