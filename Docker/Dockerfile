@@ -11,9 +11,9 @@ MAINTAINER xzhu <xzhu@ytu.edu.cn>
 WORKDIR /usr
 
 # Create a directory to store your code and add source code and test data
-RUN mkdir /usr/local/ASVBM
-ADD asvbm_v1.2.0.tar.gz /usr/local/ASVBM/
-ADD test_data.tar.gz /usr/local/ASVBM/
+RUN mkdir /usr/local/asvbm
+ADD asvbm_v1.2.0.tar.gz /usr/local/asvbm/
+ADD test_data.tar.gz /usr/local/asvbm/
 
 # Install build tools, C++ compilers, dependencies, and R environments
 RUN apt-get update && apt-get install -y \
@@ -29,7 +29,7 @@ RUN apt-get update && apt-get install -y \
 RUN R -e "install.packages('UpSetR', repos='http://cran.r-project.org')"
 
 # Set the working directory to the unzipped code directory
-WORKDIR /usr/local/ASVBM/asvbm_v1.2.0
+WORKDIR /usr/local/asvbm/asvbm_v1.2.0
 
 # Build C++ applications
 RUN make
