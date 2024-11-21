@@ -10,9 +10,9 @@ REPOSITORY        TAG       IMAGE ID       CREATED         SIZE
 asvbm             v1.2.0    22ab0947a2ba   1 second ago    <...>
 $ docker run -it asvbm:v1.2.0
 OR
-$ docker run -it --name xxx -v 'pwd':/data_test asvbm:v1.2.0 bash
+$ docker run -it --name asvbm -v 'pwd':/data_test asvbm:v1.2.0 bash
 OR
-$ docker run -it --name xxx -v 'pwd':/data_test asvbm:v1.2.0 ./asvbm -m 50000 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user_sv1.vcf /data_test/user_sv2.vcf /data_test/benchmark_sv.vcf /data_test/ref.fa -o /data_test/output
+$ docker run -it --name asvbm -v 'pwd':/data_test asvbm:v1.2.0 ./asvbm -m 50000 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user_sv1.vcf /data_test/user_sv2.vcf /data_test/benchmark_sv.vcf /data_test/ref.fa -o /data_test/output
 ```
 The -v argument mounts the current directory as /data_test in the Docker image. The output should also appear in the current directory.
 
