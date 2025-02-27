@@ -2,7 +2,7 @@
 A tool for Allele-aware Structural Variant statistics Benchmarking for Multiple callsets
 
 -------------------
-ASVBM is A tool for Allele-aware Structural Variant statistics Benchmarking for Multiple callsets. ASVBM uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), sequence identity, recall, precision, and F1 score. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of ASVBM is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, ASVBM supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples. Finally, in multiple user callsets benchmarking, ASVBM supports filtering shared false negatives (FNs) not reported by any calling results within the benchmark set, providing a more reliable reference for benchmarking.
+ASVBM is A tool for Allele-aware Structural Variant statistics Benchmarking for Multiple callsets. ASVBM uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), latent positives (LPs), sequence identity, recall, precision, and F1 score. Notably, ASVBM introduces the concept of latent positives (LPs) and employs a local joint analysis validation approach to address cases where multiple smaller variants are nearly or entirely equivalent to a larger variant. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of ASVBM is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, ASVBM supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples. Finally, in multiple user callsets benchmarking, ASVBM supports filtering shared false negatives (FNs) not reported by any calling results within the benchmark set, providing a more reliable reference for benchmarking.
 
 For more detailed experiment information, please refer to [asvbm-experiments](https://github.com/zhuxiao/asvbm-experiments).
 
@@ -31,28 +31,28 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
     <td>Number of SVs in the filtered use set</td>
   </tr>
   <tr>
-    <td>#TP_bench</td>
+    <td>#TP</td>
     <td>Number of true positive variations in the benchmark set</td>
   </tr>
   <tr>
-    <td>#TP_user</td>
-    <td>Number of true positive variations in the use set</td>
-  </tr>
-  <tr>
     <td>#FP</td>
-    <td>The number of falsely identified targets or events</td>
+    <td> Number of falsely identified targets or events</td>
   </tr>
   <tr>
     <td>#FN</td>
-    <td>The number of targets or events that were missed or incorrectly identified</td>
+    <td> Number of targets or events that were missed or incorrectly identified</td>
+  </tr>
+   <tr>
+    <td>#LP</td>
+    <td> Number of cases where multiple smaller variants are nearly or entirely equivalent to a larger variant in the benchmark set</td>
   </tr>
   <tr>
     <td>Recall</td>
-    <td>TP_bench / (TP_bench + FN)</td>
+    <td>TP / (TP + FN)</td>
   </tr>
   <tr>
     <td>Precision</td>
-    <td>TP_user / (TP_user + FP)</td>
+    <td>TP / (TP + FP)</td>
   </tr>
    <tr>
     <td>F1 score</td>
@@ -130,11 +130,11 @@ If the current directory contains a clone of the asvbm repository, asvbm can be 
 
 
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm -m 50000 /data_test/user_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -m 50000 /data_test/user_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
 ```
 or
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm -m 50000 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -m 50000 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
 ```
 The -v argument mounts the current directory as /data_test in the Docker image. The output should also appear in the current directory.
 
@@ -168,88 +168,58 @@ The help information is below:
 ```sh
 $ ASVBM
 Program: ASVBM (A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
-Version: 1.2.0
+Version: 1.3.0
 
-Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
+Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
 Description:
-   USER_FILE   User called SV result file.
-   BENCH_FILE  Benchmark SV file.
-   REF_FILE    Reference file.
+   USER_FILE    User called SV result file.
+   BENCH_FILE   Benchmark SV file.
+   REF_FILE     Reference file.
 
-Options:
-   -m INT    valid maximal region size for statistics: [50000]
-             0 is for all variant size are valid, and while positive
-             values are for the valid maximal region size, then longer
-             regions are omitted and saved to the file specified with '-l' option
-   -S        enable the strict type match mode which is disabled by default.
-             There are two variation type match modes:
-             loose: allow type match between DUP and INS, which takes effect by '-S' option
-             strict: strict type match which is disabled by default
-             The default enabled match mode is 'loose' to allow the type match between DUP and INS.
-   -C STR    Chromosomes to be processed: [null]
-             no decoy indicates not specifying the chromosome set for benchmarking.
-             This parameter is used to specify the chromosomes to be benchmarked.
-             Chromosome names should match the format within the VCF file. 
-             Chromosome names are separated by ';'. Example: -C "1;2;3" 
-   -s INT    overlap extend size: [200]
-   -i FLOAT  minimal sequence identity for variant match: [0.7]
-   -a FLOAT  minimal sequence identity for allelic variants match: [0.7]
-             This parameter is used for the sequence identity threshold for matching 
-             allelic variants in regions with highly similar sequences.
-   -p FLOAT  minimal percent size ratio for variant match: [0.7]
-   -t INT    number of threads [0]. 0 for the maximal number of threads
-             in machine
-   -T STR    Tool names [null].
-             This parameter is used for comparing multiple datasets. The number
-             of inputs should be consistent with the data set. Tool names are 
-             separated by ';'. Example: -T "tool1;tool2;tool3" 
-   -o FILE   output directory: [output]
-   -l FILE   file name of long SV regions: [long_sv_reg.bed]
-   -r FILE   file name of benchmarking results to report: [asvbm_reports.html]
-             Ensure that the filename extension is '.html'.
-   -v        show version information
-   -h        show this help message and exit
+Commands:
+   stat         revise the existing benchmark set
+   create       create a new benchmark set
 
 Example:
    # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs
-   $ asvbm -T method user_sv.vcf benchmark_sv.vcf ref.fa
+   $ asvbm stat -T method user_sv.vcf benchmark_sv.vcf ref.fa
 
    # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option
-   $ asvbm -T method -S user_sv.vcf benchmark_sv.vcf ref.fa
+   $ asvbm stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa
 
    # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets
-   $ asvbm -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
+   $ asvbm create -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 ```
 
 
 ### Use cases
 Invalid long user-called regions can be removed by using the `-m` option as they are too long to be valid variant regions. The command could be:
 ```sh
-$ asvbm -m 10000 -T method user_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 10000 -T method user_sv.vcf benchmark_sv.vcf reference.fa
 ```
 Benchmarking multiple identification result datasets can be achieved by using the '-T' option. Please use the following command:
 ```sh
-$ asvbm -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
 ## Draw istical figures
-There are 4 istical categories for `asvbm` command results, figures can be drawn for a more intuitive and detailed illustration of the four istical categories:
-* __`1_ref_reg_size_stat`__: record the istical graph of SV sizes in the user-called data set and the benchmark data set.
+There are 4 istical categories for `stat` command results, figures can be drawn for a more intuitive and detailed illustration of the four statistical categories:
+* __`1_ref_reg_size_stat`__: record the statistical graph of SV sizes in the user-called data set and the benchmark data set.
 * __`2_num_stat`__: generate the bar chart for the classification benchmarking metrics.
-* __`3_size_dif_stat`__: record istical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
+* __`3_size_dif_stat`__: record statistical graphs of the size ratio and central difference in the overlapping variant regions between the user-called dataset and the benchmark data set.
 * __`4_size_num_stat`__: generate a bar chart of classification benchmarking metrics for variants with varying region sizes.
 Additionally, when benchmarking user-called sets from multiple tools, classification benchmarking metric charts will be generated and saved in a 'figures' folder.
 
 ## Output Result Description
-The detailed benchmarking information for the 4 statistical categories for `asvbm` command results, which is saved into the following 4 folders respectively:
+The detailed benchmarking information for the 4 statistical categories for `stat` command results, which is saved into the following 4 folders respectively:
 * __`1_ref_reg_size_stat`__: variant region size statistics (and the statistical figures) in reference.
 * __`2_num_stat`__: the classical number statistics (and the statistical figures), e.g. TP, FP, FN, Recall, Precision, F1 score.
 * __`3_size_dif_stat`__: the region size difference and ratio statistics (and statistical figures) for the overlapped variants between the user-called data set and the benchmark data set.
 * __`4_size_num_stat`__: the classical number statistics (and the statistical figures) for variants with various region lengths.
 Moreover, the overall simplified statistics will be output to the terminal screen, and these screen results will be saved to the file `stat_screen` in the output directory.
 
-The multiple user callsets benchmarking results of the  `asvbm` command output the following information:
+The multiple user callsets benchmarking results of the  `stat` command output the following information:
 
 | Main Folder                 | Subfolder                                                    |
 | --------------------------- | ------------------------------------------------------------ |
@@ -263,11 +233,11 @@ The multiple user callsets benchmarking results of the  `asvbm` command output t
 Here, practical examples for the benchmarking of single-sample and multiple samples are provided. For multi-sample benchmarking, it is strongly recommended to use the "-T" parameter for better differentiation of different identification results. Benchmark the identification results of chr1 of the HG002 CCS data separately using cuteSV (v2.0.3), pbsv (v2.9.0), and Sniffles (v2.0.2).
 To benchmark the identification results for a single sample, please use the following command:
 ```sh
-$ asvbm -m 50000 -T "cuteSV" -i 0.7 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 50000 -T "cuteSV" -i 0.7 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 To benchmark the results of multiple identification outcomes, please use the following command:
 ```sh
-$ asvbm -m 50000 -T "cuteSV;pbsv;Sniffles2" -i 0.7 cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 50000 -T "cuteSV;pbsv;Sniffles2" -i 0.7 cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 
 Multisample benchmarking statistical results. The benchmarking of recognition results will primarily generate the following information. This example compares a run result of cuteSV 2.0.3 on NA24385, with the benchmark dataset being the high-confidence HG002 dataset created by the Genome in a Bottle Consortium (GIAB). More specific information can be found in the respective file:
@@ -279,15 +249,13 @@ Multisample benchmarking statistical results. The benchmarking of recognition re
     	  <th>benchmark data size</th>
       <th>user-call data size</th>
       <th>filtered user-call data size</th>
-      <th>TP_benchmark</th>
-      <th>TP_user</th>
+      <th>TPk</th>
       <th>FP</th>
       <th>FN</th>
+      <th>LP</th>
       <th>Recall</th>
-      <th>precision_user</th>
-      <th>F1 score_user</th>
-      <th>precision_benchmark</th>
-      <th>F1 score_benchmark</th>
+      <th>precision</th>
+      <th>F1 score</th>
       <th>Identitys</th>
     </tr>
   </thead>
@@ -297,16 +265,14 @@ Multisample benchmarking statistical results. The benchmarking of recognition re
     <th>74012</th>
       <th>44937</th>
       <th>44928</th>
-      <th>39438</th>
-      <th>36953</th>
-      <th>6416</th>
-      <th>34574</th>
-      <th>0.532860</th>
-      <th>0.852057</th>
-      <th>0.655674</th>
-      <th>0.860146k</th>
-      <th>0.658096</th>
-       <th>0.975146</th>
+      <th>39538</th>
+      <th>6286</th>
+      <th>34474</th>
+      <th>506</th>
+      <th>0.534211</th>
+      <th>0.862823</th>
+      <th>0.659868</th>
+      <th>0.975147</th>
     </tr>
   </tbody>
 </table>
