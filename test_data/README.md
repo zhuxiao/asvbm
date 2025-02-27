@@ -2,7 +2,7 @@
 
 ## experiment description
 
-In this experiment, we conducted an individualized benchmarking of the identification results for chromosome 1 (chr1) from the HG002 CCS (Consensus Circular Sequence) data by using seven structural variants (SV) detection methods: cuteSV(v2.0.3), pbsv (v2.9.0), Sniffles2(v2.0.2), ASVCLR(v1.4.1), SVDSS(v1.0.5), DeBreak(v1.0.2), SVIM(v2.0.0). Here we will only focus on the benchmarking results of insertion and deletion variants. Subsequently, the identification results obtained from these seven different detection methods were comprehensively benchmarked against their benchmark sets through a multi-sample benchmarking approach.
+In this experiment, we conducted an individualized benchmarking of the identification results for chromosome 1 (chr1) from the HG002 CCS (Consensus Circular Sequence) data by using seven structural variants (SV) detection methods: cuteSV(v2.0.3), pbsv (v2.9.0), Sniffles2(v2.0.2), ASVCLR(v1.4.4), SVDSS(v1.0.5), DeBreak(v1.0.2), SVIM(v2.0.0). Here we will only focus on the benchmarking results of insertion and deletion variants. Subsequently, the identification results obtained from these seven different detection methods were comprehensively benchmarked against their benchmark sets through a multi-sample benchmarking approach.
 
 ## data description and preparation
 
@@ -19,8 +19,8 @@ $ ftp://ftp-trace.ncbi.nlm.nih.gov/giab/ftp/data/AshkenazimTrio/analysis/NIST_SV
 ```
 ## Download source programs and test data
 $ wget -c https://github.com/zhuxiao/asvbm/releases/download/1.1.0/asvbm_1.1.0.tar.xz
-$ tar -xf asvbm_1.1.0.tar.xz
-$ cd asvbm_1.1.0/
+$ tar -xf asvbm_1.3.0.tar.xz
+$ cd asvbm_1.3.0/
 $ ./autogen.sh
 $ sudo apt install -y r-base r-base-dev
 # Install the UpSetR package
@@ -30,7 +30,7 @@ $ install.packages("UpSetR")
 The name of the chr1 file (reference) was renamed to test_chr1.fa. We uploaded the sequence of chr1 into three files, which can be downloaded and merged by following steps:
 ```
 ## Merge chr1 references and extract it
-$ cd asvbm_1.1.0/test_data/
+$ cd asvbm_1.3.0/test_data/
 $ cat test_chr1.fa.tar.xz_* > test_chr1.fa.tar.xz
 $ tar -xJf test_chr1.fa.tar.xz
 ```
@@ -53,7 +53,7 @@ $ tar -xJf test_DeBreak_chr1.tar.xz
 $ tar -xJf test_SVIM_chr1.tar.xz
 
 ## Benchmarking the VCF files mentioned in the test data using ASVBM, run the following command:
-$ asvbm -m 50000 -T "ASVCLR;SVDSS;DeBreak;Sniffles2;pbsv;cuteSV;SVIM" -C "1" -p 0.7 test_data/test_ASVCLR_chr1.vcf test_data/test_SVDSS_chr1.vcf test_data/test_DeBreak_chr1.vcf test_data/test_Sniffles2_chr1.vcf test_pbsv_chr1.vcf test_cuteSV_chr1.vcf test_SVIM_chr1.vcf test_benchmark_chr1.vcf test_data/test_chr1.fa
+$ asvbm stat -m 50000 -T "ASVCLR;SVDSS;DeBreak;Sniffles2;pbsv;cuteSV;SVIM" -C "1" -p 0.7 test_data/test_ASVCLR_chr1.vcf test_data/test_SVDSS_chr1.vcf test_data/test_DeBreak_chr1.vcf test_data/test_Sniffles2_chr1.vcf test_pbsv_chr1.vcf test_cuteSV_chr1.vcf test_SVIM_chr1.vcf test_benchmark_chr1.vcf test_data/test_chr1.fa
 ```
 ASVBM benchmarked the provided identification set based on the input, generating corresponding file information. If needed, more detailed benchmarking information can be obtained by running test data independently.
 
@@ -62,12 +62,12 @@ The benchmarking results were as follows:
 <table>
   <thead>
     <tr>
-    	  <th></th>
+    	  <th>SV caller</th>
     	  <th>SVs</th>
-      <th>TP_benchmark</th>
-      <th>TP_user</th>
+      <th>TP</th>
       <th>FP</th>
       <th>FN</th>
+      <th>LP</th>
       <th>Recall</th>
       <th>precision</th>
       <th>F1 score</th>
@@ -78,55 +78,55 @@ The benchmarking results were as follows:
     <tr>
     <th>ASVCLR</th>
       <th>3998</th>
-      <th>3392</th>
-      <th>3394</th>
-      <th>604</th>
-      <th>2005</th>
-      <th>0.6285</th>
-      <th>0.8489</th>
-      <th>0.7223</th>
-      <th>0.9724</th>
+      <th>3404</th>
+      <th>593</th>
+      <th>1993</th>
+      <th>44</th>
+      <th>0.6307</th>
+      <th>0.8516</th>
+      <th>0.7247</th>
+      <th>0.9808</th>
     </tr>
   </tbody>
   <tbody>
     <tr>
     <th>SVDSS</th>
       <th>3318</th>
-      <th>2505</th>
-      <th>2759</th>
-      <th>559</th>
-      <th>2891</th>
-      <th>0.4643</th>
-      <th>0.8315</th>
-      <th>0.5959</th>
-      <th>0.9739</th>
+      <th>2525</th>
+      <th>543</th>
+      <th>2872</th>
+      <th>58</th>
+      <th>0.4678</th>
+      <th>0.8230</th>
+      <th>0.5966</th>
+      <th>0.9740</th>
     </tr>
   </tbody>
     <tbody>
     <tr>
     <th>DeBreak</th>
-      <th>3675</th>
-      <th>3240</th>
-      <th>3049</th>
-      <th>504</th>
-      <th>2157</th>
-      <th>0.6003</th>
-      <th>0.8581</th>
-      <th>0.7065</th>
-      <th>1.0000</th>
+      <th>3429</th>
+      <th>3008</th>
+      <th>483</th>
+      <th>2389</th>
+      <th>4</th>
+      <th>0.5573</th>
+      <th>0.8616</th>
+      <th>0.6769</th>
+      <th>0.9341</th>
     </tr>
   </tbody>
      <tbody>
     <tr>
     <th>Sniffles2</th>
       <th>3972</th>
-      <th>3317</th>
-      <th>3188</th>
-      <th>677</th>
-      <th>2080</th>
-      <th>0.6148</th>
-      <th>0.8251</th>
-      <th>0.7046</th>
+      <th>3330</th>
+      <th>659</th>
+      <th>2067</th>
+      <th>51</th>
+      <th>0.6170</th>
+      <th>0.8348</th>
+      <th>0.7096</th>
       <th>0.9709</th>
     </tr>
   </tbody> 
@@ -134,13 +134,13 @@ The benchmarking results were as follows:
     <tr>
     <th>pbsv</th>
     	<th>3859</th>
-      <th>3241</th>
-      <th>3139</th>
-      <th>635</th>
-      <th>2156</th>
-      <th>0.6005</th>
-      <th>0.8317</th>
-      <th>0.6975</th>
+      <th>3247</th>
+      <th>627</th>
+      <th>2150</th>
+      <th>28</th>
+      <th>0.6016</th>
+      <th>0.8382</th>
+      <th>0.7005</th>
       <th>0.9818</th>
     </tr>
   </tbody>
@@ -148,13 +148,13 @@ The benchmarking results were as follows:
     <tr>
     <th>cuteSV</th>
       <th>3384</th>
-      <th>2914</th>
-      <th>2734</th>
-      <th>488</th>
-      <th>2483</th>
-      <th>0.5399</th>
-      <th>0.8485</th>
-      <th>0.6599</th>
+      <th>2920</th>
+      <th>483</th>
+      <th>2477</th>
+      <th>24</th>
+      <th>0.5410</th>
+      <th>0.8581</th>
+      <th>0.6636</th>
       <th>0.9720</th>
     </tr>
   </tbody>
@@ -162,13 +162,13 @@ The benchmarking results were as follows:
     <tr>
     <th>SVIM</th>
       <th>11490</th>
-      <th>3502</th>
-      <th>3452</th>
-      <th>2384</th>
-      <th>1895</th>
-      <th>0.6493</th>
-      <th>0.5915</th>
-      <th>0.6190</th>
+      <th>3515</th>
+      <th>2367</th>
+      <th>1882</th>
+      <th>71</th>
+      <th>0.6513</th>
+      <th>0.5976</th>
+      <th>0.6232</th>
       <th>0.9776</th>
     </tr>
   </tbody>
