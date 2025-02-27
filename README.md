@@ -249,7 +249,7 @@ Multisample benchmarking statistical results. The benchmarking of recognition re
     	  <th>benchmark data size</th>
       <th>user-call data size</th>
       <th>filtered user-call data size</th>
-      <th>TPk</th>
+      <th>TP</th>
       <th>FP</th>
       <th>FN</th>
       <th>LP</th>
