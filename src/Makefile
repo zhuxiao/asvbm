@@ -1,9 +1,9 @@
 CXXFLAGS = -O0 -g -Wall -fmessage-length=0 -std=c++11
 
 OBJS = asvbm_main.o paras.o dataLoader.o convert.o ref_reg_size_stat.o \
-	   num_stat.o size_dif_stat.o size_num_stat.o util.o meminfo.o gnuplotcall.o htmlGenerate.o
+	   num_stat.o size_dif_stat.o size_num_stat.o util.o meminfo.o gnuplotcall.o htmlGenerate.o shared_fp.o benchmark_integration.o edlib.o
 
-LIBS += -lhts -lpthread
+LIBS += -lhts -lpthread 
 
 TARGET = asvbm
 

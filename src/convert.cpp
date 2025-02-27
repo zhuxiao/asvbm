@@ -284,6 +284,11 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 						if(alt_seq.size()>=Max_SeqLen or sv_type_str.compare("TRA")==0 or sv_type_str.compare("BND")==0 or alt_seq.compare(".")==0) alt_seq="-";
 						sv_item = allocateSVItem(chrname, start_pos, endpos, chrname2, start_pos2, endpos2, sv_type_str, sv_len, ref_seq, alt_seq, lineInfo, label);
 						sv_item_vec.push_back(sv_item);
+
+
+
+
+
 					}else{
 						start_pos = stoi(start_pos_str);
 						endpos_1 = stoi(endpos_str_1);
@@ -322,6 +327,9 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 	// remove snv items
 	if(snv_filename.size()) removeSNVItems(snv_filename, sv_item_vec);
 
+
+	//if(mate_filename.size()==0)	fp_vec.push_back(sv_item_vec);
+
 	// save to file
 	output2File(outfilename, sv_item_vec, outConvertScreenFile);
 
@@ -329,6 +337,8 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 	releaseSVItemVec(sv_item_vec);
 	usersetsannotationLines.push_back(userannotationLines);
 	usersets_num += 1;
+
+
 }
 
 // convert data

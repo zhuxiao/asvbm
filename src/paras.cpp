@@ -39,6 +39,7 @@ void showUsage(){
 }
 
 // show usage for convert command
+
 void showUsageConvert(){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
@@ -59,63 +60,175 @@ void showUsageConvert(){
 	cout << "     -S FILE      snv items file: [" << snvFilename << "]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
 }
+void showUsageCreate(){
 
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl << endl;
+
+	cout << "Usage:  asvbm create [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
+
+	cout << "Description:" << endl;
+	cout << "   USER_FILE      User called SV result file." << endl;
+	cout << "   BENCH_FILE     Benchmark SV file." << endl;
+	cout << "   REF_FILE       Reference file." << endl << endl;
+
+	cout << "Options:" << endl;
+	cout << "   -m INT         valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
+	cout << "                  0 is for all variant size are valid, and while positive" << endl;
+	cout << "                  values are for the valid maximal region size, then longer" << endl;
+	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
+	cout << "   -S             enable the strict type match mode which is disabled by default." << endl;
+	cout << "                  There are two variation type match modes:" << endl;
+	cout << "                  " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
+	cout << "                  " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
+	cout << "                  The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
+	cout << "   -C STR         Chromosomes to be processed: [null]" << endl;
+	cout << "                  no decoy indicates not specifying the chromosome set for benchmarking." << endl;
+	cout << "                  This parameter is used to specify the chromosomes to be benchmarked." << endl;
+	cout << "                  Chromosome names should match the format within the VCF file. " <<endl;
+	cout << "                  Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
+	cout << "   -s INT         overlap extend size: [" << EXTEND_SIZE << "]" << endl;
+	cout << "   -i FLOAT       minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -a FLOAT       minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -p FLOAT       minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
+	cout << "   -t INT         number of threads [0]. 0 for the maximal number of threads" << endl;
+	cout << "                  in machine" << endl;
+	cout << "   -T STR         Tool names [null]." << endl;
+	cout << "                  This parameter is used for comparing multiple datasets. The number" << endl;
+	cout << "                  of inputs should be consistent with the data set. Tool names are " <<endl;
+	cout << "                  separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
+	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
+	cout << "   -l FILE        file name of long SV regions: [" << longSVFilename << "]" << endl;
+	cout << "   -r FILE        file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
+	cout << "                  Ensure that the filename extension is '.html'." << endl;
+	cout << "   -v,--version   show version information" << endl;
+	cout << "   -h,--help      show this help message and exit" << endl << endl;
+
+	cout << "Example:" << endl;
+	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
+	cout << "   $ asvbm create -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+
+	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
+	cout << "   $ asvbm create -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+
+	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
+	cout << "   $ asvbm create -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+}
 // show usage for stat command
 void showUsageStat(){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
-	cout << "Usage:  asvbm [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
+	cout << "Usage:  asvbm stat [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
 
 	cout << "Description:" << endl;
-	cout << "   USER_FILE   User called SV result file." << endl;
-	cout << "   BENCH_FILE  Benchmark SV file." << endl;
-	cout << "   REF_FILE    Reference file." << endl << endl;
+	cout << "   USER_FILE      User called SV result file." << endl;
+	cout << "   BENCH_FILE     Benchmark SV file." << endl;
+	cout << "   REF_FILE       Reference file." << endl << endl;
 
 	cout << "Options:" << endl;
-	cout << "   -m INT    valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
-	cout << "             0 is for all variant size are valid, and while positive" << endl;
-	cout << "             values are for the valid maximal region size, then longer" << endl;
-	cout << "             regions are omitted and saved to the file specified with '-l' option" << endl;
-	cout << "   -S        enable the strict type match mode which is disabled by default." << endl;
-	cout << "             There are two variation type match modes:" << endl;
-	cout << "             " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
-	cout << "             " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
-	cout << "             The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
-	cout << "   -C STR    Chromosomes to be processed: [null]" << endl;
-	cout << "             no decoy indicates not specifying the chromosome set for benchmarking." << endl;
-	cout << "             This parameter is used to specify the chromosomes to be benchmarked." << endl;
-	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
-	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
-	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-	cout << "   -i FLOAT  minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
-	cout << "   -a FLOAT  minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
-	cout << "             This parameter is used for the sequence identity threshold for matching " << endl;
-	cout << "             allelic variants in regions with highly similar sequences." << endl;
-	cout << "   -p FLOAT  minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
-	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
-	cout << "             in machine" << endl;
-	cout << "   -T STR    Tool names [null]." << endl;
-	cout << "             This parameter is used for comparing multiple datasets. The number" << endl;
-	cout << "             of inputs should be consistent with the data set. Tool names are " <<endl;
-	cout << "             separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
-	cout << "   -o FILE   output directory: [" << outputPathname << "]" << endl;
-	cout << "   -l FILE   file name of long SV regions: [" << longSVFilename << "]" << endl;
-	cout << "   -r FILE   file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
-	cout << "             Ensure that the filename extension is '.html'." << endl;
-	cout << "   -v        show version information" << endl;
-	cout << "   -h        show this help message and exit" << endl << endl;
+	cout << "   -m INT         valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
+	cout << "                  0 is for all variant size are valid, and while positive" << endl;
+	cout << "                  values are for the valid maximal region size, then longer" << endl;
+	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
+	cout << "   -S             enable the strict type match mode which is disabled by default." << endl;
+	cout << "                  There are two variation type match modes:" << endl;
+	cout << "                  " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
+	cout << "                  " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
+	cout << "                  The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
+	cout << "   -C STR         Chromosomes to be processed: [null]" << endl;
+	cout << "                  no decoy indicates not specifying the chromosome set for benchmarking." << endl;
+	cout << "                  This parameter is used to specify the chromosomes to be benchmarked." << endl;
+	cout << "                  Chromosome names should match the format within the VCF file. " <<endl;
+	cout << "                  Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
+	cout << "   -s INT         overlap extend size: [" << EXTEND_SIZE << "]" << endl;
+	cout << "   -i FLOAT       minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -a FLOAT       minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -p FLOAT       minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
+	cout << "   -t INT         number of threads [0]. 0 for the maximal number of threads" << endl;
+	cout << "                  in machine" << endl;
+	cout << "   -T STR         Tool names [null]." << endl;
+	cout << "                  This parameter is used for comparing multiple datasets. The number" << endl;
+	cout << "                  of inputs should be consistent with the data set. Tool names are " <<endl;
+	cout << "                  separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
+	cout << "   -b,--bench_refine"<< endl;
+	cout << "                  perform the refinement of benchmark set along with the benchmarking process" << endl;
+	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
+	cout << "   -l FILE        file name of long SV regions: [" << longSVFilename << "]" << endl;
+	cout << "   -r FILE        file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
+	cout << "                  Ensure that the filename extension is '.html'." << endl;
+	cout << "   -v,--version   show version information" << endl;
+	cout << "   -h,--help      show this help message and exit" << endl << endl;
 
 	cout << "Example:" << endl;
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
-	cout << "   $ asvbm -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm stat -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
-	cout << "   $ asvbm -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm stat -b -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
-	cout << "   $ asvbm -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "   $ asvbm stat --bench_refine -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+}
+
+void show(){
+
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl << endl;
+
+	cout << "Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
+
+	cout << "Description:" << endl;
+	cout << "   USER_FILE    User called SV result file." << endl;
+	cout << "   BENCH_FILE   Benchmark SV file." << endl;
+	cout << "   REF_FILE     Reference file." << endl << endl;
+
+	cout << "Commands:" << endl;
+	cout << "   stat         revise the existing benchmark set" << endl;
+	cout << "   create       create a new benchmark set" << endl<< endl;
+
+//	cout << "Options:" << endl;
+//	cout << "   -m INT    valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
+//	cout << "             0 is for all variant size are valid, and while positive" << endl;
+//	cout << "             values are for the valid maximal region size, then longer" << endl;
+//	cout << "             regions are omitted and saved to the file specified with '-l' option" << endl;
+//	cout << "   -S        enable the strict type match mode which is disabled by default." << endl;
+//	cout << "             There are two variation type match modes:" << endl;
+//	cout << "             " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
+//	cout << "             " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
+//	cout << "             The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
+//	cout << "   -C STR    Chromosomes to be processed: [null]" << endl;
+//	cout << "             no decoy indicates not specifying the chromosome set for benchmarking." << endl;
+//	cout << "             This parameter is used to specify the chromosomes to be benchmarked." << endl;
+//	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
+//	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
+//	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
+//	cout << "   -i FLOAT  minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+//	cout << "   -a FLOAT  minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+//	cout << "   -p FLOAT  minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
+//	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
+//	cout << "             in machine" << endl;
+//	cout << "   -T STR    Tool names [null]." << endl;
+//	cout << "             This parameter is used for comparing multiple datasets. The number" << endl;
+//	cout << "             of inputs should be consistent with the data set. Tool names are " <<endl;
+//	cout << "             separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
+//	cout << "   -o FILE   output directory: [" << outputPathname << "]" << endl;
+//	cout << "   -l FILE   file name of long SV regions: [" << longSVFilename << "]" << endl;
+//	cout << "   -r FILE   file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
+//	cout << "             Ensure that the filename extension is '.html'." << endl;
+//	cout << "   -v        show version information" << endl;
+//	cout << "   -h        show this help message and exit" << endl << endl;
+
+	cout << "Example:" << endl;
+	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
+	cout << "   $ asvbm stat -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+
+	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
+	cout << "   $ asvbm stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+
+	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
+	cout << "   $ asvbm create -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 
 // parse the parameters for convert command
@@ -216,10 +329,8 @@ void convert(string &infilename, string &outfilename, string &reffilename, strin
 
 	outConvertScreenFile.close();
 }
-
-// parse the parameters for stat command
 int parseStat(int argc, char **argv){
-	int32_t opt, threadNum_tmp;
+	int32_t opt, threadNum_tmp, longindex = 0;
 	string sv_file1, ref_file, sv_file2, ToolNameStore, ChromosomeNames;
 	vector<string> sv_files1;
 	vector<string> tool_names;
@@ -237,7 +348,13 @@ int parseStat(int argc, char **argv){
 	typeMatchLevel = MATCHLEVEL_L;
 	ToolNameStore = ChromosomeNames = "";
 
-	while( (opt = getopt(argc, argv, ":m:s:t:r:o:i:a:p:l:T:h:C:S")) != -1 ){
+	static struct option long_options[] = {
+		{"bench_refine", no_argument, 0, 'b'},
+		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'v'},
+		{0, 0, 0, 0}
+	};
+	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:hvC:bS", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
@@ -251,6 +368,8 @@ int parseStat(int argc, char **argv){
 			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
 			case 'h': showUsageStat(); exit(0);
+			case 'v': show_version();; exit(0);
+			case 'b': refine_bench_flag = true; break;
 			case 'S': typeMatchLevel = MATCHLEVEL_S; break;
 			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
 			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
@@ -277,6 +396,7 @@ int parseStat(int argc, char **argv){
 		showUsageStat();
 		return 1;
 	}
+
 	/*if(typeMatchLevel.compare("strict")==0 or typeMatchLevel.compare("loose")==0);
 	else {
 		cout << "Error: Specify a type matching mode for the option: -L" << endl;
@@ -332,12 +452,248 @@ int parseStat(int argc, char **argv){
 	return 0;
 }
 
+//int parseState(int argc, char **argv){
+//	int32_t opt, threadNum_tmp;
+//	string sv_file1, ref_file, sv_file2, ToolNameStore, ChromosomeNames;
+//	vector<string> sv_files1;
+//	vector<string> tool_names;
+//
+//	if (argc < 2) { showUsageStat(); return 1; }
+//
+//	maxValidRegThres = MAX_VALID_REG_THRES;
+//	percentSeqIdentity = SEQ_CONSISTENCY;
+//	percentAlleleSeqIdentity = ALLELE_SEQ_CONSISTENCY;
+//	extendSize = EXTEND_SIZE;
+//	threadNum_tmp = 0;
+//	minSizeLargeSV = MIN_SIZE_LARGE_SV;
+//	extendSizeLargeSV = EXTEND_SIZE_LARGE_SV;
+//	svlenRatio = SVLEN_RATIO;
+//	typeMatchLevel = MATCHLEVEL_L;
+//	ToolNameStore = ChromosomeNames = "";
+//
+//	while( (opt = getopt(argc, argv, ":m:s:t:r:o:i:a:p:l:T:h:C:S")) != -1 ){
+//		switch(opt){
+//			case 'm': maxValidRegThres = stoi(optarg); break;
+//			case 's': extendSize = stoi(optarg); break;
+//			case 't': threadNum_tmp = stoi(optarg); break;
+//			case 'o': outputPathname = optarg; break;
+//			case 'i': percentSeqIdentity = stod(optarg); break;
+//			case 'p': svlenRatio = stod(optarg); break;
+//			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
+//			case 'l': longSVFilename = optarg; break;
+//			case 'T': ToolNameStore = optarg; break;
+//			case 'r': htmlFilename = optarg; break;
+//			case 'C': ChromosomeNames = optarg; break;
+//			case 'h': showUsageStat(); exit(0);
+//			case 'S': typeMatchLevel = MATCHLEVEL_S; break;
+//			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
+//			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
+//		}
+//	}
+//
+//	if(maxValidRegThres<0){
+//		cout << "Error: Please specify the correct positive value for option: -m" << endl;
+//		showUsageStat();
+//		return 1;
+//	}
+//	if(extendSize<=0){
+//		cout << "Error: Please specify the correct positive value for option: -s" << endl;
+//		showUsageStat();
+//		return 1;
+//	}
+//	if(ToolNameStore.size()<0){
+//		cout << "Error: Specify the correct tool name for the option, separated by ';' :-T" << endl;
+//		showUsageStat();
+//		return 1;
+//	}
+//	if(ChromosomeNames.size()<0){
+//		cout << "Error: Specify the correct set of chromosomes for the option, separated by ';' :-C" << endl;
+//		showUsageStat();
+//		return 1;
+//	}
+//
+//	/*if(typeMatchLevel.compare("strict")==0 or typeMatchLevel.compare("loose")==0);
+//	else {
+//		cout << "Error: Specify a type matching mode for the option: -L" << endl;
+//		showUsageStat();
+//		return 1;
+//	}*/
+//	if(threadNum_tmp==0) num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+//	else num_threads = (threadNum_tmp>=sysconf(_SC_NPROCESSORS_ONLN)) ? sysconf(_SC_NPROCESSORS_ONLN) : threadNum_tmp;
+//
+//	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
+//
+//	tool_names = split(ToolNameStore,";");
+//	chromosomeSet = split(ChromosomeNames,";");
+//
+//	opt = argc - optind; // the number of SAMs on the command line
+//	if(tool_names.size()>=1){ //use the -T parameter to enter multiple tool names
+//		for(int i = optind; i<argc; i++){
+//			if(i == argc-2) sv_file2 = argv[i];
+//			else if(i == argc-1) ref_file = argv[i];
+//			else sv_files1.push_back(argv[i]);
+//		}
+//		if(tool_names.size() != sv_files1.size()){
+//			cout << "Error: The number of tool names does not match the data set :-T" << endl;
+//			showUsageStat();
+//			return 1;
+//		}
+//	}else if(opt==3){ //evaluate a data set
+//		if(opt==3) {
+//			sv_file1 = argv[optind];
+//			sv_file2 = argv[optind+1];
+//			ref_file = argv[optind+2];
+//		}else { showUsageStat(); return 1; }
+//	}else{ //evaluate multiple data sets without using the "-T" parameter
+//		for(int i = optind ; i<argc; i++){
+//			if(i == argc-2) sv_file2 = argv[i];
+//			else if(i == argc-1) ref_file = argv[i];
+//			else sv_files1.push_back(argv[i]);
+//		}
+//	}
+//
+//	mem_total = getMemInfo("MemTotal", 2);
+//	swap_total = getMemInfo("SwapTotal", 2);
+//	if(mem_total<0 or swap_total<0){
+//		cerr << "line=" << __LINE__ << ", mem_total=" << mem_total << ", swap_total=" << swap_total << ", cannot get the supplied memory information, error." << endl;
+//		exit(1);
+//	}
+//	extend_total = mem_total<swap_total ? mem_total : swap_total;
+//
+//	//cout << "mem_total=" << mem_total << ", swap_total=" << swap_total << ", extend_total=" << extend_total << endl;
+//
+//	SVStatOp(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
+//
+//	return 0;
+//}
+// parse the parameters for create command
+int parseCreate(int argc, char **argv){
+	int32_t opt, threadNum_tmp, longindex = 0;;
+	string sv_file1, ref_file, sv_file2, ToolNameStore, ChromosomeNames;
+	vector<string> sv_files1;
+	vector<string> tool_names;
+
+	if (argc < 2) { showUsageCreate(); return 1; }
+
+	maxValidRegThres = MAX_VALID_REG_THRES;
+	percentSeqIdentity = SEQ_CONSISTENCY;
+	percentAlleleSeqIdentity = ALLELE_SEQ_CONSISTENCY;
+	extendSize = EXTEND_SIZE;
+	threadNum_tmp = 0;
+	minSizeLargeSV = MIN_SIZE_LARGE_SV;
+	extendSizeLargeSV = EXTEND_SIZE_LARGE_SV;
+	svlenRatio = SVLEN_RATIO;
+	typeMatchLevel = MATCHLEVEL_L;
+	ToolNameStore = ChromosomeNames = "";
+	static struct option long_options[] = {
+		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'v'},
+		{0, 0, 0, 0}
+	};
+	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:hvC:S", long_options, &longindex)) != -1 ){
+		switch(opt){
+			case 'm': maxValidRegThres = stoi(optarg); break;
+			case 's': extendSize = stoi(optarg); break;
+			case 't': threadNum_tmp = stoi(optarg); break;
+			case 'o': outputPathname = optarg; break;
+			case 'i': percentSeqIdentity = stod(optarg); break;
+			case 'p': svlenRatio = stod(optarg); break;
+			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
+			case 'l': longSVFilename = optarg; break;
+			case 'T': ToolNameStore = optarg; break;
+			case 'r': htmlFilename = optarg; break;
+			case 'C': ChromosomeNames = optarg; break;
+			case 'h': showUsageCreate(); exit(0);
+			case 'v': show_version();; exit(0);
+			case 'S': typeMatchLevel = MATCHLEVEL_S; break;
+			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
+			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
+		}
+	}
+
+	if(maxValidRegThres<0){
+		cout << "Error: Please specify the correct positive value for option: -m" << endl;
+		showUsageCreate();
+		return 1;
+	}
+	if(extendSize<=0){
+		cout << "Error: Please specify the correct positive value for option: -s" << endl;
+		showUsageCreate();
+		return 1;
+	}
+	if(ToolNameStore.size()<0){
+		cout << "Error: Specify the correct tool name for the option, separated by ';' :-T" << endl;
+		showUsageCreate();
+		return 1;
+	}
+	if(ChromosomeNames.size()<0){
+		cout << "Error: Specify the correct set of chromosomes for the option, separated by ';' :-C" << endl;
+		showUsageCreate();
+		return 1;
+	}
+
+	/*if(typeMatchLevel.compare("strict")==0 or typeMatchLevel.compare("loose")==0);
+	else {
+		cout << "Error: Specify a type matching mode for the option: -L" << endl;
+		showUsageStat();
+		return 1;
+	}*/
+	if(threadNum_tmp==0) num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+	else num_threads = (threadNum_tmp>=sysconf(_SC_NPROCESSORS_ONLN)) ? sysconf(_SC_NPROCESSORS_ONLN) : threadNum_tmp;
+
+	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
+
+	tool_names = split(ToolNameStore,";");
+	chromosomeSet = split(ChromosomeNames,";");
+
+	opt = argc - optind; // the number of SAMs on the command line
+	if(tool_names.size()>=1){ //use the -T parameter to enter multiple tool names
+		for(int i = optind; i<argc; i++){
+			if(i == argc-2) sv_file2 = argv[i];
+			else if(i == argc-1) ref_file = argv[i];
+			else sv_files1.push_back(argv[i]);
+		}
+		if(tool_names.size() != sv_files1.size()){
+			cout << "Error: The number of tool names does not match the data set :-T" << endl;
+			showUsageCreate();
+			return 1;
+		}
+	}else if(opt==3){ //evaluate a data set
+		if(opt==3) {
+			sv_file1 = argv[optind];
+			sv_file2 = argv[optind+1];
+			ref_file = argv[optind+2];
+		}else { showUsageCreate(); return 1; }
+	}else{ //evaluate multiple data sets without using the "-T" parameter
+		for(int i = optind ; i<argc; i++){
+			if(i == argc-2) sv_file2 = argv[i];
+			else if(i == argc-1) ref_file = argv[i];
+			else sv_files1.push_back(argv[i]);
+		}
+	}
+
+	mem_total = getMemInfo("MemTotal", 2);
+	swap_total = getMemInfo("SwapTotal", 2);
+	if(mem_total<0 or swap_total<0){
+		cerr << "line=" << __LINE__ << ", mem_total=" << mem_total << ", swap_total=" << swap_total << ", cannot get the supplied memory information, error." << endl;
+		exit(1);
+	}
+	extend_total = mem_total<swap_total ? mem_total : swap_total;
+
+	//cout << "mem_total=" << mem_total << ", swap_total=" << swap_total << ", extend_total=" << extend_total << endl;
+
+	SVStatOp(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
+
+	return 0;
+}
+
 //SVStatOp :Determine whether a single data set evaluation or a multi-data set evaluation
 void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names){
 	string sv_file_name, mate_filename, snv_filename, convert_sv_file2;
 	string sv_file_name_Path, convert_sv_file2_Path;
 	string label = "benchmark", label1 = "user";
 	vector<string> convert_sv_files;
+	vector<SV_item*> sv_item_vec;
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	suboutputDirnamePath = outputPathname + suboutputDirname;
 	mkdir(suboutputDirnamePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -353,6 +709,10 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 			sv_file_name_Path = suboutputDirnamePath + "/" + sv_file_name;
 			convertVcf(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
 			convert_sv_files.push_back(sv_file_name_Path);
+
+			sv_item_vec = loadDataWithoutTra(sv_file_name_Path);
+			benchmark_vec.push_back(sv_item_vec);
+			ToolsFilenames.push_back(sv_files1[i]);
 		}
 		//benchmark
 		convert_sv_file2 = PathqueryDot(sv_file2);
@@ -386,7 +746,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 	}else
 		SVStat(ref_file, sv_file_name_Path, convert_sv_file2_Path, sv_files1, tool_names);
 
-	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1);
+	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1, ref_file);
 
 }
 

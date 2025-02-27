@@ -74,22 +74,26 @@ void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, in
 
 void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, string &file_prefix, faidx_t *fai, int Markers){
 	vector< vector<SV_item*> > result;
-	int32_t TP_benchmark, TP_user, FP, FN;
-	float recall, precision_benchmark, precision_user, F1_score_benchmark, F1_score_user, sv_num_per_reg, percent;
-	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
-	string filename_TP_user, filename_TP_bench, filename_FP, filename_FN;
-	SeqconsSum = SeqconsNum = Seqcons = 0;
+	int32_t TP_benchmark, TP_user, FP, FN ,LP;
+	float recall, precision_user, F1_score_user, sv_num_per_reg, percent;
+	string filename_intersect_user, filename_latentpositive_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
+	string filename_TP_user, filename_TP_bench, filename_FP, filename_FN, filename_LP;
+	SeqconsSum = SeqconsNum = Seqcons = LpNum = 0;
 
 	filename_intersect_user = file_prefix + "_intersect_user";
 	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
 	filename_private_user = file_prefix + "_private_user";
 	filename_private_benchmark = file_prefix + "_private_benchmark";
+	filename_latentpositive_user = file_prefix + "_latentpositive_user";
 
 	filename_TP_user = file_prefix + "_TP_user.vcf";
 	filename_TP_bench = file_prefix + "_TP_bench.vcf";
 	filename_FP = file_prefix + "_FP.vcf";
 	filename_FN = file_prefix + "_FN.vcf";
+	filename_LP = file_prefix + "_LP.vcf";
 
+	sharedFPFilenames.push_back(filename_FP);
+	benchmarkAddTP_user.push_back(filename_intersect_user);
 	// compute intersection
 	result = intersect(user_data, benchmark_data, fai);
 
@@ -134,12 +138,14 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	output3File(filename_intersect_user, result.at(0), outStatScreenFile);
 	output3File(filename_private_user, result.at(2), outStatScreenFile);
 	output3File(filename_private_benchmark, result.at(3), outStatScreenFile);
+	output3File(filename_latentpositive_user, result.at(4), outStatScreenFile);
 
 	if(usersets_num <= (int32_t)SVcallernames.size()){
 		outputvcfFile(filename_TP_bench, result.at(1));
 		outputvcfFile(filename_TP_user, result.at(0));
 		outputvcfFile(filename_FP, result.at(2));
 		outputvcfFile(filename_FN, result.at(3));
+		outputvcfFile(filename_LP, result.at(4));
 		usersets_num +=1;
 	}
 
@@ -157,20 +163,21 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	TP_benchmark = result.at(1).size();
 	FP = result.at(2).size();
 	FN = result.at(3).size();
-
+	LP = result.at(4).size();
+	cout<<"11111111111:  "<< LpNum <<endl;
 	if(benchmark_data.size()>0) recall = (float)TP_benchmark / benchmark_data.size();
 	else recall = 0;
 	//precision_user = (float)TP_user / user_data.size();
-	if(TP_user+result.at(2).size()>0) precision_user = (float)TP_user / (TP_user + result.at(2).size());
+	if(TP_benchmark+result.at(2).size()>0) precision_user = (float)(TP_benchmark) / (TP_benchmark + result.at(2).size());
 	else precision_user = 0;
 	//precision_benchmark = (float)TP_benchmark / user_data.size();
-	if(TP_benchmark+result.at(2).size()>0) precision_benchmark = (float)TP_benchmark / (TP_benchmark + result.at(2).size());
-	else precision_benchmark = 0;
+	/*if(TP_benchmark+result.at(2).size()>0) precision_benchmark = (float)TP_benchmark / (TP_benchmark + result.at(2).size());
+	else precision_benchmark = 0;*/
 
 	if(recall+precision_user>0) F1_score_user = 2.0 * (recall * precision_user) / (recall + precision_user);
 	else F1_score_user = 0;
-	if(recall+precision_benchmark>0) F1_score_benchmark = 2.0 * (recall * precision_benchmark) / (recall + precision_benchmark);
-	else F1_score_benchmark = 0;
+	/*if(recall+precision_benchmark>0) F1_score_benchmark = 2.0 * (recall * precision_benchmark) / (recall + precision_benchmark);
+	else F1_score_benchmark = 0;*/
 
 	if(TP_user>0) sv_num_per_reg = (float)TP_benchmark / TP_user;
 	else sv_num_per_reg = 0;
@@ -179,22 +186,22 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	else	Seqcons = 0;
 //	cout << "11111111:" << Seqcons << "	num:" << SeqconsNum << " SeqconsSum:" << SeqconsSum << endl;
 
-	cout << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
-	cout << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
+	cout << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << ", LP=" << LP << endl;
+	cout << "Recall=" << recall << ", Precision=" << precision_user << ", F1 score=" << F1_score_user << endl; //", precision_benchmark=" << precision_benchmark <<
 //	cout << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	cout <<"Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl; // ", F1 score_user=" << F1_score_user <<
 
-	outStatScreenFile << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
-	outStatScreenFile << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
+	outStatScreenFile << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << ", LP=" << LP << endl;
+	outStatScreenFile << "Recall=" << recall << ", Precision=" << precision_user << ", F1 score=" << F1_score_user << endl;
 //	outStatScreenFile << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	outStatScreenFile << "Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 	if(Markers == 2){
-		CollectData(TP_user, TP_benchmark, FP, FN, data1, 4, 2);
+		CollectData(LP, TP_benchmark, FP, FN, data1, 4, 2);
 		CollectData(recall, precision_user, F1_score_user, Seqcons, data, 3, 2);
 	}
 	allmetric.clear();
 	if(Markers == 4){
-		CollectData(TP_user, TP_benchmark, FP, FN, data1_4, 4, 4);
+		CollectData(LP, TP_benchmark, FP, FN, data1_4, 4, 4);
 		CollectData(recall, precision_user, F1_score_user, Seqcons, data_4, 3, 4);
 	}
 	regionmetric.clear();
@@ -388,27 +395,28 @@ void CollectData(float recall, float precision_user, float F1_score_user, double
 //		Data = {recall, precision_user, F1_score_user};
 //	}
 }
-void CollectData(int TP_user, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers){
+void CollectData(int LP, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers){
 	Data.push_back(TP_benchmark);
-	Data.push_back(TP_user);
 	Data.push_back(FP);
 	Data.push_back(FN);
+	Data.push_back(LP);
 	if(Markers==2){
 		allmetric.push_back(to_string(TP_benchmark));
-		allmetric.push_back(to_string(TP_user));
 		allmetric.push_back(to_string(FP));
 		allmetric.push_back(to_string(FN));
+		allmetric.push_back(to_string(LP));
 	}else if (Markers==4){
 		regionmetric.push_back(to_string(TP_benchmark));
-		regionmetric.push_back(to_string(TP_user));
 		regionmetric.push_back(to_string(FP));
 		regionmetric.push_back(to_string(FN));
+		regionmetric.push_back(to_string(LP));
 	}
 //	if(Data.size()>num){
 //		data1.clear();
 //		data1 = {TP_user, TP_benchmark, FP, FN};
 //		}
 }
+
 
 void computeLenStat(vector<SV_item*> &data, string &description_str){
 	int64_t len, sum, max_len, min_len, aver_len;
@@ -671,7 +679,7 @@ void checkOrder(vector<vector<SV_item*>> &subsets){
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t *fai){
 	vector<vector<SV_item*>> result;
 	size_t i, j, subset_num = subsets.size() >> 1;
-	vector<SV_item*> vec_tmp, intersect_vec_user[subset_num+1], intersect_vec_benchmark[subset_num+1], private_vec_user[subset_num+1], private_vec_benchmark[subset_num+1];
+	vector<SV_item*> vec_tmp, intersect_vec_user[subset_num+1], intersect_vec_benchmark[subset_num+1], private_vec_user[subset_num+1], private_vec_benchmark[subset_num+1], intersect_vec_latentpositive_user[subset_num+1];
 	overlapWork_opt *overlap_opt;
 
 	hts_tpool *p = hts_tpool_init(num_threads);
@@ -690,6 +698,7 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t 
 		overlap_opt->intersect_vec_benchmark = intersect_vec_benchmark + i;
 		overlap_opt->private_vec_user = private_vec_user + i;
 		overlap_opt->private_vec_benchmark = private_vec_benchmark + i;
+		overlap_opt->intersect_vec_latentpositive_user = intersect_vec_latentpositive_user + i;
 		overlap_opt->fai = fai;
 
 //		if(overlap_opt->subset1.size()>0) cout << "\t" << overlap_opt->subset1.at(0)->chrname << ", user_data: " << overlap_opt->subset1.size() << ", benchmark_data: " << overlap_opt->subset2.size() << endl;
@@ -713,20 +722,23 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t 
     	vector<SV_item*>().swap(private_vec_user[i]);
     	for(j=0; j<private_vec_benchmark[i].size(); j++) private_vec_benchmark[subset_num].push_back(private_vec_benchmark[i].at(j));
     	vector<SV_item*>().swap(private_vec_benchmark[i]);
+    	for(j=0; j<intersect_vec_latentpositive_user[i].size(); j++) intersect_vec_latentpositive_user[subset_num].push_back(intersect_vec_latentpositive_user[i].at(j));
+    	vector<SV_item*>().swap(intersect_vec_latentpositive_user[i]);
     }
 
 	result.push_back(intersect_vec_user[subset_num]);
 	result.push_back(intersect_vec_benchmark[subset_num]);
 	result.push_back(private_vec_user[subset_num]);
 	result.push_back(private_vec_benchmark[subset_num]);
+	result.push_back(intersect_vec_latentpositive_user[subset_num]);
 
 	return result;
 }
 
 void* intersectSubset(void *arg){
 	overlapWork_opt *overlap_opt = (overlapWork_opt *)arg;
-	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark;
-	SV_item *item1, *item2, *item;
+	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark, intersect_vec_latentpositive_user;
+	SV_item *item1, *item2, *item, *item3;
 	size_t i, j, k;
 	vector<size_t> overlap_type_vec;
 	vector<SV_item*> subset1, subset2;
@@ -741,8 +753,8 @@ void* intersectSubset(void *arg){
 
 	subset1 = overlap_opt->subset1;
 	subset2 = overlap_opt->subset2;
-	for(i=0; i<subset1.size(); i++) {subset1.at(i)->overlapped = false; subset1.at(i)->seqcons = "-";}
-	for(i=0; i<subset2.size(); i++) {subset2.at(i)->overlapped = false;	subset2.at(i)->seqcons = "-";}
+	for(i=0; i<subset1.size(); i++) {subset1.at(i)->overlapped = false; subset1.at(i)->seqcons = "-"; subset1.at(i)->mergeMark = false; subset1.at(i)-> LpFlag = false;}
+	for(i=0; i<subset2.size(); i++) {subset2.at(i)->overlapped = false;	subset2.at(i)->seqcons = "-"; subset2.at(i)->mergeMark = false; subset2.at(i)-> LpFlag = false;}
 
 	start_idx = end_idx = -1;
 	for(i=0; i<subset1.size(); i++){
@@ -819,6 +831,10 @@ void* intersectSubset(void *arg){
 						if(item2->startPos<start_search_pos) continue;
 						overlap_type_vec = computeOverlapType(item1, item2);
 						if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
+							//merge_judge
+							if(item1->sv_type == item2->sv_type)
+								IsmergeJudge(i, item1, item2, subset1, overlap_opt->fai);
+
 							sv_len1 = item1->sv_len; sv_len2 = item2->sv_len;
 							if(sv_len1<0) sv_len1 = -sv_len1;
 							if(sv_len2<0) sv_len2 = -sv_len2;
@@ -832,12 +848,12 @@ void* intersectSubset(void *arg){
 								if(item1->sv_type==item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){
 									if(i!=subset1.size()-1 and j!=subset2.size()-1){
 
-										if((subset1.at(i+1)->startPos - item1->startPos <= ALLELIC_DISTANCE and subset1.at(i+1)->sv_type == item1->sv_type) or (i>0 and item1->startPos - subset1.at(i-1)->startPos <= ALLELIC_DISTANCE and subset1.at(i-1)->sv_type == item1->sv_type))	alleleflag = true;
+										if((subset1.at(i+1)->startPos - item1->startPos <= ALLELIC_DISTANCE and subset1.at(i+1)->sv_type == item1->sv_type and !item1->mergeMark) or (i>0 and item1->startPos - subset1.at(i-1)->startPos <= ALLELIC_DISTANCE and subset1.at(i-1)->sv_type == item1->sv_type and !item1->mergeMark))	alleleflag = true;
 
-										if((subset2.at(j+1)->startPos - item2->startPos <= ALLELIC_DISTANCE and subset2.at(j+1)->sv_type == item2->sv_type) or (j>0 and item2->startPos - subset2.at(j-1)->startPos <= ALLELIC_DISTANCE and subset2.at(j-1)->sv_type == item2->sv_type))	alleleflag = true; //or item2->startPos - subset2.at(j-1)->startPos <=10
+										if((subset2.at(j+1)->startPos - item2->startPos <= ALLELIC_DISTANCE and subset2.at(j+1)->sv_type == item2->sv_type  and !item1->mergeMark) or (j>0 and item2->startPos - subset2.at(j-1)->startPos <= ALLELIC_DISTANCE and subset2.at(j-1)->sv_type == item2->sv_type and !item1->mergeMark))	alleleflag = true; //or item2->startPos - subset2.at(j-1)->startPos <=10
 									}else{
-										if(i>0 and item1->startPos - subset1.at(i-1)->startPos <= ALLELIC_DISTANCE and subset1.at(i-1)->sv_type == item1->sv_type)	alleleflag = true;
-										if(j>0 and item2->startPos - subset2.at(j-1)->startPos <= ALLELIC_DISTANCE and subset2.at(j-1)->sv_type == item2->sv_type)	alleleflag = true;
+										if(i>0 and item1->startPos - subset1.at(i-1)->startPos <= ALLELIC_DISTANCE and subset1.at(i-1)->sv_type == item1->sv_type and !item1->mergeMark)	alleleflag = true;
+										if(j>0 and item2->startPos - subset2.at(j-1)->startPos <= ALLELIC_DISTANCE and subset2.at(j-1)->sv_type == item2->sv_type and !item1->mergeMark)	alleleflag = true;
 									}
 									if(alleleflag){
 										if(((item1->sv_type == VAR_INS and item2->sv_type == VAR_INS) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_INV and item2->sv_type== VAR_INV)) and typeMatchLevel == MATCHLEVEL_S){ //or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)
@@ -1481,8 +1497,23 @@ void* intersectSubset(void *arg){
 	for(i=0; i<subset1.size(); i++){
 		item1 = subset1.at(i);
 		item = itemdup(item1);
-		if(!item1->overlapped) private_vec_user.push_back(item);
-		else intersect_vec_user.push_back(item);
+		/*if(!item1->overlapped) private_vec_user.push_back(item);
+		else intersect_vec_user.push_back(item);*/
+		if (item1->overlapped) {
+			if(!item1->mergeMark)
+				intersect_vec_user.push_back(item);
+			else{
+				item3 = itemdup(item1);
+				intersect_vec_user.push_back(item3);
+				intersect_vec_latentpositive_user.push_back(item);
+			}
+		} else {
+			if (item1->mergeMark) {
+				intersect_vec_latentpositive_user.push_back(item); //intersect_vec_latentpositive_user
+			} else {
+				private_vec_user.push_back(item);
+			}
+		}
 	}
 
 	pthread_mutex_lock(&mtx_overlap);
@@ -1490,6 +1521,7 @@ void* intersectSubset(void *arg){
 	for(j=0; j<intersect_vec_benchmark.size(); j++) overlap_opt->intersect_vec_benchmark->push_back(intersect_vec_benchmark.at(j));
 	for(j=0; j<private_vec_user.size(); j++) overlap_opt->private_vec_user->push_back(private_vec_user.at(j));
 	for(j=0; j<private_vec_benchmark.size(); j++) overlap_opt->private_vec_benchmark->push_back(private_vec_benchmark.at(j));
+	for(j=0; j<intersect_vec_latentpositive_user.size(); j++) overlap_opt->intersect_vec_latentpositive_user->push_back(intersect_vec_latentpositive_user.at(j));
 	//if(subset1.size()>0) cout << "\t" << subset1.at(0)->chrname << ", user_data: " << subset1.size() << ", benchmark_data: " << subset2.size() << endl;
 	//cout << "\t\t" << intersect_vec_user.size() << ", " << intersect_vec_benchmark.size() << ", " << private_vec_user.size() << ", " << private_vec_benchmark.size() << endl;
 	pthread_mutex_unlock(&mtx_overlap);
@@ -1516,6 +1548,8 @@ SV_item* itemdup(SV_item* item){
 	item_new->sv_type = item->sv_type;
 	item_new->sv_len = item->sv_len;
 	item_new->overlapped = item->overlapped;
+	item_new->mergeMark = item->mergeMark;
+	item_new->LpFlag = item->LpFlag;
 	item_new->validFlag = item->validFlag;
 	for(size_t i=0; i<4; i++) item_new->traOverlappedArr[i] = item->traOverlappedArr[i];
 	item_new->ref_seq = item->ref_seq;
@@ -1786,6 +1820,340 @@ vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 	}
 
 	return overlap_type_vec;
+}
+
+void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai){
+	vector<SV_item*> merge_users_vec, merge_item_vec;
+	SV_item *Maymerge_user, *Merge_users, *Merge_item, *Lp_Merge_item, *Definite_Merge_item;
+	size_t i = user_pos + 1;
+	int32_t min_startpos, max_endpos, refseq_len_tmp;
+	int64_t pos_update;
+	bool flag = false;
+	size_t startpos1, startpos2, endpos1, endpos2;
+	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
+	double consistency;
+	char *seq;
+
+	merge_users_vec.push_back(user);
+	pos_update = user->endPos;
+
+	if(i<subset1.size()){
+		for(i = user_pos + 1; i<subset1.size(); i++){
+			Maymerge_user = subset1.at(i);
+			if(user->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+				if(abs(Maymerge_user->startPos - user->startPos) > 500) break;
+				else{
+					if(Maymerge_user->sv_type == user->sv_type)
+						merge_users_vec.push_back(Maymerge_user);
+				}
+			}else if(user->sv_type == VAR_DEL  and bench->sv_type == VAR_DEL){
+				//distance
+				if(abs(Maymerge_user->startPos - pos_update) > 400) break;
+				else{
+					if(Maymerge_user->sv_type == user->sv_type){
+						merge_users_vec.push_back(Maymerge_user);
+						pos_update = Maymerge_user->endPos;
+					}
+				}
+			}else break;
+		}
+		if(merge_users_vec.size()>1){
+			//Merge verification: Whether it is consistent after the merger
+			auto merge_result = findClosestSubarray(merge_users_vec, bench->sv_len);
+			merge_item_vec = merge_result.second;
+			if(merge_item_vec.size() > 1){
+				//Verify heterozygous variation overlap
+				for(size_t j=1; j < merge_item_vec.size(); j++){
+					if(bench->sv_type == VAR_INS){
+						startpos1 = merge_item_vec.at(j-1)->startPos;
+						startpos2 = merge_item_vec.at(j)->startPos;
+						endpos1 = merge_item_vec.at(j-1)->startPos + merge_item_vec.at(j-1)->ref_seq.length()-1;
+						endpos2 = merge_item_vec.at(j)->endPos + merge_item_vec.at(j)->ref_seq.length()-1;
+					}else if(bench->sv_type == VAR_DEL){
+						startpos1 = merge_item_vec.at(j-1)->startPos;
+						startpos2 = merge_item_vec.at(j)->startPos;
+						endpos1 = merge_item_vec.at(j-1)->endPos;
+						endpos2 = merge_item_vec.at(j)->endPos;
+					}
+					if(endpos1 >= startpos2 && endpos2 >= startpos1) return ;
+				}
+				if(bench->sv_type == VAR_INS){
+					min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+					max_endpos = (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) >= (bench->startPos + bench->ref_seq.length()-1) ? (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) :(bench->startPos + bench->ref_seq.length()-1);
+				}else if(bench->sv_type == VAR_DEL){
+					min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+					max_endpos = merge_item_vec.at(0)->endPos >= bench->endPos ? merge_item_vec.at(0)->endPos : bench->endPos;
+				}
+				for(size_t j=0; j < merge_item_vec.size(); j++){
+					Merge_users = merge_item_vec.at(j);
+					if(Merge_users->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+						min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+						max_endpos = (Merge_users->startPos + Merge_users->ref_seq.length()-1) >= (size_t)max_endpos ? (Merge_users->startPos + Merge_users->ref_seq.length()-1) : max_endpos;
+					}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+						min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+						max_endpos = Merge_users->endPos >= max_endpos ? Merge_users->endPos : max_endpos;
+					}
+				}
+				//Extract seq1 sequence
+				for(size_t j=0; j < merge_item_vec.size(); j++){
+					Merge_item = merge_item_vec.at(j);
+					if(Merge_item->sv_type == VAR_INS){
+						if(j==0){
+							if(min_startpos == Merge_item->startPos){
+								seq1 += Merge_item->alt_seq;
+								/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;*/
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}
+						}else if(j==merge_item_vec.size()-1){
+							if((size_t)max_endpos == Merge_item->startPos+Merge_item->alt_seq.length()-1){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+								reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+							}
+						}else{
+							if(j+1 < merge_item_vec.size()){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}
+						}
+					}else if(Merge_item->sv_type == VAR_DEL){
+						if(j==0){
+							if(min_startpos == Merge_item->startPos){
+								seq1 += Merge_item->ref_seq;
+								/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;*/
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}
+						}else if(j==merge_item_vec.size()-1){
+							if(max_endpos == Merge_item->endPos){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+								reg_str = Merge_item->chrname + ":" + to_string(Merge_item->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+							}
+						}else{
+							if(j+1 < merge_item_vec.size()){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}
+						}
+					}
+				}
+				//Extract seq2 sequence
+				if(bench->sv_type == VAR_INS){
+					if(min_startpos == bench->startPos){
+						seq2 += bench->alt_seq;
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+					}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->alt_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->startPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += max_endpos;
+					}else{
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->alt_seq;
+					}
+				}else if(bench->sv_type == VAR_DEL){
+					if(min_startpos == bench->startPos){
+						seq2 += bench->ref_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+					}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->ref_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += max_endpos;
+					}else{
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->ref_seq;
+					}
+				}
+				//Sequence identity calculation
+				upperSeq(seq1);
+				upperSeq(seq2);
+				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
+				consistency = calculate_consistency(aln_seq1, aln_seq2);
+				if(consistency >= SEQ_CONSISTENCY){
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						//LP flag
+						Lp_Merge_item = merge_item_vec.at(j);
+						if(Lp_Merge_item->LpFlag){
+							flag = true;
+							break;
+						}
+					}
+					if(!flag) LpNum += 1;
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						Definite_Merge_item = merge_item_vec.at(j);
+						Definite_Merge_item->mergeMark = true;
+						Definite_Merge_item->LpFlag = true;
+					}
+					bench->overlapped = true;
+					bench->mergeMark = true;
+//					bench->seqcons = consistency;
+				}
+			}
+		}
+	}
+	return ;
+}
+
+// Finds the contiguous SV_item subarray that is closest to the target value and satisfies the condition
+pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t target) {
+    int closestSVlenSum = 0; // Used to record the nearest SVlen Sum
+    int minDiff = numeric_limits<int>::max();
+    vector<SV_item*> bestSubarray;
+    double merge_len_ratio;
+
+    // Go through all possible starting positions
+    for (size_t i = 0; i < items.size(); ++i) {
+        int currentSVlenSum = 0;
+        vector<SV_item*> currentSubarray;
+        // Go through all possible end positions
+        for (size_t j = i; j < items.size(); ++j) {
+        	currentSVlenSum += items[j]->sv_len;
+            currentSubarray.push_back(items[j]);
+            merge_len_ratio = currentSVlenSum >= target ? (double)target / currentSVlenSum : (double)currentSVlenSum / target;
+            // Determines whether the SV size condition is met
+            if (merge_len_ratio >= 0.9) {
+                int currentDiff = abs(currentSVlenSum - target);
+                //Update the nearest SVlen and subarray
+                if (currentDiff < minDiff) {
+                    minDiff = currentDiff;
+                    closestSVlenSum = currentSVlenSum;
+                    bestSubarray = currentSubarray;
+                }else if(currentDiff == minDiff){
+                	break;
+                }
+            }
+        }
+    }
+    return { closestSVlenSum, bestSubarray }; // Returns the nearest sum and subarray
 }
 
 int32_t minDistance(const string &seq1, const string &seq2) {
@@ -2442,6 +2810,8 @@ void LongSequenceSplitAlignment(vector<Minimizer>& minimizers, vector<Minimizer>
         else if (i == Length) {
             Exact_len = sequece_len - (minimizers[i - 1].position + k);
             Exact_len1 = seqence_len1 - (minimizers1[i - 1].position + k);
+            if(Exact_len < 0) Exact_len = 0;
+            if(Exact_len1 < 0) Exact_len1 = 0;
             seq = sequence.substr(minimizers[i - 1].position + k, Exact_len);
             seq1 = sequence1.substr(minimizers1[i - 1].position + k, Exact_len1);
         }

@@ -5,7 +5,7 @@
 #include <cstring>
 #include <vector>
 #include <unordered_map>
-
+#include "structure.h"
 using namespace std;
 
 // global variables
@@ -35,6 +35,8 @@ extern string convertScreenFilename;
 extern string statScreenFilename;
 extern string Rscriptfilename;
 extern string RscriptfilenamePath;
+extern string outputSharedFNsfilename;
+extern string outputBenchfilename;
 extern string RscriptfilePNGname;
 extern string RscriptfilePNGnamePath;
 extern ofstream outConvertScreenFile;
@@ -53,6 +55,21 @@ extern vector<string> folderPng5;
 extern vector<string> alltoolnames;
 extern vector<string> allmetric;
 extern vector< vector<string>> allmetrics;
+
+extern vector<string> sharedFPFilenames;
+extern vector<string> benchmarkAddTP_user;
+extern vector <vector<SV_item*>> fp_vec;
+extern vector<SV_item*> entryMap;
+extern size_t tolerance;
+extern unordered_map<string, int> sharedFPlineMap;
+extern unordered_map<string, int> refinedsharedFPlineMap;
+extern vector <vector<SV_item*>> benchmark_vec;
+extern vector<string> ToolsFilenames;
+extern vector<SV_item*> entryMap1;
+extern unordered_map<string, int> benchmark_hg002_Map;
+extern bool refine_bench_flag;
+extern bool create_bench_flag;
+
 extern vector<string> centerDistance;
 extern vector< vector<string>> centerDistances;
 extern vector<string> sizeratio;
@@ -62,7 +79,7 @@ extern vector<string> regionmetric;
 extern vector<vector<vector<string>>> allregionmetrics;
 extern vector< vector<string>> regionmetrics;
 extern vector<string> regSizeFiles;
-extern unordered_map<std::string, int> benchmarklineMap;
+extern unordered_map<string, int> benchmarklineMap;
 extern vector<string> benchmarkannotationLines;
 extern vector <vector<string>> usersetsannotationLines;
 extern bool sign;
@@ -71,6 +88,7 @@ extern vector<string> ResultdataPath;
 extern double Seqcons;
 extern double SeqconsSum;
 extern int32_t SeqconsNum;
+extern int32_t LpNum;
 extern float svlenRatio;
 extern vector<string> chromosomeSet;
 extern string typeMatchLevel;

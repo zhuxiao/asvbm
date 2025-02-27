@@ -31,7 +31,7 @@ void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, stri
 void computeNumStatFromFile(vector<SV_item*> TPbench_data, vector<SV_item*> TPuser_data, vector<SV_item*> FP_data, vector<SV_item*> FN_data, string &file_prefix, int32_t endpos, int Markers);
 
 void CollectData(float recall, float precision_user, float F1_score_user, double seqcons, vector<float> &Data, size_t num, int Markers);
-void CollectData(int TP_user, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers);
+void CollectData(int LP, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers);
 void computeLenStat(vector<SV_item*> &data, string &description_str);
 
 vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &data2, faidx_t *fai);
@@ -51,6 +51,8 @@ SV_item* itemdup(SV_item* item);
 bool IsSameChrname(string &chrname1, string &chrname2);
 vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2);
 bool isOverlappedPos(size_t startPos1, size_t endPos1, size_t startPos2, size_t endPos2);
+pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t target);
+void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai);
 //int MINDistance(string seq1, string seq2);
 int32_t minDistance(const string &seq1, const string &seq2);
 double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, double SeqIdentity);
