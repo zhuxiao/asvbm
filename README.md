@@ -78,6 +78,8 @@ ASVBM depends on the following libraries and tools:
 * HTSlib (http://www.htslib.org/download/)
 * g++ (v4.7 or higher which supports c++11)
 * gnuplot (v5.4 http://gnuplot.info/download.html)
+* R and R Development Tools (v4.1.2 or higher)
+* R Packages:UpSetR (v1.4.0 or higher)
 
 The above library and tools should be installed before compiling ASVBM.
 
