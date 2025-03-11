@@ -8,7 +8,7 @@ $ docker build -t asvbm:v1.3.1 .
 $ docker images
 REPOSITORY        TAG       IMAGE ID       CREATED         SIZE
 asvbm             v1.3.1    22ab0947a2ba   1 second ago    <...>
-$ docker run -it asvbm:v1.3.0
+$ docker run -it asvbm:v1.3.1
 OR
 $ docker run -it --name asvbm -v 'pwd':/data_test asvbm:v1.3.1 bash
 OR
