@@ -170,7 +170,7 @@ The help information is below:
 ```sh
 $ ASVBM
 Program: ASVBM (A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
-Version: 1.3.0
+Version: 1.3.1
 
 Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
