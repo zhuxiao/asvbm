@@ -211,7 +211,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
 void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart){
 	// Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
 	vector<string> scenarios;
-	vector<string> metrics = {"TP.bench", "TP.user", "FP", "FN"};
+	vector<string> metrics = {"TP", "FP", "FN", "LP"};
 	if(tool_names.size()>1) scenarios = tool_names;
 	//Note to be modified to remove '/'
 	else {
@@ -293,7 +293,25 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
 	AddfileInformation(filenamePath, Info);
 	cout << endl << "The classification of result between different data sets is saved in: " << outputFileNamePath << endl;
 }
+//Generates the segmented interval
+vector<string> generateScenarios() {
+	vector<string> scenarios;
 
+	if(size_div_vec.empty()){
+		scenarios.push_back(">0");
+		return scenarios;
+	}
+
+	scenarios.push_back("1-" + to_string(size_div_vec[0]) + "bp");
+
+	for(size_t i = 1; i < size_div_vec.size(); ++i){
+		scenarios.push_back(to_string(size_div_vec[i - 1] + 1) + "-" + to_string(size_div_vec[i]) + "bp");
+	}
+
+	scenarios.push_back(">=" + to_string(size_div_vec.back() + 1) + "bp");
+
+	return scenarios;
+}
 //Modifying File Information
 void AddfileInformation(string &FileNamePath, string &Info){
 	ifstream inputFile(FileNamePath);
@@ -573,8 +591,8 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > MeticsValues_4){
 	string filename, filenamePath, outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 	// Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
-	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500bp", "2501-5000bp", "5001-10000bp",">10000bp"};
-
+//	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500bp", "2501-5000bp", "5001-10000bp",">10000bp"};
+	vector<string> scenarios = generateScenarios();
 	// Create a data file to hold the data
 	filename = "calculation_result";
 	filenamePath = sizeNumStatDirname + filename;
@@ -635,8 +653,8 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > MeticsValues1_4){
 	string filename, filenamePath, outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 // Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
-	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500bp", "2501-5000bp", "5001-10000bp",">10000bp"};
-
+//	vector<string> scenarios ={"1-100bp","101-250bp","251-500bp","501-1000bp","1001-2500bp", "2501-5000bp", "5001-10000bp",">10000bp"};
+	vector<string> scenarios = generateScenarios();
 	// Create a data file to hold the data
 	filename = "quantitative_statistics";
 	filenamePath = sizeNumStatDirname + '/'+ filename;
@@ -787,22 +805,37 @@ void ComparisonofMetricsindifferentrangesOp(string &outputDiffRangeBasicMetricsc
 
 //stat 5
 void GenerateFileOp(string &DiffRangeStatDirname, vector<string> &tool_names, vector<string> &filenames, vector<string> &sv_files1){
-	string FileNameStr0 = "1-100";
-	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr0, MeticsValues4_0, filenames, sv_files1);
-	string FileNameStr1 = "101-250";
-	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr1, MeticsValues4_1, filenames, sv_files1);
-	string FileNameStr2 = "251-500";
-	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr2, MeticsValues4_2, filenames, sv_files1);
-	string FileNameStr3 = "501-1000";
-	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr3, MeticsValues4_3, filenames, sv_files1);
-	string FileNameStr4 = "1001-2500";
-	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr4, MeticsValues4_4, filenames, sv_files1);
-	string FileNameStr5 = "2501-5000";
-	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr5, MeticsValues4_5, filenames, sv_files1);
-	string FileNameStr6 = "5001-10000";
-	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr6, MeticsValues4_6, filenames, sv_files1);
-	string FileNameStr7 = "greaterthan10001";
-	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr7, MeticsValues4_7, filenames, sv_files1);
+//	string FileNameStr0 = "1-100";
+//	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr0, MeticsValues4_0, filenames, sv_files1);
+//	string FileNameStr1 = "101-250";
+//	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr1, MeticsValues4_1, filenames, sv_files1);
+//	string FileNameStr2 = "251-500";
+//	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr2, MeticsValues4_2, filenames, sv_files1);
+//	string FileNameStr3 = "501-1000";
+//	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr3, MeticsValues4_3, filenames, sv_files1);
+//	string FileNameStr4 = "1001-2500";
+//	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr4, MeticsValues4_4, filenames, sv_files1);
+//	string FileNameStr5 = "2501-5000";
+//	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr5, MeticsValues4_5, filenames, sv_files1);
+//	string FileNameStr6 = "5001-10000";
+//	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr6, MeticsValues4_6, filenames, sv_files1);
+//	string FileNameStr7 = "greaterthan10001";
+//	GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr7, MeticsValues4_7, filenames, sv_files1);
+	for(size_t i = 0; i < size_div_vec.size(); ++i){
+		string FileNameStr;
+		if (i == 0){
+			FileNameStr = "1-" + to_string(size_div_vec[i]);
+		} else{
+			FileNameStr = to_string(size_div_vec[i - 1] + 1) + "-" + to_string(size_div_vec[i]);
+		}
+
+		GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr, MeticsValues4_num[i], filenames, sv_files1);
+	}
+
+	if(!size_div_vec.empty()){
+		string FileNameStr = "greaterthan" + to_string(size_div_vec[size_div_vec.size()-1] + 1);
+		GenerateFile(DiffRangeStatDirname, tool_names, FileNameStr, MeticsValues4_num[size_div_vec.size()], filenames, sv_files1);
+	}
 }
 //stat 5
 void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, string &FileName, vector< vector<float> > meticsvalues, vector<string> &filenames, vector<string> &sv_files1){
@@ -850,6 +883,7 @@ void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, stri
 void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fileNames, vector<string> &tool_names, vector<string> &sv_files1) {
 	string outputFileName, outputFileNamePath, outputFileNamePath_tmp;
 	vector<string> scenarios;
+	size_t num_rows_plot;
 	outputFileName = "different_range.png";
 	outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
 	outputFileNamePath_tmp=getContentAfterSlash(outputFileNamePath);
@@ -872,10 +906,12 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 		}
 	}
 
-	vector<string> titles =  {
-			        "1-100 bp", "101-250 bp", "251-500 bp",
-			        "501-1000 bp", "1001-2500 bp",  "2501-5000 bp", "5001-10000 bp", ">=10001 bp"
-			    };
+//	vector<string> titles =  {
+//			        "1-100 bp", "101-250 bp", "251-500 bp",
+//			        "501-1000 bp", "1001-2500 bp",  "2501-5000 bp", "5001-10000 bp", ">=10001 bp"
+//			    };
+	vector<string> titles = generateScenarios();
+	num_rows_plot = (size_div_vec.size() + 2) / 2;
 	//// Open the Gnuplot pipeline
 	FILE* gnuplotPipe = popen("gnuplot -persist", "w");
 	if (!gnuplotPipe) {
@@ -884,9 +920,15 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 	}
 	// Use the GNUplot command to plot the bar plot and save the output as a PNG file
 	//Fig1
-	fprintf(gnuplotPipe, "set term pngcairo size 1500,1800\n"); // Set the output terminal to PNG
+	if(num_rows_plot>2){
+		fprintf(gnuplotPipe, "set term pngcairo size 1500,1800\n"); // Set the output terminal to PNG
+	}else if(num_rows_plot<2){
+		fprintf(gnuplotPipe, "set term pngcairo size 1800,1500\n");
+	}else{
+		fprintf(gnuplotPipe, "set term pngcairo size 1500,1500\n");
+	}
 	fprintf(gnuplotPipe, "set output '%s'\n", outputFileNamePath.c_str()); // Set output file name
-	fprintf(gnuplotPipe, "set multiplot layout 4, 2\n");
+	fprintf(gnuplotPipe, "set multiplot layout %zu, 2\n",num_rows_plot);
 
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[0].c_str());
 	fprintf(gnuplotPipe, "set xlabel 'Metrics'\n");
@@ -897,6 +939,19 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 	fprintf(gnuplotPipe, "set yrange [0:1]\n");
 	fprintf(gnuplotPipe, "set ytics 0.1\n");
 	fprintf(gnuplotPipe, "set style data histograms\n");
+//	fprintf(gnuplotPipe, "set term pngcairo size 1500,1800\n"); // Set the output terminal to PNG
+//	fprintf(gnuplotPipe, "set output '%s'\n", outputFileNamePath.c_str()); // Set output file name
+//	fprintf(gnuplotPipe, "set multiplot layout 4, 2\n");
+//
+//	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[0].c_str());
+//	fprintf(gnuplotPipe, "set xlabel 'Metrics'\n");
+//	fprintf(gnuplotPipe, "set ylabel 'Percentage'\n");
+//	fprintf(gnuplotPipe, "set style fill solid\n");
+//	fprintf(gnuplotPipe, "set boxwidth 1.0\n"); // Set the bar width
+//	fprintf(gnuplotPipe, "set xtics nomirror font 'Times-Roman,12'\n");
+//	fprintf(gnuplotPipe, "set yrange [0:1]\n");
+//	fprintf(gnuplotPipe, "set ytics 0.1\n");
+//	fprintf(gnuplotPipe, "set style data histograms\n");
 
 	// Set key (legend) font size
 	fprintf(gnuplotPipe, "set key font 'Times-Roman,10'\n");
@@ -904,7 +959,7 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 	string Info;
 	if(tool_names.size()>1)	Info = "Tool";
 	else	Info = "callsets";
-	for(size_t i = 0; i < 8; i++){
+	for(size_t i = 0; i < size_div_vec.size()+1; i++){
 		string plotCommand ="plot '" + fileNames[i] + "'";
 		for(size_t j = 0; j < scenarios.size(); j++){
 			if(i == 0)

@@ -24,7 +24,7 @@ using namespace std;
 // program variables
 #define PROG_NAME		"ASVBM"
 #define PROG_DESC		"A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets"
-#define PROG_VERSION	"1.3.0"
+#define PROG_VERSION	"1.3.1"
 
 #define CMD_STAT_STR					"stat"
 #define CMD_CREATE_STR					"create"
@@ -40,6 +40,7 @@ int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
 int parseCreate(int argc, char **argv);
 
+vector<string> generateSVregion();
 string getProgramVersion(const string &cmd_str);
 void convert(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format);
 //void SVStat(string &ref_file, string &user_file, string &benchmark_file);

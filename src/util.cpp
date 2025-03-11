@@ -25,6 +25,27 @@ vector<string> split(const string& s, const string& delim)
 	}
 	return elems;
 }
+//Split a custom interval
+vector<size_t> parseSemicolonSeparatedValues(const string& str){
+	vector<size_t> values;
+	const char* cstr = str.c_str();
+	char* endptr;
+
+	while(*cstr){
+		size_t value = static_cast<size_t>(strtol(cstr, &endptr, 10));
+		if(cstr == endptr){
+			cerr << "Invalid value: " << cstr << endl;
+			exit(1);
+		}
+		values.push_back(value);
+		cstr = endptr;
+		if(*cstr == ';'){
+			cstr++;
+		}
+	}
+
+	return values;
+}
 
 // transform double to string with specified fixed precision
 string double2Str(double num, int32_t fixedPrecision){

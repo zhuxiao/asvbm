@@ -259,12 +259,18 @@ void destroySizeDividedData(vector< vector<SV_item*> > &divided_vec){
 }
 
 void InformationStorage(size_t num, vector<float> &Data){
-	if(num == 0)	MeticsValues4_0.push_back(Data);
-	else if (num == 1) MeticsValues4_1.push_back(Data);
-	else if (num == 2) MeticsValues4_2.push_back(Data);
-	else if (num == 3) MeticsValues4_3.push_back(Data);
-	else if (num == 4) MeticsValues4_4.push_back(Data);
-	else if (num == 5) MeticsValues4_5.push_back(Data);
-	else if (num == 6) MeticsValues4_6.push_back(Data);
-	else if (num == 7) MeticsValues4_7.push_back(Data);
+	MeticsValues4_num[num].push_back(Data);
+		if (num < MeticsValues4_num.size()){
+			MeticsValues4_num[num].push_back(Data);
+		}else{
+			cerr << "Error: num is out of range." << endl;
+		}
+//	if(num == 0)	MeticsValues4_0.push_back(Data);
+//	else if (num == 1) MeticsValues4_1.push_back(Data);
+//	else if (num == 2) MeticsValues4_2.push_back(Data);
+//	else if (num == 3) MeticsValues4_3.push_back(Data);
+//	else if (num == 4) MeticsValues4_4.push_back(Data);
+//	else if (num == 5) MeticsValues4_5.push_back(Data);
+//	else if (num == 6) MeticsValues4_6.push_back(Data);
+//	else if (num == 7) MeticsValues4_7.push_back(Data);
 }

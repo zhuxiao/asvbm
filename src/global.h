@@ -63,7 +63,8 @@ vector<string> centerDistance;
 vector< vector<string>> centerDistances = {{"Tool", "-200--151", "-150--101", "-100--51", "-50--1", "0-50", "51-100", "101-150", "151-200"}};
 vector<string> sizeratio;
 vector< vector<string>> sizeratios = {{"Tool", "0.0-0.5", "0.5-0.7", "0.7-1.2", "1.2-2.0", "2.0-5.0", "5.0-10.0", "10.0-50.0", "50.0-100.0", ">100.0"}};
-vector<string> region = {"1-100bp", "101-250bp", "251-500bp", "501-1000bp", "1001-2500bp", "2501-5000bp", "5001-10000bp", ">10000bp"};
+//vector<string> region = {"1-100bp", "101-250bp", "251-500bp", "501-1000bp", "1001-2500bp", "2501-5000bp", "5001-10000bp", ">10000bp"};
+vector<string> region = {};
 vector<string> regionmetric;
 vector<vector<vector<string>>> allregionmetrics;
 vector< vector<string>> regionmetrics = {{"Region", "#TP_bench", "#TP_user", "#FP", "#FN", "Identity", "Recall", "Precision", "F1 score"}};
@@ -102,6 +103,7 @@ vector<int> data1_4;
 vector< vector<float> > MeticsValues_4;
 vector< vector<int> > MeticsValues1_4;
 
+vector< vector< vector<float> > > MeticsValues4_num;
 vector< vector<float> > MeticsValues4_0;
 vector< vector<float> > MeticsValues4_1;
 vector< vector<float> > MeticsValues4_2;

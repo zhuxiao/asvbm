@@ -10,6 +10,7 @@
 using namespace std;
 
 vector<string> split(const string& s, const string& delim);
+vector<size_t> parseSemicolonSeparatedValues(const string& str);
 string double2Str(double num, int32_t fixedPrecision);
 bool isBase(const char ch);
 void printSV(vector<SV_item*> &data);

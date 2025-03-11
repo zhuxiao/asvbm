@@ -288,7 +288,7 @@ void integrationBenchmark(string &outputFile, string &ref_file){
 	size_t totalEntries = 0;
 	int entryIndex = 0;
 	size_t selectToolsNum;
-	selectToolsNum = ceil(ToolsFilenames.size() * 0.6);
+	selectToolsNum = ceil(ToolsFilenames.size() * 0.55);
 
 	for(i=0; i<ToolsFilenames.size(); i++){
 		if(i > 0){
@@ -363,7 +363,7 @@ void integrationBenchmark(string &outputFile, string &ref_file){
 		outputFile1 << VCF_HEADER << endl;
 		for(i=0; i<connectedComponents.size(); i++){
 			if(connectedComponents[i].size() >= selectToolsNum){
-				if((extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "") || (extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2) || (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "")|| (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2)){
+//				if((extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "") || (extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2) || (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "")|| (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2)){
 					differentToolsIndex.clear();
 					for(j=0; j<connectedComponents[i].size(); j++){
 						for(l=0; l<ToolsFilenames.size(); l++){
@@ -520,7 +520,7 @@ void integrationBenchmark(string &outputFile, string &ref_file){
 							}
 						}
 					}
-				}
+//				}
 			}
 		}
 

@@ -3,23 +3,41 @@
 
 // get the program version
 string getProgramVersion(const string &cmd_str){
-    FILE *stream;
-    char tmp[256], info[256] = {0};
-    string pg_version_str = "";
+	FILE *stream;
+	char tmp[256], info[256] = {0};
+	string pg_version_str = "";
 
-    sprintf(tmp, "%s", cmd_str.c_str());
-    stream = popen(tmp, "r");
-    if(fread(info, 1, sizeof(info), stream)>0){
-        pg_version_str = info;
-        if(pg_version_str.at(pg_version_str.size()-1)=='\n') {
-            pg_version_str.erase(pg_version_str.size()-1); // Remove the newline character
-        }
-    }
-    pclose(stream);
+	sprintf(tmp, "%s", cmd_str.c_str());
+	stream = popen(tmp, "r");
+	if(fread(info, 1, sizeof(info), stream)>0){
+		pg_version_str = info;
+		if(pg_version_str.at(pg_version_str.size()-1)=='\n'){
+			pg_version_str.erase(pg_version_str.size()-1); // Remove the newline character
+		}
+	}
+	pclose(stream);
 
-    return pg_version_str;
+	return pg_version_str;
 }
+//SVregion
+vector<string> generateSVregion(){
+	vector<string> scenarios;
 
+	if(size_div_vec.empty()){
+		scenarios.push_back(">0");
+		return scenarios;
+	}
+
+	scenarios.push_back("1-" + to_string(size_div_vec[0]) + "bp");
+
+	for(size_t i = 1; i < size_div_vec.size(); ++i){
+		scenarios.push_back(to_string(size_div_vec[i - 1] + 1) + "-" + to_string(size_div_vec[i]) + "bp");
+	}
+
+	scenarios.push_back(">=" + to_string(size_div_vec.back() + 1) + "bp");
+
+	return scenarios;
+}
 //show version
 void show_version(){
 	cout << PROG_VERSION << endl;
@@ -97,6 +115,9 @@ void showUsageCreate(){
 	cout << "                  This parameter is used for comparing multiple datasets. The number" << endl;
 	cout << "                  of inputs should be consistent with the data set. Tool names are " <<endl;
 	cout << "                  separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
+	cout << "   -R STR         Custom region sizes [null]." << endl;
+	cout << "                  This parameter allows you to specify custom region sizes for analysis." << endl;
+	cout << "                  Custom region sizes are separated by ';'. Example: -R \"100;500;1000\" " <<endl;
 	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
 	cout << "   -l FILE        file name of long SV regions: [" << longSVFilename << "]" << endl;
 	cout << "   -r FILE        file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
@@ -152,6 +173,9 @@ void showUsageStat(){
 	cout << "                  This parameter is used for comparing multiple datasets. The number" << endl;
 	cout << "                  of inputs should be consistent with the data set. Tool names are " <<endl;
 	cout << "                  separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
+	cout << "   -R STR         Custom region sizes [null]." << endl;
+	cout << "                  This parameter allows you to specify custom region sizes for analysis." << endl;
+	cout << "                  Custom region sizes are separated by ';'. Example: -R \"100;500;1000\" " <<endl;
 	cout << "   -b,--bench_refine"<< endl;
 	cout << "                  perform the refinement of benchmark set along with the benchmarking process" << endl;
 	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
@@ -354,7 +378,7 @@ int parseStat(int argc, char **argv){
 		{"version", no_argument, 0, 'v'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:hvC:bS", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:R:hvC:bS", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
@@ -365,6 +389,7 @@ int parseStat(int argc, char **argv){
 			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
+			case 'R': size_div_vec = parseSemicolonSeparatedValues(optarg); break;
 			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
 			case 'h': showUsageStat(); exit(0);
@@ -407,6 +432,8 @@ int parseStat(int argc, char **argv){
 	else num_threads = (threadNum_tmp>=sysconf(_SC_NPROCESSORS_ONLN)) ? sysconf(_SC_NPROCESSORS_ONLN) : threadNum_tmp;
 
 	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
+	MeticsValues4_num.resize(size_div_vec.size()+1);
+	region = generateSVregion();
 
 	tool_names = split(ToolNameStore,";");
 	chromosomeSet = split(ChromosomeNames,";");
@@ -590,7 +617,7 @@ int parseCreate(int argc, char **argv){
 		{"version", no_argument, 0, 'v'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:hvC:S", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:R:hvC:S", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
@@ -601,6 +628,7 @@ int parseCreate(int argc, char **argv){
 			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
+			case 'R': size_div_vec = parseSemicolonSeparatedValues(optarg); break;
 			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
 			case 'h': showUsageCreate(); exit(0);
@@ -642,6 +670,8 @@ int parseCreate(int argc, char **argv){
 	else num_threads = (threadNum_tmp>=sysconf(_SC_NPROCESSORS_ONLN)) ? sysconf(_SC_NPROCESSORS_ONLN) : threadNum_tmp;
 
 	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
+	MeticsValues4_num.resize(size_div_vec.size()+1);
+	region = generateSVregion();
 
 	tool_names = split(ToolNameStore,";");
 	chromosomeSet = split(ChromosomeNames,";");

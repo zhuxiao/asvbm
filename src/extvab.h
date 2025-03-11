@@ -101,6 +101,7 @@ extern vector<int> data1_4;
 extern vector< vector<float> > MeticsValues_4;
 extern vector< vector<int> > MeticsValues1_4;
 
+extern vector< vector< vector<float> > > MeticsValues4_num;
 extern vector< vector<float> > MeticsValues4_0;
 extern vector< vector<float> > MeticsValues4_1;
 extern vector< vector<float> > MeticsValues4_2;
