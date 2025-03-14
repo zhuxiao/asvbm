@@ -205,7 +205,7 @@ Benchmarking multiple identification result datasets can be achieved by using th
 $ asvbm stat -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
-## Draw istical figures
+## Draw statistical figures
 There are 4 istical categories for `stat` command results, figures can be drawn for a more intuitive and detailed illustration of the four statistical categories:
 * __`1_ref_reg_size_stat`__: record the statistical graph of SV sizes in the user-called data set and the benchmark data set.
 * __`2_num_stat`__: generate the bar chart for the classification benchmarking metrics.
