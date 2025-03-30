@@ -8,6 +8,9 @@
 #include <vector>
 #include <getopt.h>
 #include <unistd.h>
+#include <random>
+#include <cstdlib>
+#include <htslib/sam.h>
 
 #include "structure.h"
 #include "convert.h"
@@ -40,6 +43,7 @@ int parseConvert(int argc, char **argv);
 int parseStat(int argc, char **argv);
 int parseCreate(int argc, char **argv);
 
+bool check_bam_average_read_length();
 vector<string> generateSVregion();
 string getProgramVersion(const string &cmd_str);
 void convert(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format);

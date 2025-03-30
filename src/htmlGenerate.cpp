@@ -116,8 +116,8 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "<body>\n";
 
 		htmlFile << "<h1>Benchmarking Reports</h1>\n";
-		htmlFile << "<div class=\"command-container\">\n";
-		htmlFile << "<pre>ASVBM command: " << "<br>$ " << all_cmd_program << "</pre>\n";
+		htmlFile << "<div class=\"command-container\"  style=\"max-width: 100%; overflow-x: auto;\">\n";
+		htmlFile << "<pre style=\"overflow-x: auto; white-space: pre-wrap; word-wrap: break-word;\">ASVBM command: " << "<br>$ " << all_cmd_program << "</pre>\n";
 		htmlFile << "</div>\n";
 
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";

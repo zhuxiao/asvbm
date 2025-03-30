@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <map>
+#include <set>
 #include <unordered_set>
 #include <tuple>
 #include <thread>
@@ -34,5 +35,5 @@ int calculateOverlap(SV_item* item1, SV_item* item2);
 void releaseSVItems(vector<SV_item*>& items);
 bool hasMatchingPairs(const unordered_map<int, set<pair<int, int>>>& map, int index1, int index2);
 void match(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subsetStartIndex, faidx_t *fai, size_t totalEntries, vector<int>& entriesStartIndex, vector<vector<int>>& connectedComponents);
-void findSharedFP(string &outputFile, string &ref_file, string &benchfilename);
+void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, vector<string> &sv_files1);
 #endif /* SRC_SHARED_FP_H_ */

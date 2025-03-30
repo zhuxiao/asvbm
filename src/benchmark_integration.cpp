@@ -277,7 +277,183 @@ void addEntryMap1(size_t index, SV_item *entry){
 		cerr<< "Index out of bounds or null pointer in addEntryMap function: "<< index << endl;
 	}
 }
-void integrationBenchmark(string &outputFile, string &ref_file){
+set<string> readVCFHeader(const string& filename){
+	set<string> headers;
+	ifstream file(filename);
+	string line;
+
+	if(!file.is_open()){
+		cerr << "无法打开文件: " << filename << endl;
+		return headers;
+	}
+	while(getline(file, line)){
+		if(line.empty() || line[0] != '#'){
+			break;
+		}
+		if(line.substr(0, 2) == "##"){
+			headers.insert(line);
+		}
+	}
+
+	file.close();
+	return headers;
+}
+string getCurrentTime(){
+	auto now = chrono::system_clock::now();
+	auto in_time_t = chrono::system_clock::to_time_t(now);
+	stringstream ss;
+	ss << put_time(localtime(&in_time_t), "%Y-%m-%dT%H:%M:%S%z");
+	return ss.str();
+}
+vector<string> mergeHeaders(const vector<string>& filenames){
+	set<string> mergedHeaders;
+	map<string, string> uniqueHeaders;
+	set<string> sources, headers, sampleNames;
+	string reference, combinedSource, sv_caller, source, id, currentFileDate, line, sample, sampleHeader, toolsNumInfo, toolsInfo;
+	size_t pos, eq_pos, end;
+	vector<string> orderedHeaders;
+	toolsNumInfo = "##INFO=<ID=TOOLSNUM,Number=1,Type=Integer,Description=\"The number of tools for identifying variants that match this variant\">";
+	toolsInfo = "##INFO=<ID=TOOLS,Number=1,Type=String,Description=\"Tools for identifying variants that match the variant\">";
+	for(const auto& filename : filenames){
+		headers = readVCFHeader(filename);
+		for(const auto& header : headers){
+			if(header.find("##fileformat=") != string::npos){
+				mergedHeaders.insert(header);
+			}else if(header.find("##reference=") != string::npos){
+				if(reference.empty()){
+					reference = header;
+				}
+//				mergedHeaders.insert(header);
+			}else if(header.find("##contig=") != string::npos){
+				mergedHeaders.insert(header);
+			}else if(header.find("##fileDate=") != string::npos){
+				continue;
+			}else if(header.find("##source=") != string::npos){
+				pos = header.find("##source=");
+				if(pos != string::npos){
+					eq_pos = header.find('=', pos);
+					if(eq_pos != string::npos){
+						source = header.substr(eq_pos + 1);
+						sources.insert(source);
+					}
+				}
+			}else if(header.find("##SVCaller=") != string::npos){
+				pos = header.find("##SVCaller=");
+				if(pos != string::npos){
+					eq_pos = header.find('=', pos);
+					if(eq_pos != string::npos){
+						sv_caller = header.substr(eq_pos + 1);
+						sources.insert(sv_caller);
+					}
+				}
+			}else if(header.find("##INFO=") != string::npos || header.find("##FORMAT=") != string::npos || header.find("##FILTER=") != string::npos || header.find("##ALT=") != string::npos){
+				pos = header.find("ID=");
+				if(pos != string::npos){
+					end = header.find(',', pos);
+					if(end == string::npos){
+						end = header.size();
+					}
+					id = header.substr(pos + 3, end - pos - 3);
+					if(uniqueHeaders.find(id) == uniqueHeaders.end()){
+						uniqueHeaders[id] = header;
+					}
+				}
+			}
+		}
+		ifstream file(filename);
+		while(getline(file, line)){
+			if(line.empty() || line[0] != '#'){
+				break;
+			}
+			if(line[0] == '#' && line[1] != '#'){
+				istringstream iss(line);
+				for(int i = 0; i < 9; ++i){
+					getline(iss, sample, '\t');
+				}
+				while(getline(iss, sample, '\t')){
+					sampleNames.insert(sample);
+				}
+				break;
+			}
+		}
+		file.close();
+	}
+	for(const auto& pair : uniqueHeaders){
+		mergedHeaders.insert(pair.second);
+	}
+	currentFileDate = getCurrentTime();
+	headers.insert("##fileDate=" + currentFileDate);
+	if(!reference.empty()){
+		mergedHeaders.insert(reference);
+	}
+	if(!sources.empty()){
+		combinedSource = "##source=";
+		for(const auto& source : sources){
+			combinedSource += source + ";";
+		}
+		combinedSource.pop_back();
+		mergedHeaders.insert(combinedSource);
+	}
+	mergedHeaders.insert(toolsNumInfo);
+	mergedHeaders.insert(toolsInfo);
+	for(const auto& header : mergedHeaders){
+		if(header.find("##fileformat=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+	for(const auto& header : mergedHeaders){
+		if(header.find("##fileDate=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+	for(const auto& header : mergedHeaders){
+		if(header.find("##source=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+	for(const auto& header : mergedHeaders){
+		if(header.find("##reference=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+	for(const auto& header : mergedHeaders){
+		if(header.find("##contig=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+	for(const auto& header : mergedHeaders){
+		if(header.find("##INFO=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+	for(const auto& header : mergedHeaders){
+		if(header.find("##FILTER=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+	for(const auto& header : mergedHeaders){
+		if(header.find("##FORMAT=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+	for(const auto& header : mergedHeaders){
+		if(header.find("##ALT=") != string::npos){
+			orderedHeaders.push_back(header);
+		}
+	}
+
+	for(const auto& sample : sampleNames){
+		if (!sampleHeader.empty()){
+			sampleHeader += "_";
+		}
+		sampleHeader += sample;
+	}
+	orderedHeaders.push_back("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT" + sampleHeader);
+	return orderedHeaders;
+}
+
+void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &sv_files1){
+	vector<string> headers = mergeHeaders(sv_files1);
 	faidx_t *fai;
 	fai = fai_load(ref_file.c_str());
 	string newFilename = outputFile + "Benchmark.vcf";
@@ -288,7 +464,7 @@ void integrationBenchmark(string &outputFile, string &ref_file){
 	size_t totalEntries = 0;
 	int entryIndex = 0;
 	size_t selectToolsNum;
-	selectToolsNum = ceil(ToolsFilenames.size() * 0.55);
+	selectToolsNum = ceil(ToolsFilenames.size() * 0.6);
 
 	for(i=0; i<ToolsFilenames.size(); i++){
 		if(i > 0){
@@ -360,10 +536,14 @@ void integrationBenchmark(string &outputFile, string &ref_file){
 		SV_item* otherVariant;
 		bool flag;
 		int totalOverlapForCurrentVariant, maxTotalOverlap, mostRepresentativeVariantIndex, toolsNum, count, maxCount, len;
-		outputFile1 << VCF_HEADER << endl;
+//		outputFile1 << VCF_HEADER << endl;
+
+		for (const auto& header : headers){
+			outputFile1 << header << endl;
+		}
 		for(i=0; i<connectedComponents.size(); i++){
 			if(connectedComponents[i].size() >= selectToolsNum){
-//				if((extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "") || (extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2) || (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "")|| (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2)){
+			////	if((extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "") || (extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2) || (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "")|| (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2)){
 					differentToolsIndex.clear();
 					for(j=0; j<connectedComponents[i].size(); j++){
 						for(l=0; l<ToolsFilenames.size(); l++){
@@ -394,12 +574,18 @@ void integrationBenchmark(string &outputFile, string &ref_file){
 							}
 						}
 					}
+//					for(j=0; j<connectedComponents[i].size(); j++){
+//						if(find(connectedIndex.begin(), connectedIndex.end(), connectedComponents[i][j]) == connectedIndex.end()){
+//							connectedIndex.push_back(connectedComponents[i][j]);
+//						}
+//					}
 					for(j=0; j<connectedComponents[i].size(); j++){
-						if(find(connectedIndex.begin(), connectedIndex.end(), connectedComponents[i][j]) == connectedIndex.end()){
-							connectedIndex.push_back(connectedComponents[i][j]);
+						for(m=0; m<connectedComponents[connectedComponents[i][j]].size(); m++){
+							if(find(connectedIndex.begin(), connectedIndex.end(), connectedComponents[connectedComponents[i][j]][m]) == connectedIndex.end()){
+								connectedIndex.push_back(connectedComponents[connectedComponents[i][j]][m]);
+							}
 						}
 					}
-
 
 						if(flag){
 							if(entryMap1[i] != nullptr){
@@ -449,7 +635,8 @@ void integrationBenchmark(string &outputFile, string &ref_file){
 										}
 									}
 									sizeDifferenceCount.clear();
-									if(maxCount == 0) mostRepresentativeVariantIndices.clear();
+									if(connectedComponents[i].size() == 1) break;
+									else if(maxCount == 0) mostRepresentativeVariantIndices.clear();
 								}
 
 								maxTotalOverlap = -1;
@@ -520,7 +707,7 @@ void integrationBenchmark(string &outputFile, string &ref_file){
 							}
 						}
 					}
-//				}
+				//}
 			}
 		}
 

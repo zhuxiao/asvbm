@@ -41,6 +41,7 @@ extern string RscriptfilePNGname;
 extern string RscriptfilePNGnamePath;
 extern ofstream outConvertScreenFile;
 extern ofstream outStatScreenFile;
+extern string BamFilePath;
 
 extern int32_t num_threads;
 extern int32_t extendSize;
@@ -83,6 +84,7 @@ extern unordered_map<string, int> benchmarklineMap;
 extern vector<string> benchmarkannotationLines;
 extern vector <vector<string>> usersetsannotationLines;
 extern bool sign;
+extern bool BamFileSign;
 
 extern vector<string> ResultdataPath;
 extern double Seqcons;

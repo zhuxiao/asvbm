@@ -251,8 +251,8 @@ void match(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subset
 	}
 }
 
-void findSharedFP(string &outputFile, string &ref_file, string &benchfilename){
-
+void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, vector<string> &sv_files1){
+	vector<string> headers = mergeHeaders(sv_files1);
 	faidx_t *fai;
 	fai = fai_load(ref_file.c_str());
 	string newFilename = outputFile + "shared_fp.vcf";
@@ -376,6 +376,7 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename){
 
 	//Write matched variants
 	vector<size_t> connectedIndex;
+//	unordered_set<size_t> connectedIndex;
 	vector<int> differentToolsIndex;
 	vector<int> mostRepresentativeVariantIndices;
 	unordered_map<int, int> sizeDifferenceCount;
@@ -392,8 +393,12 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename){
 	bool flag;
 	size_t size;
 	int totalOverlapForCurrentVariant, maxTotalOverlap, mostRepresentativeVariantIndex, toolsNum, count, maxCount, len;
-	outputFile1 << VCF_HEADER << endl;
-	outputFile2 << VCF_HEADER << endl;
+//	outputFile1 << VCF_HEADER << endl;
+//	outputFile2 << VCF_HEADER << endl;
+	for (const auto& header : headers){
+		outputFile1 << header << endl;
+		outputFile2 << header << endl;
+	}
 //	outputFile3 << VCF_HEADER << endl;
 	for(i=0; i<connectedComponents.size(); i++){
 		size = connectedComponents[i].size();
@@ -429,8 +434,10 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename){
 				}
 			}
 			for(j=0; j<connectedComponents[i].size(); j++){
-				if(find(connectedIndex.begin(), connectedIndex.end(), connectedComponents[i][j]) == connectedIndex.end()){
-					connectedIndex.push_back(connectedComponents[i][j]);
+				for(m=0; m<connectedComponents[connectedComponents[i][j]].size(); m++){
+					if(find(connectedIndex.begin(), connectedIndex.end(), connectedComponents[connectedComponents[i][j]][m]) == connectedIndex.end()){
+						connectedIndex.push_back(connectedComponents[connectedComponents[i][j]][m]);
+					}
 				}
 			}
 

@@ -75,11 +75,11 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 				}
 			}
 			string outputSharedFP = outputCommonFN + "/";
-			findSharedFP(outputSharedFP, ref_file, benchfilename);
+			findSharedFP(outputSharedFP, ref_file, benchfilename, sv_files1);
 		}
 		if(create_bench_flag){
 		string outputSharedFP = outputCommonFN + "/";
-		integrationBenchmark(outputSharedFP, ref_file);
+		integrationBenchmark(outputSharedFP, ref_file, sv_files1);
 		}
 //		findCommonFN(outputCommonFN, FNfilesPath);
 		//SV distribution plot

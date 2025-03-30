@@ -41,6 +41,7 @@ string outputSharedFNsfilename;
 string outputBenchfilename;
 ofstream outConvertScreenFile;
 ofstream outStatScreenFile;
+string BamFilePath;
 
 int32_t num_threads;
 int32_t extendSize;		// overlap extend size
@@ -73,6 +74,7 @@ unordered_map<string, int> benchmarklineMap;
 vector<string> benchmarkannotationLines;
 vector <vector<string>> usersetsannotationLines;
 bool sign;
+bool BamFileSign;
 
 vector<string> sharedFPFilenames;
 vector <vector<SV_item*>> fp_vec;

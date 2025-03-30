@@ -19,6 +19,96 @@ string getProgramVersion(const string &cmd_str){
 
 	return pg_version_str;
 }
+bool check_bam_average_read_length() {
+    const int REGION_LENGTH = 1000;
+    const int MAX_ATTEMPTS = 1000;
+    hts_set_log_level(HTS_LOG_OFF);
+    samFile* in = sam_open(BamFilePath.c_str(), "r");
+    if (!in) return false;
+
+    bam_hdr_t* header = sam_hdr_read(in);
+    if (!header) {
+        sam_close(in);
+        return false;
+    }
+
+    hts_idx_t* idx = sam_index_load(in, BamFilePath.c_str());
+    if (!idx) {
+        bam_hdr_destroy(header);
+        sam_close(in);
+        return false;
+    }
+    // Collect valid reference sequences (length >= REGION_LENGTH)
+    vector<int> valid_tids;
+    for (int i = 0; i < header->n_targets; ++i) {
+        if (header->target_len[i] >= REGION_LENGTH) {
+            valid_tids.push_back(i);
+        }
+    }
+    if (valid_tids.empty()) {
+        hts_idx_destroy(idx);
+        bam_hdr_destroy(header);
+        sam_close(in);
+        return false;
+    }
+
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<> tid_dist(0, valid_tids.size() - 1);
+    bam1_t* read = bam_init1();
+    vector<double> averages;
+
+    for (int i = 0; i < 3; ++i) {
+        bool found = false;
+        int attempts = 0;
+
+        while (!found && attempts++ < MAX_ATTEMPTS) {
+            int tid = valid_tids[tid_dist(gen)];
+            int contig_len = header->target_len[tid];
+            uniform_int_distribution<> pos_dist(0, contig_len - REGION_LENGTH);
+            int start = pos_dist(gen);
+            int end = start + REGION_LENGTH;
+
+            hts_itr_t* iter = sam_itr_queryi(idx, tid, start, end);
+            if (!iter) continue;
+
+            uint64_t total_len = 0;
+            int count = 0;
+            int ret;
+            while ((ret = sam_itr_next(in, iter, read)) >= 0) {
+                count++;
+                total_len += read->core.l_qseq;
+            }
+
+            hts_itr_destroy(iter);
+
+            if (count > 0) {
+                averages.push_back(static_cast<double>(total_len) / count);
+                found = true;
+            }
+        }
+
+        if (!found) {
+            bam_destroy1(read);
+            hts_idx_destroy(idx);
+            bam_hdr_destroy(header);
+            sam_close(in);
+            return false;
+        }
+    }
+
+    bam_destroy1(read);
+    hts_idx_destroy(idx);
+    bam_hdr_destroy(header);
+    sam_close(in);
+
+    for (double avg : averages) {
+        if (avg >= 2000.0) {
+            return true;
+        }
+    }
+    return false;
+}
 //SVregion
 vector<string> generateSVregion(){
 	vector<string> scenarios;
@@ -115,6 +205,10 @@ void showUsageCreate(){
 	cout << "                  This parameter is used for comparing multiple datasets. The number" << endl;
 	cout << "                  of inputs should be consistent with the data set. Tool names are " <<endl;
 	cout << "                  separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
+	cout << "   -B STR         BAM file [null]." << endl;
+	cout << "                  This parameter is used for local joint validation analysis." << endl;
+	cout << "                  Recommend for achieving more accurate local variant joint analysis." <<endl;
+	cout << "                  BAM file that supports long-read sequencing data as input." <<endl;
 	cout << "   -R STR         Custom region sizes [null]." << endl;
 	cout << "                  This parameter allows you to specify custom region sizes for analysis." << endl;
 	cout << "                  Custom region sizes are separated by ';'. Example: -R \"100;500;1000\" " <<endl;
@@ -173,6 +267,10 @@ void showUsageStat(){
 	cout << "                  This parameter is used for comparing multiple datasets. The number" << endl;
 	cout << "                  of inputs should be consistent with the data set. Tool names are " <<endl;
 	cout << "                  separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
+	cout << "   -B STR         BAM file [null]." << endl;
+	cout << "                  This parameter is used for local joint validation analysis." << endl;
+	cout << "                  Recommend for achieving more accurate local variant joint analysis." <<endl;
+	cout << "                  BAM file that supports long-read sequencing data as input." <<endl;
 	cout << "   -R STR         Custom region sizes [null]." << endl;
 	cout << "                  This parameter allows you to specify custom region sizes for analysis." << endl;
 	cout << "                  Custom region sizes are separated by ';'. Example: -R \"100;500;1000\" " <<endl;
@@ -370,15 +468,15 @@ int parseStat(int argc, char **argv){
 	extendSizeLargeSV = EXTEND_SIZE_LARGE_SV;
 	svlenRatio = SVLEN_RATIO;
 	typeMatchLevel = MATCHLEVEL_L;
-	ToolNameStore = ChromosomeNames = "";
-
+	ToolNameStore = ChromosomeNames = BamFilePath = "";
+	BamFileSign = false;
 	static struct option long_options[] = {
 		{"bench_refine", no_argument, 0, 'b'},
 		{"help", no_argument, 0, 'h'},
 		{"version", no_argument, 0, 'v'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:R:hvC:bS", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:B:R:hvC:bS", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
@@ -389,6 +487,7 @@ int parseStat(int argc, char **argv){
 			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
+			case 'B': BamFilePath = optarg;	BamFileSign = true;	break;
 			case 'R': size_div_vec = parseSemicolonSeparatedValues(optarg); break;
 			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
@@ -461,6 +560,13 @@ int parseStat(int argc, char **argv){
 			if(i == argc-2) sv_file2 = argv[i];
 			else if(i == argc-1) ref_file = argv[i];
 			else sv_files1.push_back(argv[i]);
+		}
+	}
+	if(BamFileSign){
+		if(!check_bam_average_read_length()){
+			cout << "Error: The reads length are too short to support local joint analysis verification." << endl;
+			showUsageStat();
+			return 1;
 		}
 	}
 
@@ -611,13 +717,14 @@ int parseCreate(int argc, char **argv){
 	extendSizeLargeSV = EXTEND_SIZE_LARGE_SV;
 	svlenRatio = SVLEN_RATIO;
 	typeMatchLevel = MATCHLEVEL_L;
-	ToolNameStore = ChromosomeNames = "";
+	ToolNameStore = ChromosomeNames = BamFilePath = "";
+	BamFileSign = false;
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"version", no_argument, 0, 'v'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:R:hvC:S", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:B:R:hvC:S", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
@@ -628,6 +735,7 @@ int parseCreate(int argc, char **argv){
 			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
+			case 'B': BamFilePath = optarg;	BamFileSign = true;	break;
 			case 'R': size_div_vec = parseSemicolonSeparatedValues(optarg); break;
 			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
@@ -699,6 +807,13 @@ int parseCreate(int argc, char **argv){
 			if(i == argc-2) sv_file2 = argv[i];
 			else if(i == argc-1) ref_file = argv[i];
 			else sv_files1.push_back(argv[i]);
+		}
+	}
+	if(BamFileSign){
+		if(!check_bam_average_read_length()){
+			cout << "Error: The reads length are too short to support local joint analysis verification." << endl;
+			showUsageStat();
+			return 1;
 		}
 	}
 

@@ -16,6 +16,7 @@
 #include <algorithm>
 #include <unordered_map>
 #include <map>
+#include <set>
 #include <unordered_set>
 #include <tuple>
 #include <thread>
@@ -25,6 +26,8 @@
 #include "num_stat.h"
 #include "vcf_header.h"
 
-
-void integrationBenchmark(string &outputFile, string &ref_file);
+set<string> readVCFHeader(const string& filename);
+vector<string> mergeHeaders(const vector<string>& filenames);
+string getCurrentTime();
+void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &sv_files1);
 #endif /* SRC_BENCHMARK_INTEGRATION_H_ */
