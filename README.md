@@ -2,12 +2,12 @@
 A tool for multi-Allele-aware Structural Variant statistics Benchmarking for Multiple callsets
 
 -------------------
-ASVBM is A tool for multi-Allele-aware Structural Variant statistics Benchmarking for Multiple callsets. ASVBM uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), latent positives (LPs), sequence identity, recall, precision, and F1 score. Notably, ASVBM introduces the concept of LP and employs a local joint analysis validation approach to address cases where multiple smaller variants are nearly or entirely equivalent to a larger variant. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of ASVBM is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, ASVBM supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples. Finally, in multiple user callsets benchmarking, ASVBM supports filtering shared false negatives (FNs) not reported by any calling results within the benchmark set, providing a more reliable reference for benchmarking.
+ASVBM is A tool for multi-Allele-aware Structural Variant statistics Benchmarking for Multiple callsets. ASVBM uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), latent positives (LPs), sequence similarity, recall, precision, and F1 score. Notably, ASVBM introduces the concept of LP and employs a local joint analysis validation approach to address cases where multiple smaller variants are nearly or entirely equivalent to a larger variant. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of ASVBM is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, ASVBM supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples. Finally, in multiple user callsets benchmarking, ASVBM supports filtering shared false negatives (FNs) not reported by any calling results within the benchmark set, providing a more reliable reference for benchmarking.
 
 For more detailed experiment information, please refer to [asvbm-experiments](https://github.com/zhuxiao/asvbm-experiments).
 
 ## Introduction
-ASVBM is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, ASVBM utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, reciprocal overlap, size similarity, and sequence identity to provide an improved approach to structural variant matching. ASVBM supports multiple user callsets benchmarking and generates detailed graphical information. The workflow of ASVBM is briefly explained in the following diagram:
+ASVBM is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, ASVBM utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, reciprocal overlap, size similarity, and sequence similarity to provide an improved approach to structural variant matching. ASVBM supports multiple user callsets benchmarking and generates detailed graphical information. The workflow of ASVBM is briefly explained in the following diagram:
 
 <div align="center">
 <img src="img/ASVBM_workflow.png" alt= "ASVBM workflow"> 
@@ -59,8 +59,8 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
     <td>2 * ((Recall * Precision) / (Recall + Precision))</td>
   </tr>
   <tr>
-    <td>Identity</td>
-    <td>The sequence identity for matched SV pairs that include sequences</td>
+    <td>sequence similarity</td>
+    <td>The sequence similarity for matched SV pairs that include sequences</td>
   </tr>
    <tr>
     <td>the breakpoint distance</td>
@@ -72,7 +72,7 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
   </tr>
 </table>
 
-Additionally, SVs within seven sub-intervals are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence identity are calculated.
+Additionally, SVs within seven sub-intervals are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence similarity are calculated.
 ## Prerequisites
 ASVBM depends on the following libraries and tools:
 * HTSlib (http://www.htslib.org/download/)
@@ -132,11 +132,11 @@ If the current directory contains a clone of the asvbm repository, asvbm can be 
 
 
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -m 50000 /data_test/user_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -M 50000 -m 20 /data_test/user_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
 ```
 or
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -m 50000 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -M 50000 -m 20 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
 ```
 The -v argument mounts the current directory as /data_test in the Docker image. The output should also appear in the current directory.
 
@@ -169,8 +169,8 @@ For the second item, there is an insertion of size 87 base pairs at the 1142381 
 The help information is below:
 ```sh
 $ ASVBM
-Program: ASVBM (A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
-Version: 1.3.1
+Program: ASVBM (A tool for multi-Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
+Version: 1.3.2
 
 Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
@@ -196,13 +196,13 @@ Example:
 
 
 ### Use cases
-Invalid long user-called regions can be removed by using the `-m` option as they are too long to be valid variant regions. The command could be:
+Invalid long user-called regions can be removed by using the `-M` option as they are too long to be valid variant regions. The command could be:
 ```sh
-$ asvbm stat -m 10000 -T method user_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -M 50000 -m 20 -T method user_sv.vcf benchmark_sv.vcf reference.fa
 ```
 Benchmarking multiple identification result datasets can be achieved by using the '-T' option. Please use the following command:
 ```sh
-$ asvbm stat -m 10000 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -M 50000 -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
 ## Draw statistical figures
@@ -235,15 +235,19 @@ The multiple user callsets benchmarking results of the  `stat` command output th
 Here, practical examples for the benchmarking of single-sample and multiple samples are provided. For multi-sample benchmarking, it is strongly recommended to use the "-T" parameter for better differentiation of different identification results. Benchmark the identification results of chr1 of the HG002 CCS data separately using cuteSV (v2.0.3), pbsv (v2.9.0), and Sniffles (v2.0.2).
 To benchmark the identification results for a single sample, please use the following command:
 ```sh
-$ asvbm stat -m 50000 -T "cuteSV" -i 0.7 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -M 50000 -m 20 -T "cuteSV" -i 0.7 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 To benchmark the results of multiple identification outcomes, please use the following command:
 ```sh
-$ asvbm stat -m 50000 -T "cuteSV;pbsv;Sniffles2" -i 0.7 cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -M 50000 -m 20 -T "cuteSV;pbsv;Sniffles2" -i 0.7 cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 
 Multisample benchmarking statistical results. The benchmarking of recognition results will primarily generate the following information. This example compares a run result of cuteSV 2.0.3 on NA24385, with the benchmark dataset being the high-confidence HG002 dataset created by the Genome in a Bottle Consortium (GIAB). More specific information can be found in the respective file:
-
+<style>
+  .plain-header {
+    font-weight: normal;  /* 取消粗体 */
+  }
+</style>
 <table>
   <thead>
     <tr>
@@ -258,23 +262,23 @@ Multisample benchmarking statistical results. The benchmarking of recognition re
       <th>Recall</th>
       <th>precision</th>
       <th>F1 score</th>
-      <th>Identitys</th>
+      <th>sequence similarity</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-    <th>count</th>
-    <th>74012</th>
-      <th>44937</th>
-      <th>44928</th>
-      <th>39538</th>
-      <th>6286</th>
-      <th>34474</th>
-      <th>506</th>
-      <th>0.534211</th>
-      <th>0.862823</th>
-      <th>0.659868</th>
-      <th>0.975147</th>
+    <th class="plain-header">count</th>
+    <th class="plain-header">74012</th>
+      <th class="plain-header">44937</th>
+      <th class="plain-header">44928</th>
+      <th class="plain-header">39538</th>
+      <th class="plain-header">6286</th>
+      <th class="plain-header">34474</th>
+      <th class="plain-header">506</th>
+      <th class="plain-header">0.534211</th>
+      <th class="plain-header">0.862823</th>
+      <th class="plain-header">0.659868</th>
+      <th class="plain-header">0.975147</th>
     </tr>
   </tbody>
 </table>
@@ -300,19 +304,19 @@ Moreover, for regions with overlapping variations, the quantities of variant siz
   </thead>
   <tbody>
     <tr>
-    <th>variant size ratio (count)</th>
-      <th>151</th>
-      <th>172</th>
-      <th>182</th>
-      <th>276</th>
-      <th>604</th>
-      <th>4750</th>
-      <th>27134</th>
-      <th>3410</th>
-      <th>1541</th>
-      <th>1107</th>
-      <th>825</th>
-      <th>795</th>
+    <th class="plain-header">variant size ratio (count)</th>
+      <th class="plain-header">151</th>
+      <th class="plain-header">172</th>
+      <th class="plain-header">182</th>
+      <th class="plain-header">276</th>
+      <th class="plain-header">604</th>
+      <th class="plain-header">4750</th>
+      <th class="plain-header">27134</th>
+      <th class="plain-header">3410</th>
+      <th class="plain-header">1541</th>
+      <th class="plain-header">1107</th>
+      <th class="plain-header">825</th>
+      <th class="plain-header">795</th>
     </tr>
   </tbody>
   <thead>
@@ -331,16 +335,16 @@ Moreover, for regions with overlapping variations, the quantities of variant siz
   </thead>
   <tbody>
     <tr>
-    <th>breakpoint distance (count)</th>
-      <th>3883</th>
-      <th>290</th>
-      <th>37294</th>
-      <th>500</th>
-      <th>417</th>
-      <th>81</th>
-      <th>553</th>
-      <th>255</th>
-      <th>1738</th>
+    <th class="plain-header">breakpoint distance (count)</th>
+      <th class="plain-header">3883</th>
+      <th class="plain-header">290</th>
+      <th class="plain-header">37294</th>
+      <th class="plain-header">500</th>
+      <th class="plain-header">417</th>
+      <th class="plain-header">81</th>
+      <th class="plain-header">553</th>
+      <th class="plain-header">255</th>
+      <th class="plain-header">1738</th>
     </tr>
   </tbody>
 </table>
@@ -350,7 +354,7 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
 <table>
   <thead>
     <tr>
-    	  <th>region</th>
+    	  <th>range</th>
       <th>TP_benchmark</th>
       <th>TP_user</th>
       <th>FP</th>
@@ -358,97 +362,97 @@ Additionally, basic metrics for different structural variant (SV) size ranges we
       <th>Recall</th>
       <th>precision</th>
       <th>F1 score</th>
-      <th>Identity</th>
+      <th>sequence similarity</th>
     </tr>
   </thead>
   <tbody>
     <tr>
-    	  <th>1-100bp</th>
-      <th>33850</th>
-      <th>31715</th>
-      <th>5248</th>
-      <th>30294</th>
-      <th>0.527719</th>
-      <th>0.85802</th>
-      <th>0.653505</th>
-      <th>0.912349</th>
+    	  <th class="plain-header">1-100bp</th>
+      <th class="plain-header">33850</th>
+      <th class="plain-header">31715</th>
+      <th class="plain-header">5248</th>
+      <th class="plain-header">30294</th>
+      <th class="plain-header">0.527719</th>
+      <th class="plain-header">0.85802</th>
+      <th class="plain-header">0.653505</th>
+      <th class="plain-header">0.912349</th>
     </tr>
     <tr>
-    	  <th>101-250bp</th>
-      <th>1866</th>
-      <th>1686</th>
-      <th>546</th>
-      <th>2092</th>
-      <th>0.47145</th>
-      <th>0.755376</th>
-      <th>0.580559</th>
-      <th>1.000000</th>
+    	  <th class="plain-header">101-250bp</th>
+      <th class="plain-header">1866</th>
+      <th class="plain-header">1686</th>
+      <th class="plain-header">546</th>
+      <th class="plain-header">2092</th>
+      <th class="plain-header">0.47145</th>
+      <th class="plain-header">0.755376</th>
+      <th class="plain-header">0.580559</th>
+      <th class="plain-header">1.000000</th>
     </tr>
     <tr>
-    	  <th>251-500bp</th>
-      <th>1618</th>
-      <th>1577</th>
-      <th>891</th>
-      <th>1354</th>
-      <th>0.544415</th>
-      <th>0.638979</th>
-      <th>0.587918</th>
-      <th>1.000000</th>
+    	  <th class="plain-header">251-500bp</th>
+      <th class="plain-header">1618</th>
+      <th class="plain-header">1577</th>
+      <th class="plain-header">891</th>
+      <th class="plain-header">1354</th>
+      <th class="plain-header">0.544415</th>
+      <th class="plain-header">0.638979</th>
+      <th class="plain-header">0.587918</th>
+      <th class="plain-header">1.000000</th>
     </tr>
     <tr>
-    	  <th>501-1000bp</th>
-      <th>349</th>
-      <th>341</th>
-      <th>472</th>
-      <th>763</th>
-      <th>0.313849</th>
-      <th>0.419434</th>
-      <th>0.35904</th>
-      <th>1.000000</th>
+    	  <th class="plain-header">501-1000bp</th>
+      <th class="plain-header">349</th>
+      <th class="plain-header">341</th>
+      <th class="plain-header">472</th>
+      <th class="plain-header">763</th>
+      <th class="plain-header">0.313849</th>
+      <th class="plain-header">0.419434</th>
+      <th class="plain-header">0.35904</th>
+      <th class="plain-header">1.000000</th>
     </tr>
     <tr>
-    	  <th>1001-2500bp</th>
-      <th>349</th>
-      <th>342</th>
-      <th>129</th>
-      <th>486</th>
-      <th>0.417964</th>
-      <th>0.726115</th>
-      <th>0.530540</th>
-      <th>1.000000</th> 
+    	  <th class="plain-header">1001-2500bp</th>
+      <th class="plain-header">349</th>
+      <th class="plain-header">342</th>
+      <th class="plain-header">129</th>
+      <th class="plain-header">486</th>
+      <th class="plain-header">0.417964</th>
+      <th class="plain-header">0.726115</th>
+      <th class="plain-header">0.530540</th>
+      <th class="plain-header">1.000000</th> 
     </tr>
       <tr>
-    	  <th>2501-5000bp</th>
-      <th>169</th>
-      <th>169</th>
-      <th>38</th>
-      <th>234</th>
-      <th>0.419355</th>
-      <th>0.816425</th>
-      <th>0.554098</th>
-      <th>1.000000</th> 
+    	  <th class="plain-header">2501-5000bp</th>
+      <th class="plain-header">169</th>
+      <th class="plain-header">169</th>
+      <th class="plain-header">38</th>
+      <th class="plain-header">234</th>
+      <th class="plain-header">0.419355</th>
+      <th class="plain-header">0.816425</th>
+      <th class="plain-header">0.554098</th>
+      <th class="plain-header">1.000000</th> 
     </tr>
     <tr>
-    	  <th>5001-1000bp</th>
-      <th>113</th>
-      <th>113</th>
-      <th>18</th>
-      <th>223</th>
-      <th>0.33631</th>
-      <th>0.862595</th>
-      <th>0.48394</th>
-      <th>1.000000</th>
+    	  <th class="plain-header">5001-1000bp</th>
+      <th class="plain-header">113</th>
+      <th class="plain-header">113</th>
+      <th class="plain-header">18</th>
+      <th class="plain-header">223</th>
+      <th class="plain-header">0.33631</th>
+      <th class="plain-header">0.862595</th>
+      <th class="plain-header">0.48394</th>
+      <th class="plain-header">1.000000</th>
     </tr>
     <tr>
-    	  <th>>=10001bp</th>
-      <th>39</th>
-      <th>40</th>
-      <th>43</th>
-      <th>213</th>
-      <th>0.154762</th>
-      <th>0.481928</th>
-      <th>0.234287</th>
-      <th>1.000000</th>
+    	  <th class="plain-header">>=10001bp</th>
+      <th class="plain-header">39</th>
+      <th class="plain-header">40</th>
+      <th class="plain-header">43</th>
+      <th class="plain-header">213</th>
+      <th class="plain-header">0.154762</th>
+      <th class="plain-header">0.481928</th>
+      <th class="plain-header">0.234287</th>
+      <th class="plain-header">1.000000</th>
     </tr>
   </tbody>
 </table>
