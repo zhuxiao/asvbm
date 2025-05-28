@@ -109,7 +109,7 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart){
 	// Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
 	vector<string> scenarios;
-	vector<string> metrics = { "Identity", "Recall", "Precision", "F1-score"};
+	vector<string> metrics = { "SeqSim", "Recall", "Precision", "F1-score"};
 	if(tool_names.size()>1) scenarios = tool_names;
 	else {
 		for(size_t i=0; i<sv_files1.size();i++){
@@ -197,7 +197,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
 	// Set key (legend) font size
 	fprintf(gnuplotPipe, "set key font 'Times-Roman,10'\n");
 	// Draw a bar chart, specifying the number of columns for each data column purple  olive magenta
-//    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#568AC6' title 'Recall', '' using 3 lc rgb '#F08700' title 'Precision', '' using 4 lc rgb '#F06767' title 'F1-score', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", filenamePath.c_str());
+//    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#568AC6' title 'Recall', '' using 3 lc rgb '#F08700' title 'Precision', '' using 4 lc rgb '#F06767' title 'F1-score', '' using 5 lc rgb '#BBBB6D' title 'SeqSim'\n", filenamePath.c_str());
 	fprintf(gnuplotPipe, "%s\n", plotCommand.c_str());
 	// Close the GNUplot pipeline
 	pclose(gnuplotPipe);
@@ -354,7 +354,7 @@ void AddfileInformation(string &FileNamePath, string &Info){
 //stat 2
 void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathname, string &outputBasicMetricschart){
 	vector<pair<string, float>> dataV;
-	dataV.push_back(make_pair("Identity", MeticsValues[0][0]));
+	dataV.push_back(make_pair("SeqSim", MeticsValues[0][0]));
 	dataV.push_back(make_pair("Recall", MeticsValues[0][1]));
 	dataV.push_back(make_pair("Precision", MeticsValues[0][2]));
 	dataV.push_back(make_pair("F1-score", MeticsValues[0][3]));
@@ -640,11 +640,11 @@ void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > 
 	fprintf(gnuplotPipe, "set style data histograms\n");
 
 	// Draw a bar chart, specifying the number of columns for each data column
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#3E4998' title 'Identity', '' using 3 lc rgb '#D95F02' title 'Recall', '' using 4 lc rgb '#E7298A' title 'Precision', '' using 5 lc rgb '#5D94A4' title 'F1-score'\n", filenamePath.c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb '#3E4998' title 'SeqSim', '' using 3 lc rgb '#D95F02' title 'Recall', '' using 4 lc rgb '#E7298A' title 'Precision', '' using 5 lc rgb '#5D94A4' title 'F1-score'\n", filenamePath.c_str());
 //    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
 	// Close the GNUplot pipeline
 	pclose(gnuplotPipe);
-	string newInfo = "Range Identity Recall Precision F1-score";
+	string newInfo = "Range SeqSim Recall Precision F1-score";
 	AddfileInformation(filenamePath, newInfo);
 	cout << endl << "Statistical results of basic metrics with different SV sizes are saved in: " << outputFileNamePath << endl;
 }
@@ -840,7 +840,7 @@ void GenerateFileOp(string &DiffRangeStatDirname, vector<string> &tool_names, ve
 //stat 5
 void GenerateFile(string &DiffRangeStatDirname, vector<string> &tool_names, string &FileName, vector< vector<float> > meticsvalues, vector<string> &filenames, vector<string> &sv_files1){
 	vector<string> scenarios;
-	vector<string> metrics = {"Identity", "Recall", "Precision", "F1-score"};
+	vector<string> metrics = {"SeqSim", "Recall", "Precision", "F1-score"};
 	if(tool_names.size()>1) scenarios = tool_names;
 	//Note to be modified to remove '/'’
 	else {
@@ -980,32 +980,32 @@ void GenerateMultiBarCharts(string &outputBasicMetricschart, vector<string>& fil
 	}
 
 /*	// Draw a bar chart, specifying the number of columns for each data column
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[0].c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'SeqSim'\n", fileNames[0].c_str());
 //    fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'blue' title 'Recall', '' using 3 lc rgb 'green' title 'Precision', '' using 4 lc rgb 'red' title 'F1'\n", outputFileNamePath.c_str());
 
 	//Fig2
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[1].c_str());
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[1].c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'SeqSim'\n", fileNames[1].c_str());
 
 	//Fig3
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[2].c_str());
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[2].c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'SeqSim'\n", fileNames[2].c_str());
 
 	//Fig4
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[3].c_str());
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[3].c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'SeqSim'\n", fileNames[3].c_str());
 
 	//Fig5
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[4].c_str());
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[4].c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'SeqSim'\n", fileNames[4].c_str());
 
 	//Fig6
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[5].c_str());
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[5].c_str());
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'SeqSim'\n", fileNames[5].c_str());
 
 	//Fig7
 	fprintf(gnuplotPipe, "set title '%s' font 'Arial,15'\n", titles[6].c_str());
-	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'Identity'\n", fileNames[6].c_str());*/
+	fprintf(gnuplotPipe, "plot '%s' using 2:xtic(1) lc rgb 'purple' title 'Recall', '' using 3 lc rgb 'orange' title 'Precision', '' using 4 lc rgb 'blue' title 'F1', '' using 5 lc rgb '#BBBB6D' title 'SeqSim'\n", fileNames[6].c_str());*/
 
 	// Disable the multi-image mode
 	fprintf(gnuplotPipe, "unset multiplot\n");

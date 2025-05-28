@@ -22,7 +22,7 @@ void FolderInit(){
 	statScreenFilename = "stat_screen";
 }
 
-void SVSizeNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, vector<string> &sv_files1){
+void SVSizeNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres,vector<string> &sv_files1){
 //	sizeNumStatDirname = outputPathname + sizeNumStatDirname;
 	if(sv_files1.size()>=1) sizeNumStatDirname = outputInsideToolDirname + '/' + sizeNumStatDirname;
 	else sizeNumStatDirname = outputPathname + sizeNumStatDirname;
@@ -34,31 +34,34 @@ void SVSizeNumStat(string &user_file, string &benchmark_file, string &ref_file, 
 //		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 //	}
 //	SVSizeNumStatOp(user_file, benchmark_file, ref_file, size_div_vec, 0, sizeNumStatDirname);
-	if(max_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVSizeNumStatOp(user_file, benchmark_file, ref_file, size_div_vec, max_valid_reg_thres, sizeNumStatDirname);
+		SVSizeNumStatOp(user_file, benchmark_file, ref_file, size_div_vec, max_valid_reg_thres, min_valid_reg_thres, sizeNumStatDirname);
 	}
 	//Call gnuplot to plot
 	SVsizeAndNumstatistics(sizeNumStatDirname, MeticsValues_4);
 	SVsizeAndNumstatistics(sizeNumStatDirname, MeticsValues1_4);
 }
 
-void SVSizeNumStatOp(string &user_file, string &benchmark_file, string &ref_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, string &dirname){
+void SVSizeNumStatOp(string &user_file, string &benchmark_file, string &ref_file, vector<size_t> &size_div_vec, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname){
 //	vector<SV_item*> user_data, benchmark_data, long_sv_data;
 //	vector< vector<SV_item*> > divided_vec1, divided_vec2;
 
 	//修改的部分
-	vector<SV_item*> user_data, benchmark_data, long_sv_data;
+	vector<SV_item*> user_data, benchmark_data, long_sv_data, short_sv_data;
 	vector<SV_item*> TPbench_data, TPuser_data, FP_data, FN_data, TP_bench, TP_user, FP, FN;
 
 	user_data = loadData(user_file);
 	benchmark_data = loadData(benchmark_file);
 
-	if(max_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
+		short_sv_data = getShortSVReg(user_data, min_valid_reg_thres);
 		cout << "Total long SV data size: " << long_sv_data.size() << endl;
+		cout << "Total short SV data size: " << short_sv_data.size() << endl;
 		outStatScreenFile << "Total long SV data size: " << long_sv_data.size() << endl;
+		outStatScreenFile << "Total short SV data size: " << short_sv_data.size() << endl;
 	}
 
 	cout << "Total user data size: " << user_data.size() << endl;
@@ -79,7 +82,7 @@ void SVSizeNumStatOp(string &user_file, string &benchmark_file, string &ref_file
 	destroyData(TPuser_data);
 	destroyData(FP_data);
 	destroyData(FN_data);
-	if(max_valid_reg_thres>0) destroyData(long_sv_data);
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) {destroyData(long_sv_data);destroyData(short_sv_data);}
 	//修改结束
 
 //	user_data = loadData(user_file);
@@ -171,8 +174,8 @@ void computeSizeNumStat(vector< vector<SV_item*> > &divided_vec1, vector< vector
 			outStatScreenFile << "\n>>>>>>>>> SV size: " << ">=" << start_pos << ":" << " <<<<<<<<<" << endl;
 			file_prefix_tmp = file_prefix + "_" + to_string(start_pos) + "_larger";
 		}else if(i==size_div_vec.size()+1){
-			cout << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
-			outStatScreenFile << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
+//			cout << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
+//			outStatScreenFile << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
 			file_prefix_tmp = file_prefix + "_TRA_BND_BP";
 		}
 		if(i<size_div_vec.size()+1) {
@@ -233,8 +236,8 @@ void computeSizeNumStatFromFile(vector<SV_item*> user_data, vector<SV_item*> ben
 			outStatScreenFile << "\n>>>>>>>>> SV size: " << ">=" << start_pos << ":" << " <<<<<<<<<" << endl;
 			file_prefix_tmp = file_prefix + "_" + to_string(start_pos) + "_larger";
 		}else if(i==size_div_vec.size()+1){
-			cout << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
-			outStatScreenFile << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
+//			cout << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
+//			outStatScreenFile << "\n>>>>>>>>> TRA breakpoints:" << " <<<<<<<<<" << endl;
 			file_prefix_tmp = file_prefix + "_TRA_BND_BP";
 		}
 		if(i<size_div_vec.size()+1) {

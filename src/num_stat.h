@@ -26,8 +26,8 @@
 using namespace std;
 
 void upperSeq(string &seq);
-void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, string &outputPathname, vector<string> &sv_files1);
-void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, string &dirname);
+void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres,string &outputPathname, vector<string> &sv_files1);
+void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname);
 void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, string &file_prefix, faidx_t *fai, int Markers);
 void computeNumStatFromFile(vector<SV_item*> TPbench_data, vector<SV_item*> TPuser_data, vector<SV_item*> FP_data, vector<SV_item*> FN_data, string &file_prefix, int32_t endpos, int Markers);
 
@@ -56,7 +56,7 @@ pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t 
 void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai);
 //int MINDistance(string seq1, string seq2);
 int32_t minDistance(const string &seq1, const string &seq2);
-double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, double SeqIdentity);
+double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, double SeqSim);
 void SeqConsNumStat(double consistency);
 void extractRefSeq(SV_item* item1, SV_item* item2, string &seq_new1, string &seq_new2, faidx_t *fai);
 size_t customHashFunction(const string& kmer, size_t kmerSize);

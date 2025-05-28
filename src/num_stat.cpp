@@ -5,7 +5,7 @@
 #include "convert.h"
 
 
-void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, string &outputPathname, vector<string> &sv_files1){
+void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &outputPathname, vector<string> &sv_files1){
 	if(sv_files1.size()>=1) numStatDirname = outputInsideToolDirname + '/' + numStatDirname;
 	else numStatDirname = outputPathname + numStatDirname;
 	mkdir(numStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -17,10 +17,10 @@ void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int3
 //	}
 //	SVNumStatOp(user_file, benchmark_file, ref_file, 0, numStatDirname);
 
-	if(max_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVNumStatOp(user_file, benchmark_file, ref_file, max_valid_reg_thres, numStatDirname);
+		SVNumStatOp(user_file, benchmark_file, ref_file, max_valid_reg_thres, min_valid_reg_thres, numStatDirname);
 	}
 	MeticsValues.push_back(data);
 	MeticsValues1.push_back(data1);
@@ -32,30 +32,39 @@ void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int3
 }
 
 // SV number stat operation
-void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, string &dirname){
-	vector<SV_item*> user_data, benchmark_data, long_sv_data;
-	string description_str_long, file_prefix, longFilename_tmp;
+void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname){
+	vector<SV_item*> user_data, benchmark_data, long_sv_data, short_sv_data;
+	string description_str_long, description_str_short, description_str_user_data, file_prefix, longFilename_tmp, shortFilename_tmp;
 	faidx_t *fai;
 
 	fai = fai_load(ref_file.c_str());
 
 	longFilename_tmp = dirname + longSVFilename;
-
+	shortFilename_tmp = dirname + shortSVFilename;
 	// non-TRA variants
 	user_data = loadDataWithoutTra(user_file);
 	benchmark_data = loadDataWithoutTra(benchmark_file);
 
-	if(max_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
+		short_sv_data = getShortSVReg(user_data, min_valid_reg_thres);
 		output2File(longFilename_tmp, long_sv_data, outStatScreenFile);
+		output2File(shortFilename_tmp, short_sv_data, outStatScreenFile);
 		cout << "Non-TRA: user data size: " << user_data.size() << endl;
 		cout << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
 		cout << "Non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
+		cout << "Non-TRA: short_sv_data.size: " << short_sv_data.size() << endl;
 		outStatScreenFile << "Non-TRA: user data size: " << user_data.size() << endl;
 		outStatScreenFile << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
 		outStatScreenFile << "Non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
-		description_str_long = "Size statistics for long SV regions: ";
+		outStatScreenFile << "Non-TRA: short_sv_data.size: " << short_sv_data.size() << endl;
+		description_str_long = "Size statistics for long SV regions (> " + to_string(maxValidRegThres) + " bp): ";
 		computeLenStat(long_sv_data, description_str_long);
+		description_str_short = "Size statistics for short SV regions (< " + to_string(minsvlen) + " bp): ";
+		computeLenStat(short_sv_data, description_str_short);
+		description_str_user_data = "After filtering size statistics for user data regions: ";
+		computeLenStat(user_data, description_str_user_data);
+
 	}else{
 		cout << "Non-TRA: user data size: " << user_data.size() << endl;
 		cout << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
@@ -69,7 +78,7 @@ void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, in
 	destroyData(user_data);
 	destroyData(benchmark_data);
 	fai_destroy(fai);
-	if(max_valid_reg_thres>0) destroyData(long_sv_data);
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) {destroyData(long_sv_data);destroyData(short_sv_data);}
 }
 
 void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, string &file_prefix, faidx_t *fai, int Markers){
@@ -80,11 +89,11 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	string filename_TP_user, filename_TP_bench, filename_FP, filename_FN, filename_LP;
 	SeqconsSum = SeqconsNum = Seqcons = LpNum = 0;
 
-	filename_intersect_user = file_prefix + "_intersect_user";
-	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
-	filename_private_user = file_prefix + "_private_user";
-	filename_private_benchmark = file_prefix + "_private_benchmark";
-	filename_latentpositive_user = file_prefix + "_latentpositive_user";
+	filename_intersect_user = file_prefix + "_TP_user.bed";
+	filename_intersect_benchmark = file_prefix + "_TP_bench.bed";
+	filename_private_user = file_prefix + "_FP.bed";
+	filename_private_benchmark = file_prefix + "_FN.bed";
+	filename_latentpositive_user = file_prefix + "_LP_user.bed";
 
 	filename_TP_user = file_prefix + "_TP_user.vcf";
 	filename_TP_bench = file_prefix + "_TP_bench.vcf";
@@ -189,12 +198,12 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	cout << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << ", LP=" << LP << endl;
 	cout << "Recall=" << recall << ", Precision=" << precision_user << ", F1 score=" << F1_score_user << endl; //", precision_benchmark=" << precision_benchmark <<
 //	cout << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	cout <<"Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl; // ", F1 score_user=" << F1_score_user <<
+	cout <<"SeqSim=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl; // ", F1 score_user=" << F1_score_user <<
 
 	outStatScreenFile << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << ", LP=" << LP << endl;
 	outStatScreenFile << "Recall=" << recall << ", Precision=" << precision_user << ", F1 score=" << F1_score_user << endl;
 //	outStatScreenFile << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
-	outStatScreenFile << "Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	outStatScreenFile << "SeqSim=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 	if(Markers == 2){
 		CollectData(LP, TP_benchmark, FP, FN, data1, 4, 2);
 		CollectData(recall, precision_user, F1_score_user, Seqcons, data, 3, 2);
@@ -217,10 +226,10 @@ void computeNumStatFromFile(vector<SV_item*> TPbench_data, vector<SV_item*> TPus
 	SV_item *item;
 	SeqconsSum = SeqconsNum = Seqcons = 0;
 
-	filename_intersect_user = file_prefix + "_intersect_user";
-	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
-	filename_private_user = file_prefix + "_private_user";
-	filename_private_benchmark = file_prefix + "_private_benchmark";
+	filename_intersect_user = file_prefix + "_TP_user.bed";
+	filename_intersect_benchmark = file_prefix + "_TP_bench.bed";
+	filename_private_user = file_prefix + "_FP.bed";
+	filename_private_benchmark = file_prefix + "_FN.bed";
 
 	// compute intersection
 //	result = intersect(user_data, benchmark_data, fai);
@@ -352,11 +361,11 @@ void computeNumStatFromFile(vector<SV_item*> TPbench_data, vector<SV_item*> TPus
 
 	cout << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
 	cout << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
-	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	cout << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", SeqSim=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 
 	outStatScreenFile << "TP_benchmark=" << TP_benchmark << ", TP_user=" << TP_user << ", FP=" << FP << ", FN=" << FN << endl;
 	outStatScreenFile << "Recall=" << recall << ", precision_benchmark=" << precision_benchmark << ", precision_user=" << precision_user << endl;
-	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", Identity=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
+	outStatScreenFile << "F1 score_benchmark=" << F1_score_benchmark << ", F1 score_user=" << F1_score_user << ", SeqSim=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 	if(Markers == 2){
 		CollectData(TP_user, TP_benchmark, FP, FN, data1, 4, 2);
 		CollectData(recall, precision_user, F1_score_user, Seqcons, data, 3, 2);
@@ -426,15 +435,15 @@ void computeLenStat(vector<SV_item*> &data, string &description_str){
 	sum = 0; max_len = 0; min_len = INT_MAX;
 	for(size_t i=0; i<data.size(); i++){
 		item = data.at(i);
-		len = item->endPos - item->startPos + 1;
+//		len = item->endPos - item->startPos + 1;
+		len=item->sv_len;
 		sum += len;
 		if(max_len<len) max_len = len;
 		if(min_len>len) min_len = len;
 	}
 	if(data.size()>0) aver_len = sum / data.size();
 	else { aver_len = 0; min_len = 0; }
-
-	out_str = description_str + " reg_num=" + to_string(data.size()) + ", total_len=" + to_string(sum) + ", max_len=" + to_string(max_len) + ", min_len=" + to_string(min_len) + ", aver_len=" + to_string(aver_len);
+	out_str = description_str + " item_count=" + to_string(data.size()) + ", total_len=" + to_string(sum) + ", max_size=" + to_string(max_len) + ", min_size=" + to_string(min_len) + ", aver_size=" + to_string(aver_len);
 	cout << out_str << endl;
 	outStatScreenFile << out_str << endl;
 }
@@ -826,6 +835,7 @@ void* intersectSubset(void *arg){
 			if(start_idx!=-1){ // valid start index
 				end_idx = -1;
 				if(k==0){
+					if(item1->mergeMark == true) continue;
 					for(j=start_idx; j<subset2.size(); j++){
 						item2 = subset2.at(j);
 						if(item2->startPos<start_search_pos) continue;
@@ -834,6 +844,7 @@ void* intersectSubset(void *arg){
 							//merge_judge
 							if(item1->sv_type == item2->sv_type)
 								IsmergeJudge(i, item1, item2, subset1, overlap_opt->fai);
+							if(item1->mergeMark == true) continue;
 
 							sv_len1 = item1->sv_len; sv_len2 = item2->sv_len;
 							if(sv_len1<0) sv_len1 = -sv_len1;
@@ -862,14 +873,14 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqSim);
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentAlleleSeqIdentity) {
+													if (consistency >= percentAlleleSeqSim) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														if(item1->seqcons.compare("-") == 0)
@@ -878,12 +889,12 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 															if(item1->seqcons.compare("-") ==0)
 																item1->seqcons = to_string(consistency);
 															else{
@@ -899,7 +910,7 @@ void* intersectSubset(void *arg){
 														if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 														item2->seqcons = to_string(consistency);
 													}
-													if (consistency >= percentAlleleSeqIdentity) {
+													if (consistency >= percentAlleleSeqSim) {
 														flag = true;
 													}
 												}
@@ -908,19 +919,19 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 													flag = true;
 												}else{
-													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqSim);
 //													item1->seqcons = item2->seqcons = to_string(consistency);
-//													if (consistency >= percentSeqIdentity) {
+//													if (consistency >= percentSeqSim) {
 //														SeqConsNumStat(consistency);
 //														flag = true;
 //													}
 													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
-													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 														if(stod(item2->seqcons) < consistency){
 															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //															item1->seqcons = item2->seqcons = to_string(consistency);
@@ -930,12 +941,12 @@ void* intersectSubset(void *arg){
 																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 																item2->seqcons = to_string(consistency);
 															}
-															if (consistency >= percentAlleleSeqIdentity) {
+															if (consistency >= percentAlleleSeqSim) {
 																SeqConsNumStat(consistency);
 																flag = true;
 															}
 														}else{
-															if (consistency >= percentAlleleSeqIdentity) {
+															if (consistency >= percentAlleleSeqSim) {
 //																item1->seqcons = to_string(consistency);
 																if(item1->seqcons.compare("-") ==0)
 																	item1->seqcons = to_string(consistency);
@@ -953,7 +964,7 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 //															item1->seqcons = item2->seqcons = to_string(consistency);
 															flag = true;
 														}
@@ -963,19 +974,19 @@ void* intersectSubset(void *arg){
 											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqSim);
 //												item1->seqcons = item2->seqcons = to_string(consistency);
-//												if (consistency >= percentSeqIdentity) {
+//												if (consistency >= percentSeqSim) {
 //													SeqConsNumStat(consistency);
 //													flag = true;
 //												}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentAlleleSeqIdentity) {
+													if (consistency >= percentAlleleSeqSim) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //														item1->seqcons = item2->seqcons = to_string(consistency);
@@ -985,12 +996,12 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 //															item1->seqcons = to_string(consistency);
 															if(item1->seqcons.compare("-") ==0)
 																item1->seqcons = to_string(consistency);
@@ -1002,7 +1013,7 @@ void* intersectSubset(void *arg){
 													}
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentAlleleSeqIdentity) {
+													if (consistency >= percentAlleleSeqSim) {
 //														item1->seqcons = item2->seqcons = to_string(consistency);
 														flag = true;
 													}
@@ -1018,14 +1029,14 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqSim);
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentSeqSim) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														if(item1->seqcons.compare("-") == 0)
@@ -1034,12 +1045,12 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															if(item1->seqcons.compare("-") ==0)
 																item1->seqcons = to_string(consistency);
 															else{
@@ -1055,7 +1066,7 @@ void* intersectSubset(void *arg){
 														if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 														item2->seqcons = to_string(consistency);
 													}
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentSeqSim) {
 														flag = true;
 													}
 												}
@@ -1064,19 +1075,19 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 													flag = true;
 												}else{
-													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqSim);
 //													item1->seqcons = item2->seqcons = to_string(consistency);
-//													if (consistency >= percentSeqIdentity) {
+//													if (consistency >= percentSeqSim) {
 //														SeqConsNumStat(consistency);
 //														flag = true;
 //													}
 													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
-													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 														if(stod(item2->seqcons) < consistency){
 															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //															item1->seqcons = item2->seqcons = to_string(consistency);
@@ -1086,12 +1097,12 @@ void* intersectSubset(void *arg){
 																if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 																item2->seqcons = to_string(consistency);
 															}
-															if (consistency >= percentSeqIdentity) {
+															if (consistency >= percentSeqSim) {
 																SeqConsNumStat(consistency);
 																flag = true;
 															}
 														}else{
-															if (consistency >= percentSeqIdentity) {
+															if (consistency >= percentSeqSim) {
 //																item1->seqcons = to_string(consistency);
 																if(item1->seqcons.compare("-") ==0)
 																	item1->seqcons = to_string(consistency);
@@ -1109,7 +1120,7 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 //															item1->seqcons = item2->seqcons = to_string(consistency);
 															flag = true;
 														}
@@ -1120,22 +1131,22 @@ void* intersectSubset(void *arg){
 												flag = true;
 											}else{
 //												auto start = chrono::high_resolution_clock::now();
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqSim);
 //												auto end = chrono::high_resolution_clock::now();
 //												chrono::duration<double> duration = end - start;
 //												cout << "Execution time: " << duration.count() << " seconds" << endl;
 //												item1->seqcons = item2->seqcons = to_string(consistency);
-//												if (consistency >= percentSeqIdentity) {
+//												if (consistency >= percentSeqSim) {
 //													SeqConsNumStat(consistency);
 //													flag = true;
 //												}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentSeqSim) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //														item1->seqcons = item2->seqcons = to_string(consistency);
@@ -1145,12 +1156,12 @@ void* intersectSubset(void *arg){
 															if(consistency >= stod(item1->seqcons))	item1->seqcons = to_string(consistency);
 															item2->seqcons = to_string(consistency);
 														}
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 //															item1->seqcons = to_string(consistency);
 															if(item1->seqcons.compare("-") ==0)
 																item1->seqcons = to_string(consistency);
@@ -1162,7 +1173,7 @@ void* intersectSubset(void *arg){
 													}
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentSeqSim) {
 //														item1->seqcons = item2->seqcons = to_string(consistency);
 														flag = true;
 													}
@@ -1187,6 +1198,7 @@ void* intersectSubset(void *arg){
 						}
 					}
 				}else{ // k=1
+					if(item1->mergeMark == true) continue;
 					for(j=start_idx; j<subset2.size(); j++){
 						item2 = subset2.at(j);
 //						if(item2->startPos<start_search_pos) continue;
@@ -1216,36 +1228,36 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqSim);
 	//											item1->seqcons = item2->seqcons = to_string(consistency);
 	//											// determine the overlap flag according to consistency
-	//											if(consistency>=percentSeqIdentity) {
+	//											if(consistency>=percentSeqSim) {
 	//												SeqConsNumStat(consistency);
 	//												flag = true;
 	//											}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentAlleleSeqIdentity) {
+													if (consistency >= percentAlleleSeqSim) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 															item1->seqcons = to_string(consistency);
 															flag = true;
 														}
 													}
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentAlleleSeqIdentity) {
+													if (consistency >= percentAlleleSeqSim) {
 														flag = true;
 													}
 												}
@@ -1254,35 +1266,35 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 													flag = true;
 												}else{
-													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqSim);
 	//												item1->seqcons = item2->seqcons = to_string(consistency);
-	//												if (consistency >= percentSeqIdentity) {
+	//												if (consistency >= percentSeqSim) {
 	//													SeqConsNumStat(consistency);
 	//													flag = true;
 	//												}
 													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
-													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 														if(stod(item2->seqcons) < consistency){
 															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 															item1->seqcons = item2->seqcons = to_string(consistency);
-															if (consistency >= percentAlleleSeqIdentity) {
+															if (consistency >= percentAlleleSeqSim) {
 																SeqConsNumStat(consistency);
 																flag = true;
 															}
 														}else{
-															if (consistency >= percentAlleleSeqIdentity) {
+															if (consistency >= percentAlleleSeqSim) {
 																item1->seqcons = to_string(consistency);
 																flag = true;
 															}
 														}
 													}else{
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 	//														item1->seqcons = item2->seqcons = to_string(consistency);
 															flag = true;
 														}
@@ -1292,36 +1304,36 @@ void* intersectSubset(void *arg){
 											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqIdentity);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentAlleleSeqSim);
 	//											item1->seqcons = item2->seqcons = to_string(consistency);
 	//											// determine the overlap flag according to consistency
-	//											if(consistency>=percentSeqIdentity) {
+	//											if(consistency>=percentSeqSim) {
 	//												SeqConsNumStat(consistency);
 	//												flag = true;
 	//											}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentAlleleSeqIdentity) {
+													if (consistency >= percentAlleleSeqSim) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqIdentity){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= percentAlleleSeqIdentity) {
+														if (consistency >= percentAlleleSeqSim) {
 															item1->seqcons = to_string(consistency);
 															flag = true;
 														}
 													}
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentAlleleSeqIdentity) {
+													if (consistency >= percentAlleleSeqSim) {
 	//													item1->seqcons = item2->seqcons = to_string(consistency);
 														flag = true;
 													}
@@ -1336,36 +1348,36 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqSim);
 		//											item1->seqcons = item2->seqcons = to_string(consistency);
 		//											// determine the overlap flag according to consistency
-		//											if(consistency>=percentSeqIdentity) {
+		//											if(consistency>=percentSeqSim) {
 		//												SeqConsNumStat(consistency);
 		//												flag = true;
 		//											}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentSeqSim) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															item1->seqcons = to_string(consistency);
 															flag = true;
 														}
 													}
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentSeqSim) {
 														flag = true;
 													}
 												}
@@ -1374,35 +1386,35 @@ void* intersectSubset(void *arg){
 											if (item1->alt_seq.compare("-")==0 or item2->alt_seq.compare("-")==0) {
 													flag = true;
 												}else{
-													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+													consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqSim);
 		//												item1->seqcons = item2->seqcons = to_string(consistency);
-		//												if (consistency >= percentSeqIdentity) {
+		//												if (consistency >= percentSeqSim) {
 		//													SeqConsNumStat(consistency);
 		//													flag = true;
 		//												}
 													if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
-													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
+													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 														if(stod(item2->seqcons) < consistency){
 															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 															item1->seqcons = item2->seqcons = to_string(consistency);
-															if (consistency >= percentSeqIdentity) {
+															if (consistency >= percentSeqSim) {
 																SeqConsNumStat(consistency);
 																flag = true;
 															}
 														}else{
-															if (consistency >= percentSeqIdentity) {
+															if (consistency >= percentSeqSim) {
 																item1->seqcons = to_string(consistency);
 																flag = true;
 															}
 														}
 													}else{
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 		//														item1->seqcons = item2->seqcons = to_string(consistency);
 															flag = true;
 														}
@@ -1412,36 +1424,36 @@ void* intersectSubset(void *arg){
 											if (item1->ref_seq.compare("-") == 0 or item2->ref_seq.compare("-")== 0) {
 												flag = true;
 											}else{
-												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqIdentity);
+												consistency = computeVarseqConsistency(item1, item2, overlap_opt->fai, percentSeqSim);
 		//											item1->seqcons = item2->seqcons = to_string(consistency);
 		//											// determine the overlap flag according to consistency
-		//											if(consistency>=percentSeqIdentity) {
+		//											if(consistency>=percentSeqSim) {
 		//												SeqConsNumStat(consistency);
 		//												flag = true;
 		//											}
 												if(item1->seqcons.compare("-") == 0 and item2->seqcons.compare("-") == 0){
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentSeqSim) {
 														SeqConsNumStat(consistency);
 														flag = true;
 													}
-												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqIdentity){
+												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 													if(stod(item2->seqcons) < consistency){
 														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
 															flag = true;
 														}
 													}else{
-														if (consistency >= percentSeqIdentity) {
+														if (consistency >= percentSeqSim) {
 															item1->seqcons = to_string(consistency);
 															flag = true;
 														}
 													}
 												}else{
 													item1->seqcons = item2->seqcons = to_string(consistency);
-													if (consistency >= percentSeqIdentity) {
+													if (consistency >= percentSeqSim) {
 		//													item1->seqcons = item2->seqcons = to_string(consistency);
 														flag = true;
 													}
@@ -2344,7 +2356,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 								seq2 += bench->ref_seq;
 							}
 						}
-						//Sequence identity calculation
+						//Sequence similarity calculation
 						upperSeq(seq1);
 						upperSeq(seq2);
 						needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
@@ -2609,7 +2621,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 						seq2 += bench->ref_seq;
 					}
 				}
-				//Sequence identity calculation
+				//Sequence similarity calculation
 				upperSeq(seq1);
 				upperSeq(seq2);
 				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
@@ -2725,7 +2737,7 @@ int32_t minDistance(const string &seq1, const string &seq2) {
 	return result;
 }
 
-double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, double SeqIdentity){
+double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, double SeqSim){
 	string seq1, seq2, aln_seq1, aln_seq2,  AlignSeq,  AlignSeq1, aln_seq3, aln_seq4;
 	double consistency,consistency_tmp1, consistency_tmp2;
 	vector<Minimizer> minimizers, minimizers1;
@@ -2748,11 +2760,11 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, do
 			consistency = (consistency_tmp1 > consistency_tmp2) ? consistency_tmp1 : consistency_tmp2;
 //			cout << "seq1: "<< seq1 << endl;
 //			cout << "seq2: "<< seq2 << endl;
-			if(consistency >= SeqIdentity)	return consistency;
+			if(consistency >= SeqSim)	return consistency;
 			else{
 				int distance = minDistance(seq1, seq2);
 				consistency =  1 - ((double)distance / (seq1.length() + seq2.length()));
-				if(consistency >= SeqIdentity) return consistency;
+				if(consistency >= SeqSim) return consistency;
 				else seq1 = seq2 = aln_seq1 = aln_seq2 = "";
 			}
 		}else{
@@ -2760,7 +2772,7 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, do
 			upperSeq(seq1);
 			upperSeq(seq2);
 			consistency = MinimizerMethodOp(seq1, seq2, aln_seq1, aln_seq2, AlignSeq, AlignSeq1);
-			if(consistency >= SeqIdentity)	return consistency;
+			if(consistency >= SeqSim)	return consistency;
 			else	seq1 = seq2 = aln_seq1 = aln_seq2 = AlignSeq = AlignSeq1 = "";
 		}
 	}
@@ -2799,10 +2811,10 @@ double computeVarseqConsistency(SV_item *item1, SV_item *item2, faidx_t *fai, do
 		consistency = calculate_consistency(aln_seq1, aln_seq2);
 	}
 //	consistency = 0.9;
-	/*if(item1->sv_type == VAR_INS and consistency < percentSeqIdentity){
+	/*if(item1->sv_type == VAR_INS and consistency < percentSeqSim){
 			cout<<"111111111111: "<<item1->chrname<<" :"<<item1->startPos<<endl;
 		}*/
-	if(consistency < SeqIdentity and seq1.size() <= EDLIBLEN){
+	if(consistency < SeqSim and seq1.size() <= EDLIBLEN){
 		int distance = minDistance(seq1, seq2);
 		consistency =  1 - ((double)distance / (seq1.length() + seq2.length()));
 	}
@@ -3517,21 +3529,21 @@ void computeOverlapTra(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_
 
 // cpmpute breakpoint statistics for TRA
 void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t*> &bp_vec_benchmark, string &file_prefix){
-	size_t i, total_bp_num_user, overlapped_bp_num_user, total_bp_num_benchmark, overlapped_bp_num_benchmark;
+	size_t i, overlapped_bp_num_user, overlapped_bp_num_benchmark;
 	vector<Breakpoint_t*> bp_vec_intersect_user, bp_vec_intersect_benchmark, bp_vec_private_user, bp_vec_private_benchmark;
 	Breakpoint_t *bp_item, *bp_item_tmp;
 
-	int32_t TP_user, TP_benchmark, FP, FN;
-	float recall, precision_user, F1_score_user, precision_benchmark, F1_score_benchmark;
+//	int32_t TP_user, TP_benchmark, FP, FN;
+//	float recall, precision_user, F1_score_user, precision_benchmark, F1_score_benchmark;
 	string filename_intersect_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark;
 
-	filename_intersect_user = file_prefix + "_intersect_user";
-	filename_intersect_benchmark = file_prefix + "_intersect_benchmark";
-	filename_private_user = file_prefix + "_private_user";
-	filename_private_benchmark = file_prefix + "_private_benchmark";
+	filename_intersect_user = file_prefix + "_TP_user.bed";
+	filename_intersect_benchmark = file_prefix + "_TP_bench.bed";
+	filename_private_user = file_prefix + "_FP.bed";
+	filename_private_benchmark = file_prefix + "_FN.bed";
 
-	total_bp_num_user = bp_vec_user.size();
-	total_bp_num_benchmark = bp_vec_benchmark.size();
+//	total_bp_num_user = bp_vec_user.size();
+//	total_bp_num_benchmark = bp_vec_benchmark.size();
 
 	// construct intersect vector and private vectors
 	overlapped_bp_num_user = 0;
@@ -3562,44 +3574,44 @@ void computeBPNumStatTra(vector<Breakpoint_t*> &bp_vec_user, vector<Breakpoint_t
 	outputBP2File(filename_private_benchmark, bp_vec_private_benchmark);
 
 	// compute TRA breakpoint statistics
-	TP_user = overlapped_bp_num_user;
-	TP_benchmark = overlapped_bp_num_benchmark;
-	FP = total_bp_num_user - overlapped_bp_num_user;
-	FN = total_bp_num_benchmark - overlapped_bp_num_benchmark;
+//	TP_user = overlapped_bp_num_user;
+//	TP_benchmark = overlapped_bp_num_benchmark;
+//	FP = total_bp_num_user - overlapped_bp_num_user;
+//	FN = total_bp_num_benchmark - overlapped_bp_num_benchmark;
 
-	if(total_bp_num_benchmark>0) recall = (float)TP_benchmark / total_bp_num_benchmark;
-	else recall = 0;
-	if(total_bp_num_user>0) precision_user = (float)TP_user / total_bp_num_user;
-	else precision_user = 0;
-	if(total_bp_num_user>0) precision_benchmark = (float)TP_benchmark / total_bp_num_user;
-	else precision_benchmark = 0;
+//	if(total_bp_num_benchmark>0) recall = (float)TP_benchmark / total_bp_num_benchmark;
+//	else recall = 0;
+//	if(total_bp_num_user>0) precision_user = (float)TP_user / total_bp_num_user;
+//	else precision_user = 0;
+//	if(total_bp_num_user>0) precision_benchmark = (float)TP_benchmark / total_bp_num_user;
+//	else precision_benchmark = 0;
+//
+//	if(recall+precision_user>0) F1_score_user = 2.0 * (recall * precision_user) / (recall + precision_user);
+//	else F1_score_user = 0;
+//	if(recall+precision_benchmark>0) F1_score_benchmark = 2.0 * (recall * precision_benchmark) / (recall + precision_benchmark);
+//	else F1_score_benchmark = 0;
 
-	if(recall+precision_user>0) F1_score_user = 2.0 * (recall * precision_user) / (recall + precision_user);
-	else F1_score_user = 0;
-	if(recall+precision_benchmark>0) F1_score_benchmark = 2.0 * (recall * precision_benchmark) / (recall + precision_benchmark);
-	else F1_score_benchmark = 0;
-
-	cout << "Total user breakpoint data size: " << total_bp_num_user << endl;
-	cout << "Total benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
-	cout << "User intersection breakpoint data size:" << overlapped_bp_num_user << endl;
-	cout << "Benchmark intersection breakpoint data size:" << overlapped_bp_num_benchmark << endl;
-	cout << "User private breakpoint data size:" << bp_vec_private_user.size() << endl;
-	cout << "Benchmark private breakpoint data size:" << bp_vec_private_benchmark.size() << endl;
-	cout << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
-	cout << "Recall=" << recall << endl;
-	cout << "precision_user=" << precision_user << ", precision_benchmark=" << precision_benchmark << endl;
-	cout << "F1 score_user=" << F1_score_user << ", F1 score_benchmark=" << F1_score_benchmark << endl;
-
-	outStatScreenFile << "Total user breakpoint data size: " << total_bp_num_user << endl;
-	outStatScreenFile << "Total benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
-	outStatScreenFile << "User intersection breakpoint data size:" << overlapped_bp_num_user << endl;
-	outStatScreenFile << "Benchmark intersection breakpoint data size:" << overlapped_bp_num_benchmark << endl;
-	outStatScreenFile << "User private breakpoint data size:" << bp_vec_private_user.size() << endl;
-	outStatScreenFile << "Benchmark private breakpoint data size:" << bp_vec_private_benchmark.size() << endl;
-	outStatScreenFile << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
-	outStatScreenFile << "Recall=" << recall << endl;
-	outStatScreenFile << "precision_user=" << precision_user << ", precision_benchmark=" << precision_benchmark << endl;
-	outStatScreenFile <<"F1 score_user=" << F1_score_user << ", F1 score_benchmark=" << F1_score_benchmark << endl;
+//	cout << "Total user breakpoint data size: " << total_bp_num_user << endl;
+//	cout << "Total benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
+//	cout << "User intersection breakpoint data size:" << overlapped_bp_num_user << endl;
+//	cout << "Benchmark intersection breakpoint data size:" << overlapped_bp_num_benchmark << endl;
+//	cout << "User private breakpoint data size:" << bp_vec_private_user.size() << endl;
+//	cout << "Benchmark private breakpoint data size:" << bp_vec_private_benchmark.size() << endl;
+//	cout << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
+//	cout << "Recall=" << recall << endl;
+//	cout << "precision_user=" << precision_user << ", precision_benchmark=" << precision_benchmark << endl;
+//	cout << "F1 score_user=" << F1_score_user << ", F1 score_benchmark=" << F1_score_benchmark << endl;
+//
+//	outStatScreenFile << "Total user breakpoint data size: " << total_bp_num_user << endl;
+//	outStatScreenFile << "Total benchmark breakpoint data size: " << total_bp_num_benchmark << endl;
+//	outStatScreenFile << "User intersection breakpoint data size:" << overlapped_bp_num_user << endl;
+//	outStatScreenFile << "Benchmark intersection breakpoint data size:" << overlapped_bp_num_benchmark << endl;
+//	outStatScreenFile << "User private breakpoint data size:" << bp_vec_private_user.size() << endl;
+//	outStatScreenFile << "Benchmark private breakpoint data size:" << bp_vec_private_benchmark.size() << endl;
+//	outStatScreenFile << "TP_user=" << TP_user << ", TP_benchmark=" << TP_benchmark << ", FP=" << FP << ", FN=" << FN << endl;
+//	outStatScreenFile << "Recall=" << recall << endl;
+//	outStatScreenFile << "precision_user=" << precision_user << ", precision_benchmark=" << precision_benchmark << endl;
+//	outStatScreenFile <<"F1 score_user=" << F1_score_user << ", F1 score_benchmark=" << F1_score_benchmark << endl;
 
 	destroyBPData(bp_vec_intersect_user);
 	destroyBPData(bp_vec_intersect_benchmark);

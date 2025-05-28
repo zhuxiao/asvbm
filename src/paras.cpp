@@ -181,9 +181,12 @@ void showUsageCreate(){
 	cout << "   REF_FILE       Reference file." << endl << endl;
 
 	cout << "Options:" << endl;
-	cout << "   -m INT         valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
+	cout << "   -M INT         valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
 	cout << "                  0 is for all variant size are valid, and while positive" << endl;
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
+	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
+	cout << "   -m INT         valid minimal region size for statistics: [" << MIN_SVLEN << "]" << endl;
+	cout << "                  values are for the valid minimal region size, then shorter" << endl;
 	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
 	cout << "   -S             enable the strict type match mode which is disabled by default." << endl;
 	cout << "                  There are two variation type match modes:" << endl;
@@ -196,8 +199,8 @@ void showUsageCreate(){
 	cout << "                  Chromosome names should match the format within the VCF file. " <<endl;
 	cout << "                  Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 	cout << "   -s INT         overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-	cout << "   -i FLOAT       minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
-	cout << "   -a FLOAT       minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -i FLOAT       minimal sequence similarly for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -a FLOAT       minimal sequence similarly for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
 	cout << "   -p FLOAT       minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
 	cout << "   -t INT         number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "                  in machine" << endl;
@@ -214,6 +217,7 @@ void showUsageCreate(){
 	cout << "                  Custom region sizes are separated by ';'. Example: -R \"100;500;1000\" " <<endl;
 	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
 	cout << "   -l FILE        file name of long SV regions: [" << longSVFilename << "]" << endl;
+	cout << "                  file name of short SV regions: [" << shortSVFilename << "]" << endl;
 	cout << "   -r FILE        file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
 	cout << "                  Ensure that the filename extension is '.html'." << endl;
 	cout << "   -v,--version   show version information" << endl;
@@ -243,9 +247,12 @@ void showUsageStat(){
 	cout << "   REF_FILE       Reference file." << endl << endl;
 
 	cout << "Options:" << endl;
-	cout << "   -m INT         valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
+	cout << "   -M INT         valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
 	cout << "                  0 is for all variant size are valid, and while positive" << endl;
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
+	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
+	cout << "   -m INT         valid minimal region size for statistics: [" << MIN_SVLEN << "]" << endl;
+	cout << "                  values are for the valid minimal region size, then shorter" << endl;
 	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
 	cout << "   -S             enable the strict type match mode which is disabled by default." << endl;
 	cout << "                  There are two variation type match modes:" << endl;
@@ -258,8 +265,8 @@ void showUsageStat(){
 	cout << "                  Chromosome names should match the format within the VCF file. " <<endl;
 	cout << "                  Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 	cout << "   -s INT         overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-	cout << "   -i FLOAT       minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
-	cout << "   -a FLOAT       minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -i FLOAT       minimal sequence similarly for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -a FLOAT       minimal sequence similarly for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
 	cout << "   -p FLOAT       minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
 	cout << "   -t INT         number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "                  in machine" << endl;
@@ -278,6 +285,7 @@ void showUsageStat(){
 	cout << "                  perform the refinement of benchmark set along with the benchmarking process" << endl;
 	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
 	cout << "   -l FILE        file name of long SV regions: [" << longSVFilename << "]" << endl;
+	cout << "                  file name of short SV regions: [" << shortSVFilename << "]" << endl;
 	cout << "   -r FILE        file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
 	cout << "                  Ensure that the filename extension is '.html'." << endl;
 	cout << "   -v,--version   show version information" << endl;
@@ -326,8 +334,8 @@ void show(){
 //	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
 //	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 //	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-//	cout << "   -i FLOAT  minimal sequence identity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
-//	cout << "   -a FLOAT  minimal sequence identity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+//	cout << "   -i FLOAT  minimal sequence similarly for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+//	cout << "   -a FLOAT  minimal sequence similarly for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
 //	cout << "   -p FLOAT  minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
 //	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
 //	cout << "             in machine" << endl;
@@ -458,10 +466,10 @@ int parseStat(int argc, char **argv){
 	vector<string> tool_names;
 
 	if (argc < 2) { showUsageStat(); return 1; }
-
+	minsvlen = MIN_SVLEN;
 	maxValidRegThres = MAX_VALID_REG_THRES;
-	percentSeqIdentity = SEQ_CONSISTENCY;
-	percentAlleleSeqIdentity = ALLELE_SEQ_CONSISTENCY;
+	percentSeqSim = SEQ_CONSISTENCY;
+	percentAlleleSeqSim = ALLELE_SEQ_CONSISTENCY;
 	extendSize = EXTEND_SIZE;
 	threadNum_tmp = 0;
 	minSizeLargeSV = MIN_SIZE_LARGE_SV;
@@ -474,17 +482,19 @@ int parseStat(int argc, char **argv){
 		{"bench_refine", no_argument, 0, 'b'},
 		{"help", no_argument, 0, 'h'},
 		{"version", no_argument, 0, 'v'},
+		{"minsvlen",no_argument, 0, 'm'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:B:R:hvC:bS", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:M:s:t:r:o:i:a:p:l:T:B:R:hvC:bS", long_options, &longindex)) != -1 ){
 		switch(opt){
-			case 'm': maxValidRegThres = stoi(optarg); break;
+			case 'm': minsvlen = stoi(optarg); break;
+			case 'M': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
 			case 't': threadNum_tmp = stoi(optarg); break;
 			case 'o': outputPathname = optarg; break;
-			case 'i': percentSeqIdentity = stod(optarg); break;
+			case 'i': percentSeqSim = stod(optarg); break;
 			case 'p': svlenRatio = stod(optarg); break;
-			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
+			case 'a': percentAlleleSeqSim = stod(optarg); break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
 			case 'B': BamFilePath = optarg;	BamFileSign = true;	break;
@@ -502,6 +512,11 @@ int parseStat(int argc, char **argv){
 
 	if(maxValidRegThres<0){
 		cout << "Error: Please specify the correct positive value for option: -m" << endl;
+		showUsageStat();
+		return 1;
+	}
+	if(minsvlen<=0){
+		cout << "Error: Please specify the correct positive value for option: -M" << endl;
 		showUsageStat();
 		return 1;
 	}
@@ -594,8 +609,8 @@ int parseStat(int argc, char **argv){
 //	if (argc < 2) { showUsageStat(); return 1; }
 //
 //	maxValidRegThres = MAX_VALID_REG_THRES;
-//	percentSeqIdentity = SEQ_CONSISTENCY;
-//	percentAlleleSeqIdentity = ALLELE_SEQ_CONSISTENCY;
+//	percentSeqSim = SEQ_CONSISTENCY;
+//	percentAlleleSeqSim = ALLELE_SEQ_CONSISTENCY;
 //	extendSize = EXTEND_SIZE;
 //	threadNum_tmp = 0;
 //	minSizeLargeSV = MIN_SIZE_LARGE_SV;
@@ -610,9 +625,9 @@ int parseStat(int argc, char **argv){
 //			case 's': extendSize = stoi(optarg); break;
 //			case 't': threadNum_tmp = stoi(optarg); break;
 //			case 'o': outputPathname = optarg; break;
-//			case 'i': percentSeqIdentity = stod(optarg); break;
+//			case 'i': percentSeqSim = stod(optarg); break;
 //			case 'p': svlenRatio = stod(optarg); break;
-//			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
+//			case 'a': percentAlleleSeqSim = stod(optarg); break;
 //			case 'l': longSVFilename = optarg; break;
 //			case 'T': ToolNameStore = optarg; break;
 //			case 'r': htmlFilename = optarg; break;
@@ -707,10 +722,10 @@ int parseCreate(int argc, char **argv){
 	vector<string> tool_names;
 
 	if (argc < 2) { showUsageCreate(); return 1; }
-
+	minsvlen = MIN_SVLEN;
 	maxValidRegThres = MAX_VALID_REG_THRES;
-	percentSeqIdentity = SEQ_CONSISTENCY;
-	percentAlleleSeqIdentity = ALLELE_SEQ_CONSISTENCY;
+	percentSeqSim = SEQ_CONSISTENCY;
+	percentAlleleSeqSim = ALLELE_SEQ_CONSISTENCY;
 	extendSize = EXTEND_SIZE;
 	threadNum_tmp = 0;
 	minSizeLargeSV = MIN_SIZE_LARGE_SV;
@@ -722,17 +737,19 @@ int parseCreate(int argc, char **argv){
 	static struct option long_options[] = {
 		{"help", no_argument, 0, 'h'},
 		{"version", no_argument, 0, 'v'},
+		{"minsvlen",no_argument, 0, 'm'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:s:t:r:o:i:a:p:l:T:B:R:hvC:S", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:M:s:t:r:o:i:a:p:l:T:B:R:hvC:S", long_options, &longindex)) != -1 ){
 		switch(opt){
-			case 'm': maxValidRegThres = stoi(optarg); break;
+			case 'm': minsvlen = stoi(optarg); break;
+			case 'M': maxValidRegThres = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
 			case 't': threadNum_tmp = stoi(optarg); break;
 			case 'o': outputPathname = optarg; break;
-			case 'i': percentSeqIdentity = stod(optarg); break;
+			case 'i': percentSeqSim = stod(optarg); break;
 			case 'p': svlenRatio = stod(optarg); break;
-			case 'a': percentAlleleSeqIdentity = stod(optarg); break;
+			case 'a': percentAlleleSeqSim = stod(optarg); break;
 			case 'l': longSVFilename = optarg; break;
 			case 'T': ToolNameStore = optarg; break;
 			case 'B': BamFilePath = optarg;	BamFileSign = true;	break;
@@ -750,6 +767,11 @@ int parseCreate(int argc, char **argv){
 	if(maxValidRegThres<0){
 		cout << "Error: Please specify the correct positive value for option: -m" << endl;
 		showUsageCreate();
+		return 1;
+	}
+	if(minsvlen<=0){
+		cout << "Error: Please specify the correct positive value for option: -M" << endl;
+		showUsageStat();
 		return 1;
 	}
 	if(extendSize<=0){
@@ -946,20 +968,20 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 
 	cout << "############# Stage 1: SV size statistics: #############" << endl;
 	outStatScreenFile << "############# Stage 1: SV size statistics: #############" << endl;
-	refRegSizeStat(user_file, benchmark_file, maxValidRegThres, sv_files1);
+	refRegSizeStat(user_file, benchmark_file, maxValidRegThres, minsvlen, sv_files1);
 
 	cout << "\n\n############# Stage 2: Num statistics: #############" << endl;
 	outStatScreenFile << "\n\n############# Stage 2: Num statistics: #############" << endl;
-	SVNumStat(user_file, benchmark_file, ref_file,  maxValidRegThres, outputPathname, sv_files1);
+	SVNumStat(user_file, benchmark_file, ref_file,  maxValidRegThres, minsvlen, outputPathname, sv_files1);
 
 	// compute SV size difference statistics
 	cout << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
 	outStatScreenFile << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
-	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres, sv_files1);
+	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres, minsvlen, sv_files1);
 
 	cout << "\n\n############# Stage 4: SV size and num statistics: #############" << endl;
 	outStatScreenFile << "\n\n############# Stage 4: SV size and num statistics: #############" << endl;
-	SVSizeNumStat(user_file, benchmark_file, ref_file, maxValidRegThres, sv_files1);
+	SVSizeNumStat(user_file, benchmark_file, ref_file, maxValidRegThres, minsvlen, sv_files1);
 
 	outStatScreenFile.close();
 	//Evaluate multiple data sets and initialize the path for the next data save
@@ -1036,8 +1058,8 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 	cout << " Maximal region size: " << maxValidRegThres << endl;
 	cout << " Overlap extend size: " << extendSize << endl;
 	cout << "  Percent size ratio: " << svlenRatio << endl;
-	cout << "   Sequence identity: " << percentSeqIdentity << endl;
-	cout << "Allelic seq identity: " << percentAlleleSeqIdentity << endl;
+	cout << "   Sequence similarly: " << percentSeqSim << endl;
+	cout << "Allelic seq similarly: " << percentAlleleSeqSim << endl;
 	cout << "   Number of threads: " << num_threads << endl;
 	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
 	cout << "    Type match level: " << typeMatchLevel << " (allow type match between DUPLICTION and INSERTION)" << endl;
@@ -1058,8 +1080,8 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 	outStatScreenFile << " Maximal region size: " << maxValidRegThres << endl;
 	outStatScreenFile << " Overlap extend size: " << extendSize << endl;
 	outStatScreenFile << "  Percent size ratio: " << svlenRatio << endl;
-	outStatScreenFile << "   Sequence identity: " << percentSeqIdentity << endl;
-	outStatScreenFile << "Allelic seq identity: " << percentAlleleSeqIdentity << endl;
+	outStatScreenFile << "   Sequence similarly: " << percentSeqSim << endl;
+	outStatScreenFile << "Allelic seq similarly: " << percentAlleleSeqSim << endl;
 	outStatScreenFile << "   Number of threads: " << num_threads << endl;
 	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
 	outStatScreenFile << "    Type match level: " << typeMatchLevel << " (treat DUPLTCATION as INSERTION)" << endl;

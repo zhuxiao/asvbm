@@ -3,7 +3,7 @@
 #include "util.h"
 #include "gnuplotcall.h"
 
-void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, vector<string> &sv_files1){
+void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, vector<string> &sv_files1){
 	if(sv_files1.size()>0) sizeDifStatDirname = outputInsideToolDirname + '/' + sizeDifStatDirname;
 	else sizeDifStatDirname = outputPathname + sizeDifStatDirname;
 	mkdir(sizeDifStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -13,16 +13,16 @@ void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_
 //		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 //	}
 //	SVSizeDifStatOp(user_file, benchmark_file, 0, sizeDifStatDirname);
-	if(max_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
 		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
 		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		SVSizeDifStatOp(user_file, benchmark_file, max_valid_reg_thres, sizeDifStatDirname);
+		SVSizeDifStatOp(user_file, benchmark_file, max_valid_reg_thres, min_valid_reg_thres, sizeDifStatDirname);
 	}
 	CenterdistanceAndAreasizeratio(sizeDifStatDirname);
 }
 
-void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &dirname){
-	vector<SV_item*> user_data, benchmark_data, long_sv_data;
+void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname){
+	vector<SV_item*> user_data, benchmark_data, long_sv_data, short_sv_data;
 	vector<SV_pair*> sv_pair_vec;
 	vector< vector<int32_t> > dif_stat_vec;
 	vector<size_t> ratio_stat_vec;
@@ -32,8 +32,10 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 	user_data = loadData(user_file);
 	benchmark_data = loadData(benchmark_file);
 
-	if(max_valid_reg_thres>0)
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
+		short_sv_data = getShortSVReg(user_data, min_valid_reg_thres);
+	}
 	cout << "Total user data size: " << user_data.size() << endl;
 	cout << "Total benchmark data size: " << benchmark_data.size() << endl;
 
@@ -45,7 +47,7 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 
 	// output pair statistics data to file
 	svSizeDifRatioFilename_tmp = dirname + svSizeDifRatioFilename;
-	if(max_valid_reg_thres>0) svSizeDifRatioFilename_tmp += "_long_filtered";
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) svSizeDifRatioFilename_tmp += "_long_filtered";
 	outputPairDataToFile(svSizeDifRatioFilename_tmp, sv_pair_vec);
 
 	// compute size difference statistics
@@ -53,7 +55,7 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 
 	// save to file
 	svSizeDifStatFilename_tmp = dirname + svSizeDifStatFilename;
-	if(max_valid_reg_thres>0) svSizeDifStatFilename_tmp += "_long_filtered";
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) svSizeDifStatFilename_tmp += "_long_filtered";
 	outputDifStatToFile(svSizeDifStatFilename_tmp, dif_stat_vec);
 
 	// compute size ratio statistics
@@ -61,7 +63,7 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 
 	// save to file
 	svSizeRatioStatFilename_tmp = dirname + svSizeRatioStatFilename;
-	if(max_valid_reg_thres>0) svSizeRatioStatFilename_tmp += "_long_filtered";
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) svSizeRatioStatFilename_tmp += "_long_filtered";
 	outputRatioStatToFile(svSizeRatioStatFilename_tmp, ratio_stat_vec, ratio_div_vec);
 
 	// compute rmse
@@ -71,7 +73,7 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 	destroyPairData(sv_pair_vec);
 	destroyData(user_data);
 	destroyData(benchmark_data);
-	if(max_valid_reg_thres>0) destroyData(long_sv_data);
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) {destroyData(long_sv_data);destroyData(short_sv_data);}
 }
 
 vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> &data2){

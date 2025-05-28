@@ -121,12 +121,14 @@ extern vector<string> SVcallernames;
 extern vector<string> TPfilesPath;
 extern vector<string> FNfilesPath;
 
+extern int32_t minsvlen;
 extern int32_t maxValidRegThres;
-extern double percentSeqIdentity;
-extern double percentAlleleSeqIdentity;
+extern double percentSeqSim;
+extern double percentAlleleSeqSim;
 extern string snvFilename;
 extern string mateItemFilename;
 extern string longSVFilename;
+extern string shortSVFilename;
 extern string svSizeDifRatioFilename;
 extern string svSizeDifStatFilename;
 extern string svSizeRatioStatFilename;

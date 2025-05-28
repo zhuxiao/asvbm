@@ -21,8 +21,8 @@ using namespace std;
 #define SUB_DIF_REG_SIZE	50
 
 
-void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, vector<string> &sv_files1);
-void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, string &dirname);
+void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, vector<string> &sv_files1);
+void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname);
 vector<SV_pair*> computeOverlapSVPair(vector<SV_item*> &data1, vector<SV_item*> &data2);
 void* computeOverlapSVPairSubset(void *arg);
 vector<SV_pair*> computeOverlapSVPairOp(vector<vector<SV_item*>> &subsets);

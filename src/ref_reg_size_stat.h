@@ -15,7 +15,7 @@ using namespace std;
 #define DEL_SIZE_ARR_SIZE	-2000
 
 
-void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres , vector<string> &sv_files1);
-void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres, string &dirname);
+void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres , int32_t min_valid_reg_thres, vector<string> &sv_files1);
+void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres,  string &dirname);
 
 #endif /* SRC_REF_REG_SIZE_STAT_H_ */

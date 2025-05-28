@@ -22,6 +22,7 @@ SV_item *constructSVItem(string &line);
 void destroyData(vector<SV_item*> &sv_vec);
 
 vector<SV_item*> getLongSVReg(vector<SV_item*> &dataset, int32_t thres);
+vector<SV_item*> getShortSVReg(vector<SV_item*> &dataset, int32_t thres);
 void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfile);
 void output3File(const string &filename, vector<SV_item*> &data, ofstream &logfile);
 

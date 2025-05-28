@@ -193,7 +193,26 @@ vector<SV_item*> getLongSVReg(vector<SV_item*> &dataset, int32_t thres){
 
 	return sv_vec;
 }
+vector<SV_item*> getShortSVReg(vector<SV_item*> &dataset, int32_t thres){
+	vector<SV_item*> sv_vec;
+	size_t i;
+	int32_t reg_len;
+	SV_item *sv_item;
 
+	for(i=0; i<dataset.size(); ){
+		sv_item = dataset.at(i);
+		reg_len = 0;
+		if(sv_item->sv_type!=VAR_TRA and sv_item->sv_type!=VAR_BND)
+			reg_len = sv_item->endPos - sv_item->startPos + 1;
+		if(sv_item->sv_type==VAR_INS)reg_len =sv_item->sv_len;
+		if(reg_len<thres){
+			sv_vec.push_back(sv_item);
+			dataset.erase(dataset.begin()+i);
+		}else i++;
+	}
+
+	return sv_vec;
+}
 void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfile){
 	ofstream outfile;
 	string line, sv_type_str;
@@ -239,7 +258,7 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 				}
 				if(!seqcons_filtered.empty()){
 					ss << setprecision(4) << stod(seqcons_filtered);
-					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "Identity=" + ss.str() + "\t" + item->lineInfo;
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "SeqSim=" + ss.str() + "\t" + item->lineInfo;
 				}
 			}else{
 				if(item->seqcons.compare("")!=0)
@@ -249,7 +268,7 @@ void output2File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 			}
 		}else{
 			if(item->seqcons.compare("-")!=0)
-				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "Identity=" + item->seqcons + "\t" + item->lineInfo;
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "SeqSim=" + item->seqcons + "\t" + item->lineInfo;
 			else
 				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + item->seqcons + "\t" + item->lineInfo;
 		}
@@ -308,7 +327,7 @@ void output3File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 				}
 				if(!seqcons_filtered.empty()){
 					ss << setprecision(4) << stod(seqcons_filtered);
-					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "Identity=" + ss.str() + "\t" + "-";
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "SeqSim=" + ss.str() + "\t" + "-";
 				}
 			}else{
 				if(item->seqcons.compare("")!=0)
@@ -318,7 +337,7 @@ void output3File(const string &filename, vector<SV_item*> &data, ofstream &logfi
 			}
 		}else{
 			if(item->seqcons.compare("-")!=0)
-				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "Identity=" + item->seqcons + "\t" + "-";
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "SeqSim=" + item->seqcons + "\t" + "-";
 			else
 				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + item->seqcons + "\t" + "-";
 		}
@@ -392,7 +411,7 @@ void outputvcfFile(const string &filename, vector<SV_item*> &data){
 				}
 				if(!seqcons_filtered.empty()){
 					ss << setprecision(4) << stod(seqcons_filtered);
-					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "Identity=" + ss.str() + "\t" + item->lineInfo;
+					line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq  + "\t" + "SeqSim=" + ss.str() + "\t" + item->lineInfo;
 				}
 			}else{
 				if(item->seqcons.compare("")!=0)
@@ -403,7 +422,7 @@ void outputvcfFile(const string &filename, vector<SV_item*> &data){
 			line = item->lineInfo;
 		}else{
 			/*if(item->seqcons.compare("-")!=0)
-				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "Identity=" + item->seqcons + "\t" + item->lineInfo;
+				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + "SeqSim=" + item->seqcons + "\t" + item->lineInfo;
 			else
 				line = item->chrname + "\t" + to_string(item->startPos) + "\t" + to_string(item->endPos) + "\t" + item->chrname2 + "\t" + to_string(item->startPos2) + "\t" + to_string(item->endPos2) + "\t" + sv_type_str + "\t" + to_string(item->sv_len) + "\t" + item->ref_seq + "\t" + item->alt_seq + "\t" + item->seqcons + "\t" + item->lineInfo;
 			*/

@@ -213,8 +213,8 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 										if(item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
 											flag = true;
 										}else{
-											consistency = computeVarseqConsistency(item1, item2, fai, percentAlleleSeqIdentity);
-											if(consistency >= percentAlleleSeqIdentity){
+											consistency = computeVarseqConsistency(item1, item2, fai, percentAlleleSeqSim);
+											if(consistency >= percentAlleleSeqSim){
 												//SeqConsNumStat(consistency);
 												flag = true;
 											}
@@ -307,7 +307,8 @@ string getCurrentTime(){
 }
 vector<string> mergeHeaders(const vector<string>& filenames){
 	set<string> mergedHeaders;
-	map<string, string> uniqueHeaders;
+//	map<string, string> uniqueHeaders;
+	map<string, map<string, string>> uniqueHeadersByType;
 	set<string> sources, headers, sampleNames;
 	string reference, combinedSource, sv_caller, source, id, currentFileDate, line, sample, sampleHeader, toolsNumInfo, toolsInfo;
 	size_t pos, eq_pos, end;
@@ -346,7 +347,13 @@ vector<string> mergeHeaders(const vector<string>& filenames){
 						sources.insert(sv_caller);
 					}
 				}
-			}else if(header.find("##INFO=") != string::npos || header.find("##FORMAT=") != string::npos || header.find("##FILTER=") != string::npos || header.find("##ALT=") != string::npos){
+			}else if (header.find("##INFO=") != string::npos || header.find("##FORMAT=") != string::npos || header.find("##FILTER=") != string::npos || header.find("##ALT=") != string::npos){
+				string type;
+				if(header.find("##INFO=") != string::npos) type = "INFO";
+				else if(header.find("##FORMAT=") != string::npos) type = "FORMAT";
+				else if(header.find("##FILTER=") != string::npos) type = "FILTER";
+				else if(header.find("##ALT=") != string::npos) type = "ALT";
+
 				pos = header.find("ID=");
 				if(pos != string::npos){
 					end = header.find(',', pos);
@@ -354,11 +361,24 @@ vector<string> mergeHeaders(const vector<string>& filenames){
 						end = header.size();
 					}
 					id = header.substr(pos + 3, end - pos - 3);
-					if(uniqueHeaders.find(id) == uniqueHeaders.end()){
-						uniqueHeaders[id] = header;
+					if(uniqueHeadersByType[type].find(id) == uniqueHeadersByType[type].end()){
+						uniqueHeadersByType[type][id] = header;
 					}
 				}
 			}
+//			else if(header.find("##INFO=") != string::npos || header.find("##FORMAT=") != string::npos || header.find("##FILTER=") != string::npos || header.find("##ALT=") != string::npos){
+//				pos = header.find("ID=");
+//				if(pos != string::npos){
+//					end = header.find(',', pos);
+//					if(end == string::npos){
+//						end = header.size();
+//					}
+//					id = header.substr(pos + 3, end - pos - 3);
+//					if(uniqueHeaders.find(id) == uniqueHeaders.end()){
+//						uniqueHeaders[id] = header;
+//					}
+//				}
+//			}
 		}
 		ifstream file(filename);
 		while(getline(file, line)){
@@ -378,8 +398,14 @@ vector<string> mergeHeaders(const vector<string>& filenames){
 		}
 		file.close();
 	}
-	for(const auto& pair : uniqueHeaders){
-		mergedHeaders.insert(pair.second);
+//	for(const auto& pair : uniqueHeaders){
+//		mergedHeaders.insert(pair.second);
+//	}
+
+	for(const auto& typePair : uniqueHeadersByType){
+		for(const auto& idPair : typePair.second){
+			mergedHeaders.insert(idPair.second);
+		}
 	}
 	currentFileDate = getCurrentTime();
 	headers.insert("##fileDate=" + currentFileDate);
@@ -448,7 +474,7 @@ vector<string> mergeHeaders(const vector<string>& filenames){
 		}
 		sampleHeader += sample;
 	}
-	orderedHeaders.push_back("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT" + sampleHeader);
+	orderedHeaders.push_back("#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\t" + sampleHeader);
 	return orderedHeaders;
 }
 

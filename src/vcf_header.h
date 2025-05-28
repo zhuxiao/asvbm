@@ -38,7 +38,7 @@
 			"##contig=<ID=X,length=155270560>\n" \
 			"##contig=<ID=Y,length=59373566>\n" \
 			"##contig=<ID=MT,length=16569>\n" \
-			"##INFO=<ID=TOOLSNUM,Number=1,Type=Integer,Description=\"The total number of variants that match this variant\">\n" \
+			"##INFO=<ID=TOOLSNUM,Number=1,Type=Integer,Description=\"The number of tools for identifying variants that match this variant\">\n" \
 			"##INFO=<ID=TOOLS,Number=1,Type=String,Description=\"Tools for identifying variants that match the variant\">\n" \
 			"##INFO=<ID=SS,Number=1,Type=Integer,Description=\"Number of supported signatures\">\n" \
 			"##INFO=<ID=ST,Number=1,Type=Integer,Description=\"Number of supported templates\">\n" \

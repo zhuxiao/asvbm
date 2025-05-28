@@ -191,8 +191,8 @@ void match(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subset
 										if(item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
 											flag = true;
 										}else{
-											consistency = computeVarseqConsistency(item1, item2, fai, percentAlleleSeqIdentity);
-											if(consistency >= percentAlleleSeqIdentity){
+											consistency = computeVarseqConsistency(item1, item2, fai, percentAlleleSeqSim);
+											if(consistency >= percentAlleleSeqSim){
 												//SeqConsNumStat(consistency);
 												flag = true;
 											}

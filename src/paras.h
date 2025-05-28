@@ -26,8 +26,8 @@ using namespace std;
 
 // program variables
 #define PROG_NAME		"ASVBM"
-#define PROG_DESC		"A tool for Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets"
-#define PROG_VERSION	"1.3.1"
+#define PROG_DESC		"A tool for multi-Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets"
+#define PROG_VERSION	"1.3.2"
 
 #define CMD_STAT_STR					"stat"
 #define CMD_CREATE_STR					"create"
