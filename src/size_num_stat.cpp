@@ -34,9 +34,9 @@ void SVSizeNumStat(string &user_file, string &benchmark_file, string &ref_file, 
 //		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 //	}
 //	SVSizeNumStatOp(user_file, benchmark_file, ref_file, size_div_vec, 0, sizeNumStatDirname);
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
-		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0){
+		cout << "\n>>>>>>>>> After filtering long SV regions and short SV regions: <<<<<<<<<" << endl;
+		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions and short SV regions: <<<<<<<<<" << endl;
 		SVSizeNumStatOp(user_file, benchmark_file, ref_file, size_div_vec, max_valid_reg_thres, min_valid_reg_thres, sizeNumStatDirname);
 	}
 	//Call gnuplot to plot
@@ -55,7 +55,7 @@ void SVSizeNumStatOp(string &user_file, string &benchmark_file, string &ref_file
 	user_data = loadData(user_file);
 	benchmark_data = loadData(benchmark_file);
 
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
 		short_sv_data = getShortSVReg(user_data, min_valid_reg_thres);
 		cout << "Total long SV data size: " << long_sv_data.size() << endl;
@@ -65,10 +65,10 @@ void SVSizeNumStatOp(string &user_file, string &benchmark_file, string &ref_file
 	}
 
 	cout << "Total user data size: " << user_data.size() << endl;
-	cout << "Total benchmark data size: " << benchmark_data.size() << endl;
+//	cout << "Total benchmark data size: " << benchmark_data.size() << endl;
 
 	outStatScreenFile << "Total user data size: " << user_data.size() << endl;
-	outStatScreenFile << "Total benchmark data size: " << benchmark_data.size() << endl;
+//	outStatScreenFile << "Total benchmark data size: " << benchmark_data.size() << endl;
 
 	TPbench_data = loadData(ResultdataPath[0]);
 	TPuser_data = loadData(ResultdataPath[1]);

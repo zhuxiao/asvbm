@@ -11,11 +11,24 @@ void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid
 	else refRegSizeStatDirname = outputPathname + refRegSizeStatDirname;
 	mkdir(refRegSizeStatDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
-	cout << ">>>>>>>>> The SV reference region size statistics for benchmark set: <<<<<<<<<" << endl;
-	outStatScreenFile << ">>>>>>>>> The SV reference region size statistics for benchmark set: <<<<<<<<<" << endl;
-	refRegSizeStatOp(refRegSizeFilename_benchmark, benchmark_file, 0, 0, refRegSizeStatDirname);
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0) {
+		cout << ">>>>>>>>> The SV reference region size statistics before filtering for benchmark set: <<<<<<<<<" << endl;
+		outStatScreenFile << ">>>>>>>>> The SV reference region size statistics before filtering for benchmark set: <<<<<<<<<" << endl;
+	}
+	else{
+		cout << ">>>>>>>>> The SV reference region size statistics for benchmark set: <<<<<<<<<" << endl;
+		outStatScreenFile << ">>>>>>>>> The SV reference region size statistics for benchmark set: <<<<<<<<<" << endl;
+	}
 
-	if(max_valid_reg_thres>0) {
+	refRegSizeStatOp(refRegSizeFilename_benchmark, benchmark_file, 0, 0, refRegSizeStatDirname, true);
+
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0){
+		cout << "\n>>>>>>>>> The SV reference region size statistics after filtering for benchmark set: <<<<<<<<<" << endl;
+		outStatScreenFile << "\n>>>>>>>>> The SV reference region size statistics after filtering for benchmark set: <<<<<<<<<" << endl;
+		refRegSizeStatOp(refRegSizeFilename_benchmark, benchmark_file, max_valid_reg_thres, min_valid_reg_thres, refRegSizeStatDirname, false);
+	}
+
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0) {
 		cout << ">>>>>>>>> The SV reference region size statistics before filtering for user-called set: <<<<<<<<<" << endl;
 		outStatScreenFile << ">>>>>>>>> The SV reference region size statistics before filtering for user-called set: <<<<<<<<<" << endl;
 	}
@@ -23,17 +36,17 @@ void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid
 		cout << ">>>>>>>>> The SV reference region size statistics for user-called set: <<<<<<<<<" << endl;
 		outStatScreenFile << ">>>>>>>>> The SV reference region size statistics for user-called set: <<<<<<<<<" << endl;
 	}
-	refRegSizeStatOp(refRegSizeFilename_user, user_file, 0, 0, refRegSizeStatDirname);
+	refRegSizeStatOp(refRegSizeFilename_user, user_file, 0, 0, refRegSizeStatDirname, true);
 
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0){
 		cout << "\n>>>>>>>>> The SV reference region size statistics after filtering for user-called set: <<<<<<<<<" << endl;
 		outStatScreenFile << "\n>>>>>>>>> The SV reference region size statistics after filtering for user-called set: <<<<<<<<<" << endl;
-		refRegSizeStatOp(refRegSizeFilename_user, user_file, max_valid_reg_thres, min_valid_reg_thres, refRegSizeStatDirname);
+		refRegSizeStatOp(refRegSizeFilename_user, user_file, max_valid_reg_thres, min_valid_reg_thres, refRegSizeStatDirname, false);
 	}
 
 }
 
-void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname){
+void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname, bool isSVs_before_filtered){
 	vector<SV_item*> sv_data, long_sv_data, short_sv_data;
 	SV_item *item;
 	size_t i, count_array[SV_SIZE_ARR_SIZE+2],  num;
@@ -47,9 +60,13 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 	if(max_valid_reg_thres>0) long_sv_data = getLongSVReg(sv_data, max_valid_reg_thres);
 	if(min_valid_reg_thres>0) short_sv_data = getShortSVReg(sv_data, min_valid_reg_thres);
 	cout << "Total data size: " << sv_data.size() << endl;
-	allmetric.push_back(to_string(sv_data.size()));
+	if(!isSVs_before_filtered){
+		allmetric.push_back(to_string(sv_data.size()));
+	}else{
+		before_filtered.push_back(to_string(sv_data.size()));
+	}
 	outStatScreenFile << "Total data size: " << sv_data.size() << endl;
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) {
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0) {
 		cout << "Total long SV data size: " << long_sv_data.size() << endl;
 		cout << "Total short SV data size: " << short_sv_data.size() << endl;
 		outStatScreenFile << "Total long SV data size: " << long_sv_data.size() << endl;
@@ -82,7 +99,7 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 	destroyData(short_sv_data);
 	// compute statistics
 	refRegSizeFinename_tmp = dirname + refRegSizeFinename;
-	if(max_valid_reg_thres>0) refRegSizeFinename_tmp += "_long_filtered";
+	if(max_valid_reg_thres>0 || min_valid_reg_thres>=0) refRegSizeFinename_tmp += "_filtered";
 
 	outfile.open(refRegSizeFinename_tmp);
 	if(!outfile.is_open()){
@@ -118,7 +135,7 @@ void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_v
 	cout << num << " reference region size items have been saved to file: " << refRegSizeFinename_tmp << endl;
 	outStatScreenFile << num << " reference region size items have been saved to file: " << refRegSizeFinename_tmp << endl;
 	//graph
-	SvNumberDistributionGraph(max_valid_reg_thres, refRegSizeFinename, refRegSizeFinename_tmp);
+	SvNumberDistributionGraph(max_valid_reg_thres, min_valid_reg_thres, refRegSizeFinename, refRegSizeFinename_tmp);
 }
 
 

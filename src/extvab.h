@@ -55,6 +55,7 @@ extern vector<string> folderPng4;
 extern vector<string> folderPng5;
 extern vector<string> alltoolnames;
 extern vector<string> allmetric;
+extern vector<string> before_filtered;
 extern vector< vector<string>> allmetrics;
 
 extern vector<string> sharedFPFilenames;
@@ -70,6 +71,8 @@ extern vector<SV_item*> entryMap1;
 extern unordered_map<string, int> benchmark_hg002_Map;
 extern bool refine_bench_flag;
 extern bool create_bench_flag;
+extern bool genotype_filterBench_flag;
+extern unordered_map<SV_item*, int> itemToIndex;
 
 extern vector<string> centerDistance;
 extern vector< vector<string>> centerDistances;
@@ -128,6 +131,8 @@ extern double percentAlleleSeqSim;
 extern string snvFilename;
 extern string mateItemFilename;
 extern string longSVFilename;
+extern string longBenchmarkSVFilename;
+extern string shortBenchmarkSVFilename;
 extern string shortSVFilename;
 extern string svSizeDifRatioFilename;
 extern string svSizeDifStatFilename;

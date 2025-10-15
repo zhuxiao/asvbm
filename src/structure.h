@@ -15,7 +15,7 @@ using namespace std;
 #define VAR_TRA				5	// translocation
 #define VAR_BND				6	// BND
 #define VAR_INV_TRA			7	// inverted translocation
-#define VAR_MIX				10	// mixed variation
+#define VAR_MIX				10	// mixed variant
 #define VAR_MNP				11	// MNP
 #define VAR_SNV				12	// SNV
 #define VAR_CNV				13	// CNV
@@ -30,6 +30,8 @@ typedef struct {
 	int64_t startPos2, endPos2;  // 1-based
 	bool overlapped;	// default: false
 	bool mergeMark;		// default: false
+	bool mergeMark2;		// default: false
+	bool mergeFlag;		// default: false
 	bool LpFlag;		// default: false
 	bool validFlag;		// default: true
 	//bool balancedTraFlag;	// TRA, default: false
@@ -65,7 +67,7 @@ typedef struct {
 
 typedef struct {
 	vector<SV_item*> subset1, subset2;
-	vector<SV_item*> *intersect_vec_user, *intersect_vec_benchmark, *private_vec_user, *private_vec_benchmark, *intersect_vec_latentpositive_user;
+	vector<SV_item*> *intersect_vec_user, *intersect_vec_benchmark, *private_vec_user, *private_vec_benchmark, *intersect_vec_latentpositive_user, *intersect_vec_latentpositive_benchmark;
 	vector<SV_pair*> *sv_pair_vec;
 	faidx_t *fai;
 }overlapWork_opt;

@@ -189,7 +189,7 @@ void showUsageCreate(){
 	cout << "                  values are for the valid minimal region size, then shorter" << endl;
 	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
 	cout << "   -S             enable the strict type match mode which is disabled by default." << endl;
-	cout << "                  There are two variation type match modes:" << endl;
+	cout << "                  There are two variant type match modes:" << endl;
 	cout << "                  " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
 	cout << "                  " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
 	cout << "                  The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
@@ -199,8 +199,8 @@ void showUsageCreate(){
 	cout << "                  Chromosome names should match the format within the VCF file. " <<endl;
 	cout << "                  Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 	cout << "   -s INT         overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-	cout << "   -i FLOAT       minimal sequence similarly for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
-	cout << "   -a FLOAT       minimal sequence similarly for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -i FLOAT       minimal sequence similarity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -a FLOAT       minimal sequence similarity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
 	cout << "   -p FLOAT       minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
 	cout << "   -t INT         number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "                  in machine" << endl;
@@ -225,13 +225,13 @@ void showUsageCreate(){
 
 	cout << "Example:" << endl;
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
-	cout << "   $ asvbm create -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm create -m 20 -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
-	cout << "   $ asvbm create -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm create -m 20 -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
-	cout << "   $ asvbm create -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "   $ asvbm create -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 // show usage for stat command
 void showUsageStat(){
@@ -255,7 +255,7 @@ void showUsageStat(){
 	cout << "                  values are for the valid minimal region size, then shorter" << endl;
 	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
 	cout << "   -S             enable the strict type match mode which is disabled by default." << endl;
-	cout << "                  There are two variation type match modes:" << endl;
+	cout << "                  There are two variant type match modes:" << endl;
 	cout << "                  " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
 	cout << "                  " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
 	cout << "                  The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
@@ -265,8 +265,8 @@ void showUsageStat(){
 	cout << "                  Chromosome names should match the format within the VCF file. " <<endl;
 	cout << "                  Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 	cout << "   -s INT         overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-	cout << "   -i FLOAT       minimal sequence similarly for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
-	cout << "   -a FLOAT       minimal sequence similarly for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -i FLOAT       minimal sequence similarity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+	cout << "   -a FLOAT       minimal sequence similarity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
 	cout << "   -p FLOAT       minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
 	cout << "   -t INT         number of threads [0]. 0 for the maximal number of threads" << endl;
 	cout << "                  in machine" << endl;
@@ -293,13 +293,13 @@ void showUsageStat(){
 
 	cout << "Example:" << endl;
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
-	cout << "   $ asvbm stat -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm stat -m 20 -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
-	cout << "   $ asvbm stat -b -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm stat -m 20 -b -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
-	cout << "   $ asvbm stat --bench_refine -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "   $ asvbm stat -m 20 --bench_refine -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 
 void show(){
@@ -324,7 +324,7 @@ void show(){
 //	cout << "             values are for the valid maximal region size, then longer" << endl;
 //	cout << "             regions are omitted and saved to the file specified with '-l' option" << endl;
 //	cout << "   -S        enable the strict type match mode which is disabled by default." << endl;
-//	cout << "             There are two variation type match modes:" << endl;
+//	cout << "             There are two variant type match modes:" << endl;
 //	cout << "             " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
 //	cout << "             " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
 //	cout << "             The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
@@ -334,8 +334,8 @@ void show(){
 //	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
 //	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
 //	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-//	cout << "   -i FLOAT  minimal sequence similarly for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
-//	cout << "   -a FLOAT  minimal sequence similarly for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
+//	cout << "   -i FLOAT  minimal sequence similarity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
+//	cout << "   -a FLOAT  minimal sequence similarity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
 //	cout << "   -p FLOAT  minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
 //	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
 //	cout << "             in machine" << endl;
@@ -352,13 +352,13 @@ void show(){
 
 	cout << "Example:" << endl;
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
-	cout << "   $ asvbm stat -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm stat -m 20 -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
-	cout << "   $ asvbm stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm stat -m 20 -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
-	cout << "   $ asvbm create -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "   $ asvbm create -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 }
 
 // parse the parameters for convert command
@@ -478,6 +478,7 @@ int parseStat(int argc, char **argv){
 	typeMatchLevel = MATCHLEVEL_L;
 	ToolNameStore = ChromosomeNames = BamFilePath = "";
 	BamFileSign = false;
+
 	static struct option long_options[] = {
 		{"bench_refine", no_argument, 0, 'b'},
 		{"help", no_argument, 0, 'h'},
@@ -511,12 +512,12 @@ int parseStat(int argc, char **argv){
 	}
 
 	if(maxValidRegThres<0){
-		cout << "Error: Please specify the correct positive value for option: -m" << endl;
+		cout << "Error: Please specify the correct positive value for option: -M" << endl;
 		showUsageStat();
 		return 1;
 	}
-	if(minsvlen<=0){
-		cout << "Error: Please specify the correct positive value for option: -M" << endl;
+	if(minsvlen<0){
+		cout << "Error: Please specify the correct positive value for option: -m" << endl;
 		showUsageStat();
 		return 1;
 	}
@@ -550,7 +551,7 @@ int parseStat(int argc, char **argv){
 	region = generateSVregion();
 
 	tool_names = split(ToolNameStore,";");
-	chromosomeSet = split(ChromosomeNames,";");
+	chromosomeSet = split(expand_chromosome_names(ChromosomeNames),";");
 
 	opt = argc - optind; // the number of SAMs on the command line
 	if(tool_names.size()>=1){ //use the -T parameter to enter multiple tool names
@@ -577,6 +578,7 @@ int parseStat(int argc, char **argv){
 			else sv_files1.push_back(argv[i]);
 		}
 	}
+
 	if(BamFileSign){
 		if(!check_bam_average_read_length()){
 			cout << "Error: The reads length are too short to support local joint analysis verification." << endl;
@@ -600,6 +602,253 @@ int parseStat(int argc, char **argv){
 	return 0;
 }
 
+struct ChromosomeConfig {
+	vector<string> full_list;
+	string prefix;
+	string full_range;
+	string x_tag;
+	string y_tag;
+};
+
+
+vector<ChromosomeConfig> init_chromosome_configs(){
+    return{
+        {
+            {"chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10",
+             "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
+             "chr20", "chr21", "chr22", "chrX", "chrY"},
+            "chr",
+            "chr1-chrY",
+            "chrX",
+            "chrY"
+        },
+
+        {
+            {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+             "11", "12", "13", "14", "15", "16", "17", "18", "19",
+             "20", "21", "22", "X", "Y"},
+            "",
+            "1-Y",
+            "X",
+            "Y"
+        }
+    };
+}
+
+
+vector<string> split_by_semicolon(const string& input){
+	vector<string> parts;
+	stringstream ss(input);
+	string part;
+
+    while(getline(ss, part, ';')){
+
+        part.erase(0, part.find_first_not_of(" \t\n\r"));
+        part.erase(part.find_last_not_of(" \t\n\r") + 1);
+        if(!part.empty()){
+            parts.push_back(part);
+        }
+    }
+    return parts;
+}
+
+string merge_chromosomes(const vector<string>& input_chroms, const ChromosomeConfig& config){
+	vector<string> merged;
+	unordered_set<string> added;
+
+	for(const auto& standard_chrom : config.full_list){
+        if(find(input_chroms.begin(), input_chroms.end(), standard_chrom) != input_chroms.end() && added.find(standard_chrom) == added.end()){
+            merged.push_back(standard_chrom);
+            added.insert(standard_chrom);
+        }
+    }
+
+	string result;
+    for(size_t i = 0; i < merged.size(); ++i){
+        if (i > 0) {
+            result += ";";
+        }
+        result += merged[i];
+    }
+    return result;
+}
+
+string parse_single_range(const string& range, const ChromosomeConfig& config){
+    if(find(config.full_list.begin(), config.full_list.end(), range) != config.full_list.end()){
+        return range;
+    }
+
+    regex y_mix_regex("^chr(\\d+)-Y$");
+    smatch y_mix_match;
+    if(regex_match(range, y_mix_match, y_mix_regex)){
+        string start_num = y_mix_match[1].str();
+        string standard_range = "chr" + start_num + "-chrY";
+        return parse_single_range(standard_range, config);
+    }
+    string y_std_pattern = "^" + config.prefix + "(\\d+)-" + config.y_tag + "$";
+    regex y_std_regex(y_std_pattern);
+    smatch y_std_match;
+    if(regex_match(range, y_std_match, y_std_regex)){
+        errno = 0;
+        int start = stoi(y_std_match[1].str());
+        if(errno != 0 || start < 1 || start > 22){
+            cerr << "警告：无效的Y范围起始数字 " << y_std_match[1].str() << "（需1-22）\n";
+            return "";
+        }
+
+        string result;
+        bool y_found = false;
+        for(const auto& chrom : config.full_list){
+            smatch num_match;
+            string num_pattern = "^" + config.prefix + "(\\d+)$";
+            if(regex_match(chrom, num_match, regex(num_pattern))){
+                int chrom_num = stoi(num_match[1].str());
+                if(chrom_num >= start && chrom_num <= 22){
+                    if (!result.empty()) result += ";";
+                    result += chrom;
+                }
+            }
+            else if(chrom == config.x_tag){
+                if (!result.empty()) result += ";";
+                result += chrom;
+            }
+            else if(chrom == config.y_tag){
+                if (!result.empty()) result += ";";
+                result += chrom;
+                y_found = true;
+                break;
+            }
+        }
+        return y_found ? result : "";
+    }
+
+    if(range == config.full_range){
+        string result;
+        for(size_t i = 0; i < config.full_list.size(); ++i){
+            if (i > 0) result += ";";
+            result += config.full_list[i];
+        }
+        return result;
+    }
+
+    regex x_mix_regex("^chr(\\d+)-X$");
+    smatch x_mix_match;
+    if(regex_match(range, x_mix_match, x_mix_regex)){
+        string start_num = x_mix_match[1].str();
+        string standard_range = "chr" + start_num + "-chrX";
+        return parse_single_range(standard_range, config);
+    }
+    string x_std_pattern = "^" + config.prefix + "(\\d+)-" + config.x_tag + "$";
+    regex x_std_regex(x_std_pattern);
+    smatch x_std_match;
+    if(regex_match(range, x_std_match, x_std_regex)){
+        errno = 0;
+        int start = stoi(x_std_match[1].str());
+        if(errno != 0 || start < 1 || start > 22){
+            cerr << "警告：无效的X范围起始数字 " << x_std_match[1].str() << "（需1-22）\n";
+            return "";
+        }
+
+        string result;
+        bool x_found = false;
+        for(const auto& chrom : config.full_list){
+            if (chrom == config.y_tag) break;
+
+            smatch num_match;
+            string num_pattern = "^" + config.prefix + "(\\d+)$";
+            if (regex_match(chrom, num_match, regex(num_pattern))){
+                int chrom_num = stoi(num_match[1].str());
+                if (chrom_num >= start && chrom_num <= 22) {
+                    if (!result.empty()) result += ";";
+                    result += chrom;
+                }
+            }
+            else if(chrom == config.x_tag){
+                if (!result.empty()) result += ";";
+                result += chrom;
+                x_found = true;
+            }
+        }
+        return x_found ? result : "";
+    }
+
+
+    regex num_mix_regex("^chr(\\d+)-(\\d+)$");
+    smatch num_mix_match;
+    if(regex_match(range, num_mix_match, num_mix_regex)){
+        errno = 0;
+        int start = stoi(num_mix_match[1].str());
+        int end = stoi(num_mix_match[2].str());
+        if (errno != 0 || start > end || start < 1 || end > 22) {
+            cerr << "警告：无效的混合数字范围 " << range << "（需1≤起始≤结束≤22）\n";
+            return "";
+        }
+        string standard_range = "chr" + to_string(start) + "-chr" + to_string(end);
+        return parse_single_range(standard_range, config);
+    }
+    string num_std_pattern = "^" + config.prefix + "(\\d+)-" + config.prefix + "(\\d+)$";
+    regex num_std_regex(num_std_pattern);
+    smatch num_std_match;
+    if(regex_match(range, num_std_match, num_std_regex)){
+        errno = 0;
+        int start = stoi(num_std_match[1].str());
+        int end = stoi(num_std_match[2].str());
+        if (errno != 0 || start > end || start < 1 || end > 22) {
+            cerr << "警告：无效的标准数字范围 " << range << "（需1≤起始≤结束≤22）\n";
+            return "";
+        }
+
+        string result;
+        string num_pattern = "^" + config.prefix + "(\\d+)$";
+        regex num_regex(num_pattern);
+        for(const auto& chrom : config.full_list){
+            smatch num_match;
+            if (regex_match(chrom, num_match, num_regex)){
+                int chrom_num = stoi(num_match[1].str());
+                if(chrom_num >= start && chrom_num <= end){
+                    if(!result.empty()) result += ";";
+                    result += chrom;
+                }
+            }
+        }
+        return result;
+    }
+
+    cerr << "警告：未支持的染色体格式 " << range << "\n";
+    cerr << "支持的格式示例：chr1-Y、chr1-chrY、chr1-22、chr1-chr22、1-Y、1-22\n";
+    return "";
+}
+
+
+string expand_chromosome_names(const string& input){
+    static const vector<ChromosomeConfig> configs = init_chromosome_configs();
+
+    const ChromosomeConfig& target_config = (input.find("chr") != string::npos)
+        ? configs[0]
+        : configs[1];
+
+    vector<string> input_ranges = split_by_semicolon(input);
+    if(input_ranges.empty()){
+        cerr << "警告：染色体输入为空\n";
+        return "";
+    }
+
+    vector<string> all_chromosomes;
+    for(const auto& range : input_ranges){
+        string parsed = parse_single_range(range, target_config);
+        if(parsed.empty()){
+            continue;
+        }
+        vector<string> parsed_chroms = split_by_semicolon(parsed);
+        all_chromosomes.insert(all_chromosomes.end(), parsed_chroms.begin(), parsed_chroms.end());
+    }
+
+    string final_result = merge_chromosomes(all_chromosomes, target_config);
+    if (final_result.empty()) {
+        cerr << "错误：未解析到有效染色体\n";
+    }
+    return final_result;
+}
 //int parseState(int argc, char **argv){
 //	int32_t opt, threadNum_tmp;
 //	string sv_file1, ref_file, sv_file2, ToolNameStore, ChromosomeNames;
@@ -740,7 +989,7 @@ int parseCreate(int argc, char **argv){
 		{"minsvlen",no_argument, 0, 'm'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:M:s:t:r:o:i:a:p:l:T:B:R:hvC:S", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:M:s:t:r:o:i:a:p:l:T:B:R:hvC:gS", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': minsvlen = stoi(optarg); break;
 			case 'M': maxValidRegThres = stoi(optarg); break;
@@ -756,6 +1005,7 @@ int parseCreate(int argc, char **argv){
 			case 'R': size_div_vec = parseSemicolonSeparatedValues(optarg); break;
 			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
+			case 'g': genotype_filterBench_flag = true; break;
 			case 'h': showUsageCreate(); exit(0);
 			case 'v': show_version();; exit(0);
 			case 'S': typeMatchLevel = MATCHLEVEL_S; break;
@@ -765,12 +1015,12 @@ int parseCreate(int argc, char **argv){
 	}
 
 	if(maxValidRegThres<0){
-		cout << "Error: Please specify the correct positive value for option: -m" << endl;
+		cout << "Error: Please specify the correct positive value for option: -M" << endl;
 		showUsageCreate();
 		return 1;
 	}
-	if(minsvlen<=0){
-		cout << "Error: Please specify the correct positive value for option: -M" << endl;
+	if(minsvlen<0){
+		cout << "Error: Please specify the correct positive value for option: -m" << endl;
 		showUsageStat();
 		return 1;
 	}
@@ -804,7 +1054,7 @@ int parseCreate(int argc, char **argv){
 	region = generateSVregion();
 
 	tool_names = split(ToolNameStore,";");
-	chromosomeSet = split(ChromosomeNames,";");
+	chromosomeSet = split(expand_chromosome_names(ChromosomeNames),";");
 
 	opt = argc - optind; // the number of SAMs on the command line
 	if(tool_names.size()>=1){ //use the -T parameter to enter multiple tool names
@@ -849,7 +1099,7 @@ int parseCreate(int argc, char **argv){
 
 	//cout << "mem_total=" << mem_total << ", swap_total=" << swap_total << ", extend_total=" << extend_total << endl;
 
-	SVStatOp(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
+	SVCreateOp(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
 
 	return 0;
 }
@@ -861,6 +1111,7 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 	string label = "benchmark", label1 = "user";
 	vector<string> convert_sv_files;
 	vector<SV_item*> sv_item_vec;
+	bool isVCF = false, isBED = false;
 	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	suboutputDirnamePath = outputPathname + suboutputDirname;
 	mkdir(suboutputDirnamePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -874,11 +1125,13 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 			mate_filename = to_string(i)+ "_" + mateItemFilename;
 //			snv_filename = to_string(i)+ "_" + snvFilename;
 			sv_file_name_Path = suboutputDirnamePath + "/" + sv_file_name;
-			convertVcf(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+			processFile(sv_files1[i], isVCF, isBED);
+			if(isVCF) convertVcf(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+			if(isBED) convertBed(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
 			convert_sv_files.push_back(sv_file_name_Path);
 
-			sv_item_vec = loadDataWithoutTra(sv_file_name_Path);
-			benchmark_vec.push_back(sv_item_vec);
+//			sv_item_vec = loadDataWithoutTra(sv_file_name_Path);
+//			benchmark_vec.push_back(sv_item_vec);
 			ToolsFilenames.push_back(sv_files1[i]);
 		}
 		//benchmark
@@ -887,7 +1140,9 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 //		snv_filename = "Benckmark_" + snvFilename;
 		convert_sv_file2 = Pathquerybackslash(convert_sv_file2);
 		convert_sv_file2_Path = suboutputDirnamePath + "/" + convert_sv_file2;
-		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+		processFile(sv_file2, isVCF, isBED);
+		if(isVCF) convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+		if(isBED) convertBed(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
 	}else{
 		sv_file_name = sv_file1;
 		sv_file_name = PathqueryDot(sv_file_name);
@@ -895,13 +1150,17 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 		//path
 		sv_file_name = Pathquerybackslash(sv_file_name);
 		sv_file_name_Path = suboutputDirnamePath + "/" + sv_file_name;
-		convertVcf(sv_file1, sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+		processFile(sv_file1, isVCF, isBED);
+		if(isVCF) convertVcf(sv_file1, sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+		if(isBED) convertBed(sv_file1, sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
 		//benchmark
 		convert_sv_file2 = PathqueryDot(sv_file2);
 		mate_filename = "Benckmark_" + mateItemFilename;
 		convert_sv_file2 = Pathquerybackslash(convert_sv_file2);
 		convert_sv_file2_Path = suboutputDirnamePath + "/" + convert_sv_file2;
-		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+		processFile(sv_file2, isVCF, isBED);
+		if(isVCF) convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+		if(isBED) convertBed(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
 	}
 	outConvertScreenFile.close();
 	usersets_num = 0;
@@ -916,7 +1175,80 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1, ref_file);
 
 }
+void SVCreateOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names){
+	string sv_file_name, mate_filename, snv_filename, convert_sv_file2;
+	string sv_file_name_Path, convert_sv_file2_Path;
+	string label = "benchmark", label1 = "user";
+	vector<string> convert_sv_files;
+	vector<SV_item*> sv_item_vec;
+	bool isVCF = false, isBED = false;
+	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	suboutputDirnamePath = outputPathname + suboutputDirname;
+	mkdir(suboutputDirnamePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	//convert
+	if(sv_files1.size()>=1){
+		for(size_t i=0; i< sv_files1.size(); i++){
+			sv_file_name = sv_files1[i];
+			sv_file_name = PathqueryDot(sv_file_name);
+			//path
+			sv_file_name = Pathquerybackslash(sv_file_name);
+			mate_filename = to_string(i)+ "_" + mateItemFilename;
+//			snv_filename = to_string(i)+ "_" + snvFilename;
+			sv_file_name_Path = suboutputDirnamePath + "/" + sv_file_name;
+			processFile(sv_files1[i], isVCF, isBED);
+			if(isVCF) convertVcf(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+			if(isBED) convertBed(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+//			convertVcf(sv_files1[i], sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+			convert_sv_files.push_back(sv_file_name_Path);
 
+//			sv_item_vec = loadDataWithoutTra(sv_file_name_Path);
+//			benchmark_vec.push_back(sv_item_vec);
+			ToolsFilenames.push_back(sv_files1[i]);
+		}
+		//benchmark
+		convert_sv_file2 = PathqueryDot(sv_file2);
+		mate_filename = "Benckmark_" + mateItemFilename;
+//		snv_filename = "Benckmark_" + snvFilename;
+		convert_sv_file2 = Pathquerybackslash(convert_sv_file2);
+		convert_sv_file2_Path = suboutputDirnamePath + "/" + convert_sv_file2;
+//		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+		processFile(sv_file2, isVCF, isBED);
+		if(isVCF) convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+		if(isBED) convertBed(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+	}else{
+		sv_file_name = sv_file1;
+		sv_file_name = PathqueryDot(sv_file_name);
+		mate_filename = mateItemFilename;
+		//path
+		sv_file_name = Pathquerybackslash(sv_file_name);
+		sv_file_name_Path = suboutputDirnamePath + "/" + sv_file_name;
+//		convertVcf(sv_file1, sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+		processFile(sv_file1, isVCF, isBED);
+		if(isVCF) convertVcf(sv_file1, sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+		if(isBED) convertBed(sv_file1, sv_file_name_Path, ref_file, mate_filename, snv_filename, label1);
+		//benchmark
+		convert_sv_file2 = PathqueryDot(sv_file2);
+		mate_filename = "Benckmark_" + mateItemFilename;
+		convert_sv_file2 = Pathquerybackslash(convert_sv_file2);
+		convert_sv_file2_Path = suboutputDirnamePath + "/" + convert_sv_file2;
+//		convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+		processFile(sv_file2, isVCF, isBED);
+		if(isVCF) convertVcf(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+		if(isBED) convertBed(sv_file2, convert_sv_file2_Path, ref_file, mate_filename, snv_filename, label);
+	}
+	outConvertScreenFile.close();
+	usersets_num = 0;
+
+	if(convert_sv_files.size()>=1){	//multiple data sets are evaluated			sv_files1
+		for(string& sv_file1 : convert_sv_files){
+			SVCreate(ref_file, sv_file1, convert_sv_file2_Path, convert_sv_files, tool_names);
+		}
+	}else
+		SVCreate(ref_file, sv_file_name_Path, convert_sv_file2_Path, sv_files1, tool_names);
+
+	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1, ref_file);
+
+}
 // SV stat
 void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names){
 
@@ -987,7 +1319,75 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 	//Evaluate multiple data sets and initialize the path for the next data save
 	if(sv_files1.size()>=1)	FolderInit();
 }
+void SVCreate(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names){
 
+//	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if(sv_files1.size()>=1){
+		for(size_t i=1; i<=sv_files1.size();i++){
+			if(user_file == sv_files1.at(i-1)){
+				if(tool_names.size()>0) {outputInsideToolDirname = tool_names.at(i-1);	SVcallernames.push_back(tool_names.at(i-1));}
+				else{
+					//Instead of entering the tool name, use the data set name as the name of the output file
+					size_t lastSlashPos = user_file.find_last_of('/');
+					if (lastSlashPos == string::npos) {
+						// If '/' is not found, the entire string is printed
+						outputInsideToolDirname = sv_files1.at(i-1);
+					} else {
+						// When '/' is reached, the part after '/' is printed
+						outputInsideToolDirname = user_file.substr(lastSlashPos + 1);
+					}
+					SVcallernames.push_back(outputInsideToolDirname);
+				}
+				alltoolnames.push_back(outputInsideToolDirname);
+				method_name = outputInsideToolDirname;
+				allmetric.push_back(outputInsideToolDirname);
+				centerDistance.push_back(outputInsideToolDirname);
+				sizeratio.push_back(outputInsideToolDirname);
+				outputInsideToolDirname = outputPathname + outputInsideToolDirname;
+				mkdir(outputInsideToolDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+				statScreenFilename = outputInsideToolDirname +'/' + statScreenFilename;
+				outStatScreenFile.open(statScreenFilename);
+				break;
+			}
+		}
+	}else{
+		alltoolnames.push_back("method");
+		allmetric.push_back(acquiesce_count);
+		centerDistance.push_back(acquiesce_count);
+		sizeratio.push_back(acquiesce_count);
+		statScreenFilename = outputPathname + statScreenFilename;
+		outStatScreenFile.open(statScreenFilename);
+	}
+
+	if(!outStatScreenFile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << statScreenFilename << endl;
+		exit(1);
+	}
+	outStatScreenFile << "Program command: " << program_cmd_str << endl << endl;
+
+	printCreateParas(user_file, benchmark_file, ref_file); // print parameters
+
+	cout << "############# Stage 1: SV size statistics: #############" << endl;
+	outStatScreenFile << "############# Stage 1: SV size statistics: #############" << endl;
+	refRegSizeStat(user_file, benchmark_file, maxValidRegThres, minsvlen, sv_files1);
+
+	cout << "\n\n############# Stage 2: Num statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Stage 2: Num statistics: #############" << endl;
+	SVNumStat(user_file, benchmark_file, ref_file,  maxValidRegThres, minsvlen, outputPathname, sv_files1);
+
+	// compute SV size difference statistics
+	cout << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Stage 3: SV size difference statistics: #############" << endl;
+	SVSizeDifStat(user_file, benchmark_file, maxValidRegThres, minsvlen, sv_files1);
+
+	cout << "\n\n############# Stage 4: SV size and num statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Stage 4: SV size and num statistics: #############" << endl;
+	SVSizeNumStat(user_file, benchmark_file, ref_file, maxValidRegThres, minsvlen, sv_files1);
+
+	outStatScreenFile.close();
+	//Evaluate multiple data sets and initialize the path for the next data save
+	if(sv_files1.size()>=1)	FolderInit();
+}
 // print parameters for 'convert' command
 void printConvertParas(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format){
 
@@ -1051,42 +1451,95 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 	cout << "Version: " << PROG_VERSION << endl << endl;
 
 	cout << "############# Parameters for 'ASVBM' command: #############" << endl;
-	cout << "      Reference file: " << ref_file << endl;
-	cout << " User-called SV file: " << user_file << endl;
-	cout << "   Benchmark SV file: " << benchmark_file << endl;
+	cout << "        Reference file: " << ref_file << endl;
+	cout << "   User-called SV file: " << user_file << endl;
+	cout << "     Benchmark SV file: " << benchmark_file << endl;
 
-	cout << " Maximal region size: " << maxValidRegThres << endl;
-	cout << " Overlap extend size: " << extendSize << endl;
-	cout << "  Percent size ratio: " << svlenRatio << endl;
-	cout << "   Sequence similarly: " << percentSeqSim << endl;
-	cout << "Allelic seq similarly: " << percentAlleleSeqSim << endl;
-	cout << "   Number of threads: " << num_threads << endl;
+	cout << "   Minimal region size: " << minsvlen << endl;
+	cout << "   Maximal region size: " << maxValidRegThres << endl;
+	cout << "   Overlap extend size: " << extendSize << endl;
+	cout << "    Percent size ratio: " << svlenRatio << endl;
+	cout << "   Sequence similarity: " << percentSeqSim << endl;
+	cout << "Allelic seq similarity: " << percentAlleleSeqSim << endl;
+	cout << "     Number of threads: " << num_threads << endl;
 	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
-	cout << "    Type match level: " << typeMatchLevel << " (allow type match between DUPLICTION and INSERTION)" << endl;
+	cout << "      Type match level: " << typeMatchLevel << " (allow type match between DUPLICTION and INSERTION)" << endl;
 	else
-	cout << "    Type match level: " << typeMatchLevel << " (strict variant type match)" << endl;
-	cout << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
-	cout << "Long SV regions file: " << longSVFilename << endl << endl;
+	cout << "      Type match level: " << typeMatchLevel << " (strict variant type match)" << endl;
+	cout << "      Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+	cout << " Short SV regions file: " << shortSVFilename << endl;
+	cout << "  Long SV regions file: " << longSVFilename << endl << endl;
 
 	// print to file
 	outStatScreenFile << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	outStatScreenFile << "Version: " << PROG_VERSION << endl << endl;
 
 	outStatScreenFile << "############# Parameters for 'stat' command: #############" << endl;
-	outStatScreenFile << "      Reference file: " << ref_file << endl;
-	outStatScreenFile << " User-called SV file: " << user_file << endl;
-	outStatScreenFile << "   Benchmark SV file: " << benchmark_file << endl;
+	outStatScreenFile << "        Reference file: " << ref_file << endl;
+	outStatScreenFile << "   User-called SV file: " << user_file << endl;
+	outStatScreenFile << "     Benchmark SV file: " << benchmark_file << endl;
 
-	outStatScreenFile << " Maximal region size: " << maxValidRegThres << endl;
-	outStatScreenFile << " Overlap extend size: " << extendSize << endl;
-	outStatScreenFile << "  Percent size ratio: " << svlenRatio << endl;
-	outStatScreenFile << "   Sequence similarly: " << percentSeqSim << endl;
-	outStatScreenFile << "Allelic seq similarly: " << percentAlleleSeqSim << endl;
-	outStatScreenFile << "   Number of threads: " << num_threads << endl;
+	outStatScreenFile << "   Minimal region size: " << minsvlen << endl;
+	outStatScreenFile << "   Maximal region size: " << maxValidRegThres << endl;
+	outStatScreenFile << "   Overlap extend size: " << extendSize << endl;
+	outStatScreenFile << "    Percent size ratio: " << svlenRatio << endl;
+	outStatScreenFile << "   Sequence similarity: " << percentSeqSim << endl;
+	outStatScreenFile << "Allelic seq similarity: " << percentAlleleSeqSim << endl;
+	outStatScreenFile << "     Number of threads: " << num_threads << endl;
 	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
-	outStatScreenFile << "    Type match level: " << typeMatchLevel << " (treat DUPLTCATION as INSERTION)" << endl;
+	outStatScreenFile << "      Type match level: " << typeMatchLevel << " (allow type match between DUPLICTION and INSERTION)" << endl;
 	else
-	outStatScreenFile << "    Type match level: " << typeMatchLevel << " (strict variant type matching)" << endl;
-	outStatScreenFile << "    Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
-	outStatScreenFile << "Long SV regions file: " << longSVFilename << endl << endl;
+	outStatScreenFile << "      Type match level: " << typeMatchLevel << " (strict variant type matching)" << endl;
+	outStatScreenFile << "      Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+	outStatScreenFile << " Short SV regions file: " << shortSVFilename << endl;
+	outStatScreenFile << "  Long SV regions file: " << longSVFilename << endl << endl;
+}
+void printCreateParas(string &user_file, string &benchmark_file ,string &ref_file){
+
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl << endl;
+
+	cout << "############# Parameters for 'ASVBM' command: #############" << endl;
+	cout << "        Reference file: " << ref_file << endl;
+	cout << "   User-called SV file: " << user_file << endl;
+	cout << "     Benchmark SV file: " << benchmark_file << endl;
+
+	cout << "   Minimal region size: " << minsvlen << endl;
+	cout << "   Maximal region size: " << maxValidRegThres << endl;
+	cout << "   Overlap extend size: " << extendSize << endl;
+	cout << "    Percent size ratio: " << svlenRatio << endl;
+	cout << "   Sequence similarity: " << percentSeqSim << endl;
+	cout << "Allelic seq similarity: " << percentAlleleSeqSim << endl;
+	cout << "     Number of threads: " << num_threads << endl;
+	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
+	cout << "      Type match level: " << typeMatchLevel << " (allow type match between DUPLICTION and INSERTION)" << endl;
+	else
+	cout << "      Type match level: " << typeMatchLevel << " (strict variant type match)" << endl;
+	cout << "      Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+	cout << " Short SV regions file: " << shortSVFilename << endl;
+	cout << "  Long SV regions file: " << longSVFilename << endl << endl;
+
+	// print to file
+	outStatScreenFile << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	outStatScreenFile << "Version: " << PROG_VERSION << endl << endl;
+
+	outStatScreenFile << "############# Parameters for 'create' command: #############" << endl;
+	outStatScreenFile << "        Reference file: " << ref_file << endl;
+	outStatScreenFile << "   User-called SV file: " << user_file << endl;
+	outStatScreenFile << "     Benchmark SV file: " << benchmark_file << endl;
+
+	outStatScreenFile << "   Minimal region size: " << minsvlen << endl;
+	outStatScreenFile << "   Maximal region size: " << maxValidRegThres << endl;
+	outStatScreenFile << "   Overlap extend size: " << extendSize << endl;
+	outStatScreenFile << "    Percent size ratio: " << svlenRatio << endl;
+	outStatScreenFile << "   Sequence similarity: " << percentSeqSim << endl;
+	outStatScreenFile << "Allelic seq similarity: " << percentAlleleSeqSim << endl;
+	outStatScreenFile << "     Number of threads: " << num_threads << endl;
+	if(typeMatchLevel.compare(MATCHLEVEL_L)==0)
+	outStatScreenFile << "      Type match level: " << typeMatchLevel << " (allow type match between DUPLICTION and INSERTION)" << endl;
+	else
+	outStatScreenFile << "      Type match level: " << typeMatchLevel << " (strict variant type matching)" << endl;
+	outStatScreenFile << "      Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+	outStatScreenFile << " Short SV regions file: " << shortSVFilename << endl;
+	outStatScreenFile << "  Long SV regions file: " << longSVFilename << endl << endl;
 }

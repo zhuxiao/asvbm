@@ -5,6 +5,7 @@
 #include <iostream>
 #include "extvab.h"
 #include "constants.h"
+#include "paras.h"
 
 using namespace std;
 

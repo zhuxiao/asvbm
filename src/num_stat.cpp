@@ -17,9 +17,9 @@ void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int3
 //	}
 //	SVNumStatOp(user_file, benchmark_file, ref_file, 0, numStatDirname);
 
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
-		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
+	if(max_valid_reg_thres>0 || min_valid_reg_thres>0){
+		cout << "\n>>>>>>>>> After filtering long SV regions and short SV regions: <<<<<<<<<" << endl;
+		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions and short SV regions: <<<<<<<<<" << endl;
 		SVNumStatOp(user_file, benchmark_file, ref_file, max_valid_reg_thres, min_valid_reg_thres, numStatDirname);
 	}
 	MeticsValues.push_back(data);
@@ -33,43 +33,70 @@ void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int3
 
 // SV number stat operation
 void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname){
-	vector<SV_item*> user_data, benchmark_data, long_sv_data, short_sv_data;
-	string description_str_long, description_str_short, description_str_user_data, file_prefix, longFilename_tmp, shortFilename_tmp;
+	vector<SV_item*> user_data, benchmark_data, long_sv_data, short_sv_data, long_benchmark_sv_data, short_benchmark_sv_data, sv_item;
+	string description_str_long, description_str_short, description_str_benchmark_long, description_str_benchmark_short, description_str_user_data, description_str_benchmark_data, file_prefix, long_benchmark_Filename_tmp, short_benchmark_Filename_tmp, longFilename_tmp, shortFilename_tmp;
 	faidx_t *fai;
 
 	fai = fai_load(ref_file.c_str());
 
 	longFilename_tmp = dirname + longSVFilename;
 	shortFilename_tmp = dirname + shortSVFilename;
+	long_benchmark_Filename_tmp = dirname + longBenchmarkSVFilename;
+	short_benchmark_Filename_tmp = dirname + shortBenchmarkSVFilename;
 	// non-TRA variants
-	user_data = loadDataWithoutTra(user_file);
-	benchmark_data = loadDataWithoutTra(benchmark_file);
+	user_data = loadData(user_file);
+	benchmark_data = loadData(benchmark_file);
 
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
 		short_sv_data = getShortSVReg(user_data, min_valid_reg_thres);
+		long_benchmark_sv_data = getLongSVReg(benchmark_data, max_valid_reg_thres);
+		short_benchmark_sv_data = getShortSVReg(benchmark_data, min_valid_reg_thres);
+		for(const auto* item : user_data){
+			if(item != nullptr){
+				sv_item.push_back(new SV_item(*item));
+			}
+		}
+		benchmark_vec.push_back(sv_item);
 		output2File(longFilename_tmp, long_sv_data, outStatScreenFile);
 		output2File(shortFilename_tmp, short_sv_data, outStatScreenFile);
-		cout << "Non-TRA: user data size: " << user_data.size() << endl;
-		cout << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
-		cout << "Non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
-		cout << "Non-TRA: short_sv_data.size: " << short_sv_data.size() << endl;
-		outStatScreenFile << "Non-TRA: user data size: " << user_data.size() << endl;
-		outStatScreenFile << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
-		outStatScreenFile << "Non-TRA: long_sv_data.size: " << long_sv_data.size() << endl;
-		outStatScreenFile << "Non-TRA: short_sv_data.size: " << short_sv_data.size() << endl;
-		description_str_long = "Size statistics for long SV regions (> " + to_string(maxValidRegThres) + " bp): ";
+		output2File(long_benchmark_Filename_tmp, long_benchmark_sv_data, outStatScreenFile);
+		output2File(short_benchmark_Filename_tmp, short_benchmark_sv_data, outStatScreenFile);
+		cout << "user data size: " << user_data.size() << endl;
+		cout << "benchmark data size: " << benchmark_data.size() << endl;
+		cout << "long_user_sv_data.size: " << long_sv_data.size() << endl;
+		cout << "short_user_sv_data.size: " << short_sv_data.size() << endl;
+		cout << "long_benchmark_sv_data.size: " << long_benchmark_sv_data.size() << endl;
+		cout << "short_benchmark_sv_data.size: " << short_benchmark_sv_data.size() << endl<< endl;
+		outStatScreenFile << "user data size: " << user_data.size() << endl;
+		outStatScreenFile << "benchmark data size: " << benchmark_data.size() << endl;
+		outStatScreenFile << "long_user_sv_data.size: " << long_sv_data.size() << endl;
+		outStatScreenFile << "short_user_sv_data.size: " << short_sv_data.size() << endl;
+		outStatScreenFile << "long_benchmark_sv_data.size: " << long_benchmark_sv_data.size() << endl;
+		outStatScreenFile << "short_benchmark_sv_data.size: " << short_benchmark_sv_data.size() << endl<< endl;
+		description_str_long = "Size statistics for long SV regions in the user-called set (> " + to_string(maxValidRegThres) + " bp): ";
 		computeLenStat(long_sv_data, description_str_long);
-		description_str_short = "Size statistics for short SV regions (< " + to_string(minsvlen) + " bp): ";
+		description_str_short = "Size statistics for short SV regions in the user-called set (< " + to_string(minsvlen) + " bp): ";
 		computeLenStat(short_sv_data, description_str_short);
+		cout << endl;
+		outStatScreenFile << endl;
+		description_str_benchmark_long = "Size statistics for long SV regions in the benchmark set (> " + to_string(maxValidRegThres) + " bp): ";
+		computeLenStat(long_benchmark_sv_data, description_str_benchmark_long);
+		description_str_benchmark_short = "Size statistics for short SV regions in the benchmark set (< " + to_string(minsvlen) + " bp): ";
+		computeLenStat(short_benchmark_sv_data, description_str_benchmark_short);
+		cout << endl;
+		outStatScreenFile << endl;
 		description_str_user_data = "After filtering size statistics for user data regions: ";
 		computeLenStat(user_data, description_str_user_data);
-
+		description_str_benchmark_data = "After filtering size statistics for benchmark data regions: ";
+		computeLenStat(benchmark_data, description_str_benchmark_data);
+		cout << endl;
+		outStatScreenFile << endl;
 	}else{
-		cout << "Non-TRA: user data size: " << user_data.size() << endl;
-		cout << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
-		outStatScreenFile << "Non-TRA: user data size: " << user_data.size() << endl;
-		outStatScreenFile << "Non-TRA: benchmark data size: " << benchmark_data.size() << endl;
+		cout << "user data size: " << user_data.size() << endl;
+		cout << "benchmark data size: " << benchmark_data.size() << endl;
+		outStatScreenFile << "user data size: " << user_data.size() << endl;
+		outStatScreenFile << "benchmark data size: " << benchmark_data.size() << endl;
 	}
 
 	file_prefix = dirname + "num_stat";
@@ -78,15 +105,15 @@ void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, in
 	destroyData(user_data);
 	destroyData(benchmark_data);
 	fai_destroy(fai);
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) {destroyData(long_sv_data);destroyData(short_sv_data);}
+	if(max_valid_reg_thres >0 && min_valid_reg_thres >=0) {destroyData(long_sv_data);destroyData(short_sv_data);}
 }
 
 void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, string &file_prefix, faidx_t *fai, int Markers){
 	vector< vector<SV_item*> > result;
-	int32_t TP_benchmark, TP_user, FP, FN ,LP;
+	int32_t TP_benchmark, TP_user, FP, FN ,LP, LP_bench;
 	float recall, precision_user, F1_score_user, sv_num_per_reg, percent;
-	string filename_intersect_user, filename_latentpositive_user, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
-	string filename_TP_user, filename_TP_bench, filename_FP, filename_FN, filename_LP;
+	string filename_intersect_user, filename_latentpositive_user, filename_latentpositive_benchmark, filename_intersect_benchmark, filename_private_user, filename_private_benchmark, out_str;
+	string filename_TP_user, filename_TP_bench, filename_FP, filename_FN, filename_LP, filename_LP_benchmark;
 	SeqconsSum = SeqconsNum = Seqcons = LpNum = 0;
 
 	filename_intersect_user = file_prefix + "_TP_user.bed";
@@ -94,12 +121,14 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	filename_private_user = file_prefix + "_FP.bed";
 	filename_private_benchmark = file_prefix + "_FN.bed";
 	filename_latentpositive_user = file_prefix + "_LP_user.bed";
+	filename_latentpositive_benchmark = file_prefix + "_LP_benchmark.bed";
 
 	filename_TP_user = file_prefix + "_TP_user.vcf";
 	filename_TP_bench = file_prefix + "_TP_bench.vcf";
 	filename_FP = file_prefix + "_FP.vcf";
 	filename_FN = file_prefix + "_FN.vcf";
 	filename_LP = file_prefix + "_LP.vcf";
+	filename_LP_benchmark = file_prefix + "_LP_benchmark.vcf";
 
 	sharedFPFilenames.push_back(filename_FP);
 	benchmarkAddTP_user.push_back(filename_intersect_user);
@@ -148,6 +177,7 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	output3File(filename_private_user, result.at(2), outStatScreenFile);
 	output3File(filename_private_benchmark, result.at(3), outStatScreenFile);
 	output3File(filename_latentpositive_user, result.at(4), outStatScreenFile);
+	output3File(filename_latentpositive_benchmark, result.at(5), outStatScreenFile);
 
 	if(usersets_num <= (int32_t)SVcallernames.size()){
 		outputvcfFile(filename_TP_bench, result.at(1));
@@ -155,6 +185,7 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 		outputvcfFile(filename_FP, result.at(2));
 		outputvcfFile(filename_FN, result.at(3));
 		outputvcfFile(filename_LP, result.at(4));
+		outputvcfFile(filename_LP_benchmark, result.at(5));
 		usersets_num +=1;
 	}
 
@@ -173,6 +204,7 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 	FP = result.at(2).size();
 	FN = result.at(3).size();
 	LP = result.at(4).size();
+	LP_bench = result.at(5).size();
 //	cout<<"11111111111:  "<< LpNum <<endl;
 	if(benchmark_data.size()>0) recall = (float)TP_benchmark / benchmark_data.size();
 	else recall = 0;
@@ -205,16 +237,16 @@ void computeNumStat(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_dat
 //	outStatScreenFile << "precision_user=" << precision_user << ", F1 score_user=" << F1_score_user << endl;
 	outStatScreenFile << "SeqSim=" << Seqcons << ", sv_num_per_reg=" << sv_num_per_reg << endl;
 	if(Markers == 2){
-		CollectData(LP, TP_benchmark, FP, FN, data1, 4, 2);
+		CollectData2(LP_bench, LP, TP_benchmark, FP, FN, data1, 4, 2);
 		CollectData(recall, precision_user, F1_score_user, Seqcons, data, 3, 2);
 	}
 	allmetric.clear();
 	if(Markers == 4){
-		CollectData(LP, TP_benchmark, FP, FN, data1_4, 4, 4);
+		CollectData2(LP_bench, LP, TP_benchmark, FP, FN, data1_4, 4, 4);
 		CollectData(recall, precision_user, F1_score_user, Seqcons, data_4, 3, 4);
 	}
 	regionmetric.clear();
-	destroyResultData(result);
+//	destroyResultData(result);
 }
 
 void computeNumStatFromFile(vector<SV_item*> TPbench_data, vector<SV_item*> TPuser_data, vector<SV_item*> FP_data, vector<SV_item*> FN_data, string &file_prefix, int32_t endpos, int Markers){
@@ -425,8 +457,66 @@ void CollectData(int LP, int TP_benchmark, int FP, int FN, vector<int> &Data, si
 //		data1 = {TP_user, TP_benchmark, FP, FN};
 //		}
 }
+void CollectData2(int LP_bench, int LP, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers){
+	Data.push_back(TP_benchmark);
+	Data.push_back(FP);
+	Data.push_back(FN);
+	Data.push_back(LP);
+	Data.push_back(LP_bench);
+	if(Markers==2){
+		allmetric.push_back(to_string(TP_benchmark));
+		allmetric.push_back(to_string(FP));
+		allmetric.push_back(to_string(FN));
+		allmetric.push_back(to_string(LP));
+		allmetric.push_back(to_string(LP_bench));
+	}else if (Markers==4){
+		regionmetric.push_back(to_string(TP_benchmark));
+		regionmetric.push_back(to_string(FP));
+		regionmetric.push_back(to_string(FN));
+		regionmetric.push_back(to_string(LP));
+	}
+//	if(Data.size()>num){
+//		data1.clear();
+//		data1 = {TP_user, TP_benchmark, FP, FN};
+//		}
+}
+std::string extract_bnd_strand(const std::string &lineInfo){
+    // 情况1：标准VCF格式（含SVTYPE=BND）
+    if(lineInfo.find("SVTYPE=BND") != std::string::npos){
+        std::vector<std::string> fields = split1(lineInfo, '\t');
+        if (fields.size() < 5) return ""; // 至少需CHROM/POS/ID/REF/ALT列
 
+        std::string alt = fields[4]; // ALT字段（第5列）
+        size_t first_bracket = alt.find_first_of("[]");
+        if (first_bracket == std::string::npos) return ""; // 无BND符号
 
+        std::string bnd_sym = alt.substr(first_bracket);
+        // 简化判断：按首尾符号返回链组合
+        if (bnd_sym.front() == '[' && bnd_sym.back() == '[') return "++";
+        if (bnd_sym.front() == ']' && bnd_sym.back() == ']') return "--";
+        if (bnd_sym.front() == '[' && bnd_sym.back() != '[') return "+-";
+        if (bnd_sym.back() == ']' && bnd_sym.front() != ']') return "-+";
+        return "";
+    }
+/*    else{
+        std::vector<std::string> fields = split1(lineInfo, '\t');
+        // 需确保至少有8列（索引0-7），第7列才存在
+        if (fields.size() < 8) return "";
+
+        std::string id_col = fields[6]; // 第7列（索引6）
+        // 确保第7列长度≥2（避免越界），且最后2个字符是链符号（+-组合）
+        if (id_col.size() < 2) return "";
+        std::string strand = id_col.substr(id_col.size() - 2); // 截取末尾2个字符
+
+        // 验证是否为合法链符号（避免无效字符）
+        if (strand == "++" || strand == "+-" || strand == "-+" || strand == "--") {
+            return strand;
+        }
+        return "";
+    }*/
+
+    return ""; // 无法解析的格式
+}
 void computeLenStat(vector<SV_item*> &data, string &description_str){
 	int64_t len, sum, max_len, min_len, aver_len;
 	SV_item *item;
@@ -688,7 +778,7 @@ void checkOrder(vector<vector<SV_item*>> &subsets){
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t *fai){
 	vector<vector<SV_item*>> result;
 	size_t i, j, subset_num = subsets.size() >> 1;
-	vector<SV_item*> vec_tmp, intersect_vec_user[subset_num+1], intersect_vec_benchmark[subset_num+1], private_vec_user[subset_num+1], private_vec_benchmark[subset_num+1], intersect_vec_latentpositive_user[subset_num+1];
+	vector<SV_item*> vec_tmp, intersect_vec_user[subset_num+1], intersect_vec_benchmark[subset_num+1], private_vec_user[subset_num+1], private_vec_benchmark[subset_num+1], intersect_vec_latentpositive_user[subset_num+1], intersect_vec_latentpositive_benchmark[subset_num+1];
 	overlapWork_opt *overlap_opt;
 
 	hts_tpool *p = hts_tpool_init(num_threads);
@@ -708,6 +798,7 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t 
 		overlap_opt->private_vec_user = private_vec_user + i;
 		overlap_opt->private_vec_benchmark = private_vec_benchmark + i;
 		overlap_opt->intersect_vec_latentpositive_user = intersect_vec_latentpositive_user + i;
+		overlap_opt->intersect_vec_latentpositive_benchmark = intersect_vec_latentpositive_benchmark + i;
 		overlap_opt->fai = fai;
 
 //		if(overlap_opt->subset1.size()>0) cout << "\t" << overlap_opt->subset1.at(0)->chrname << ", user_data: " << overlap_opt->subset1.size() << ", benchmark_data: " << overlap_opt->subset2.size() << endl;
@@ -733,6 +824,8 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t 
     	vector<SV_item*>().swap(private_vec_benchmark[i]);
     	for(j=0; j<intersect_vec_latentpositive_user[i].size(); j++) intersect_vec_latentpositive_user[subset_num].push_back(intersect_vec_latentpositive_user[i].at(j));
     	vector<SV_item*>().swap(intersect_vec_latentpositive_user[i]);
+    	for(j=0; j<intersect_vec_latentpositive_benchmark[i].size(); j++) intersect_vec_latentpositive_benchmark[subset_num].push_back(intersect_vec_latentpositive_benchmark[i].at(j));
+    	vector<SV_item*>().swap(intersect_vec_latentpositive_benchmark[i]);
     }
 
 	result.push_back(intersect_vec_user[subset_num]);
@@ -740,13 +833,14 @@ vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t 
 	result.push_back(private_vec_user[subset_num]);
 	result.push_back(private_vec_benchmark[subset_num]);
 	result.push_back(intersect_vec_latentpositive_user[subset_num]);
+	result.push_back(intersect_vec_latentpositive_benchmark[subset_num]);
 
 	return result;
 }
 
 void* intersectSubset(void *arg){
 	overlapWork_opt *overlap_opt = (overlapWork_opt *)arg;
-	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark, intersect_vec_latentpositive_user;
+	vector<SV_item*> intersect_vec_user, intersect_vec_benchmark, private_vec_user, private_vec_benchmark, intersect_vec_latentpositive_user, intersect_vec_latentpositive_benchmark;
 	SV_item *item1, *item2, *item, *item3;
 	size_t i, j, k;
 	vector<size_t> overlap_type_vec;
@@ -762,8 +856,8 @@ void* intersectSubset(void *arg){
 
 	subset1 = overlap_opt->subset1;
 	subset2 = overlap_opt->subset2;
-	for(i=0; i<subset1.size(); i++) {subset1.at(i)->overlapped = false; subset1.at(i)->seqcons = "-"; subset1.at(i)->mergeMark = false; subset1.at(i)-> LpFlag = false;}
-	for(i=0; i<subset2.size(); i++) {subset2.at(i)->overlapped = false;	subset2.at(i)->seqcons = "-"; subset2.at(i)->mergeMark = false; subset2.at(i)-> LpFlag = false;}
+	for(i=0; i<subset1.size(); i++) {subset1.at(i)->overlapped = false; subset1.at(i)->seqcons = "-"; subset1.at(i)->mergeMark = false; subset1.at(i)->mergeMark2 = false;subset1.at(i)-> LpFlag = false;}
+	for(i=0; i<subset2.size(); i++) {subset2.at(i)->overlapped = false;	subset2.at(i)->seqcons = "-"; subset2.at(i)->mergeMark = false; subset2.at(i)->mergeMark2 = false;subset2.at(i)-> LpFlag = false;}
 
 	start_idx = end_idx = -1;
 	for(i=0; i<subset1.size(); i++){
@@ -781,8 +875,10 @@ void* intersectSubset(void *arg){
 			else{
 				svlen_1 = item1->sv_len;
 				if(svlen_1<0) svlen_1 = -svlen_1;
-				if(svlen_1>=minSizeLargeSV)
-					extendsize_tmp = extendSizeLargeSV;
+				if(svlen_1>=minSizeLargeSV){
+					if(item1->sv_type==VAR_INS || item1->sv_type==VAR_DUP)
+					extendsize_tmp = max(static_cast<int64_t>(extendSizeLargeSV),svlen_1);
+				}
 				else
 					continue;
 			}
@@ -790,6 +886,10 @@ void* intersectSubset(void *arg){
 			//compute limit search regions
 			start_search_pos = item1->startPos - extendsize_tmp;
 			end_search_pos = item1->endPos + extendsize_tmp;
+			if(item1->sv_type == VAR_BND || item1->sv_type == VAR_TRA){
+				start_search_pos = item1->startPos - 1000;
+				end_search_pos = item1->endPos + 1000;
+			}
 			if(start_search_pos<1) start_search_pos = 1;
 
 			//compute start element index
@@ -835,16 +935,36 @@ void* intersectSubset(void *arg){
 			if(start_idx!=-1){ // valid start index
 				end_idx = -1;
 				if(k==0){
-					if(item1->mergeMark == true) continue;
+//					if(item1->mergeMark == true) continue;
+					if(refine_bench_flag){
+						if(item1->mergeMark == true) continue;
+					}
 					for(j=start_idx; j<subset2.size(); j++){
 						item2 = subset2.at(j);
 						if(item2->startPos<start_search_pos) continue;
+
+						if((item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or (item1->sv_type == VAR_BND and item2->sv_type == VAR_TRA) or (item1->sv_type == VAR_TRA and item2->sv_type == VAR_BND) or (item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA)){
+							if(item1->chrname2 == item2->chrname2 and (item1->startPos2 - 1000) < item2->startPos2 and item2->startPos2 < (item1->startPos2 + 1000)){
+								if(extract_bnd_strand(item1->lineInfo) == "" || extract_bnd_strand(item2->lineInfo) == "" || extract_bnd_strand(item1->lineInfo) == extract_bnd_strand(item2->lineInfo)){
+
+									item1->overlapped = true;
+									item2->overlapped = true;
+									continue;
+								}
+							}
+						}
+
 						overlap_type_vec = computeOverlapType(item1, item2);
 						if(overlap_type_vec.size()>0 and overlap_type_vec.at(0)!=NO_OVERLAP){
 							//merge_judge
 							if(item1->sv_type == item2->sv_type)
 								IsmergeJudge(i, item1, item2, subset1, overlap_opt->fai);
-							if(item1->mergeMark == true) continue;
+							if(refine_bench_flag){
+								if(item1->mergeMark == true) continue;
+							}
+
+							if(item1->sv_type == item2->sv_type)
+								IsmergeJudge3(j, item2, item1, subset2, overlap_opt->fai);
 
 							sv_len1 = item1->sv_len; sv_len2 = item2->sv_len;
 							if(sv_len1<0) sv_len1 = -sv_len1;
@@ -855,6 +975,14 @@ void* intersectSubset(void *arg){
 
 							flag = false;
 							bool alleleflag = false;
+
+							if(max(sv_len1, sv_len2) < 50){
+								svlenRatio = 0;
+							}else if(max(sv_len1, sv_len2) >= 1000){
+								svlenRatio= 0.7;
+							}else{
+								svlenRatio = 0.7 * (1 - exp(-(max(sv_len1, sv_len2) - 50) / 100));
+							}
 							if(svlenRatio_tmp1>=svlenRatio){
 								if(item1->sv_type==item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){
 									if(i!=subset1.size()-1 and j!=subset2.size()-1){
@@ -882,7 +1010,7 @@ void* intersectSubset(void *arg){
 													}
 												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 													if(stod(item2->seqcons) < consistency){
-														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														if(item1->seqcons.compare("-") == 0)
 															item1->seqcons = item2->seqcons = to_string(consistency);
 														else{
@@ -933,7 +1061,7 @@ void* intersectSubset(void *arg){
 														}
 													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 														if(stod(item2->seqcons) < consistency){
-															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //															item1->seqcons = item2->seqcons = to_string(consistency);
 															if(item1->seqcons.compare("-") == 0)
 																item1->seqcons = item2->seqcons = to_string(consistency);
@@ -988,7 +1116,7 @@ void* intersectSubset(void *arg){
 													}
 												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 													if(stod(item2->seqcons) < consistency){
-														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //														item1->seqcons = item2->seqcons = to_string(consistency);
 														if(item1->seqcons.compare("-") == 0)
 															item1->seqcons = item2->seqcons = to_string(consistency);
@@ -1038,7 +1166,7 @@ void* intersectSubset(void *arg){
 													}
 												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 													if(stod(item2->seqcons) < consistency){
-														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														if(item1->seqcons.compare("-") == 0)
 															item1->seqcons = item2->seqcons = to_string(consistency);
 														else{
@@ -1089,7 +1217,7 @@ void* intersectSubset(void *arg){
 														}
 													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 														if(stod(item2->seqcons) < consistency){
-															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //															item1->seqcons = item2->seqcons = to_string(consistency);
 															if(item1->seqcons.compare("-") == 0)
 																item1->seqcons = item2->seqcons = to_string(consistency);
@@ -1148,7 +1276,7 @@ void* intersectSubset(void *arg){
 													}
 												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 													if(stod(item2->seqcons) < consistency){
-														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 //														item1->seqcons = item2->seqcons = to_string(consistency);
 														if(item1->seqcons.compare("-") == 0)
 															item1->seqcons = item2->seqcons = to_string(consistency);
@@ -1198,7 +1326,10 @@ void* intersectSubset(void *arg){
 						}
 					}
 				}else{ // k=1
-					if(item1->mergeMark == true) continue;
+//					if(item1->mergeMark == true) continue;
+					if(refine_bench_flag){
+							if(item1->mergeMark == true) continue;
+						}
 					for(j=start_idx; j<subset2.size(); j++){
 						item2 = subset2.at(j);
 //						if(item2->startPos<start_search_pos) continue;
@@ -1209,6 +1340,13 @@ void* intersectSubset(void *arg){
 							if(svlen_1<svlen_2) svlenRatio_tmp = (float)svlen_1 / svlen_2;
 							else svlenRatio_tmp = (float)svlen_2 / svlen_1;
 
+							if(max(svlen_1, svlen_2) < 50){
+								svlenRatio = 0;
+							}else if(max(svlen_1, svlen_2) >= 1000){
+								svlenRatio= 0.7;
+							}else{
+								svlenRatio = 0.7 * (1 - exp(-(max(svlen_1, svlen_2) - 50) / 100));
+							}
 							flag = false;
 							bool alleleflag1 = false;
 							if(svlenRatio_tmp>=svlenRatio){
@@ -1243,7 +1381,7 @@ void* intersectSubset(void *arg){
 													}
 												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 													if(stod(item2->seqcons) < consistency){
-														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
 														if (consistency >= percentAlleleSeqSim) {
 															SeqConsNumStat(consistency);
@@ -1280,7 +1418,7 @@ void* intersectSubset(void *arg){
 														}
 													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 														if(stod(item2->seqcons) < consistency){
-															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 															item1->seqcons = item2->seqcons = to_string(consistency);
 															if (consistency >= percentAlleleSeqSim) {
 																SeqConsNumStat(consistency);
@@ -1319,7 +1457,7 @@ void* intersectSubset(void *arg){
 													}
 												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentAlleleSeqSim){
 													if(stod(item2->seqcons) < consistency){
-														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
 														if (consistency >= percentAlleleSeqSim) {
 															SeqConsNumStat(consistency);
@@ -1363,7 +1501,7 @@ void* intersectSubset(void *arg){
 													}
 												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 													if(stod(item2->seqcons) < consistency){
-														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
 														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
@@ -1400,7 +1538,7 @@ void* intersectSubset(void *arg){
 														}
 													}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 														if(stod(item2->seqcons) < consistency){
-															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//															SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 															item1->seqcons = item2->seqcons = to_string(consistency);
 															if (consistency >= percentSeqSim) {
 																SeqConsNumStat(consistency);
@@ -1439,7 +1577,7 @@ void* intersectSubset(void *arg){
 													}
 												}else if(item2->seqcons.compare("-") != 0 and stod(item2->seqcons) >= percentSeqSim){
 													if(stod(item2->seqcons) < consistency){
-														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
+//														SeqconsSum -= stod(item2->seqcons);	SeqconsNum = SeqconsNum - 1;
 														item1->seqcons = item2->seqcons = to_string(consistency);
 														if (consistency >= percentSeqSim) {
 															SeqConsNumStat(consistency);
@@ -1495,14 +1633,20 @@ void* intersectSubset(void *arg){
 	for(i=0; i<subset2.size(); i++){
 		item2 = subset2.at(i);
 		item = itemdup(item2);
-		if(item2->overlapped) intersect_vec_benchmark.push_back(item);
+//		if(item2->overlapped ) intersect_vec_benchmark.push_back(item);
+		if(item2->overlapped or item2->mergeMark2){
+			intersect_vec_benchmark.push_back(item);
+			if(item2->mergeMark2){
+				intersect_vec_latentpositive_benchmark.push_back(item);
+			}
+		}
 		else{ private_vec_benchmark.push_back(item);
 			auto it = benchmarklineMap.find(item->lineInfo);
-			    if (it != benchmarklineMap.end()) {
-			        ++it->second;
-			    } else {
-			        cout << "Record not found: " << item->lineInfo << std::endl;
-			    }
+			if(it != benchmarklineMap.end()){
+				++it->second;
+			}else{
+				cout << "Record not found: " << item->lineInfo << endl;
+			}
 		}
 	}
 
@@ -1534,6 +1678,7 @@ void* intersectSubset(void *arg){
 	for(j=0; j<private_vec_user.size(); j++) overlap_opt->private_vec_user->push_back(private_vec_user.at(j));
 	for(j=0; j<private_vec_benchmark.size(); j++) overlap_opt->private_vec_benchmark->push_back(private_vec_benchmark.at(j));
 	for(j=0; j<intersect_vec_latentpositive_user.size(); j++) overlap_opt->intersect_vec_latentpositive_user->push_back(intersect_vec_latentpositive_user.at(j));
+	for(j=0; j<intersect_vec_latentpositive_benchmark.size(); j++) overlap_opt->intersect_vec_latentpositive_benchmark->push_back(intersect_vec_latentpositive_benchmark.at(j));
 	//if(subset1.size()>0) cout << "\t" << subset1.at(0)->chrname << ", user_data: " << subset1.size() << ", benchmark_data: " << subset2.size() << endl;
 	//cout << "\t\t" << intersect_vec_user.size() << ", " << intersect_vec_benchmark.size() << ", " << private_vec_user.size() << ", " << private_vec_benchmark.size() << endl;
 	pthread_mutex_unlock(&mtx_overlap);
@@ -1901,14 +2046,13 @@ vector<bam1_t*> load_region_data(const string& chrname, int start_pos, int end_p
 
     return records;
 }
-
-void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai){
+void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai, vector<SV_item*> &merge_item2_vec){
 	vector<SV_item*> merge_users_vec, merge_item_vec;
 	vector<vector<SV_item*>> clusters;
 	SV_item *Maymerge_user, *Merge_users, *Merge_item, *Lp_Merge_item, *Definite_Merge_item;
 	size_t i = user_pos + 1;
 	int32_t min_startpos, max_endpos, refseq_len_tmp;
-	int64_t pos_update;
+	int64_t pos_update, pos_update_const, merge_users_vec_endPos_max=0;
 	bool flag = false;
 	size_t startpos1, startpos2, endpos1, endpos2;
 	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
@@ -1919,7 +2063,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 
 	merge_users_vec.push_back(user);
 	pos_update = user->endPos;
-
+	pos_update_const = user->endPos;
 	if(i<subset1.size()){
 		for(i = user_pos + 1; i<subset1.size(); i++){
 			Maymerge_user = subset1.at(i);
@@ -1934,8 +2078,16 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 				if(abs(Maymerge_user->startPos - pos_update) > 400) break;
 				else{
 					if(Maymerge_user->sv_type == user->sv_type){
-						merge_users_vec.push_back(Maymerge_user);
-						pos_update = Maymerge_user->endPos;
+//						merge_users_vec.push_back(Maymerge_user);
+//						pos_update = Maymerge_user->endPos;
+						if(abs(Maymerge_user->startPos - pos_update_const) <= 400 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
+						{
+							merge_users_vec.push_back(Maymerge_user);
+							pos_update = Maymerge_user->endPos;
+						}
+						if(Maymerge_user->endPos > merge_users_vec_endPos_max){
+							merge_users_vec_endPos_max = Maymerge_user->endPos;
+						}
 					}
 				}
 			}else break;
@@ -1947,7 +2099,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 			int32_t region_end = merge_users_vec.back()->endPos + 200;
 			regionReads = load_region_data(user->chrname, region_start, region_end);
 //			cout<<"111111111111:"<<regionReads.size()<<endl;
-			 // Build SV location index (variation for fast query coverage)
+			 // Build SV location index (variant for fast query coverage)
 			map<pair<int64_t, int64_t>, SV_item*> sv_pos_map;
 			for (SV_item* sv : merge_users_vec) {
 				if(sv->sv_type == VAR_INS)
@@ -2125,7 +2277,1529 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 					auto merge_result = findClosestSubarray(clusters[0], bench->sv_len);
 					merge_item_vec = merge_result.second;
 					if(merge_item_vec.size() > 1){
-						//Verify heterozygous variation overlap
+						//Verify heterozygous variant overlap
+						for(size_t j=1; j < merge_item_vec.size(); j++){
+							if(bench->sv_type == VAR_INS){
+								startpos1 = merge_item_vec.at(j-1)->startPos;
+								startpos2 = merge_item_vec.at(j)->startPos;
+								endpos1 = merge_item_vec.at(j-1)->startPos + merge_item_vec.at(j-1)->ref_seq.length()-1;
+								endpos2 = merge_item_vec.at(j)->endPos + merge_item_vec.at(j)->ref_seq.length()-1;
+							}else if(bench->sv_type == VAR_DEL){
+								startpos1 = merge_item_vec.at(j-1)->startPos;
+								startpos2 = merge_item_vec.at(j)->startPos;
+								endpos1 = merge_item_vec.at(j-1)->endPos;
+								endpos2 = merge_item_vec.at(j)->endPos;
+							}
+							if(endpos1 >= startpos2 && endpos2 >= startpos1) return ;
+						}
+						if(bench->sv_type == VAR_INS){
+							min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+							max_endpos = (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) >= (bench->startPos + bench->ref_seq.length()-1) ? (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) :(bench->startPos + bench->ref_seq.length()-1);
+						}else if(bench->sv_type == VAR_DEL){
+							min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+							max_endpos = merge_item_vec.at(0)->endPos >= bench->endPos ? merge_item_vec.at(0)->endPos : bench->endPos;
+						}
+						for(size_t j=0; j < merge_item_vec.size(); j++){
+							Merge_users = merge_item_vec.at(j);
+							if(Merge_users->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+								min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+								max_endpos = (Merge_users->startPos + Merge_users->ref_seq.length()-1) >= (size_t)max_endpos ? (Merge_users->startPos + Merge_users->ref_seq.length()-1) : max_endpos;
+							}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+								min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+								max_endpos = Merge_users->endPos >= max_endpos ? Merge_users->endPos : max_endpos;
+							}
+						}
+						//Extract seq1 sequence
+						for(size_t j=0; j < merge_item_vec.size(); j++){
+							Merge_item = merge_item_vec.at(j);
+							if(Merge_item->sv_type == VAR_INS){
+								if(j==0){
+									if(min_startpos == Merge_item->startPos){
+										seq1 += Merge_item->alt_seq;
+										/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;*/
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}
+								}else if(j==merge_item_vec.size()-1){
+									if((size_t)max_endpos == Merge_item->startPos+Merge_item->alt_seq.length()-1){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+										reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+									}
+								}else{
+									if(j+1 < merge_item_vec.size()){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}
+								}
+							}else if(Merge_item->sv_type == VAR_DEL){
+								if(j==0){
+									if(min_startpos == Merge_item->startPos){
+										seq1 += Merge_item->ref_seq;
+										/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;*/
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}
+								}else if(j==merge_item_vec.size()-1){
+									if(max_endpos == Merge_item->endPos){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+										reg_str = Merge_item->chrname + ":" + to_string(Merge_item->endPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+									}
+								}else{
+									if(j+1 < merge_item_vec.size()){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}
+								}
+							}
+						}
+						//Extract seq2 sequence
+						if(bench->sv_type == VAR_INS){
+							if(min_startpos == bench->startPos){
+								seq2 += bench->alt_seq;
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+							}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->alt_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += max_endpos;
+							}else{
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->alt_seq;
+							}
+						}else if(bench->sv_type == VAR_DEL){
+							if(min_startpos == bench->startPos){
+								seq2 += bench->ref_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+							}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->ref_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += max_endpos;
+							}else{
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->ref_seq;
+							}
+						}
+						//Sequence similarity calculation
+						upperSeq(seq1);
+						upperSeq(seq2);
+						needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
+						consistency = calculate_consistency(aln_seq1, aln_seq2);
+						if(consistency >= SEQ_CONSISTENCY){
+							for(size_t j=0; j < merge_item_vec.size(); j++){
+								//LP flag
+								Lp_Merge_item = merge_item_vec.at(j);
+								if(Lp_Merge_item->LpFlag){
+									flag = true;
+									break;
+								}
+							}
+							if(!flag) {LpNum += 1;
+		//					cout << "merge Num: " << merge_item_vec.size() <<"	pos:" << merge_item_vec.at(0)->startPos <<"	LpNum = " << LpNum << endl;
+							}
+							for(size_t j=0; j < merge_item_vec.size(); j++){
+								Definite_Merge_item = merge_item_vec.at(j);
+								Definite_Merge_item->mergeMark2 = true;
+								Definite_Merge_item->LpFlag = true;
+								Definite_Merge_item->mergeFlag = true;
+							}
+							bench->overlapped = true;
+							merge_item2_vec = merge_item_vec;
+//							bench->mergeMark = true;
+		//					bench->seqcons = consistency;
+						}
+					}
+				}
+			}
+		}else{
+			//Merge verification: Whether it is consistent after the merger
+			auto merge_result = findClosestSubarray(merge_users_vec, bench->sv_len);
+			merge_item_vec = merge_result.second;
+			if(merge_item_vec.size() > 1){
+				//Verify heterozygous variant overlap
+				for(size_t j=1; j < merge_item_vec.size(); j++){
+					if(bench->sv_type == VAR_INS){
+						startpos1 = merge_item_vec.at(j-1)->startPos;
+						startpos2 = merge_item_vec.at(j)->startPos;
+						endpos1 = merge_item_vec.at(j-1)->startPos + merge_item_vec.at(j-1)->ref_seq.length()-1;
+						endpos2 = merge_item_vec.at(j)->endPos + merge_item_vec.at(j)->ref_seq.length()-1;
+					}else if(bench->sv_type == VAR_DEL){
+						startpos1 = merge_item_vec.at(j-1)->startPos;
+						startpos2 = merge_item_vec.at(j)->startPos;
+						endpos1 = merge_item_vec.at(j-1)->endPos;
+						endpos2 = merge_item_vec.at(j)->endPos;
+					}
+					if(endpos1 >= startpos2 && endpos2 >= startpos1) return ;
+				}
+				if(bench->sv_type == VAR_INS){
+					min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+					max_endpos = (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) >= (bench->startPos + bench->ref_seq.length()-1) ? (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) :(bench->startPos + bench->ref_seq.length()-1);
+				}else if(bench->sv_type == VAR_DEL){
+					min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+					max_endpos = merge_item_vec.at(0)->endPos >= bench->endPos ? merge_item_vec.at(0)->endPos : bench->endPos;
+				}
+				for(size_t j=0; j < merge_item_vec.size(); j++){
+					Merge_users = merge_item_vec.at(j);
+					if(Merge_users->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+						min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+						max_endpos = (Merge_users->startPos + Merge_users->ref_seq.length()-1) >= (size_t)max_endpos ? (Merge_users->startPos + Merge_users->ref_seq.length()-1) : max_endpos;
+					}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+						min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+						max_endpos = Merge_users->endPos >= max_endpos ? Merge_users->endPos : max_endpos;
+					}
+				}
+				//Extract seq1 sequence
+				for(size_t j=0; j < merge_item_vec.size(); j++){
+					Merge_item = merge_item_vec.at(j);
+					if(Merge_item->sv_type == VAR_INS){
+						if(j==0){
+							if(min_startpos == Merge_item->startPos){
+								seq1 += Merge_item->alt_seq;
+								/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;*/
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}
+						}else if(j==merge_item_vec.size()-1){
+							if((size_t)max_endpos == Merge_item->startPos+Merge_item->alt_seq.length()-1){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+								reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+							}
+						}else{
+							if(j+1 < merge_item_vec.size()){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}
+						}
+					}else if(Merge_item->sv_type == VAR_DEL){
+						if(j==0){
+							if(min_startpos == Merge_item->startPos){
+								seq1 += Merge_item->ref_seq;
+								/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;*/
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}
+						}else if(j==merge_item_vec.size()-1){
+							if(max_endpos == Merge_item->endPos){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+								reg_str = Merge_item->chrname + ":" + to_string(Merge_item->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+							}
+						}else{
+							if(j+1 < merge_item_vec.size()){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}
+						}
+					}
+				}
+				//Extract seq2 sequence
+				if(bench->sv_type == VAR_INS){
+					if(min_startpos == bench->startPos){
+						seq2 += bench->alt_seq;
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+					}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->alt_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->startPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += max_endpos;
+					}else{
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->alt_seq;
+					}
+				}else if(bench->sv_type == VAR_DEL){
+					if(min_startpos == bench->startPos){
+						seq2 += bench->ref_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+					}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->ref_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += max_endpos;
+					}else{
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->ref_seq;
+					}
+				}
+				//Sequence similarity calculation
+				upperSeq(seq1);
+				upperSeq(seq2);
+				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
+				consistency = calculate_consistency(aln_seq1, aln_seq2);
+				if(consistency >= SEQ_CONSISTENCY){
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						//LP flag
+						Lp_Merge_item = merge_item_vec.at(j);
+						if(Lp_Merge_item->LpFlag){
+							flag = true;
+							break;
+						}
+					}
+					if(!flag) {LpNum += 1;
+//					cout << "merge Num: " << merge_item_vec.size() <<"	pos:" << merge_item_vec.at(0)->startPos <<"	LpNum = " << LpNum << endl;
+					}
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						Definite_Merge_item = merge_item_vec.at(j);
+						Definite_Merge_item->mergeMark2 = true;
+						Definite_Merge_item->LpFlag = true;
+						Definite_Merge_item->mergeFlag = true;
+					}
+					bench->overlapped = true;
+					merge_item2_vec = merge_item_vec;
+//					bench->mergeMark = true;
+//					bench->seqcons = consistency;
+				}
+			}
+		}
+	}
+	return ;
+}
+void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai){
+	vector<SV_item*> merge_users_vec, merge_item_vec;
+	vector<vector<SV_item*>> clusters;
+	SV_item *Maymerge_user, *Merge_users, *Merge_item, *Lp_Merge_item, *Definite_Merge_item;
+	size_t i = user_pos + 1;
+	int32_t min_startpos, max_endpos, refseq_len_tmp;
+	int64_t pos_update, pos_update_const, merge_users_vec_endPos_max=0;
+	bool flag = false;
+	size_t startpos1, startpos2, endpos1, endpos2;
+	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
+	double consistency;
+	char *seq;
+	vector<bam1_t*> regionReads;
+	int64_t sv_length;
+
+	merge_users_vec.push_back(user);
+	pos_update = user->endPos;
+	pos_update_const = user->endPos;
+	if(i<subset1.size()){
+		for(i = user_pos + 1; i<subset1.size(); i++){
+			Maymerge_user = subset1.at(i);
+			if(user->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+				if(abs(Maymerge_user->startPos - user->startPos) > 500) break;
+				else{
+					if(Maymerge_user->sv_type == user->sv_type)
+						merge_users_vec.push_back(Maymerge_user);
+				}
+			}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+				//distance
+				if(abs(Maymerge_user->startPos - pos_update) > 400) break;
+				else{
+					if(Maymerge_user->sv_type == user->sv_type){
+//						merge_users_vec.push_back(Maymerge_user);
+//						pos_update = Maymerge_user->endPos;
+						if(abs(Maymerge_user->startPos - pos_update_const) <= 400 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
+						{
+							merge_users_vec.push_back(Maymerge_user);
+							pos_update = Maymerge_user->endPos;
+						}
+						if(Maymerge_user->endPos > merge_users_vec_endPos_max){
+							merge_users_vec_endPos_max = Maymerge_user->endPos;
+						}
+					}
+				}
+			}else break;
+		}
+		//BAM
+		if(BamFileSign and merge_users_vec.size()>1){
+			//Area range calculation
+			int32_t region_start = std::max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 200));
+			int32_t region_end = merge_users_vec.back()->endPos + 200;
+			regionReads = load_region_data(user->chrname, region_start, region_end);
+//			cout<<"111111111111:"<<regionReads.size()<<endl;
+			 // Build SV location index (variant for fast query coverage)
+			map<pair<int64_t, int64_t>, SV_item*> sv_pos_map;
+			for (SV_item* sv : merge_users_vec) {
+				if(sv->sv_type == VAR_INS)
+					sv_pos_map[{sv->startPos, sv->endPos + sv->sv_len}] = sv;
+				else
+					sv_pos_map[{sv->startPos, sv->endPos}] = sv;
+			}
+
+			// Iterate through all reads and record the covered SV set
+			unordered_map<string, vector<SV_item*>> read_sv_groups;
+			for (bam1_t* read : regionReads) {
+				// Gets the alignment position and direction of the read
+//				size_t read_start = read->core.pos + 1;
+//				size_t read_end = bam_endpos(read);
+
+				// Analyze the CIGAR and calculate the coverage area (more accurate way)
+				uint32_t* cigar = bam_get_cigar(read);
+				int n_cigar = read->core.n_cigar;
+				int64_t ref_pos = read->core.pos;
+				int64_t read_len = 0;
+
+				// Traverse the CIGAR operation to calculate the reference genome coverage interval
+				vector<pair<int64_t, int64_t>> ref_blocks;
+				for (int i = 0; i < n_cigar; ++i) {
+				    int op = bam_cigar_op(cigar[i]);
+				    int len = bam_cigar_oplen(cigar[i]);
+				    switch(op) {
+				        case BAM_CDEL:
+				        	if(len >= 20){
+				        		ref_blocks.push_back({ref_pos, ref_pos + len});
+				        	}
+				            ref_pos += len;
+				            break;
+				        case BAM_CINS:
+				        	if(len >= 20){
+				        		ref_blocks.push_back({ref_pos, ref_pos + len});
+				        	}
+				            read_len += len;
+				            break;
+				        case BAM_CMATCH:
+				        case BAM_CEQUAL:
+				        case BAM_CDIFF:
+				        case BAM_CREF_SKIP:
+				        case BAM_CSOFT_CLIP:
+				        case BAM_CHARD_CLIP:
+				            // Update reference coordinates or read lengths without recording intervals
+				            if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF) {
+				                ref_pos += len;
+				                read_len += len;
+				            } else if (op == BAM_CREF_SKIP) {
+				                ref_pos += len;
+				            } else {
+				                read_len += len;
+				            }
+				            break;
+				    }
+				}
+
+				// Check whether each SV is overwritten by the current read
+				vector<SV_item*> covered_svs;
+				for (auto& sv_pair : sv_pos_map) {
+				    int64_t sv_start = sv_pair.first.first;
+				    int64_t sv_end = sv_pair.first.second;
+				    SV_item* sv = sv_pair.second;
+				    if(sv->sv_type == VAR_INS)
+				    	sv_length = sv_end - sv_start;
+				    else
+				    	sv_length = sv_end - sv_start +1;
+				    double ratio = 0;
+				    // Calculate the total length covered
+				    int64_t covered_length = 0;
+				    for (auto& block : ref_blocks) {
+				        //Intersection of computation interval
+				        int64_t overlap_start = max(sv_start, block.first);
+				        int64_t overlap_end = min(sv_end, block.second);
+				        if (overlap_start - 50 < overlap_end + 50) {
+				        	if(abs(sv_start-block.first) > 250) continue;
+				        	if(overlap_start < overlap_end)
+				        		covered_length += (overlap_end - overlap_start);
+				        	else
+				        		covered_length += (block.second - block.first);
+				            if(sv_length >= (block.second - block.first)){
+				            	ratio = (double)(block.second - block.first)/sv_length;
+				            }else{
+				            	ratio = (double)sv_length/(block.second - block.first);
+				            }
+				            if((double)covered_length/(block.second - block.first) >= 0 and ratio >= 0.9){	//  0.7/0.95
+				            	covered_svs.push_back(sv);
+				            }
+				        }
+				    }
+				}
+				// Records reads covering multiple SVS
+				if (covered_svs.size() >= 2) {
+				    string qname = bam_get_qname(read);
+				    read_sv_groups[qname] = covered_svs;
+				}
+			}
+
+			// Merge SVS that share the same read (build clusters)
+			unordered_map<SV_item*, int> sv_to_cluster;
+			clusters.clear();
+			int cluster_id = 0;
+
+			for (auto& group : read_sv_groups) {
+				vector<SV_item*>& svs = group.second;
+				vector<int> existing_clusters;
+
+				// Checks whether the current SV already belongs to a cluster
+				for (SV_item* sv : svs) {
+					if (sv_to_cluster.find(sv) != sv_to_cluster.end()) {
+						existing_clusters.push_back(sv_to_cluster[sv]);
+					}
+				}
+
+				//Merge or create a new cluster
+				if (existing_clusters.empty()) {
+					for (SV_item* sv : svs) {
+						sv_to_cluster[sv] = cluster_id;
+					}
+					clusters.push_back(svs);
+					cluster_id++;
+				} else {
+					int target_cluster = existing_clusters[0];
+					// duplicate removal
+					for (int cid : existing_clusters) {
+						if (cid != target_cluster) {
+							for (SV_item* sv : clusters[cid]) {
+								sv_to_cluster[sv] = target_cluster;
+							}
+							clusters[target_cluster].insert(
+								clusters[target_cluster].end(),
+								clusters[cid].begin(),
+								clusters[cid].end()
+							);
+							clusters[cid].clear();
+						}
+					}
+					// Add the current SV to the target cluster
+					for (SV_item* sv : svs) {
+						if (sv_to_cluster.find(sv) == sv_to_cluster.end()) {
+							sv_to_cluster[sv] = target_cluster;
+							clusters[target_cluster].push_back(sv);
+						}
+					}
+				}
+			}
+
+			// Clean empty clustering
+			vector<vector<SV_item*>> final_clusters;
+			for (auto& cluster : clusters) {
+				if (!cluster.empty()) {
+					// Sort by startPos ascending order
+					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
+						return a->startPos < b->startPos;
+					});
+					final_clusters.push_back(cluster);
+				}
+			}
+			clusters = final_clusters;
+
+//			cout << "Found " << clusters.size() << " clusters supported by reads" << endl;
+
+		}
+
+		for (bam1_t* read : regionReads) {
+		    bam_destroy1(read);
+		}
+		regionReads.clear();
+
+		if(BamFileSign){
+			for(size_t m =0; m < clusters.size(); m++){
+				if(clusters[m].size()>1){
+					//Merge verification: Whether it is consistent after the merger
+					auto merge_result = findClosestSubarray(clusters[0], bench->sv_len);
+					merge_item_vec = merge_result.second;
+					if(merge_item_vec.size() > 1){
+						//Verify heterozygous variant overlap
+						for(size_t j=1; j < merge_item_vec.size(); j++){
+							if(bench->sv_type == VAR_INS){
+								startpos1 = merge_item_vec.at(j-1)->startPos;
+								startpos2 = merge_item_vec.at(j)->startPos;
+								endpos1 = merge_item_vec.at(j-1)->startPos + merge_item_vec.at(j-1)->ref_seq.length()-1;
+								endpos2 = merge_item_vec.at(j)->endPos + merge_item_vec.at(j)->ref_seq.length()-1;
+							}else if(bench->sv_type == VAR_DEL){
+								startpos1 = merge_item_vec.at(j-1)->startPos;
+								startpos2 = merge_item_vec.at(j)->startPos;
+								endpos1 = merge_item_vec.at(j-1)->endPos;
+								endpos2 = merge_item_vec.at(j)->endPos;
+							}
+							if(endpos1 >= startpos2 && endpos2 >= startpos1) return ;
+						}
+						if(bench->sv_type == VAR_INS){
+							min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+							max_endpos = (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) >= (bench->startPos + bench->ref_seq.length()-1) ? (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) :(bench->startPos + bench->ref_seq.length()-1);
+						}else if(bench->sv_type == VAR_DEL){
+							min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+							max_endpos = merge_item_vec.at(0)->endPos >= bench->endPos ? merge_item_vec.at(0)->endPos : bench->endPos;
+						}
+						for(size_t j=0; j < merge_item_vec.size(); j++){
+							Merge_users = merge_item_vec.at(j);
+							if(Merge_users->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+								min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+								max_endpos = (Merge_users->startPos + Merge_users->ref_seq.length()-1) >= (size_t)max_endpos ? (Merge_users->startPos + Merge_users->ref_seq.length()-1) : max_endpos;
+							}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+								min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+								max_endpos = Merge_users->endPos >= max_endpos ? Merge_users->endPos : max_endpos;
+							}
+						}
+						//Extract seq1 sequence
+						for(size_t j=0; j < merge_item_vec.size(); j++){
+							Merge_item = merge_item_vec.at(j);
+							if(Merge_item->sv_type == VAR_INS){
+								if(j==0){
+									if(min_startpos == Merge_item->startPos){
+										seq1 += Merge_item->alt_seq;
+										/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;*/
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}
+								}else if(j==merge_item_vec.size()-1){
+									if((size_t)max_endpos == Merge_item->startPos+Merge_item->alt_seq.length()-1){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+										reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+									}
+								}else{
+									if(j+1 < merge_item_vec.size()){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}
+								}
+							}else if(Merge_item->sv_type == VAR_DEL){
+								if(j==0){
+									if(min_startpos == Merge_item->startPos){
+										seq1 += Merge_item->ref_seq;
+										/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;*/
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}
+								}else if(j==merge_item_vec.size()-1){
+									if(max_endpos == Merge_item->endPos){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+										reg_str = Merge_item->chrname + ":" + to_string(Merge_item->endPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+									}
+								}else{
+									if(j+1 < merge_item_vec.size()){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}
+								}
+							}
+						}
+						//Extract seq2 sequence
+						if(bench->sv_type == VAR_INS){
+							if(min_startpos == bench->startPos){
+								seq2 += bench->alt_seq;
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+							}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->alt_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += max_endpos;
+							}else{
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->alt_seq;
+							}
+						}else if(bench->sv_type == VAR_DEL){
+							if(min_startpos == bench->startPos){
+								seq2 += bench->ref_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+							}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->ref_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += max_endpos;
+							}else{
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->ref_seq;
+							}
+						}
+						//Sequence similarity calculation
+						upperSeq(seq1);
+						upperSeq(seq2);
+						needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
+						consistency = calculate_consistency(aln_seq1, aln_seq2);
+						if(consistency >= SEQ_CONSISTENCY){
+							for(size_t j=0; j < merge_item_vec.size(); j++){
+								//LP flag
+								Lp_Merge_item = merge_item_vec.at(j);
+								if(Lp_Merge_item->LpFlag){
+									flag = true;
+									break;
+								}
+							}
+							if(!flag) {LpNum += 1;
+		//					cout << "merge Num: " << merge_item_vec.size() <<"	pos:" << merge_item_vec.at(0)->startPos <<"	LpNum = " << LpNum << endl;
+							}
+							for(size_t j=0; j < merge_item_vec.size(); j++){
+								Definite_Merge_item = merge_item_vec.at(j);
+								Definite_Merge_item->mergeMark2 = true;
+								Definite_Merge_item->LpFlag = true;
+								Definite_Merge_item->mergeFlag = true;
+							}
+							bench->overlapped = true;
+//							bench->mergeMark = true;
+		//					bench->seqcons = consistency;
+						}
+					}
+				}
+			}
+		}else{
+			//Merge verification: Whether it is consistent after the merger
+			auto merge_result = findClosestSubarray(merge_users_vec, bench->sv_len);
+			merge_item_vec = merge_result.second;
+			if(merge_item_vec.size() > 1){
+				//Verify heterozygous variant overlap
+				for(size_t j=1; j < merge_item_vec.size(); j++){
+					if(bench->sv_type == VAR_INS){
+						startpos1 = merge_item_vec.at(j-1)->startPos;
+						startpos2 = merge_item_vec.at(j)->startPos;
+						endpos1 = merge_item_vec.at(j-1)->startPos + merge_item_vec.at(j-1)->ref_seq.length()-1;
+						endpos2 = merge_item_vec.at(j)->endPos + merge_item_vec.at(j)->ref_seq.length()-1;
+					}else if(bench->sv_type == VAR_DEL){
+						startpos1 = merge_item_vec.at(j-1)->startPos;
+						startpos2 = merge_item_vec.at(j)->startPos;
+						endpos1 = merge_item_vec.at(j-1)->endPos;
+						endpos2 = merge_item_vec.at(j)->endPos;
+					}
+					if(endpos1 >= startpos2 && endpos2 >= startpos1) return ;
+				}
+				if(bench->sv_type == VAR_INS){
+					min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+					max_endpos = (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) >= (bench->startPos + bench->ref_seq.length()-1) ? (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) :(bench->startPos + bench->ref_seq.length()-1);
+				}else if(bench->sv_type == VAR_DEL){
+					min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+					max_endpos = merge_item_vec.at(0)->endPos >= bench->endPos ? merge_item_vec.at(0)->endPos : bench->endPos;
+				}
+				for(size_t j=0; j < merge_item_vec.size(); j++){
+					Merge_users = merge_item_vec.at(j);
+					if(Merge_users->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+						min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+						max_endpos = (Merge_users->startPos + Merge_users->ref_seq.length()-1) >= (size_t)max_endpos ? (Merge_users->startPos + Merge_users->ref_seq.length()-1) : max_endpos;
+					}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+						min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+						max_endpos = Merge_users->endPos >= max_endpos ? Merge_users->endPos : max_endpos;
+					}
+				}
+				//Extract seq1 sequence
+				for(size_t j=0; j < merge_item_vec.size(); j++){
+					Merge_item = merge_item_vec.at(j);
+					if(Merge_item->sv_type == VAR_INS){
+						if(j==0){
+							if(min_startpos == Merge_item->startPos){
+								seq1 += Merge_item->alt_seq;
+								/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;*/
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}
+						}else if(j==merge_item_vec.size()-1){
+							if((size_t)max_endpos == Merge_item->startPos+Merge_item->alt_seq.length()-1){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+								reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+							}
+						}else{
+							if(j+1 < merge_item_vec.size()){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}
+						}
+					}else if(Merge_item->sv_type == VAR_DEL){
+						if(j==0){
+							if(min_startpos == Merge_item->startPos){
+								seq1 += Merge_item->ref_seq;
+								/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;*/
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}
+						}else if(j==merge_item_vec.size()-1){
+							if(max_endpos == Merge_item->endPos){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+								reg_str = Merge_item->chrname + ":" + to_string(Merge_item->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+							}
+						}else{
+							if(j+1 < merge_item_vec.size()){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}
+						}
+					}
+				}
+				//Extract seq2 sequence
+				if(bench->sv_type == VAR_INS){
+					if(min_startpos == bench->startPos){
+						seq2 += bench->alt_seq;
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+					}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->alt_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->startPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += max_endpos;
+					}else{
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->alt_seq;
+					}
+				}else if(bench->sv_type == VAR_DEL){
+					if(min_startpos == bench->startPos){
+						seq2 += bench->ref_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+					}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->ref_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += max_endpos;
+					}else{
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->ref_seq;
+					}
+				}
+				//Sequence similarity calculation
+				upperSeq(seq1);
+				upperSeq(seq2);
+				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
+				consistency = calculate_consistency(aln_seq1, aln_seq2);
+				if(consistency >= SEQ_CONSISTENCY){
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						//LP flag
+						Lp_Merge_item = merge_item_vec.at(j);
+						if(Lp_Merge_item->LpFlag){
+							flag = true;
+							break;
+						}
+					}
+					if(!flag) {LpNum += 1;
+//					cout << "merge Num: " << merge_item_vec.size() <<"	pos:" << merge_item_vec.at(0)->startPos <<"	LpNum = " << LpNum << endl;
+					}
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						Definite_Merge_item = merge_item_vec.at(j);
+						Definite_Merge_item->mergeMark2 = true;
+						Definite_Merge_item->LpFlag = true;
+						Definite_Merge_item->mergeFlag = true;
+					}
+					bench->overlapped = true;
+//					bench->mergeMark = true;
+//					bench->seqcons = consistency;
+				}
+			}
+		}
+	}
+	return ;
+}
+void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai, vector<SV_item*> &merge_item1_vec){
+	vector<SV_item*> merge_users_vec, merge_item_vec;
+	vector<vector<SV_item*>> clusters;
+	SV_item *Maymerge_user, *Merge_users, *Merge_item, *Lp_Merge_item, *Definite_Merge_item;
+	size_t i = user_pos + 1;
+	int32_t min_startpos, max_endpos, refseq_len_tmp;
+	int64_t pos_update, pos_update_const, merge_users_vec_endPos_max=0;
+	bool flag = false;
+	size_t startpos1, startpos2, endpos1, endpos2;
+	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
+	double consistency;
+	char *seq;
+	vector<bam1_t*> regionReads;
+	int64_t sv_length;
+
+	merge_users_vec.push_back(user);
+	pos_update = user->endPos;
+	pos_update_const = user->endPos;
+	if(i<subset1.size()){
+		for(i = user_pos + 1; i<subset1.size(); i++){
+			Maymerge_user = subset1.at(i);
+			if(user->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+				if(abs(Maymerge_user->startPos - user->startPos) > 500) break;
+				else{
+					if(Maymerge_user->sv_type == user->sv_type)
+						merge_users_vec.push_back(Maymerge_user);
+				}
+			}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+				//distance
+				if(abs(Maymerge_user->startPos - pos_update) > 400) break;
+				else{
+					if(Maymerge_user->sv_type == user->sv_type){
+//						merge_users_vec.push_back(Maymerge_user);
+//						pos_update = Maymerge_user->endPos;
+						if(abs(Maymerge_user->startPos - pos_update_const) <= 400 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
+						{
+							merge_users_vec.push_back(Maymerge_user);
+							pos_update = Maymerge_user->endPos;
+						}
+						if(Maymerge_user->endPos > merge_users_vec_endPos_max){
+							merge_users_vec_endPos_max = Maymerge_user->endPos;
+						}
+					}
+				}
+			}else break;
+		}
+		//BAM
+		if(BamFileSign and merge_users_vec.size()>1){
+			//Area range calculation
+			int32_t region_start = std::max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 200));
+			int32_t region_end = merge_users_vec.back()->endPos + 200;
+			regionReads = load_region_data(user->chrname, region_start, region_end);
+//			cout<<"111111111111:"<<regionReads.size()<<endl;
+			 // Build SV location index (variant for fast query coverage)
+			map<pair<int64_t, int64_t>, SV_item*> sv_pos_map;
+			for (SV_item* sv : merge_users_vec) {
+				if(sv->sv_type == VAR_INS)
+					sv_pos_map[{sv->startPos, sv->endPos + sv->sv_len}] = sv;
+				else
+					sv_pos_map[{sv->startPos, sv->endPos}] = sv;
+			}
+
+			// Iterate through all reads and record the covered SV set
+			unordered_map<string, vector<SV_item*>> read_sv_groups;
+			for (bam1_t* read : regionReads) {
+				// Gets the alignment position and direction of the read
+//				size_t read_start = read->core.pos + 1;
+//				size_t read_end = bam_endpos(read);
+
+				// Analyze the CIGAR and calculate the coverage area (more accurate way)
+				uint32_t* cigar = bam_get_cigar(read);
+				int n_cigar = read->core.n_cigar;
+				int64_t ref_pos = read->core.pos;
+				int64_t read_len = 0;
+
+				// Traverse the CIGAR operation to calculate the reference genome coverage interval
+				vector<pair<int64_t, int64_t>> ref_blocks;
+				for (int i = 0; i < n_cigar; ++i) {
+				    int op = bam_cigar_op(cigar[i]);
+				    int len = bam_cigar_oplen(cigar[i]);
+				    switch(op) {
+				        case BAM_CDEL:
+				        	if(len >= 20){
+				        		ref_blocks.push_back({ref_pos, ref_pos + len});
+				        	}
+				            ref_pos += len;
+				            break;
+				        case BAM_CINS:
+				        	if(len >= 20){
+				        		ref_blocks.push_back({ref_pos, ref_pos + len});
+				        	}
+				            read_len += len;
+				            break;
+				        case BAM_CMATCH:
+				        case BAM_CEQUAL:
+				        case BAM_CDIFF:
+				        case BAM_CREF_SKIP:
+				        case BAM_CSOFT_CLIP:
+				        case BAM_CHARD_CLIP:
+				            // Update reference coordinates or read lengths without recording intervals
+				            if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF) {
+				                ref_pos += len;
+				                read_len += len;
+				            } else if (op == BAM_CREF_SKIP) {
+				                ref_pos += len;
+				            } else {
+				                read_len += len;
+				            }
+				            break;
+				    }
+				}
+
+				// Check whether each SV is overwritten by the current read
+				vector<SV_item*> covered_svs;
+				for (auto& sv_pair : sv_pos_map) {
+				    int64_t sv_start = sv_pair.first.first;
+				    int64_t sv_end = sv_pair.first.second;
+				    SV_item* sv = sv_pair.second;
+				    if(sv->sv_type == VAR_INS)
+				    	sv_length = sv_end - sv_start;
+				    else
+				    	sv_length = sv_end - sv_start +1;
+				    double ratio = 0;
+				    // Calculate the total length covered
+				    int64_t covered_length = 0;
+				    for (auto& block : ref_blocks) {
+				        //Intersection of computation interval
+				        int64_t overlap_start = max(sv_start, block.first);
+				        int64_t overlap_end = min(sv_end, block.second);
+				        if (overlap_start - 50 < overlap_end + 50) {
+				        	if(abs(sv_start-block.first) > 250) continue;
+				        	if(overlap_start < overlap_end)
+				        		covered_length += (overlap_end - overlap_start);
+				        	else
+				        		covered_length += (block.second - block.first);
+				            if(sv_length >= (block.second - block.first)){
+				            	ratio = (double)(block.second - block.first)/sv_length;
+				            }else{
+				            	ratio = (double)sv_length/(block.second - block.first);
+				            }
+				            if((double)covered_length/(block.second - block.first) >= 0 and ratio >= 0.9){	//  0.7/0.95
+				            	covered_svs.push_back(sv);
+				            }
+				        }
+				    }
+				}
+				// Records reads covering multiple SVS
+				if (covered_svs.size() >= 2) {
+				    string qname = bam_get_qname(read);
+				    read_sv_groups[qname] = covered_svs;
+				}
+			}
+
+			// Merge SVS that share the same read (build clusters)
+			unordered_map<SV_item*, int> sv_to_cluster;
+			clusters.clear();
+			int cluster_id = 0;
+
+			for (auto& group : read_sv_groups) {
+				vector<SV_item*>& svs = group.second;
+				vector<int> existing_clusters;
+
+				// Checks whether the current SV already belongs to a cluster
+				for (SV_item* sv : svs) {
+					if (sv_to_cluster.find(sv) != sv_to_cluster.end()) {
+						existing_clusters.push_back(sv_to_cluster[sv]);
+					}
+				}
+
+				//Merge or create a new cluster
+				if (existing_clusters.empty()) {
+					for (SV_item* sv : svs) {
+						sv_to_cluster[sv] = cluster_id;
+					}
+					clusters.push_back(svs);
+					cluster_id++;
+				} else {
+					int target_cluster = existing_clusters[0];
+					// duplicate removal
+					for (int cid : existing_clusters) {
+						if (cid != target_cluster) {
+							for (SV_item* sv : clusters[cid]) {
+								sv_to_cluster[sv] = target_cluster;
+							}
+							clusters[target_cluster].insert(
+								clusters[target_cluster].end(),
+								clusters[cid].begin(),
+								clusters[cid].end()
+							);
+							clusters[cid].clear();
+						}
+					}
+					// Add the current SV to the target cluster
+					for (SV_item* sv : svs) {
+						if (sv_to_cluster.find(sv) == sv_to_cluster.end()) {
+							sv_to_cluster[sv] = target_cluster;
+							clusters[target_cluster].push_back(sv);
+						}
+					}
+				}
+			}
+
+			// Clean empty clustering
+			vector<vector<SV_item*>> final_clusters;
+			for (auto& cluster : clusters) {
+				if (!cluster.empty()) {
+					// Sort by startPos ascending order
+					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
+						return a->startPos < b->startPos;
+					});
+					final_clusters.push_back(cluster);
+				}
+			}
+			clusters = final_clusters;
+
+//			cout << "Found " << clusters.size() << " clusters supported by reads" << endl;
+
+		}
+
+		for (bam1_t* read : regionReads) {
+		    bam_destroy1(read);
+		}
+		regionReads.clear();
+
+		if(BamFileSign){
+			for(size_t m =0; m < clusters.size(); m++){
+				if(clusters[m].size()>1){
+					//Merge verification: Whether it is consistent after the merger
+					auto merge_result = findClosestSubarray(clusters[0], bench->sv_len);
+					merge_item_vec = merge_result.second;
+					if(merge_item_vec.size() > 1){
+						//Verify heterozygous variant overlap
 						for(size_t j=1; j < merge_item_vec.size(); j++){
 							if(bench->sv_type == VAR_INS){
 								startpos1 = merge_item_vec.at(j-1)->startPos;
@@ -2377,9 +4051,11 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 								Definite_Merge_item = merge_item_vec.at(j);
 								Definite_Merge_item->mergeMark = true;
 								Definite_Merge_item->LpFlag = true;
+								Definite_Merge_item->mergeFlag = true;
 							}
 							bench->overlapped = true;
-							bench->mergeMark = true;
+							merge_item1_vec = merge_item_vec;
+//							bench->mergeMark = true;
 		//					bench->seqcons = consistency;
 						}
 					}
@@ -2390,7 +4066,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 			auto merge_result = findClosestSubarray(merge_users_vec, bench->sv_len);
 			merge_item_vec = merge_result.second;
 			if(merge_item_vec.size() > 1){
-				//Verify heterozygous variation overlap
+				//Verify heterozygous variant overlap
 				for(size_t j=1; j < merge_item_vec.size(); j++){
 					if(bench->sv_type == VAR_INS){
 						startpos1 = merge_item_vec.at(j-1)->startPos;
@@ -2642,9 +4318,769 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 						Definite_Merge_item = merge_item_vec.at(j);
 						Definite_Merge_item->mergeMark = true;
 						Definite_Merge_item->LpFlag = true;
+						Definite_Merge_item->mergeFlag = true;
 					}
 					bench->overlapped = true;
-					bench->mergeMark = true;
+					merge_item1_vec = merge_item_vec;
+//					bench->mergeMark = true;
+//					bench->seqcons = consistency;
+				}
+			}
+		}
+	}
+	return ;
+}
+void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai){
+	vector<SV_item*> merge_users_vec, merge_item_vec;
+	vector<vector<SV_item*>> clusters;
+	SV_item *Maymerge_user, *Merge_users, *Merge_item, *Lp_Merge_item, *Definite_Merge_item;
+	size_t i = user_pos + 1;
+	int32_t min_startpos, max_endpos, refseq_len_tmp;
+	int64_t pos_update, pos_update_const, merge_users_vec_endPos_max=0;
+	bool flag = false;
+	size_t startpos1, startpos2, endpos1, endpos2;
+	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
+	double consistency;
+	char *seq;
+	vector<bam1_t*> regionReads;
+	int64_t sv_length;
+
+	merge_users_vec.push_back(user);
+	pos_update = user->endPos;
+	pos_update_const = user->endPos;
+	if(i<subset1.size()){
+		for(i = user_pos + 1; i<subset1.size(); i++){
+			Maymerge_user = subset1.at(i);
+			if(user->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+				if(abs(Maymerge_user->startPos - user->startPos) > 500) break;
+				else{
+					if(Maymerge_user->sv_type == user->sv_type)
+						merge_users_vec.push_back(Maymerge_user);
+				}
+			}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+				//distance
+				if(abs(Maymerge_user->startPos - pos_update) > 400) break;
+				else{
+					if(Maymerge_user->sv_type == user->sv_type){
+						if(abs(Maymerge_user->startPos - pos_update_const) <= 400 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
+						{
+							merge_users_vec.push_back(Maymerge_user);
+							pos_update = Maymerge_user->endPos;
+						}
+						if(Maymerge_user->endPos > merge_users_vec_endPos_max){
+							merge_users_vec_endPos_max = Maymerge_user->endPos;
+						}
+					}
+				}
+			}else break;
+		}
+		//BAM
+		if(BamFileSign and merge_users_vec.size()>1){
+			//Area range calculation
+			int32_t region_start = std::max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 200));
+			int32_t region_end = merge_users_vec.back()->endPos + 200;
+			regionReads = load_region_data(user->chrname, region_start, region_end);
+//			cout<<"111111111111:"<<regionReads.size()<<endl;
+			 // Build SV location index (variant for fast query coverage)
+			map<pair<int64_t, int64_t>, SV_item*> sv_pos_map;
+			for (SV_item* sv : merge_users_vec) {
+				if(sv->sv_type == VAR_INS)
+					sv_pos_map[{sv->startPos, sv->endPos + sv->sv_len}] = sv;
+				else
+					sv_pos_map[{sv->startPos, sv->endPos}] = sv;
+			}
+
+			// Iterate through all reads and record the covered SV set
+			unordered_map<string, vector<SV_item*>> read_sv_groups;
+			for (bam1_t* read : regionReads) {
+				// Gets the alignment position and direction of the read
+//				size_t read_start = read->core.pos + 1;
+//				size_t read_end = bam_endpos(read);
+
+				// Analyze the CIGAR and calculate the coverage area (more accurate way)
+				uint32_t* cigar = bam_get_cigar(read);
+				int n_cigar = read->core.n_cigar;
+				int64_t ref_pos = read->core.pos;
+				int64_t read_len = 0;
+
+				// Traverse the CIGAR operation to calculate the reference genome coverage interval
+				vector<pair<int64_t, int64_t>> ref_blocks;
+				for (int i = 0; i < n_cigar; ++i) {
+				    int op = bam_cigar_op(cigar[i]);
+				    int len = bam_cigar_oplen(cigar[i]);
+				    switch(op) {
+				        case BAM_CDEL:
+				        	if(len >= 20){
+				        		ref_blocks.push_back({ref_pos, ref_pos + len});
+				        	}
+				            ref_pos += len;
+				            break;
+				        case BAM_CINS:
+				        	if(len >= 20){
+				        		ref_blocks.push_back({ref_pos, ref_pos + len});
+				        	}
+				            read_len += len;
+				            break;
+				        case BAM_CMATCH:
+				        case BAM_CEQUAL:
+				        case BAM_CDIFF:
+				        case BAM_CREF_SKIP:
+				        case BAM_CSOFT_CLIP:
+				        case BAM_CHARD_CLIP:
+				            // Update reference coordinates or read lengths without recording intervals
+				            if (op == BAM_CMATCH || op == BAM_CEQUAL || op == BAM_CDIFF) {
+				                ref_pos += len;
+				                read_len += len;
+				            } else if (op == BAM_CREF_SKIP) {
+				                ref_pos += len;
+				            } else {
+				                read_len += len;
+				            }
+				            break;
+				    }
+				}
+
+				// Check whether each SV is overwritten by the current read
+				vector<SV_item*> covered_svs;
+				for (auto& sv_pair : sv_pos_map) {
+				    int64_t sv_start = sv_pair.first.first;
+				    int64_t sv_end = sv_pair.first.second;
+				    SV_item* sv = sv_pair.second;
+				    if(sv->sv_type == VAR_INS)
+				    	sv_length = sv_end - sv_start;
+				    else
+				    	sv_length = sv_end - sv_start +1;
+				    double ratio = 0;
+				    // Calculate the total length covered
+				    int64_t covered_length = 0;
+				    for (auto& block : ref_blocks) {
+				        //Intersection of computation interval
+				        int64_t overlap_start = max(sv_start, block.first);
+				        int64_t overlap_end = min(sv_end, block.second);
+				        if (overlap_start - 50 < overlap_end + 50) {
+				        	if(abs(sv_start-block.first) > 250) continue;
+				        	if(overlap_start < overlap_end)
+				        		covered_length += (overlap_end - overlap_start);
+				        	else
+				        		covered_length += (block.second - block.first);
+				            if(sv_length >= (block.second - block.first)){
+				            	ratio = (double)(block.second - block.first)/sv_length;
+				            }else{
+				            	ratio = (double)sv_length/(block.second - block.first);
+				            }
+				            if((double)covered_length/(block.second - block.first) >= 0 and ratio >= 0.9){	//  0.7/0.95
+				            	covered_svs.push_back(sv);
+				            }
+				        }
+				    }
+				}
+				// Records reads covering multiple SVS
+				if (covered_svs.size() >= 2) {
+				    string qname = bam_get_qname(read);
+				    read_sv_groups[qname] = covered_svs;
+				}
+			}
+
+			// Merge SVS that share the same read (build clusters)
+			unordered_map<SV_item*, int> sv_to_cluster;
+			clusters.clear();
+			int cluster_id = 0;
+
+			for (auto& group : read_sv_groups) {
+				vector<SV_item*>& svs = group.second;
+				vector<int> existing_clusters;
+
+				// Checks whether the current SV already belongs to a cluster
+				for (SV_item* sv : svs) {
+					if (sv_to_cluster.find(sv) != sv_to_cluster.end()) {
+						existing_clusters.push_back(sv_to_cluster[sv]);
+					}
+				}
+
+				//Merge or create a new cluster
+				if (existing_clusters.empty()) {
+					for (SV_item* sv : svs) {
+						sv_to_cluster[sv] = cluster_id;
+					}
+					clusters.push_back(svs);
+					cluster_id++;
+				} else {
+					int target_cluster = existing_clusters[0];
+					// duplicate removal
+					for (int cid : existing_clusters) {
+						if (cid != target_cluster) {
+							for (SV_item* sv : clusters[cid]) {
+								sv_to_cluster[sv] = target_cluster;
+							}
+							clusters[target_cluster].insert(
+								clusters[target_cluster].end(),
+								clusters[cid].begin(),
+								clusters[cid].end()
+							);
+							clusters[cid].clear();
+						}
+					}
+					// Add the current SV to the target cluster
+					for (SV_item* sv : svs) {
+						if (sv_to_cluster.find(sv) == sv_to_cluster.end()) {
+							sv_to_cluster[sv] = target_cluster;
+							clusters[target_cluster].push_back(sv);
+						}
+					}
+				}
+			}
+
+			// Clean empty clustering
+			vector<vector<SV_item*>> final_clusters;
+			for (auto& cluster : clusters) {
+				if (!cluster.empty()) {
+					// Sort by startPos ascending order
+					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
+						return a->startPos < b->startPos;
+					});
+					final_clusters.push_back(cluster);
+				}
+			}
+			clusters = final_clusters;
+
+//			cout << "Found " << clusters.size() << " clusters supported by reads" << endl;
+
+		}
+
+		for (bam1_t* read : regionReads) {
+		    bam_destroy1(read);
+		}
+		regionReads.clear();
+
+		if(BamFileSign){
+			for(size_t m =0; m < clusters.size(); m++){
+				if(clusters[m].size()>1){
+					//Merge verification: Whether it is consistent after the merger
+					auto merge_result = findClosestSubarray(clusters[0], bench->sv_len);
+					merge_item_vec = merge_result.second;
+					if(merge_item_vec.size() > 1){
+						//Verify heterozygous variant overlap
+						for(size_t j=1; j < merge_item_vec.size(); j++){
+							if(bench->sv_type == VAR_INS){
+								startpos1 = merge_item_vec.at(j-1)->startPos;
+								startpos2 = merge_item_vec.at(j)->startPos;
+								endpos1 = merge_item_vec.at(j-1)->startPos + merge_item_vec.at(j-1)->ref_seq.length()-1;
+								endpos2 = merge_item_vec.at(j)->endPos + merge_item_vec.at(j)->ref_seq.length()-1;
+							}else if(bench->sv_type == VAR_DEL){
+								startpos1 = merge_item_vec.at(j-1)->startPos;
+								startpos2 = merge_item_vec.at(j)->startPos;
+								endpos1 = merge_item_vec.at(j-1)->endPos;
+								endpos2 = merge_item_vec.at(j)->endPos;
+							}
+							if(endpos1 >= startpos2 && endpos2 >= startpos1) return ;
+						}
+						if(bench->sv_type == VAR_INS){
+							min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+							max_endpos = (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) >= (bench->startPos + bench->ref_seq.length()-1) ? (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) :(bench->startPos + bench->ref_seq.length()-1);
+						}else if(bench->sv_type == VAR_DEL){
+							min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+							max_endpos = merge_item_vec.at(0)->endPos >= bench->endPos ? merge_item_vec.at(0)->endPos : bench->endPos;
+						}
+						for(size_t j=0; j < merge_item_vec.size(); j++){
+							Merge_users = merge_item_vec.at(j);
+							if(Merge_users->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+								min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+								max_endpos = (Merge_users->startPos + Merge_users->ref_seq.length()-1) >= (size_t)max_endpos ? (Merge_users->startPos + Merge_users->ref_seq.length()-1) : max_endpos;
+							}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+								min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+								max_endpos = Merge_users->endPos >= max_endpos ? Merge_users->endPos : max_endpos;
+							}
+						}
+						//Extract seq1 sequence
+						for(size_t j=0; j < merge_item_vec.size(); j++){
+							Merge_item = merge_item_vec.at(j);
+							if(Merge_item->sv_type == VAR_INS){
+								if(j==0){
+									if(min_startpos == Merge_item->startPos){
+										seq1 += Merge_item->alt_seq;
+										/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;*/
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}
+								}else if(j==merge_item_vec.size()-1){
+									if((size_t)max_endpos == Merge_item->startPos+Merge_item->alt_seq.length()-1){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+										reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+									}
+								}else{
+									if(j+1 < merge_item_vec.size()){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->alt_seq;
+									}
+								}
+							}else if(Merge_item->sv_type == VAR_DEL){
+								if(j==0){
+									if(min_startpos == Merge_item->startPos){
+										seq1 += Merge_item->ref_seq;
+										/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;*/
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}
+								}else if(j==merge_item_vec.size()-1){
+									if(max_endpos == Merge_item->endPos){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}else{
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+										reg_str = Merge_item->chrname + ":" + to_string(Merge_item->endPos) + "-" + to_string(max_endpos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+									}
+								}else{
+									if(j+1 < merge_item_vec.size()){
+										reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+										pthread_mutex_lock(&mutex_mem);
+										seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+										pthread_mutex_unlock(&mutex_mem);
+										seq_extact = seq;
+										free(seq);
+										seq1 += seq_extact;
+										seq1 += Merge_item->ref_seq;
+									}
+								}
+							}
+						}
+						//Extract seq2 sequence
+						if(bench->sv_type == VAR_INS){
+							if(min_startpos == bench->startPos){
+								seq2 += bench->alt_seq;
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+							}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->alt_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += max_endpos;
+							}else{
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->alt_seq;
+							}
+						}else if(bench->sv_type == VAR_DEL){
+							if(min_startpos == bench->startPos){
+								seq2 += bench->ref_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+							}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->ref_seq;
+								reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += max_endpos;
+							}else{
+								reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq2 += seq_extact;
+								seq2 += bench->ref_seq;
+							}
+						}
+						//Sequence similarity calculation
+						upperSeq(seq1);
+						upperSeq(seq2);
+						needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
+						consistency = calculate_consistency(aln_seq1, aln_seq2);
+						if(consistency >= SEQ_CONSISTENCY){
+							for(size_t j=0; j < merge_item_vec.size(); j++){
+								//LP flag
+								Lp_Merge_item = merge_item_vec.at(j);
+								if(Lp_Merge_item->LpFlag){
+									flag = true;
+									break;
+								}
+							}
+							if(!flag) {LpNum += 1;
+		//					cout << "merge Num: " << merge_item_vec.size() <<"	pos:" << merge_item_vec.at(0)->startPos <<"	LpNum = " << LpNum << endl;
+							}
+							for(size_t j=0; j < merge_item_vec.size(); j++){
+								Definite_Merge_item = merge_item_vec.at(j);
+								Definite_Merge_item->mergeMark = true;
+								Definite_Merge_item->LpFlag = true;
+								Definite_Merge_item->mergeFlag = true;
+							}
+							bench->overlapped = true;
+//							bench->mergeMark = true;
+		//					bench->seqcons = consistency;
+						}
+					}
+				}
+			}
+		}else{
+			//Merge verification: Whether it is consistent after the merger
+			auto merge_result = findClosestSubarray(merge_users_vec, bench->sv_len);
+			merge_item_vec = merge_result.second;
+			if(merge_item_vec.size() > 1){
+				//Verify heterozygous variant overlap
+				for(size_t j=1; j < merge_item_vec.size(); j++){
+					if(bench->sv_type == VAR_INS){
+						startpos1 = merge_item_vec.at(j-1)->startPos;
+						startpos2 = merge_item_vec.at(j)->startPos;
+						endpos1 = merge_item_vec.at(j-1)->startPos + merge_item_vec.at(j-1)->ref_seq.length()-1;
+						endpos2 = merge_item_vec.at(j)->endPos + merge_item_vec.at(j)->ref_seq.length()-1;
+					}else if(bench->sv_type == VAR_DEL){
+						startpos1 = merge_item_vec.at(j-1)->startPos;
+						startpos2 = merge_item_vec.at(j)->startPos;
+						endpos1 = merge_item_vec.at(j-1)->endPos;
+						endpos2 = merge_item_vec.at(j)->endPos;
+					}
+					if(endpos1 >= startpos2 && endpos2 >= startpos1) return ;
+				}
+				if(bench->sv_type == VAR_INS){
+					min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+					max_endpos = (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) >= (bench->startPos + bench->ref_seq.length()-1) ? (merge_item_vec.at(0)->startPos + merge_item_vec.at(0)-> ref_seq.length()-1) :(bench->startPos + bench->ref_seq.length()-1);
+				}else if(bench->sv_type == VAR_DEL){
+					min_startpos = merge_item_vec.at(0)->startPos <= bench->startPos ? merge_item_vec.at(0)->startPos : bench->startPos;
+					max_endpos = merge_item_vec.at(0)->endPos >= bench->endPos ? merge_item_vec.at(0)->endPos : bench->endPos;
+				}
+				for(size_t j=0; j < merge_item_vec.size(); j++){
+					Merge_users = merge_item_vec.at(j);
+					if(Merge_users->sv_type == VAR_INS and bench->sv_type == VAR_INS){
+						min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+						max_endpos = (Merge_users->startPos + Merge_users->ref_seq.length()-1) >= (size_t)max_endpos ? (Merge_users->startPos + Merge_users->ref_seq.length()-1) : max_endpos;
+					}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
+						min_startpos = Merge_users->startPos <= min_startpos ? Merge_users->startPos : min_startpos;
+						max_endpos = Merge_users->endPos >= max_endpos ? Merge_users->endPos : max_endpos;
+					}
+				}
+				//Extract seq1 sequence
+				for(size_t j=0; j < merge_item_vec.size(); j++){
+					Merge_item = merge_item_vec.at(j);
+					if(Merge_item->sv_type == VAR_INS){
+						if(j==0){
+							if(min_startpos == Merge_item->startPos){
+								seq1 += Merge_item->alt_seq;
+								/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;*/
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}
+						}else if(j==merge_item_vec.size()-1){
+							if((size_t)max_endpos == Merge_item->startPos+Merge_item->alt_seq.length()-1){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+								reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+							}
+						}else{
+							if(j+1 < merge_item_vec.size()){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->startPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->alt_seq;
+							}
+						}
+					}else if(Merge_item->sv_type == VAR_DEL){
+						if(j==0){
+							if(min_startpos == Merge_item->startPos){
+								seq1 += Merge_item->ref_seq;
+								/*reg_str = Merge_item->chrname + ":" + to_string(Merge_item->startPos+1) + "-" + to_string(merge_item_vec[j+1]->startPos-1);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c.str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;*/
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(min_startpos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}
+						}else if(j==merge_item_vec.size()-1){
+							if(max_endpos == Merge_item->endPos){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}else{
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+								reg_str = Merge_item->chrname + ":" + to_string(Merge_item->endPos) + "-" + to_string(max_endpos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+							}
+						}else{
+							if(j+1 < merge_item_vec.size()){
+								reg_str = Merge_item->chrname + ":" + to_string(merge_item_vec[j-1]->endPos) + "-" + to_string(Merge_item->startPos);
+								pthread_mutex_lock(&mutex_mem);
+								seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+								pthread_mutex_unlock(&mutex_mem);
+								seq_extact = seq;
+								free(seq);
+								seq1 += seq_extact;
+								seq1 += Merge_item->ref_seq;
+							}
+						}
+					}
+				}
+				//Extract seq2 sequence
+				if(bench->sv_type == VAR_INS){
+					if(min_startpos == bench->startPos){
+						seq2 += bench->alt_seq;
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+					}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->alt_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->startPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += max_endpos;
+					}else{
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->alt_seq;
+					}
+				}else if(bench->sv_type == VAR_DEL){
+					if(min_startpos == bench->startPos){
+						seq2 += bench->ref_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+					}else if(min_startpos < bench->startPos and max_endpos > bench->startPos){
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->ref_seq;
+						reg_str = bench->chrname + ":" + to_string(bench->endPos) + "-" + to_string(max_endpos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += max_endpos;
+					}else{
+						reg_str = bench->chrname + ":" + to_string(min_startpos) + "-" + to_string(bench->startPos);
+						pthread_mutex_lock(&mutex_mem);
+						seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+						pthread_mutex_unlock(&mutex_mem);
+						seq_extact = seq;
+						free(seq);
+						seq2 += seq_extact;
+						seq2 += bench->ref_seq;
+					}
+				}
+				//Sequence similarity calculation
+				upperSeq(seq1);
+				upperSeq(seq2);
+				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
+				consistency = calculate_consistency(aln_seq1, aln_seq2);
+				if(consistency >= SEQ_CONSISTENCY){
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						//LP flag
+						Lp_Merge_item = merge_item_vec.at(j);
+						if(Lp_Merge_item->LpFlag){
+							flag = true;
+							break;
+						}
+					}
+					if(!flag) {LpNum += 1;
+//					cout << "merge Num: " << merge_item_vec.size() <<"	pos:" << merge_item_vec.at(0)->startPos <<"	LpNum = " << LpNum << endl;
+					}
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						Definite_Merge_item = merge_item_vec.at(j);
+						Definite_Merge_item->mergeMark = true;
+						Definite_Merge_item->LpFlag = true;
+						Definite_Merge_item->mergeFlag = true;
+					}
+					bench->overlapped = true;
+//					bench->mergeMark = true;
 //					bench->seqcons = consistency;
 				}
 			}
@@ -2654,6 +5090,45 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 }
 // Finds the contiguous SV_item subarray that is closest to the target value and satisfies the condition
 pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t target) {
+    int closestSVlenSum = 0; // Used to record the nearest SVlen Sum
+    int minDiff = numeric_limits<int>::max();
+    vector<SV_item*> bestSubarray;
+    double merge_len_ratio;
+
+    size_t n = items.size();
+
+    // Iterate over all possible combinations (subsets) using bitmask
+    for (int mask = 1; mask < (1 << n); ++mask) { // mask from 1 to 2^n - 1
+        int currentSVlenSum = 0;
+        vector<SV_item*> currentSubarray;
+
+        // Generate the subarray corresponding to the current bitmask
+        for (size_t i = 0; i < n; ++i) {
+            if (mask & (1 << i)) { // If the i-th bit is set in the mask
+                currentSVlenSum += items[i]->sv_len;
+                currentSubarray.push_back(items[i]);
+            }
+        }
+
+        // Calculate the merge length ratio
+        merge_len_ratio = currentSVlenSum >= target ? (double)target / currentSVlenSum : (double)currentSVlenSum / target;
+
+        // Determine whether the SV size condition is met
+        if (merge_len_ratio >= 0.9) {
+            int currentDiff = abs(currentSVlenSum - target);
+
+            // Update the nearest SVlen and subarray if needed
+            if (currentDiff < minDiff) {
+                minDiff = currentDiff;
+                closestSVlenSum = currentSVlenSum;
+                bestSubarray = currentSubarray;
+            }
+        }
+    }
+
+    return { closestSVlenSum, bestSubarray }; // Returns the nearest sum and subarray
+}
+/*pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t target) {
     int closestSVlenSum = 0; // Used to record the nearest SVlen Sum
     int minDiff = numeric_limits<int>::max();
     vector<SV_item*> bestSubarray;
@@ -2683,7 +5158,7 @@ pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t 
         }
     }
     return { closestSVlenSum, bestSubarray }; // Returns the nearest sum and subarray
-}
+}*/
 
 int32_t minDistance(const string &seq1, const string &seq2) {
 	int64_t m = seq1.size() + 1, n = seq2.size() + 1;
@@ -3024,6 +5499,9 @@ size_t customHashFunction(const string& kmer, size_t kmerSize) {
 vector<Minimizer> findMinimizers(const string& sequence, size_t windowSize, size_t kmerSize) {
     vector<Minimizer> minimizers;
 
+    if(sequence.length() < windowSize + kmerSize - 1){
+    	return minimizers;
+    }
     for (size_t i = 0; i <= sequence.length() - windowSize- kmerSize+1; ++i) {
         string window = sequence.substr(i, windowSize+ kmerSize-1);
         //size_t Maximum value of the data type

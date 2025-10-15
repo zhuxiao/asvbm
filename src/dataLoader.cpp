@@ -149,16 +149,29 @@ SV_item *constructSVItem(string &line){
 		item->ref_seq = str_vec.at(5);
 		item->alt_seq = str_vec.at(6);
 		item->seqcons = str_vec.at(7);
-		if (str_vec.size() > 8) {
-			std::ostringstream oss;
-			for (size_t i = 8; i < str_vec.size(); ++i) {
-				oss << str_vec[i];
-				if (i != str_vec.size() - 1) {
-					oss << "	";
+		if(str_vec.size() > 8){
+			ostringstream oss;
+			if(item->sv_type==VAR_TRA or item->sv_type==VAR_BND){
+				item->ref_seq = str_vec.at(8);
+				item->alt_seq = str_vec.at(9);
+				item->seqcons = str_vec.at(10);
+				for(size_t i = 11; i < str_vec.size(); ++i){
+					oss << str_vec[i];
+					if(i != str_vec.size() - 1){
+						oss << "	";
+					}
+				}
+			}else{
+				for(size_t i = 8; i < str_vec.size(); ++i){
+					oss << str_vec[i];
+					if(i != str_vec.size() - 1){
+						oss << "	";
+					}
 				}
 			}
 			item->lineInfo = oss.str();
-		} else {
+
+		}else{
 			item->lineInfo = "-";
 		}
 	}
@@ -183,9 +196,9 @@ vector<SV_item*> getLongSVReg(vector<SV_item*> &dataset, int32_t thres){
 		sv_item = dataset.at(i);
 		reg_len = 0;
 		if(sv_item->sv_type!=VAR_TRA and sv_item->sv_type!=VAR_BND)
-			reg_len = sv_item->endPos - sv_item->startPos + 1;
-
-		if(reg_len>thres){
+//			reg_len = sv_item->endPos - sv_item->startPos + 1;
+			reg_len = sv_item->sv_len;
+		if(reg_len>thres && sv_item->sv_type != VAR_TRA && sv_item->sv_type != VAR_BND){
 			sv_vec.push_back(sv_item);
 			dataset.erase(dataset.begin()+i);
 		}else i++;
@@ -203,9 +216,9 @@ vector<SV_item*> getShortSVReg(vector<SV_item*> &dataset, int32_t thres){
 		sv_item = dataset.at(i);
 		reg_len = 0;
 		if(sv_item->sv_type!=VAR_TRA and sv_item->sv_type!=VAR_BND)
-			reg_len = sv_item->endPos - sv_item->startPos + 1;
-		if(sv_item->sv_type==VAR_INS)reg_len =sv_item->sv_len;
-		if(reg_len<thres){
+//			reg_len = sv_item->endPos - sv_item->startPos + 1;
+			reg_len = sv_item->sv_len;
+		if(reg_len<thres && sv_item->sv_type != VAR_TRA && sv_item->sv_type != VAR_BND){
 			sv_vec.push_back(sv_item);
 			dataset.erase(dataset.begin()+i);
 		}else i++;

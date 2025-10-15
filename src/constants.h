@@ -21,7 +21,7 @@
 #define ALLELE_SEQ_CONSISTENCY		0.7f
 
 #define MIN_SVLEN					20
-#define MAX_VALID_REG_THRES			50000
+#define MAX_VALID_REG_THRES			100000
 #define EXTEND_SIZE					200  // 100
 
 #define MIN_SIZE_LARGE_SV			100

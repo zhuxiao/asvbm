@@ -21,6 +21,7 @@ string Pathquerybackslash(string filename);
 string PathqueryDot(string filename);
 bool isExistChromosomeSet(string &chrname);
 bool isDecoyChr(string &chrname);
+void processFile(const string &infilename, bool &isVCF, bool &isBED);
 void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label);
 void convertVcf(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label);
 void convertCsv(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label);

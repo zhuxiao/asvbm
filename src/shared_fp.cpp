@@ -269,8 +269,8 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 	size_t totalEntries = 0;
 	int entryIndex = 0;
 	size_t selectToolsNum;
-//	size_t input;
-//	bool validInput;
+	size_t input, input2;
+	bool validInput;
 
 //	vector<SV_item*> sv_item_bench_vec, sv_item_vec1;
 //	vector<SV_item*> tp_vec;
@@ -285,33 +285,37 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 //	}
 //	sort(tp_vec);
 
-	selectToolsNum = ceil(sharedFPFilenames.size() * 0.6);
-	cout << "Do you want to set the number of selected tools? (1 for Yes, 0 for No): ";
-//	while(true){
-//		cin >> input;
-//		if(cin.fail() || input < 0 || input > 1){
-//			cin.clear();
-//			cin.ignore(numeric_limits<streamsize>::max(), '\n');
-//			cout << "Invalid choice. Please enter 1 for Yes or 0 for No." << endl;
-//		}else{
-//			break;
-//		}
-//	}
-//	if(input == 1){
-//		validInput = false;
-//		while(!validInput){
-//			cout << "Set your number (between 2 and " << sharedFPFilenames.size() << "): ";
-//			cin >> input;
-//			if(cin.fail() || input < 2 || input > sharedFPFilenames.size()){
-//				cin.clear();
-//				cin.ignore(numeric_limits<streamsize>::max(), '\n');
-//				cout << "Invalid input. Please try again." << endl;
-//			}else{
-//				validInput = true;
-//			}
-//		}
-//	}else if(input == 0){
-//	}
+
+	cout << "Do you want to set the number of selected tools? (1 for Yes, 0 for No): " << endl;
+	cout << "If you input 0, the selectToolsNum = " << ceil(sharedFPFilenames.size() * 0.6) << endl;
+
+	while(true){
+		cin >> input;
+		if(cin.fail() || input < 0 || input > 1){
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			cout << "Invalid choice. Please enter 1 for Yes or 0 for No." << endl;
+		}else{
+			break;
+		}
+	}
+	if(input == 1){
+		validInput = false;
+		while(!validInput){
+			cout << "Set your number (between 2 and " << sharedFPFilenames.size() << "): ";
+			cin >> input2;
+			if(cin.fail() || input2 < 2 || input2 > sharedFPFilenames.size()){
+				cin.clear();
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+				cout << "Invalid input. Please try again." << endl;
+			}else{
+				validInput = true;
+				selectToolsNum = input2;
+			}
+		}
+	}else if(input == 0){
+		selectToolsNum = ceil(sharedFPFilenames.size() * 0.6);
+	}
 	cout << "Selected value: " << selectToolsNum << endl;
 	for(i=0; i<sharedFPFilenames.size(); i++){
 		if(i > 0){
@@ -375,8 +379,8 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 	}
 
 	//Write matched variants
-	vector<size_t> connectedIndex;
-//	unordered_set<size_t> connectedIndex;
+//	vector<size_t> connectedIndex;
+	unordered_set<size_t> connectedIndex;
 	vector<int> differentToolsIndex;
 	vector<int> mostRepresentativeVariantIndices;
 	unordered_map<int, int> sizeDifferenceCount;
@@ -425,22 +429,31 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 			if(differentToolsIndex.size() >= selectToolsNum){
 			flag = true;
 
-			if(!connectedIndex.empty()){
-				for(m=0; m<connectedIndex.size(); m++){
-					if(i == connectedIndex[m]){
-						flag = false;
-						break;
-					}
-				}
+//			if(!connectedIndex.empty()){
+//				for(m=0; m<connectedIndex.size(); m++){
+//					if(i == connectedIndex[m]){
+//						flag = false;
+//						break;
+//					}
+//				}
+//			}
+			if(!connectedIndex.empty() && connectedIndex.find(i) != connectedIndex.end()){
+				flag = false;
 			}
+//			for(j=0; j<connectedComponents[i].size(); j++){
+//				for(m=0; m<connectedComponents[connectedComponents[i][j]].size(); m++){
+//					if(find(connectedIndex.begin(), connectedIndex.end(), connectedComponents[connectedComponents[i][j]][m]) == connectedIndex.end()){
+//						connectedIndex.push_back(connectedComponents[connectedComponents[i][j]][m]);
+//					}
+//				}
+//			}
 			for(j=0; j<connectedComponents[i].size(); j++){
 				for(m=0; m<connectedComponents[connectedComponents[i][j]].size(); m++){
-					if(find(connectedIndex.begin(), connectedIndex.end(), connectedComponents[connectedComponents[i][j]][m]) == connectedIndex.end()){
-						connectedIndex.push_back(connectedComponents[connectedComponents[i][j]][m]);
+					if(connectedIndex.find(connectedComponents[connectedComponents[i][j]][m]) == connectedIndex.end()){
+						connectedIndex.insert(connectedComponents[connectedComponents[i][j]][m]);
 					}
 				}
 			}
-
 
 				if(flag){
 					if(entryMap[i] != nullptr){

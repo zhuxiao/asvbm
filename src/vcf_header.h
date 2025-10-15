@@ -51,12 +51,12 @@
 			"##INFO=<ID=CN,Number=1,Type=Float,Description=\"Copy number for duplication alleles(normal=1).\">\n" \
 			"##INFO=<ID=CR,Number=1,Type=Float,Description=\"Core ratio.\">\n" \
 			"##INFO=<ID=M3L,Number=3,Type=Integer,Description=\"(min length, medium length, max length).\">\n" \
-			"##INFO=<ID=STDEV_POS,Number=1,Type=Float,Description=\"Standard deviation of structural variation start position\">\n" \
-			"##INFO=<ID=STDEV_LEN,Number=1,Type=Float,Description=\"Standard deviation of structural variation length\">\n" \
-			"##INFO=<ID=COVERAGE,Number=.,Type=Float,Description=\"Coverages near upstream, start, center, end, downstream of structural variation\">\n" \
+			"##INFO=<ID=STDEV_POS,Number=1,Type=Float,Description=\"Standard deviation of structural variant start position\">\n" \
+			"##INFO=<ID=STDEV_LEN,Number=1,Type=Float,Description=\"Standard deviation of structural variant length\">\n" \
+			"##INFO=<ID=COVERAGE,Number=.,Type=Float,Description=\"Coverages near upstream, start, center, end, downstream of structural variant\">\n" \
 			"##INFO=<ID=PSTD,Number=1,Type=Float,Description=\"Position STD, -1 if not calculated.\">\n" \
 			"##INFO=<ID=MULTI,Number=0,Type=Flag,Description=\"If the SV is multi-allelic SV\">\n" \
-			"##INFO=<ID=MOSAIC,Number=0,Type=Flag,Description=\"Structural variation classified as putative mosaic\">\n" \
+			"##INFO=<ID=MOSAIC,Number=0,Type=Flag,Description=\"Structural variant classified as putative mosaic\">\n" \
 			"##INFO=<ID=LARGEINS,Number=0,Type=Flag,Description=\"Large insertion identified from local assembly\">\n" \
 			"##INFO=<ID=START2,Number=1,Type=Integer,Description=\"SV start position on the second haplotype of multi-allelic SV\">\n" \
 			"##INFO=<ID=END2,Number=1,Type=Integer,Description=\"SV end position on the second haplotype of multi-allelic SV\">\n" \
@@ -89,8 +89,8 @@
 			"##INFO=<ID=COV1,Number=1,Type=Integer,Description=\"Total number of alignments covering this locus (HP=1)\">\n" \
 			"##INFO=<ID=COV2,Number=1,Type=Integer,Description=\"Total number of alignments covering this locus (HP=2)\">\n" \
 			"##INFO=<ID=AS,Number=1,Type=Integer,Description=\"Alignment score\">\n" \
-			"##INFO=<ID=NV,Number=1,Type=Integer,Description=\"Number of variations on same consensus\">\n" \
-			"##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description=\"Imprecise structural variation\">\n" \
+			"##INFO=<ID=NV,Number=1,Type=Integer,Description=\"Number of variants on same consensus\">\n" \
+			"##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description=\"Imprecise structural variant\">\n" \
 			"##INFO=<ID=CIGAR,Number=A,Type=String,Description=\"CIGAR of consensus\">\n" \
 			"##INFO=<ID=READS,Number=.,Type=String,Description=\"Reads identifiers supporting the call\">\n" \
 			"##INFO=<ID=RVEC,Number=.,Type=String,Description=\"Reads vector used by genotyper\">\n" \

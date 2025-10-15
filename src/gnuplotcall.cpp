@@ -102,7 +102,7 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 	cout << "For more detailed benchmarking results, please refer to the generated result information in the respective folders." << endl;
 	cout << "For more detailed experiment information, please refer to the github repositories: https://github.com/zhuxiao/asvbm and https://github.com/zhuxiao/asvbm-experiments." << endl;
 //	cout << "For more detailed evaluation results, please refer to the generated result information in the respective folders." << endl;
-	cout << "If you have any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!" << endl;
+	cout << "For any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!" << endl;
 }
 
 //Compare multiple data sets
@@ -211,7 +211,8 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
 void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_files1, vector<string> &tool_names, string &outputBasicMetricschart){
 	// Prepare the bar chart data, including Recall, Precision, and F1 values for n cases
 	vector<string> scenarios;
-	vector<string> metrics = {"TP", "FP", "FN", "LP"};
+	vector<string> metrics = {"TP", "FP", "FN"};
+//	vector<string> metrics = {"TP", "FP", "FN", "LP", "LP_bench"};
 	if(tool_names.size()>1) scenarios = tool_names;
 	//Note to be modified to remove '/'
 	else {
@@ -238,7 +239,7 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
 		return ;
 	}
 	// Write data to a file
-	for (size_t i = 0; i < 4; i++) {
+	for (size_t i = 0; i < 3; i++) {
 		dataFile << metrics[i];
 		for (size_t j = 0; j < scenarios.size(); j++) {
 			dataFile << " " << MeticsValues[j][i];
@@ -397,7 +398,8 @@ void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathna
 		dataV.push_back(make_pair("TP", MeticsValues1[0][0]));
 		dataV.push_back(make_pair("FP", MeticsValues1[0][1]));
 		dataV.push_back(make_pair("FN", MeticsValues1[0][2]));
-		dataV.push_back(make_pair("LP", MeticsValues1[0][3]));
+//		dataV.push_back(make_pair("LP", MeticsValues1[0][3]));
+//		dataV.push_back(make_pair("LP-bench", MeticsValues1[0][4]));
 
 		outputFileName = "result_classification.png";
 		outputFileNamePath = outputBasicMetricschart + '/' + outputFileName;
@@ -430,20 +432,26 @@ void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathna
 }
 
 // stat 1
-void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinename, string &refRegSizeFinename_tmp){
+void SvNumberDistributionGraph(int max_valid_reg_thres, int min_valid_reg_thres, string &refRegSizeFinename, string &refRegSizeFinename_tmp){
 	string fileName, fileNamePath, filePathstr_tmp;
-	if(refRegSizeFinename.compare("ref_reg_size_benchmark")==0){
+	if(refRegSizeFinename.compare("ref_reg_size_benchmark")==0 and (max_valid_reg_thres == 0 && min_valid_reg_thres == 0)){
 		fileName = refRegSizeFinename;
 		fileNamePath = refRegSizeFinename_tmp;
 		filePathstr_tmp = getContentAfterSlash(fileNamePath) + ".png";
 		if(folderPng1.size()==0) folderPng1.push_back(filePathstr_tmp);
-	}else if(refRegSizeFinename.compare("ref_reg_size_user")== 0 and max_valid_reg_thres == 0){
+	}else if(refRegSizeFinename.compare("ref_reg_size_benchmark")==0 and (max_valid_reg_thres > 0 || min_valid_reg_thres > 0)){
+		fileName = refRegSizeFinename + "_filtered";
+		fileNamePath = refRegSizeFinename_tmp;
+//		regSizeFiles.push_back(fileNamePath);
+		filePathstr_tmp = getContentAfterSlash(fileNamePath) + ".png";
+		folderPng1.push_back(filePathstr_tmp);
+	}else if(refRegSizeFinename.compare("ref_reg_size_user")== 0 and (max_valid_reg_thres == 0 && min_valid_reg_thres == 0)){
 		fileName = refRegSizeFinename;
 		fileNamePath = refRegSizeFinename_tmp;
 		filePathstr_tmp = getContentAfterSlash(fileNamePath) + ".png";
 		folderPng1.push_back(filePathstr_tmp);
-	}else if(refRegSizeFinename.compare("ref_reg_size_user")== 0 and max_valid_reg_thres > 0){
-		fileName = refRegSizeFinename + "_long_filtered";
+	}else if(refRegSizeFinename.compare("ref_reg_size_user")== 0 and (max_valid_reg_thres > 0 || min_valid_reg_thres > 0)){
+		fileName = refRegSizeFinename + "_filtered";
 		fileNamePath = refRegSizeFinename_tmp;
 		regSizeFiles.push_back(fileNamePath);
 		filePathstr_tmp = getContentAfterSlash(fileNamePath) + ".png";
@@ -584,7 +592,7 @@ void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname){
 
 	pclose(gnuplotPipe);
 
-	cout << "\n" <<"Statistical results of breakpoint distance and variation region size ratio are saved in:" << filename_pngPath << endl;
+	cout << "\n" <<"Statistical results of breakpoint distance and variant region size ratio are saved in:" << filename_pngPath << endl;
 }
 
 //stat 4

@@ -25,9 +25,10 @@
 #include "gnuplotcall.h"
 #include "num_stat.h"
 #include "vcf_header.h"
-
+#include <cmath>
 set<string> readVCFHeader(const string& filename);
 vector<string> mergeHeaders(const vector<string>& filenames);
+vector<string> split1(const string& str, char delimiter);
 string getCurrentTime();
 void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &sv_files1);
 #endif /* SRC_BENCHMARK_INTEGRATION_H_ */

@@ -26,7 +26,7 @@ string Pathquerybackslash(string filename){
 }
 
 // convert data
-void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label){
+/*void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label){
 	ifstream infile;
 	string line, chrname, chrname2, sv_type_str, ref_seq, alt_seq, reg_str, lineInfo;
 	vector<string> str_vec, sv_type_vec;
@@ -108,7 +108,7 @@ void convertBed(const string &infilename, const string &outfilename, const strin
 
 	// release memory
 	releaseSVItemVec(sv_item_vec);
-}
+}*/
 
 //Determine if it is present in chromosome collections
 bool isExistChromosomeSet(string &chrname){
@@ -131,6 +131,685 @@ bool isDecoyChr(string &chrname){
 
 	return flag;
 }
+void processFile(const string &infilename, bool &isVCF, bool &isBED){
+	ifstream infile;
+	string line;
+	vector<string> headerCols;
+	infile.open(infilename);
+	if(!infile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << infilename << endl;
+		exit(1);
+	}
+	isVCF = false, isBED = false;
+	while(getline(infile, line)){
+		if(line.empty()){
+			continue;
+		}
+		// 情况1：##开头的行（VCF元信息行）
+		if(line.size() >= 2 && line[0] == '#' && line[1] == '#'){
+			// 检查是否为VCF标志性元信息行
+			if(line.size() >= 16 && line.substr(0, 16) == "##fileformat=VCF"){
+				isVCF = true;
+				break;
+			}
+			continue;
+		}
+		// 情况2：#开头但非##开头的行（标题行）
+		if(line[0] == '#'){
+			// 确保行长度≥2，避免访问headerCols[0]时越界（如行仅为"#"）
+			if(line.size() < 2){
+				continue;
+			}
+			headerCols = split(line, "\t");
+			if(headerCols.empty()){
+				continue; // 分割失败，跳过
+			}
+			// 判断标题行类型
+			if(headerCols[0] == "#CHROM"){
+				isVCF = true;
+				break;
+			}else if (headerCols[0] == "#Chr" || headerCols[0] == "#Chr1"){
+				isBED = true;
+				break;
+			}
+		}
+	}
+
+	infile.close();
+}
+/*void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label){
+	ifstream infile;
+	string line, chrname, chrname2;  // 主染色体、TRA/BND涉及的第二条染色体
+	string start_pos_str, endpos_str, start_pos2_str, endpos2_str;  // 位置字符串
+	string sv_type_str, sv_len_str, sv_len_str1, sv_len_str2;  // 变异类型和长度
+	string ref_seq, alt_seq, ref_seq1, alt_seq1, ref_seq2, alt_seq2;  // 参考/替代序列
+	string reg_str, lineInfo, mate_reg;  // 基因组区域、行原始信息、mate区域
+	size_t start_pos, endpos, start_pos2, endpos2;  // 位置数值（size_t适配大坐标）
+	int32_t sv_len, sv_len1, sv_len2, refseq_len_tmp;  // 变异长度（支持正负）
+	vector<string> str_vec;  // 行分割后的字段向量
+	vector<SV_item*> sv_item_vec;  // 存储SV项目的容器
+	SV_item *sv_item, *sv_item1, *sv_item2;  // SV项目指针
+	char *seq;  // 从参考基因组获取的序列
+	faidx_t *fai;  // 参考基因组索引（用于快速获取序列）
+	vector<string> userannotationLines;  // 存储用户注释行
+
+	fai = fai_load(reffilename.c_str());
+	if(!fai){
+		cerr << __func__ << ", line=" << __LINE__ << ": 无法加载参考基因组索引: " << reffilename << endl;
+		exit(1);
+	}
+	infile.open(infilename);
+	if(!infile.is_open()){
+		cerr << __func__ << ", line=" << __LINE__ << ": 无法打开文件: " << infilename << endl;
+		exit(1);
+	}
+	while(getline(infile, line)){
+		if(line.empty()) continue;
+
+		if(line.at(0) == '#'){
+			if (label == "benchmark"){
+				benchmarkannotationLines.push_back(line);  // 基准数据注释行
+			}else if (label == "user"){
+				userannotationLines.push_back(line);  // 用户数据注释行
+			}
+			continue;
+		}
+
+		// 处理数据行：非#开头的有效行
+		lineInfo = line;  // 保存原始行信息，用于后续追溯
+		if (label == "benchmark"){
+			benchmarklineMap[lineInfo] = 0;  // 基准数据行映射（用于校验）
+		}
+		str_vec = split(line, "\t");  // 按制表符分割字段（BED格式强制制表符分隔）
+		size_t num_cols = str_vec.size();  // 获取当前行列数
+
+
+		// 校验列数：仅支持12列（非BND/TRA）或16列（BND/TRA）
+		if(num_cols != 12 && num_cols != 16){
+			cerr << __func__ << ": 无效BED格式（预期12或16列），行内容: " << line << endl;
+			continue;
+		}
+
+
+		// --------------------------
+		// 解析12列BED：非BND/TRA变异（如DEL、INS、INV、DUP等）
+		// 格式：#Chr	Start	End	ID	SVType	SVLen	DupNum	Ref	Alt	Extra	FORMAT	sample
+		// --------------------------
+		if(num_cols == 12){
+			chrname = str_vec[0];  // 0: 染色体名称
+			start_pos_str = str_vec[1];  // 1: 起始位置（BED通常为0-based）
+			endpos_str = str_vec[2];  // 2: 结束位置
+			sv_type_str = str_vec[4];  // 4: 变异类型（如DEL、INS）
+			sv_len_str = str_vec[5];  // 5: 变异长度
+			ref_seq = str_vec[7];  // 7: 参考序列（REF）
+			alt_seq = str_vec[8];  // 8: 替代序列（ALT）
+
+			// 染色体过滤（排除decoy和无效染色体）
+			if(!chromosomeSet.empty() && !isExistChromosomeSet(chrname)) continue;
+			if(chromosomeSet.empty() && isDecoyChr(chrname)) continue;
+
+			// 解析变异长度（校验有效性）
+			if(sv_len_str.empty() || sv_len_str.find_first_not_of("-0123456789") != string::npos){
+				sv_len = 0;  // 无效长度标记为0
+			}else{
+				sv_len = stoi(sv_len_str);
+				// 过滤过长无效长度
+				if(abs(sv_len) > MAX_VALID_SVLEN){
+					sv_len = 0;
+				}
+			}
+
+			// 处理参考序列（REF）：缺失时从参考基因组获取
+			if(ref_seq == "N" || ref_seq == "." || ref_seq == "0"){
+				start_pos = stoull(start_pos_str);
+				endpos = stoull(endpos_str);
+				if (endpos < start_pos) endpos = start_pos;  // 避免无效区间
+				reg_str = chrname + ":" + start_pos_str + "-" + to_string(endpos);
+				// 从参考基因组索引提取序列
+				seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+				if(seq == nullptr || strlen(seq) >= Max_SeqLen){
+					ref_seq = "-";  // 序列无效或过长，标记为-
+				}else{
+					ref_seq = seq;  // 有效序列赋值
+				}
+				free(seq);  // 释放fai_fetch分配的内存
+			}
+
+			// 处理替代序列（ALT）：过长或无效时标记为-
+			if(alt_seq.size() >= Max_SeqLen || alt_seq == "."){
+				alt_seq = "-";
+			}
+
+			// 转换位置为数值型
+			start_pos = stoull(start_pos_str);
+			endpos = stoull(endpos_str);
+			// TRA/BND相关字段置空（非此类变异）
+			chrname2 = "";
+			start_pos2 = endpos2 = 0;
+			sv_len1 = sv_len2 = 0;
+
+			// 特殊处理DEL类型：长度取绝对值（同convertVcf逻辑）
+			if(sv_type_str == "DEL"){
+				sv_len = abs(sv_len);
+			}
+
+			// 创建SV项目并添加到容器
+			sv_item = allocateSVItem(
+					chrname, start_pos, endpos, chrname2, start_pos2, endpos2,
+					sv_type_str, sv_len, ref_seq, alt_seq, lineInfo, label
+			);
+			sv_item_vec.push_back(sv_item);
+		}
+
+
+        // --------------------------
+        // 解析16列BED：BND/TRA变异（涉及两条染色体的易位或断裂点）
+        // 格式：#Chr1	Start1	End1	Chr2	Start2	End2	ID	SVType	SVLen1	SVLen2	MateReg	Ref1	Alt1	Ref2	Alt2	FORMAT	sample
+        // --------------------------
+        else if (num_cols == 16) {
+            // 提取核心字段（列索引固定）
+            chrname = str_vec[0];  // 0: 第一条染色体
+            start_pos_str = str_vec[1];  // 1: 第一条染色体起始位置
+            endpos_str = str_vec[2];  // 2: 第一条染色体结束位置
+            chrname2 = str_vec[3];  // 3: 第二条染色体（TRA/BND涉及）
+            start_pos2_str = str_vec[4];  // 4: 第二条染色体起始位置
+            endpos2_str = str_vec[5];  // 5: 第二条染色体结束位置
+            sv_type_str = str_vec[7];  // 7: 变异类型（BND或TRA）
+            sv_len_str1 = str_vec[8];  // 8: 第一条染色体侧长度
+            sv_len_str2 = str_vec[9];  // 9: 第二条染色体侧长度
+            mate_reg = str_vec[10];  // 10: mate区域信息
+            ref_seq1 = str_vec[11];  // 11: 第一条染色体侧REF
+            alt_seq1 = str_vec[12];  // 12: 第一条染色体侧ALT
+            ref_seq2 = str_vec[13];  // 13: 第二条染色体侧REF
+            alt_seq2 = str_vec[14];  // 14: 第二条染色体侧ALT
+
+            // 染色体过滤：两条染色体均需有效
+            if ((!chromosomeSet.empty() && (!isExistChromosomeSet(chrname) || !isExistChromosomeSet(chrname2))) ||
+                (chromosomeSet.empty() && (isDecoyChr(chrname) || isDecoyChr(chrname2)))) {
+                continue;
+            }
+
+            // 解析变异长度（两条染色体侧）
+            sv_len1 = (sv_len_str1.empty() || sv_len_str1.find_first_not_of("-0123456789") != string::npos) ? 0 : stoi(sv_len_str1);
+            sv_len2 = (sv_len_str2.empty() || sv_len_str2.find_first_not_of("-0123456789") != string::npos) ? 0 : stoi(sv_len_str2);
+            if (abs(sv_len1) > MAX_VALID_SVLEN) sv_len1 = 0;
+            if (abs(sv_len2) > MAX_VALID_SVLEN) sv_len2 = 0;
+
+            // 处理第一条染色体侧参考序列（REF1）
+            if (ref_seq1 == "N" || ref_seq1 == "." || ref_seq1 == "0") {
+                start_pos = stoull(start_pos_str);
+                endpos = stoull(endpos_str);
+                if (endpos < start_pos) endpos = start_pos;
+                reg_str = chrname + ":" + start_pos_str + "-" + to_string(endpos);
+                seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+                ref_seq1 = (seq == nullptr || strlen(seq) >= Max_SeqLen) ? "-" : seq;
+                free(seq);
+            }
+
+            // 处理第二条染色体侧参考序列（REF2）
+            if (ref_seq2 == "N" || ref_seq2 == "." || ref_seq2 == "0") {
+                start_pos2 = stoull(start_pos2_str);
+                endpos2 = stoull(endpos2_str);
+                if (endpos2 < start_pos2) endpos2 = start_pos2;
+                reg_str = chrname2 + ":" + start_pos2_str + "-" + to_string(endpos2);
+                seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+                ref_seq2 = (seq == nullptr || strlen(seq) >= Max_SeqLen) ? "-" : seq;
+                free(seq);
+            }
+
+            // 处理替代序列（ALT1和ALT2）
+            if (alt_seq1.size() >= Max_SeqLen || alt_seq1 == ".") alt_seq1 = "-";
+            if (alt_seq2.size() >= Max_SeqLen || alt_seq2 == ".") alt_seq2 = "-";
+
+            // 转换位置为数值型
+            start_pos = stoull(start_pos_str);
+            endpos = stoull(endpos_str);
+            start_pos2 = stoull(start_pos2_str);
+            endpos2 = stoull(endpos2_str);
+
+            // 对BND/TRA变异创建两个SV项目（分别对应两条染色体侧）
+            sv_item1 = allocateSVItem(
+                chrname, start_pos, endpos, chrname2, start_pos2, endpos2,
+                sv_type_str, sv_len1, ref_seq1, alt_seq1, lineInfo, label
+            );
+            sv_item2 = allocateSVItem(
+                chrname2, start_pos2, endpos2, chrname, start_pos, endpos,  // 反向关联主染色体
+                sv_type_str, sv_len2, ref_seq2, alt_seq2, lineInfo, label
+            );
+            sv_item_vec.push_back(sv_item1);
+            sv_item_vec.push_back(sv_item2);
+        }
+    }
+
+
+
+	infile.close();
+	fai_destroy(fai);
+	if(!mate_filename.empty()) removemateSVItems(mate_filename, sv_item_vec);
+	if(!snv_filename.empty()) removeSNVItems(snv_filename, sv_item_vec);
+
+	output2File(outfilename, sv_item_vec, outConvertScreenFile);
+	releaseSVItemVec(sv_item_vec);
+
+	usersetsannotationLines.push_back(userannotationLines);
+	usersets_num++;
+}*/
+void convertBed(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label) {
+    ifstream infile;
+    string line, lineInfo;
+
+    // 存储两行表头的列名（原始列名和小写列名）
+
+    vector<string> header1_lower, header2_lower;  // 小写列名（用于不区分大小写匹配）
+    int header_count = 0;  // 已读取的表头行数（0/1/2）
+
+    // 第一行表头（非TRA/BND）的字段索引结构体
+    struct NormalIndex {
+        size_t chr = (size_t)-1;    // #Chr列索引
+        size_t start = (size_t)-1;  // Start列索引
+        size_t end = (size_t)-1;    // End列索引
+        size_t svtype = (size_t)-1; // SVType列索引
+        size_t svlen = (size_t)-1;  // SVLen列索引
+        size_t ref = (size_t)-1;    // Ref列索引
+        size_t alt = (size_t)-1;    // Alt列索引
+    } normal_idx;
+
+    // 第二行表头（TRA/BND）的字段索引结构体
+    struct TraIndex {
+        size_t chr1 = (size_t)-1;   // #Chr1列索引
+        size_t start1 = (size_t)-1; // Start1列索引
+        size_t end1 = (size_t)-1;   // End1列索引
+        size_t chr2 = (size_t)-1;   // Chr2列索引
+        size_t start2 = (size_t)-1; // Start2列索引
+        size_t end2 = (size_t)-1;   // End2列索引
+        size_t svtype = (size_t)-1; // SVType列索引
+        size_t svlen1 = (size_t)-1; // SVLen1列索引
+        size_t svlen2 = (size_t)-1; // SVLen2列索引
+        size_t ref1 = (size_t)-1;   // Ref1列索引
+        size_t alt1 = (size_t)-1;   // Alt1列索引
+        size_t ref2 = (size_t)-1;   // Ref2列索引
+        size_t alt2 = (size_t)-1;   // Alt2列索引
+    } tra_idx;
+
+    // 其他变量定义
+    string chrname, chrname2;
+    string start_pos_str, endpos_str, start1_str, end1_str, start2_str, end2_str;
+    string sv_type_str, sv_len_str, sv_len1_str, sv_len2_str;
+    string ref_seq, alt_seq, ref1_seq, alt1_seq, ref2_seq, alt2_seq;
+    string reg_str;
+    size_t start_pos, endpos, start1, end1, start2, end2;
+    int32_t sv_len = 0, sv_len1 = 0, sv_len2 = 0, refseq_len_tmp;
+    vector<string> str_vec;
+    vector<SV_item*> sv_item_vec;
+    SV_item *sv_item, *sv_item1, *sv_item2;
+    char *seq;
+    faidx_t *fai;
+    vector<string> userannotationLines;
+    string empty_str;
+
+    // 加载参考基因组索引
+    fai = fai_load(reffilename.c_str());
+    if (!fai) {
+        cerr << __func__ << ", line=" << __LINE__ << ": 无法加载参考基因组索引: " << reffilename << endl;
+        exit(1);
+    }
+
+    // 打开输入BED文件
+    infile.open(infilename);
+    if (!infile.is_open()) {
+        cerr << __func__ << ", line=" << __LINE__ << ": 无法打开文件: " << infilename << endl;
+        exit(1);
+    }
+
+    // 逐行处理BED文件
+    while (getline(infile, line)) {
+        if (line.empty()) continue;
+
+        // 1. 处理注释行（支持两行表头）
+        if (line.at(0) == '#' && header_count < 2) {
+            header_count++;
+            vector<string> cols = split(line, "\t");
+            vector<string> cols_lower;
+
+            // 转换列名为小写，用于不区分大小写匹配
+            for (const auto &col : cols) {
+            	string col_clean = col;
+            	    // 直接移除所有回车符（ASCII=13）
+            	    col_clean.erase(remove(col_clean.begin(), col_clean.end(), '\r'), col_clean.end());
+
+            	    // 再移除其他控制字符（ASCII < 32）
+            	    string col_filtered;
+            	    for (char c : col_clean) {
+            	        if (c >= 32) {
+            	            col_filtered += c;
+            	        }
+            	    }
+
+            	    // 转换为小写
+            	    string col_lower;
+            	    transform(col_filtered.begin(), col_filtered.end(), back_inserter(col_lower), ::tolower);
+            	    if (header_count == 1) {
+            	            header1_lower.push_back(col_lower);  // 第一行表头的清洗后小写列名
+            	        } else if (header_count == 2) {
+            	            header2_lower.push_back(col_lower);  // 第二行表头的清洗后小写列名
+            	        }
+            }
+            // 解析第一行表头（非TRA/BND）
+            if (header_count == 1) {
+
+
+                // 提取非TRA/BND字段索引
+                for (size_t i = 0; i < header1_lower.size(); ++i) {
+                    if (header1_lower[i] == "#chr" || header1_lower[i] == "chr") {
+                        normal_idx.chr = i;
+                    } else if (header1_lower[i] == "start") {
+                        normal_idx.start = i;
+                    } else if (header1_lower[i] == "end") {
+                        normal_idx.end = i;
+                    } else if (header1_lower[i] == "svtype") {
+                        normal_idx.svtype = i;
+                    } else if (header1_lower[i] == "svlen") {
+                        normal_idx.svlen = i;
+                    } else if (header1_lower[i] == "ref") {
+                        normal_idx.ref = i;
+                    } else if (header1_lower[i] == "alt") {
+                        normal_idx.alt = i;
+                    }
+                }
+
+                // 验证第一行表头必填列
+                if (normal_idx.chr == (size_t)-1 || normal_idx.start == (size_t)-1 || normal_idx.end == (size_t)-1) {
+                    cerr << __func__ << ": 第一行表头缺少非TRA/BND必填列（Chr/Start/End）" << endl;
+                    exit(1);
+                }
+
+            }
+            // 解析第二行表头（TRA/BND）
+            else if (header_count == 2) {
+
+
+                // 提取TRA/BND字段索引
+                for (size_t i = 0; i < header2_lower.size(); ++i) {
+                    if (header2_lower[i] == "#chr1" || header2_lower[i] == "chr1") {
+                        tra_idx.chr1 = i;
+                    } else if (header2_lower[i] == "start1") {
+                        tra_idx.start1 = i;
+                    } else if (header2_lower[i] == "end1") {
+                        tra_idx.end1 = i;
+                    } else if (header2_lower[i] == "chr2") {
+                        tra_idx.chr2 = i;
+                    } else if (header2_lower[i] == "start2") {
+                        tra_idx.start2 = i;
+                    } else if (header2_lower[i] == "end2") {
+                        tra_idx.end2 = i;
+                    } else if (header2_lower[i] == "svtype") {
+                        tra_idx.svtype = i;
+                    } else if (header2_lower[i] == "svlen1") {
+                        tra_idx.svlen1 = i;
+                    } else if (header2_lower[i] == "svlen2") {
+                        tra_idx.svlen2 = i;
+                    } else if (header2_lower[i] == "ref1") {
+                        tra_idx.ref1 = i;
+                    } else if (header2_lower[i] == "alt1") {
+                        tra_idx.alt1 = i;
+                    } else if (header2_lower[i] == "ref2") {
+                        tra_idx.ref2 = i;
+                    } else if (header2_lower[i] == "alt2") {
+                        tra_idx.alt2 = i;
+                    }
+                }
+
+                // 验证第二行表头必填列
+                if (tra_idx.chr1 == (size_t)-1 || tra_idx.start1 == (size_t)-1 || tra_idx.end1 == (size_t)-1 ||
+                    tra_idx.chr2 == (size_t)-1 || tra_idx.start2 == (size_t)-1 || tra_idx.end2 == (size_t)-1) {
+                    cerr << __func__ << ": 第二行表头缺少TRA/BND必填列（Chr1/Start1/End1/Chr2/Start2/End2）" << endl;
+                    exit(1);
+                }
+            }
+
+            // 保存注释行
+            if (label == "benchmark") {
+                benchmarkannotationLines.push_back(line);
+            } else if (label == "user") {
+                userannotationLines.push_back(line);
+            }
+            continue;
+        }
+
+        // 2. 处理数据行（需至少读取1行表头）
+        if (header_count == 0) {
+            cerr << __func__ << ": 数据行前未找到标题行，格式错误" << endl;
+            continue;
+        }
+
+        lineInfo = line;
+        if (label == "benchmark") {
+            benchmarklineMap[lineInfo] = 0;
+        }
+        str_vec = split(line, "\t");
+        size_t num_cols = str_vec.size();
+
+        // 3. 动态匹配数据行对应的表头（根据列数）
+        bool is_normal = (header_count >= 1 && num_cols == header1_lower.size());  // 匹配第一行表头（非TRA/BND）
+        bool is_tra = (header_count >= 2 && num_cols == header2_lower.size());    // 匹配第二行表头（TRA/BND）
+        // 4. 处理非TRA/BND变异（匹配第一行表头）
+        if (is_normal) {
+            // 检查必填列是否有效
+            if (normal_idx.chr >= num_cols || normal_idx.start >= num_cols || normal_idx.end >= num_cols) {
+                cerr << __func__ << ": 非TRA/BND数据行缺少必填列，跳过: " << line << endl;
+                continue;
+            }
+
+            // 提取字段（使用第一行表头索引）
+            chrname = str_vec[normal_idx.chr];
+            start_pos_str = str_vec[normal_idx.start];
+            endpos_str = str_vec[normal_idx.end];
+            sv_type_str = (normal_idx.svtype != (size_t)-1 && normal_idx.svtype < num_cols) ? str_vec[normal_idx.svtype] : "-";
+            sv_len_str = (normal_idx.svlen != (size_t)-1 && normal_idx.svlen < num_cols) ? str_vec[normal_idx.svlen] : "-";
+            ref_seq = (normal_idx.ref != (size_t)-1 && normal_idx.ref < num_cols) ? str_vec[normal_idx.ref] : "-";
+            alt_seq = (normal_idx.alt != (size_t)-1 && normal_idx.alt < num_cols) ? str_vec[normal_idx.alt] : "-";
+            // 染色体过滤
+            if (!chromosomeSet.empty() && !isExistChromosomeSet(chrname)) continue;
+            if (chromosomeSet.empty() && isDecoyChr(chrname)) continue;
+
+            // 解析SVLen（核心修复：正确提取非TRA/BND的SVLen值）
+            sv_len = 0;
+            sv_len_str.erase(remove(sv_len_str.begin(), sv_len_str.end(), '\r'), sv_len_str.end());
+            if (sv_len_str != "-") {
+                // 检查是否为有效数字
+                if (sv_len_str.find_first_not_of("-0123456789") == string::npos) {
+                    try {
+                        sv_len = stoi(sv_len_str);
+                        // 过滤超过阈值的长度
+                        if (abs(sv_len) > MAX_VALID_SVLEN) {
+                            sv_len = 0;
+                        }
+                    } catch (...) {
+                        sv_len = 0;  // 转换失败时设为0
+                    }
+                }
+                // 否则保持0（非数字）
+            }
+            // 处理参考序列
+            if (ref_seq == "N" || ref_seq == "." || ref_seq == "0" || ref_seq == "-") {
+                try {
+                    start_pos = stoull(start_pos_str);
+                    endpos = stoull(endpos_str);
+                } catch (...) {
+                    cerr << __func__ << ": 位置格式错误，跳过: " << line << endl;
+                    continue;
+                }
+                if (endpos < start_pos) endpos = start_pos;
+                reg_str = chrname + ":" + start_pos_str + "-" + to_string(endpos);
+                seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+                ref_seq = (seq == nullptr || strlen(seq) >= Max_SeqLen) ? "-" : seq;
+                free(seq);
+            }
+
+            // 处理替代序列
+            if (alt_seq.size() >= Max_SeqLen || alt_seq == "." || alt_seq == "0") {
+                alt_seq = "-";
+            }
+
+            // 转换位置为数值型
+            try {
+                start_pos = stoull(start_pos_str);
+                endpos = stoull(endpos_str);
+            } catch (...) {
+                cerr << __func__ << ": 位置转换失败，跳过: " << line << endl;
+                continue;
+            }
+
+            // DEL类型长度取绝对值
+            if (sv_type_str != "-" && (sv_type_str == "DEL" || sv_type_str == "del")) {
+                sv_len = abs(sv_len);
+            }
+
+            // 创建SV_item
+            empty_str.clear();
+            sv_item = allocateSVItem(
+                chrname, start_pos, endpos, empty_str, 0, 0,
+                sv_type_str, sv_len, ref_seq, alt_seq, lineInfo, label
+            );
+            sv_item_vec.push_back(sv_item);
+
+
+
+        }
+        // 5. 处理TRA/BND变异（匹配第二行表头）
+        else if (is_tra) {
+            // 检查必填列是否有效
+            if (tra_idx.chr1 >= num_cols || tra_idx.start1 >= num_cols || tra_idx.end1 >= num_cols ||
+                tra_idx.chr2 >= num_cols || tra_idx.start2 >= num_cols || tra_idx.end2 >= num_cols) {
+                cerr << __func__ << ": TRA/BND数据行缺少必填列，跳过: " << line << endl;
+                continue;
+            }
+
+            // 提取字段（使用第二行表头索引）
+            chrname = str_vec[tra_idx.chr1];
+            start1_str = str_vec[tra_idx.start1];
+            end1_str = str_vec[tra_idx.end1];
+            chrname2 = str_vec[tra_idx.chr2];
+            start2_str = str_vec[tra_idx.start2];
+            end2_str = str_vec[tra_idx.end2];
+            sv_type_str = (tra_idx.svtype != (size_t)-1 && tra_idx.svtype < num_cols) ? str_vec[tra_idx.svtype] : "-";
+            sv_len1_str = (tra_idx.svlen1 != (size_t)-1 && tra_idx.svlen1 < num_cols) ? str_vec[tra_idx.svlen1] : "-";
+            sv_len2_str = (tra_idx.svlen2 != (size_t)-1 && tra_idx.svlen2 < num_cols) ? str_vec[tra_idx.svlen2] : "-";
+            ref1_seq = (tra_idx.ref1 != (size_t)-1 && tra_idx.ref1 < num_cols) ? str_vec[tra_idx.ref1] : "-";
+            alt1_seq = (tra_idx.alt1 != (size_t)-1 && tra_idx.alt1 < num_cols) ? str_vec[tra_idx.alt1] : "-";
+            ref2_seq = (tra_idx.ref2 != (size_t)-1 && tra_idx.ref2 < num_cols) ? str_vec[tra_idx.ref2] : "-";
+            alt2_seq = (tra_idx.alt2 != (size_t)-1 && tra_idx.alt2 < num_cols) ? str_vec[tra_idx.alt2] : "-";
+
+            // 染色体过滤
+            if ((!chromosomeSet.empty() && (!isExistChromosomeSet(chrname) || !isExistChromosomeSet(chrname2))) ||
+                (chromosomeSet.empty() && (isDecoyChr(chrname) || isDecoyChr(chrname2)))) {
+                continue;
+            }
+
+            // 解析SVLen1和SVLen2
+            sv_len1 = 0;
+            if (sv_len1_str != "-" && sv_len1_str.find_first_not_of("-0123456789") == string::npos) {
+                try {
+                    sv_len1 = stoi(sv_len1_str);
+                    if (abs(sv_len1) > MAX_VALID_SVLEN) sv_len1 = 0;
+                } catch (...) {
+                    sv_len1 = 0;
+                }
+            }
+
+            sv_len2 = 0;
+            if (sv_len2_str != "-" && sv_len2_str.find_first_not_of("-0123456789") == string::npos) {
+                try {
+                    sv_len2 = stoi(sv_len2_str);
+                    if (abs(sv_len2) > MAX_VALID_SVLEN) sv_len2 = 0;
+                } catch (...) {
+                    sv_len2 = 0;
+                }
+            }
+
+            // 处理参考序列1
+            if (ref1_seq == "N" || ref1_seq == "." || ref1_seq == "0" || ref1_seq == "-") {
+                try {
+                    start1 = stoull(start1_str);
+                    end1 = stoull(end1_str);
+                } catch (...) {
+                    cerr << __func__ << ": Chr1位置格式错误，跳过: " << line << endl;
+                    continue;
+                }
+                if (end1 < start1) end1 = start1;
+                reg_str = chrname + ":" + start1_str + "-" + to_string(end1);
+                seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+                ref1_seq = (seq == nullptr || strlen(seq) >= Max_SeqLen) ? "-" : seq;
+                free(seq);
+            }
+
+            // 处理参考序列2
+            if (ref2_seq == "N" || ref2_seq == "." || ref2_seq == "0" || ref2_seq == "-") {
+                try {
+                    start2 = stoull(start2_str);
+                    end2 = stoull(end2_str);
+                } catch (...) {
+                    cerr << __func__ << ": Chr2位置格式错误，跳过: " << line << endl;
+                    continue;
+                }
+                if (end2 < start2) end2 = start2;
+                reg_str = chrname2 + ":" + start2_str + "-" + to_string(end2);
+                seq = fai_fetch(fai, reg_str.c_str(), &refseq_len_tmp);
+                ref2_seq = (seq == nullptr || strlen(seq) >= Max_SeqLen) ? "-" : seq;
+                free(seq);
+            }
+
+            // 处理替代序列
+            if (alt1_seq.size() >= Max_SeqLen || alt1_seq == "." || alt1_seq == "0") alt1_seq = "-";
+            if (alt2_seq.size() >= Max_SeqLen || alt2_seq == "." || alt2_seq == "0") alt2_seq = "-";
+
+            // 转换位置为数值型
+            try {
+                start1 = stoull(start1_str);
+                end1 = stoull(end1_str);
+                start2 = stoull(start2_str);
+                end2 = stoull(end2_str);
+            } catch (...) {
+                cerr << __func__ << ": 位置转换失败，跳过: " << line << endl;
+                continue;
+            }
+
+            // 创建两个SV_item（对应两个断点）
+            sv_item1 = allocateSVItem(
+                chrname, start1, end1, chrname2, start2, end2,
+                sv_type_str, sv_len1, ref1_seq, alt1_seq, lineInfo, label
+            );
+            sv_item2 = allocateSVItem(
+                chrname2, start2, end2, chrname, start1, end1,
+                sv_type_str, sv_len2, ref2_seq, alt2_seq, lineInfo, label
+            );
+            sv_item_vec.push_back(sv_item1);
+            sv_item_vec.push_back(sv_item2);
+
+        }
+        // 6. 列数不匹配任何表头
+        else {
+            cerr << __func__ << ": 数据行列数（" << num_cols << "）不匹配任何表头（第一行：" << header1_lower.size()
+                 << "列，第二行：" << header2_lower.size() << "列），跳过: " << line << endl;
+            continue;
+        }
+    }
+
+    // 后续处理
+    infile.close();
+    fai_destroy(fai);
+
+    if (!mate_filename.empty()) removemateSVItems(mate_filename, sv_item_vec);
+    if (!snv_filename.empty()) removeSNVItems(snv_filename, sv_item_vec);
+
+    output2File(outfilename, sv_item_vec, outConvertScreenFile);
+    releaseSVItemVec(sv_item_vec);
+
+    usersetsannotationLines.push_back(userannotationLines);
+    usersets_num++;
+}
+
+
 // convert vcf result
 void convertVcf(const string &infilename, const string &outfilename, const string &reffilename, string &mate_filename, string &snv_filename, string &label){
 	ifstream infile;
@@ -162,6 +841,7 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 		if(line.size()){
 			if(line.at(0)!='#'){
 				lineInfo = line;
+
 				if(label.compare("benchmark")==0)	benchmarklineMap[lineInfo] = 0;
 				str_vec = split(line, "\t");
 
@@ -307,6 +987,8 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 						sv_item2 = allocateSVItem(chrname, start_pos, endpos_2, chrname2, start_pos2, endpos2, sv_type_str2, sv_len2, ref_seq, alt_seq, lineInfo, label);
 						sv_item_vec.push_back(sv_item1);
 						sv_item_vec.push_back(sv_item2);
+
+
 					}
 				}else{
 					cout << line << endl;

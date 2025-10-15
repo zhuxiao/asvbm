@@ -16,6 +16,6 @@ using namespace std;
 
 
 void refRegSizeStat(string &user_file, string &benchmark_file, int32_t max_valid_reg_thres , int32_t min_valid_reg_thres, vector<string> &sv_files1);
-void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres,  string &dirname);
+void refRegSizeStatOp(string &refRegSizeFinename, string &sv_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname, bool isSVs_before_filtered);
 
 #endif /* SRC_REF_REG_SIZE_STAT_H_ */

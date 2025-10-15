@@ -125,6 +125,7 @@ void Generatehtml(string figuresFilePath){
 		if(typeMatchLevel.compare(MATCHLEVEL_L)==0){
 			htmlFile <<"</div>\n";
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
+			htmlFile << "<h3 style=\"margin-top: 0px; margin-bottom: 0px; text-align: left;\">ASVBM version: <span style=\"color:red;\">" << PROG_VERSION<< "</span></h3>";
 			htmlFile << "<h3 style=\"margin-top: 0px; margin-bottom: 0px; text-align: left;\">Variant type match mode: <span style=\"color:red;\">" << typeMatchLevel<< " (allow type match between DUPLICTION and INSERTION)</span></h3>";
 			htmlFile << "</div>";
 		}else{
@@ -134,14 +135,14 @@ void Generatehtml(string figuresFilePath){
 			htmlFile << "</div>";
 		}
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "The benchmarking metrics has two categories after filtering long SV regions: one category is used to highlight performance by metrics including Recall, Precision, F1 score, and sequence similarity (SeqSim) and the other category presents benchmark results, which consists of TP_bench, TP_user, FP, FN. Visualizing these metrics through bar charts provides a more intuitive representation of the benchmarking results for the variation detection methods.";
+		htmlFile << "The benchmarking metrics has two categories after filtering long Structural Variant(SV) regions: one category is used to highlight performance by metrics including Recall, Precision, F1 score, and sequence similarity (SeqSim) and the other category presents benchmark results, which consists of TP, FP, FN and LP. Visualizing these metrics through bar charts provides a more intuitive representation of the benchmarking results for the variant detection methods.";
 		htmlFile << "</div>";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 0px; text-align: left;\">(1) The benchmarking results of the user-called set are as follows:</h3>";
 		htmlFile << "</div>\n";
 		// Add h2 style for the first title
 		htmlFile << "<div style=\"text-align: center; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Table "<< table_num  <<" Structural Variation Detection Method Performance Benchmarking</h4>\n";
+		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Table "<< table_num  <<" Structural variant Detection Method Performance Benchmarking</h4>\n";
 		htmlFile << "</div>\n";
 		++table_num;
 		// Add first table
@@ -163,13 +164,13 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "</table>\n";
 
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "The table 1 shows the benchmarking results of the variation identification result. Where #SVs_bench represents the number of identified structural variations (SVs) in the benchmark set, #SV_user represents the number of SVs in the called set, and #SV_filtered_user represents the number of SVs after filtering out large SVs. #TP stands for the number of True Positives, indicating correctly identified targets or events. #FP stands for the number of False Positives, representing falsely identified targets or events. #FN represents the number of False Negatives, referring to the targets or events that were missed or not identified correctly. #LP represents variant calls that, referring to adjacent or overlapping variants, collectively resemble true positives. SeqSim represents the measure of sequence similarity, which is calculated for matched SV pairs that include sequences.\n";
+		htmlFile << "The table 1 shows the benchmarking results of the variant identification result. Where #SVs_bench represents the count of identified structural variants (SVs) in the benchmark set after filtering out long SVs and short SVs. #SVs_user represents the count of SVs in the called set after filtering out long SVs and short SVs. #TP stands for the count of True Positives, indicating correctly identified targets or events. #FP stands for the count of False Positives, representing falsely identified targets or events. #FN represents the count of False Negatives, referring to the targets or events that were missed or not identified correctly. #LP_user represents variant calls that, referring to adjacent or overlapping variants in the user-called set, collectively resemble true positives in the benchmark set. #LP_bench represents variant calls that, referring to adjacent or overlapping variants in the benchmark set, collectively resemble true positives in the user-called set. SeqSim represents the measure of sequence similarity, which is calculated for matched SV pairs that include sequences.\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 0px; text-align: left;\">(2) The benchmarking results of two categories of metrics are shown in the figure:</h3>\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "Two categories of metrics are independently calculated: (a) one category includes Recall, Precision, F1 Score, and SeqSim; (b) the other category consists of #TP_bench, #TP_user, #FP, and #FN. The result statistics are as follows:\n";
+		htmlFile << "Two categories of metrics are independently calculated: (a) one category includes Recall, Precision, F1 Score, and SeqSim; (b) the other category consists of #TP, #FP and #FN. The result statistics are as follows:\n";
 		htmlFile << "</div>\n";
 //		htmlFile << "<h3>Figure 1. Benchmarking results of the user-call set</h3>\n";
 		htmlFile << "<style>\n";
@@ -223,7 +224,7 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "<h2>2. Statistical results of deviations for overlapping variants</h2>\n";
 		htmlFile <<"</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "For variations that overlap between the user-called set and the benchmark set, the deviations between them are quantified by calculating the breakpoint distance and the variant size ratio of the overlapping variations.<br>";
+		htmlFile << "For variants that overlap between the user-called set and the benchmark set, the deviations between them are quantified by calculating the breakpoint distance and the variant size ratio of the overlapping variants.<br>";
 		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(1) Deviation of the breakpoint distance</h3>";
 		htmlFile << "As the breakpoint distance approaches 0, the deviation decreases, indicating a more precise identification result. Statistics results for eight size regions are presented in Table 2:";
 		htmlFile << "</div>\n";
@@ -248,7 +249,7 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "</table>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(2) Deviation of the variant size ratio</h3>";
-		htmlFile << "Calculating the variant size ratio for two overlapping variations based on the length of SVs, the closer the ratio is to 1, the smaller the deviation, indicating a more precise and accurate identification result. Statistics results for nine size regions are presented in Table 3:";
+		htmlFile << "Calculating the variant size ratio for two overlapping variants based on the length of SVs, the closer the ratio is to 1, the smaller the deviation, indicating a more precise and accurate identification result. Statistics results for nine size regions are presented in Table 3:";
 		htmlFile << "</div>\n";
 		// Add h2 style for the third title
 		htmlFile << "<h3>Table "<< table_num  <<" Statistical results of deviation of the variant region size ratio</h3>\n";
@@ -323,7 +324,7 @@ void Generatehtml(string figuresFilePath){
 			htmlFile << "</div>\n";
 		}
 		htmlFile << "<div style=\"text-align: center; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure "<< figure_num  <<" Deviation statistics with overlapping variations</h4>\n";
+		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure "<< figure_num  <<" Deviation statistics with overlapping variants</h4>\n";
 		htmlFile <<"</div>\n";
 		++figure_num;
 
@@ -331,12 +332,12 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "<h2>3. Benchmarking results for metrics of different SV size regions</h2>\n";
 		htmlFile <<"</div>\n";
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-		htmlFile << "The SV identification results typically contain variations of various sizes, and categorize these variations into different size ranges could be used to explore the identification results more detailed in a fine-grained manner, and could provide new insights into the sensitivity of SV callers to variations of different sizes. Detailed benchmarking results are presented in the table as follows：\n";
+		htmlFile << "The SV identification results typically contain variants of various sizes, and categorize these variants into different size ranges could be used to explore the identification results more detailed in a fine-grained manner, and could provide new insights into the sensitivity of SV callers to variants of different sizes. Detailed benchmarking results are presented in the table as follows：\n";
 		htmlFile << "</div>\n";
 		if(folderPng5.size()>0){
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 			htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(1) Benchmarking results for metrics of different SV size regions with different methods</h3>";
-			htmlFile <<"Variations are categorized into eight size regions and metrics are computed for comprehensive benchmarking for different detection methods within each region. The benchmarking results are as follows:\n";
+			htmlFile <<"variants are categorized into eight size regions and metrics are computed for comprehensive benchmarking for different detection methods within each region. The benchmarking results are as follows:\n";
 			htmlFile << "</div>\n";
 			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 				htmlFile << "  <img src=\""<< folderPng5[0] << "\" alt=\"different_range.png\" style=\"width: 50%;\">\n";
@@ -390,7 +391,7 @@ void Generatehtml(string figuresFilePath){
 			htmlFile <<"</div>\n";
 			++figure_num;
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-			htmlFile << "Figure (a) shows the statistical results of Recall, Precision, F1 score and SeqSim; (b) shows the statistical results of #TP_benchmark, #TP_user,#FP and #FN.";
+			htmlFile << "Figure (a) shows the statistical results of Recall, Precision, F1 score and SeqSim; (b) shows the statistical results of #TP_user, #TP_bench, #FP and #FN.";
 			htmlFile <<"</div>\n";
 		}
 
@@ -400,7 +401,7 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 			if(SVcallernames.size()>1){
 	//		htmlFile << "<h3 style=\"margin-top: 0px; margin-bottom: 5px;\">(I) Distribution of SV  of multiple user callsets</h3>\n";
-			htmlFile << "<h4 style=\"font-size: 1.17em; margin-top: 0px; margin-bottom: 5px;\">(I) Distribution of SV  of multiple user callsets</h4>\n";
+			htmlFile << "<h4 style=\"font-size: 1.17em; margin-top: 0px; margin-bottom: 5px;\">(I) Distribution of SVs  of multiple user callsets</h4>\n";
 	//		htmlFile << "</div>\n";
 	//		htmlFile << "<div style=\"text-align: center; margin: 0 auto;\">\n";
 			htmlFile << "<div style=\"text-align: center; margin: 0 auto;\">\n";
@@ -414,38 +415,45 @@ void Generatehtml(string figuresFilePath){
 
 			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 	//		htmlFile << "<h3 style=\"margin-top: 0px; margin-bottom: 5px;\">(II) Distribution of SV  of benchmark set and user callsets</h3>\n";
-			htmlFile << "<h4 style=\"font-size: 1.17em; margin-top: 0px; margin-bottom: 5px;\">(II) Distribution of SV  of benchmark set and user callsets</h4>\n";
+			htmlFile << "<h4 style=\"font-size: 1.17em; margin-top: 0px; margin-bottom: 5px;\">(II) Distribution of SVs  of benchmark set and user callsets</h4>\n";
 //			htmlFile <<"</div>\n";
 		}
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 		//htmlFile << "The benchmark set：<br>";
 		htmlFile << "<h4 style=\"margin-top: 0px; margin-bottom: 5px;\">(1) Statistics of the count of different SV lengths in the benchmark set: </h4>";
-		htmlFile << "The SV reference region size statistics for benchmark set: Total SVs number："<< allmetrics[1][1] << "";
-		htmlFile << "<div style=\"text-align: center; margin: 0 auto;\">\n";
+		htmlFile << "The SV reference region size statistics before filtering for benchmark set: Total SV count："<< before_filtered[0]<<"<br>";
+		htmlFile << "The SV reference region size statistics after filtering for benchmark set: Total SV count："<< allmetrics[1][1] << "";
+/*		htmlFile << "<div style=\"text-align: center; margin: 0 auto;\">\n";
 		htmlFile << "  <img src=\""<< folderPng1[0]  << "\" alt=\"The benchmark set SVs count statistics\" style=\"width: 60%;\">\n";
+		htmlFile << "</div>\n";*/
+		htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
+		htmlFile <<"<h4 style=\" margin-left: 40px;\">(a)</h4>\n";
+		htmlFile << "  <img src=\""<< folderPng1[0] << "\" alt=\" The benchmark set SVs count statistics\" style=\"width: 50%;\">\n";
+		htmlFile <<"<h4 style=\" margin-left: 10px;\">(b)</h4>\n";
+		htmlFile << "  <img src=\""<< folderPng1[1]  << "\" alt=\" The benchmark set filtered SVs count statistics\" style=\"width: 50%;\">\n";
 		htmlFile << "</div>\n";
 		htmlFile << "<div style=\"text-align: center; margin: 0 auto; width: 50%;\">\n";
 		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure "<< figure_num  <<" The quantity distribution of the benchmark set</h4>\n";
 		htmlFile <<"</div>\n";
 		++figure_num;
-		htmlFile <<"The figure shows the distribution of SV counts of the benchmark set.\n";
+		htmlFile <<"The figure shows the distribution of SVs counts of the benchmark set, where (a) represents the result statistics before filtering SVs, and (b) shows the result statistics after filtering SVs.\n";
 		htmlFile <<"<br>\n";
 		//htmlFile << "The user-called set：<br>";
 		for(size_t i=1; i<allmetrics.size(); i++){
 			htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 5px;\">("<< i+1 <<") Statistics of the count of different SV lengths in the user-called set ("<< allmetrics[i][0] <<"): " << "</h4>";
-			htmlFile << "The SV reference region size statistics before filtering for user-called set ("<< allmetrics[i][0]<<"):"<< "Total SVs number：" << allmetrics[i][2]<<"<br>";
-			htmlFile << "The SV reference region size statistics after filtering for user-called set ("<< allmetrics[i][0]<<"):"<< "Total SVs number：" << allmetrics[i][3]<<"<br>";
+			htmlFile << "The SV reference region size statistics before filtering for user-called set ("<< allmetrics[i][0]<<"):"<< "Total SV count：" << before_filtered[1]<<"<br>";
+			htmlFile << "The SV reference region size statistics after filtering for user-called set ("<< allmetrics[i][0]<<"):"<< "Total SV count：" << allmetrics[i][2]<<"<br>";
 			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 			htmlFile <<"<h4 style=\" margin-left: 40px;\">(a)</h4>\n";
-			htmlFile << "  <img src=\""<< folderPng1[2*(i-1)+1] << "\" alt=\" The user-called set SVs count statistics\" style=\"width: 50%;\">\n";
+			htmlFile << "  <img src=\""<< folderPng1[2*(i-1)+2] << "\" alt=\" The user-called set SVs count statistics\" style=\"width: 50%;\">\n";
 			htmlFile <<"<h4 style=\" margin-left: 10px;\">(b)</h4>\n";
-			htmlFile << "  <img src=\""<< folderPng1[2*(i-1)+2]  << "\" alt=\" The user-called set filtered SVs count statistics\" style=\"width: 50%;\">\n";
+			htmlFile << "  <img src=\""<< folderPng1[2*(i-1)+3]  << "\" alt=\" The user-called set filtered SVs count statistics\" style=\"width: 50%;\">\n";
 			htmlFile << "</div>\n";
 			htmlFile << "<div style=\"text-align: center; margin: 0 auto; width: 50%;\">\n";
 			htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">Figure "<< figure_num  <<" The quantity distribution of the user-called set</h4>\n";
 			htmlFile <<"</div>\n";
 			++figure_num;
-			htmlFile << "The figures show the distribution of SV counts, where (a) represents the result statistics before filtering large SVs, and (b) shows the result statistics after filtering large SVs.\n";
+			htmlFile << "The figures show the distribution of SVs counts of the user-called set, where (a) represents the result statistics before filtering SVs, and (b) shows the result statistics after filtering SVs.\n";
 		}
 		htmlFile << "</div>\n";
 
@@ -457,7 +465,7 @@ void Generatehtml(string figuresFilePath){
 		htmlFile << "<ul>\n";
 		htmlFile << "<li>For more detailed benchmarking results, please refer to the generated result information in the respective folders.</li>\n";
 		htmlFile << "<li>For more detailed experiment information, please refer to the github repositories: " << " <a href=\"https://github.com/zhuxiao/asvbm\" target=\"_blank\">asvbm</a>" <<  " and <a href=\"https://github.com/zhuxiao/asvbm-experiments\" target=\"_blank\">asvbm-experiments</a>.</li>\n";
-		htmlFile << "<li>If you have any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!</li>\n";
+		htmlFile << "<li>For any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!</li>\n";
 		htmlFile << "</ul>\n";
 		htmlFile << "-------------------------- This is the end of the Benchmarking Reports. --------------------------\n";
 		htmlFile << "</div>\n";
@@ -471,7 +479,7 @@ void Generatehtml(string figuresFilePath){
 //		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">The benchmarking results of the user-called set are as follows:</h4>";
 //		htmlFile << "</div>\n";
 //		// Add h2 style for the first title
-//		htmlFile << "<h3>Table 1 Structural Variation Detection Method Performance Benchmarking</h3>\n";
+//		htmlFile << "<h3>Table 1 Structural variant Detection Method Performance Benchmarking</h3>\n";
 //		// Add first table
 //		htmlFile << "<table border=\"1\">\n";
 //		// Add header line
@@ -490,7 +498,7 @@ void Generatehtml(string figuresFilePath){
 //		}
 //		htmlFile << "</table>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "The table 1 shows the benchmarking results of the structural variation detection method. Where SVs_bench represents the quantity of structural variations (SVs) in the benchmark set, SV_user represents the quantity of SVs in the called set, and SV_user_filtered represents the quantity of SVs after filtering out large SVs. TP stands for True Positive, indicating the count of correctly identified targets or events. FP stands for False Positive, representing the count of falsely identified targets or events. FN represents False Negative, referring to the count of targets or events that were missed or not identified correctly.\n";
+//		htmlFile << "The table 1 shows the benchmarking results of the structural variant detection method. Where SVs_bench represents the quantity of structural variants (SVs) in the benchmark set, SV_user represents the quantity of SVs in the called set, and SV_user_filtered represents the quantity of SVs after filtering out large SVs. TP stands for True Positive, indicating the count of correctly identified targets or events. FP stands for False Positive, representing the count of falsely identified targets or events. FN represents False Negative, referring to the count of targets or events that were missed or not identified correctly.\n";
 //		htmlFile << "</div>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 //		htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 0px;\">The benchmarking results of two categorizes of metrics are shown in the figure:</h4>\n";
@@ -524,7 +532,7 @@ void Generatehtml(string figuresFilePath){
 //		htmlFile << "<h2>3. Statistical results of deviations for overlapping variants</h2>\n";
 //		htmlFile <<"</div>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "For variations that overlap between the user-called set and the benchmark set, the deviations between them are quantified by calculating the center distance and the region size ratio of the overlapping variations.<br>";
+//		htmlFile << "For variants that overlap between the user-called set and the benchmark set, the deviations between them are quantified by calculating the center distance and the region size ratio of the overlapping variants.<br>";
 //		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(1) Deviation of the center distance</h3>";
 //		htmlFile << "As the center distance approaches 0, the deviation decreases, indicating a more precise identification result. Statistics results for eight size regions are presented in Table 2:";
 //		htmlFile << "</div>\n";
@@ -548,7 +556,7 @@ void Generatehtml(string figuresFilePath){
 //		htmlFile << "</table>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 //		htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">(2) Deviation of the region size ratio</h3>";
-//		htmlFile << "Calculating the region size ratio for two overlapping variations based on the length of SVs, the closer the ratio is to 1, the smaller the deviation, indicating a more precise and accurate identification result. Statistics results for nine size regions are presented in Table 3:";
+//		htmlFile << "Calculating the region size ratio for two overlapping variants based on the length of SVs, the closer the ratio is to 1, the smaller the deviation, indicating a more precise and accurate identification result. Statistics results for nine size regions are presented in Table 3:";
 //		htmlFile << "</div>\n";
 //		// Add h2 style for the third title
 //		htmlFile << "<h3>Table 2 Statistical results of deviation of the region size ratio</h3>\n";
@@ -625,7 +633,7 @@ void Generatehtml(string figuresFilePath){
 //		htmlFile << "<h2>4. Benchmarking results for metrics of different SV size regions</h2>\n";
 //		htmlFile <<"</div>\n";
 //		htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
-//		htmlFile << "The SV identification results typically contain variations of various sizes, and categorize these variations into different size ranges could be used to explore the identification results more detailed in a fine-grained manner, and could provide new insights into the sensitivity of SV callers to variations of different sizes. Detailed benchmarking results are presented in the table as follows：\n";
+//		htmlFile << "The SV identification results typically contain variants of various sizes, and categorize these variants into different size ranges could be used to explore the identification results more detailed in a fine-grained manner, and could provide new insights into the sensitivity of SV callers to variants of different sizes. Detailed benchmarking results are presented in the table as follows：\n";
 //		htmlFile << "</div>\n";
 //		//The metric benchmarking results of cutesv in different SV regions
 //		for (size_t tableIndex = 0; tableIndex < allregionmetrics.size(); ++tableIndex) {
@@ -664,7 +672,7 @@ void Generatehtml(string figuresFilePath){
 //		if(folderPng5.size()>0){
 //			htmlFile << "<div style=\"text-align: left; margin: 0 auto; width: 50%;\">\n";
 //			htmlFile << "<h3 style=\"margin-top: 5px; margin-bottom: 5px; text-align: left;\">("<< allregionmetrics.size() +1 <<") Benchmarking results for metrics of different SV size regions with different methods</h3>";
-//			htmlFile <<"Variations are categorized into seven size regions and metrics are computed for comprehensive benchmarking for different detection methods within each region. The benchmarking results are as follows:\n";
+//			htmlFile <<"variants are categorized into seven size regions and metrics are computed for comprehensive benchmarking for different detection methods within each region. The benchmarking results are as follows:\n";
 //			htmlFile << "</div>\n";
 //			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 //				htmlFile << "  <img src=\""<< folderPng5[0] << "\" alt=\"different_range.png\" style=\"width: 50%;\">\n";

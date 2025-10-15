@@ -25,7 +25,7 @@ void multipledataset(vector< vector<int> > MeticsValues, vector<string> &sv_file
 void AddfileInformation(string &FileNamePath, string &Info);
 void Histogram_drawing(vector< vector<float> > MeticsValues, string &outputPathname, string &outputBasicMetricschart);
 void Histogram_drawing(vector< vector<int> > MeticsValues1, string &outputPathname, string &outputBasicMetricschart);
-void SvNumberDistributionGraph(int max_valid_reg_thres, string &refRegSizeFinename, string &refRegSizeFinename_tmp);
+void SvNumberDistributionGraph(int max_valid_reg_thres, int min_valid_reg_thres, string &refRegSizeFinename, string &refRegSizeFinename_tmp);
 void CenterdistanceAndAreasizeratio(string &sizeDifStatDirname);
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<float> > MeticsValues_4);
 void SVsizeAndNumstatistics(string &sizeNumStatDirname, vector< vector<int> > MeticsValues1_4);

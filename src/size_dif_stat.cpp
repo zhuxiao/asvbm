@@ -13,9 +13,9 @@ void SVSizeDifStat(string &user_file, string &benchmark_file, int32_t max_valid_
 //		outStatScreenFile << ">>>>>>>>> Before filtering long SV regions: <<<<<<<<<" << endl;
 //	}
 //	SVSizeDifStatOp(user_file, benchmark_file, 0, sizeDifStatDirname);
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
-		cout << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
-		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions: <<<<<<<<<" << endl;
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0){
+		cout << "\n>>>>>>>>> After filtering long SV regions and short SV regions: <<<<<<<<<" << endl;
+		outStatScreenFile << "\n>>>>>>>>> After filtering long SV regions and short SV regions: <<<<<<<<<" << endl;
 		SVSizeDifStatOp(user_file, benchmark_file, max_valid_reg_thres, min_valid_reg_thres, sizeDifStatDirname);
 	}
 	CenterdistanceAndAreasizeratio(sizeDifStatDirname);
@@ -32,15 +32,15 @@ void SVSizeDifStatOp(string &user_file, string &benchmark_file, int32_t max_vali
 	user_data = loadData(user_file);
 	benchmark_data = loadData(benchmark_file);
 
-	if(max_valid_reg_thres>0 && min_valid_reg_thres>0){
+	if(max_valid_reg_thres>0 && min_valid_reg_thres>=0){
 		long_sv_data = getLongSVReg(user_data, max_valid_reg_thres);
 		short_sv_data = getShortSVReg(user_data, min_valid_reg_thres);
 	}
 	cout << "Total user data size: " << user_data.size() << endl;
-	cout << "Total benchmark data size: " << benchmark_data.size() << endl;
+//	cout << "Total benchmark data size: " << benchmark_data.size() << endl;
 
 	outStatScreenFile << "Total user data size: " << user_data.size() << endl;
-	outStatScreenFile << "Total benchmark data size: " << benchmark_data.size() << endl;
+//	outStatScreenFile << "Total benchmark data size: " << benchmark_data.size() << endl;
 
 	// compute overlapped SV pairs
 	sv_pair_vec = computeOverlapSVPair(user_data, benchmark_data);
@@ -445,14 +445,14 @@ vector< vector<int32_t> > computeDifStatVec(vector<SV_pair*> &sv_pair_vec){
 	dif_stat_vec.push_back(negative_dif_stat_vec);
 	dif_stat_vec.push_back(positive_dif_stat_vec);
 	for(int j=3; j>=0; j--){
-//		if(j<negative_dif_stat_vec.size())
+		if(j<(int)negative_dif_stat_vec.size())
 		centerDistance.push_back(to_string(negative_dif_stat_vec[j]));
-//		else	centerDistance.push_back(to_string(0));
+		else	centerDistance.push_back(to_string(0));
 	}
 	for(int j=0; j<=3; j++){
-//		if(j<positive_dif_stat_vec.size())
+		if(j<(int)positive_dif_stat_vec.size())
 		centerDistance.push_back(to_string(positive_dif_stat_vec[j]));
-//		else centerDistance.push_back(to_string(0));
+		else centerDistance.push_back(to_string(0));
 	}
 	centerDistances.push_back(centerDistance);
 	centerDistance.clear();
