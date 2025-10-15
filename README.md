@@ -7,7 +7,21 @@ ASVBM is A tool for multi-Allele-aware Structural Variant statistics Benchmarkin
 For more detailed experiment information, please refer to [asvbm-experiments](https://github.com/zhuxiao/asvbm-experiments).
 
 ## Introduction
-ASVBM is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, ASVBM utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, reciprocal overlap, size similarity, and sequence similarity to provide an improved approach to structural variant matching. ASVBM supports multiple user callsets benchmarking and generates detailed graphical information. The workflow of ASVBM is briefly explained in the following diagram:
+ASVBM is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, ASVBM utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, reciprocal overlap, size similarity, and sequence similarity to provide an improved approach to structural variant matching. ASVBM supports multiple user callsets benchmarking and generates detailed graphical information.
+
+If you use ASVBM, please cite
+
+> Peizheng Mu, Xiangyan Feng, Lanxin Tong, Jie Huang, Chaoqun Zhu, Fei Wang, Wei Quan, Yuanjun Ma, Yucui Dong, Xiao Zhu,
+> ASVBM: Structural variant benchmarking with local joint analysis for multiple callsets,
+> Computational and Structural Biotechnology Journal,
+> Volume 27,
+> 2025,
+> Pages 2851-2862,
+> ISSN 2001-0370,
+> https://doi.org/10.1016/j.csbj.2025.06.045.
+> (https://www.sciencedirect.com/science/article/pii/S2001037025002612)
+
+The workflow of ASVBM is briefly explained in the following diagram:
 
 <div align="center">
 <img src="img/ASVBM_workflow.png" alt= "ASVBM workflow"> 
@@ -18,17 +32,13 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
     <th style="text-align: center;">Metrics</th>
     <th style="text-align: center;">Definition</th>
   </tr>
-    <tr>
+  <tr>
     <td>#SVs_bench</td>
-    <td>Number of SVs in the benchmark set</td>
+    <td>Number of SVs in the filtered benchmark set</td>
   </tr>
   <tr>
     <td>#SVs_user</td>
-    <td>Number of SVs in the use set</td>
-  </tr>
-   <tr>
-    <td>#SVs_filtered_user</td>
-    <td>Number of SVs in the filtered use set</td>
+    <td>Number of SVs in the filtered user set</td>
   </tr>
   <tr>
     <td>#TP</td>
@@ -43,8 +53,12 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
     <td> Number of targets or events that were missed or incorrectly identified</td>
   </tr>
    <tr>
-    <td>#LP</td>
-    <td> Number of cases where multiple smaller variants are nearly or entirely equivalent to a larger variant in the benchmark set</td>
+    <td>#LP_user</td>
+    <td> Number of cases where multiple smaller variants in the user set are nearly or entirely equivalent to a larger variant in the benchmark set</td>
+  </tr>
+     <tr>
+    <td>#LP_bench</td>
+    <td> Number of cases where multiple smaller variants in the benchmark set are nearly or entirely equivalent to a larger variant in the user set</td>
   </tr>
   <tr>
     <td>Recall</td>
@@ -132,11 +146,11 @@ If the current directory contains a clone of the asvbm repository, asvbm can be 
 
 
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -M 50000 -m 20 /data_test/user_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -m 20 /data_test/user_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
 ```
 or
 ```sh
-docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -M 50000 -m 20 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
+docker run -it --name xxx -v `pwd`:/data_test ASVBM_test ./asvbm stat -m 20 -T "tool1;tool2;tool3" /data_test/user_sv.vcf /data_test/user1_sv.vcf /data_test/user2_sv.vcf /data_test/benchmark_sv.vcf /data_test/reference.fa -o /data_test/test
 ```
 The -v argument mounts the current directory as /data_test in the Docker image. The output should also appear in the current directory.
 
@@ -170,7 +184,7 @@ The help information is below:
 ```sh
 $ ASVBM
 Program: ASVBM (A tool for multi-Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
-Version: 1.3.2
+Version: 1.4.0
 
 Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
 
@@ -198,11 +212,15 @@ Example:
 ### Use cases
 Invalid long user-called regions can be removed by using the `-M` option as they are too long to be valid variant regions. The command could be:
 ```sh
-$ asvbm stat -M 50000 -m 20 -T method user_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -M 100000 -m 20 -T method user_sv.vcf benchmark_sv.vcf reference.fa
 ```
 Benchmarking multiple identification result datasets can be achieved by using the '-T' option. Please use the following command:
 ```sh
-$ asvbm stat -M 50000 -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
+```
+Benchmarking specifies the chromosomes to be processed can be achieved by using the '-C' option. Please use the following command:
+```sh
+$ asvbm stat -C "chr1-22;chrX;chrY" -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
 ## Draw statistical figures
@@ -235,17 +253,17 @@ The multiple user callsets benchmarking results of the  `stat` command output th
 Here, practical examples for the benchmarking of single-sample and multiple samples are provided. For multi-sample benchmarking, it is strongly recommended to use the "-T" parameter for better differentiation of different identification results. Benchmark the identification results of chr1 of the HG002 CCS data separately using cuteSV (v2.0.3), pbsv (v2.9.0), and Sniffles (v2.0.2).
 To benchmark the identification results for a single sample, please use the following command:
 ```sh
-$ asvbm stat -M 50000 -m 20 -T "cuteSV" -i 0.7 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 20 -T "cuteSV" -i 0.7 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 To benchmark the results of multiple identification outcomes, please use the following command:
 ```sh
-$ asvbm stat -M 50000 -m 20 -T "cuteSV;pbsv;Sniffles2" -i 0.7 cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 20 -T "cuteSV;pbsv;Sniffles2" -i 0.7 cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 
 Multisample benchmarking statistical results. The benchmarking of recognition results will primarily generate the following information. This example compares a run result of cuteSV 2.0.3 on NA24385, with the benchmark dataset being the high-confidence HG002 dataset created by the Genome in a Bottle Consortium (GIAB). More specific information can be found in the respective file:
 <style>
   .plain-header {
-    font-weight: normal;  /* 取消粗体 */
+    font-weight: normal;  
   }
 </style>
 <table>
