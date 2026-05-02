@@ -2,11 +2,16 @@
 A tool for multi-Allele-aware Structural Variant statistics Benchmarking for Multiple callsets
 
 -------------------
-ASVBM is A tool for multi-Allele-aware Structural Variant statistics Benchmarking for Multiple callsets. ASVBM uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), latent positives (LPs), sequence similarity, recall, precision, and F1 score. Notably, ASVBM introduces the concept of LP and employs a local joint analysis validation approach to address cases where multiple smaller variants are nearly or entirely equivalent to a larger variant. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of ASVBM is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, ASVBM supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples. Finally, in multiple user callsets benchmarking, ASVBM supports filtering shared false negatives (FNs) not reported by any calling results within the benchmark set, providing a more reliable reference for benchmarking.
+ASVBM is A tool for multi-Allele-aware Structural Variant (SV) statistics Benchmarking for Multiple callsets. ASVBM uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), latent positives (LPs), sequence similarity, recall, precision, and F1 score. Notably, ASVBM introduces the concept of LP and employs a local joint analysis validation approach to address cases where multiple smaller variants are nearly or entirely equivalent to a larger variant. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of ASVBM is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, ASVBM supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples. Finally, in multiple user callsets benchmarking, ASVBM supports filtering shared false negatives (FNs) not reported by any calling results within the benchmark set, providing a more reliable reference for benchmarking.
 
-For more detailed experiment information, please refer to [asvbm-experiments](https://github.com/zhuxiao/asvbm-experiments).
+Besides, ASVBM has the ability of constructing confident high-quality SV set from multiple callsets, which is useful when constructing high-quality benchmark sets. ASVBM employs the bi-directional local joint analysis strategy to construct the SV set in a robost way.
+
+Moreover, ASVBM also can be used to extract multi-allelic variants in human genomes. For the diploid human genome, there are many heterozygous variants, and ASVBM can be used to extract these variants.
+
+For more detailed benchmarking experiment information, please refer to [asvbm-experiments](https://github.com/zhuxiao/asvbm-experiments).
 
 ## Introduction
+### Variant statistics
 ASVBM is a comprehensive tool for benchmarking the results of structural variant identification. Taking the VCF files as input, ASVBM utilizes multiple structural variant similarity metrics, including reference distance, SV type matching, reciprocal overlap, size similarity, and sequence similarity to provide an improved approach to structural variant matching. ASVBM supports multiple user callsets benchmarking and generates detailed graphical information.
 
 If you use ASVBM, please cite
@@ -26,7 +31,8 @@ The workflow of ASVBM is briefly explained in the following diagram:
 <div align="center">
 <img src="img/ASVBM_workflow.png" alt= "ASVBM workflow"> 
 </div>
-When benchmarking the performance of a tool, we rely on a set of quantitative metrics to measure its accuracy and practicality. Here are some commonly used benchmarking metrics  that can help us understand the different aspects of tool performance:
+Note that: In ASVBM, variants with size largar than 100 kb will be converted to BND format, and the benchmarking on these variants mainly focuses on the loci of their breakpoints rather than their necleotide sequecnes.
+When benchmarking the performance of a tool, ASVBM employes a set of quantitative metrics to measure its accuracy and practicality. Here are some commonly used benchmarking metrics  that may help us understand the different aspects of tool performance:
 <table>
   <tr>
     <th style="text-align: center;">Metrics</th>
@@ -86,7 +92,19 @@ When benchmarking the performance of a tool, we rely on a set of quantitative me
   </tr>
 </table>
 
-Additionally, SVs within seven sub-intervals are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence similarity are calculated.
+Additionally, SVs within seven sub-bins are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence similarity are calculated.
+
+### Create high-quality set
+ASVBM supports the creation of a robust high-quality set constructed from multiple callsets by bi-directional local joint analysis.
+The workflow is briefly explained in the following diagram:
+
+<div align="center">
+<img src="img/create_workflow.png" alt= "create workflow"> 
+</div>
+
+### Extract multi-allelic variants
+ASVBM supports the extraction of multi-allelic variants from each callset. Biologically, heterozygous variants may located at the same positions or loci with near distance on the chromosomes. However, due to factors such as the sequencing technology, sequencing depth differences, and the selection of sequence alignment tools and variant detection algorithms, the locus of allelic variants may have a distance shift deviation, and ASVBM adopts a start position distance threshold when determining multi-allelic variants. Specifically, if the distance of the start positions of two variants is less than the predefined threshold, they will be considered as multi-allelic variants; otherwise, they are not.
+
 ## Prerequisites
 ASVBM depends on the following libraries and tools:
 * HTSlib (http://www.htslib.org/download/)
@@ -129,9 +147,9 @@ HTSlib needs to be installed from source files.
 
 The binary file can be generated by typing:
 ```sh
-$ wget -c https://github.com/zhuxiao/asvbm/releases/download/1.4.0/asvbm_1.4.0.tar.xz
-$ tar -xf asvbm_1.4.0.tar.xz
-$ cd asvbm_1.4.0/
+$ wget -c https://github.com/zhuxiao/asvbm/releases/download/1.4.1/asvbm_1.4.1.tar.xz
+$ tar -xf asvbm_1.4.1.tar.xz
+$ cd asvbm_1.4.1/
 $ ./autogen.sh
 ```
 Or
@@ -175,6 +193,36 @@ chromosome1	start_ref_pos1	end_ref_pos1	chromosome2	start_ref_pos2	end_ref_pos2	
 ```
 The SV_type can be TRA or BND, and the SV_len will be 0.
 
+In ASVBM, convert variants larger than 100kb to BND format.
+For insertions:
+```sh
+chr6	51089157	51089157	INS	102939	C	CAGC...	-
+//after convert
+chr6	51089157	51089157	chr6	51192096	51192096	BND	0	C	CAGC...	-
+```
+Note: After conversion, the end position of insertion variant is a 'virtual locus' that only represents the variant size.
+
+For deletions:
+```sh
+chr6	29765271	29979691	DEL	214420	CGGC...	-	-
+//after convert
+chr6	29765271	29765271	chr6	29979691	29979691	BND	0	CGGC...	-	-
+chr6	29979691	29979691	chr6	29765271	29765271	BND	0	CGGC...	-	-
+```
+For inversions:
+```sh
+chr1	120630582	145080161	INV	24449579	C	-	-
+//after convert
+chr1	120630582	120630582	chr1	145080161	145080161	BND	0	C	-	-
+chr1	145080161	145080161	chr1	120630582	120630582	BND	0	G	-	-
+```
+For duplications:
+```sh
+chr15	20306137	21318340	DUP	1011664	A	-	-
+//after convert
+chr15	20306137	20306137	chr15	21318340	21318340	BND	0	A	-	-
+chr15	21318340	21318340	chr15	20306137	20306137	BND	0	T	-	-
+```
 Note that: In ASVBM, all variant types, including translocations, can be stored together in the same file as the input, for example:
 ```sh
 chr1	1167806	1168012	DEL	-206	ATCG...	A -
@@ -189,11 +237,12 @@ For the second item, there is an insertion of size 87 base pairs at the 1142381 
 ## General usage
 The help information is below:
 ```sh
-$ ASVBM
+$ asvbm
 Program: ASVBM (A tool for multi-Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
-Version: 1.4.0
+Version: 1.4.1
+Compile: May  2 2026, 21:01:59
 
-Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>
+Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] [BENCH_FILE] [REF_FILE]
 
 Description:
    USER_FILE    User called SV result file.
@@ -202,32 +251,50 @@ Description:
 
 Commands:
    stat         revise the existing benchmark set
-   create       create a new benchmark set
+   create       create a new high-quality set
+   allele       extract multi-allelic variants from each callset
 
 Example:
    # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs
-   $ asvbm stat -T method user_sv.vcf benchmark_sv.vcf ref.fa
+   $ asvbm stat -m 20 -T method user_sv.vcf benchmark_sv.vcf ref.fa
 
    # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option
-   $ asvbm stat -T method -S user_sv.vcf benchmark_sv.vcf ref.fa
+   $ asvbm stat -m 20 -T method -S user_sv.vcf benchmark_sv.vcf ref.fa
 
    # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets
-   $ asvbm create -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
-```
+   $ asvbm stat -m 20 -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 
+   # create high-quality set based on multiple user callsets
+   $ asvbm create -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
+
+   # extract multi-allelic variants from each callset
+   $ asvbm allele user_sv1.vcf user_sv2.vcf user_sv3.vcf
+```
 
 ### Use cases
 Invalid long user-called regions can be removed by using the `-M` option as they are too long to be valid variant regions. The command could be:
 ```sh
 $ asvbm stat -M 100000 -m 20 -T method user_sv.vcf benchmark_sv.vcf reference.fa
 ```
-Benchmarking multiple identification result datasets can be achieved by using the '-T' option. Please use the following command:
+Benchmarking multiple identification result datasets can be achieved by using the '-T' option.
 ```sh
 $ asvbm stat -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
-Benchmarking specifies the chromosomes to be processed can be achieved by using the '-C' option. Please use the following command:
+Benchmarking specifies the chromosomes to be processed can be achieved by using the '-C' option.
 ```sh
 $ asvbm stat -C "chr1-22;chrX;chrY" -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
+```
+Perform the refinement of benchmark set along with the benchmarking process can be achieved by using the '-b' option.
+```sh
+$ asvbm stat -b -C "chr1-22;chrX;chrY" -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
+```
+Filter out variants that violating Mendelian inheritance laws can be achieved by using the '-g' option.
+```sh
+$ asvbm create -g -C "chr1-22" -m 20 -T "tool1;tool2;tool3" hg002_sv.vcf hg003_sv.vcf hg004_sv.vcf benchmark_sv.vcf reference.fa
+```
+Extract multi-allelic variants for each callset respectively.
+```sh
+$ asvbm allele user_sv1.vcf user_sv2.vcf user_sv3.vcf
 ```
 
 ## Draw statistical figures
@@ -257,22 +324,18 @@ The multiple user callsets benchmarking results of the  `stat` command output th
 | SharedFN & RefinedBenchmark | bench_low_quality_variant.vcf; Refined_benchmark.vcf;        |
 
 ## Example Usage
-Here, practical examples for the benchmarking of single-sample and multiple samples are provided. For multi-sample benchmarking, it is strongly recommended to use the "-T" parameter for better differentiation of different identification results. Benchmark the identification results of chr1 of the HG002 CCS data separately using cuteSV (v2.0.3), pbsv (v2.9.0), and Sniffles (v2.0.2).
+Here, practical examples for the benchmarking of single-sample and multiple samples are provided. For multi-sample benchmarking, it is strongly recommended to use the `-T` parameter for better differentiation of different identification results. Benchmark the identification results of chr1 of the HG002 CCS data separately using ASVCLR, cuteSV, pbsv, and Sniffles.
 To benchmark the identification results for a single sample, please use the following command:
 ```sh
-$ asvbm stat -m 20 -T "cuteSV" -i 0.7 cuteSV_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 20 -T "ASVCLR" asvclr_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 To benchmark the results of multiple identification outcomes, please use the following command:
 ```sh
-$ asvbm stat -m 20 -T "cuteSV;pbsv;Sniffles2" -i 0.7 cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
+$ asvbm stat -m 20 -T "ASVCLR;cuteSV;pbsv;Sniffles2" asvclr_chr1.vcf cuteSV_chr1.vcf pbsv_chr1.vcf Sniffles_chr1.vcf benchmark_sv.vcf reference.fa
 ```
 
-Multisample benchmarking statistical results. The benchmarking of recognition results will primarily generate the following information. This example compares a run result of cuteSV 2.0.3 on NA24385, with the benchmark dataset being the high-confidence HG002 dataset created by the Genome in a Bottle Consortium (GIAB). More specific information can be found in the respective file:
-<style>
-  .plain-header {
-    font-weight: normal;  
-  }
-</style>
+Multisample benchmarking statistical results. The benchmarking of recognition results will primarily generate the following information. This example compares a run result of cuteSV on HG002, with the benchmark dataset being the high-confidence HG002 dataset created by the Genome in a Bottle Consortium (GIAB). More specific information can be found in the respective file:
+
 <table>
   <thead>
     <tr>
