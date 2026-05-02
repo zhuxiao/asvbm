@@ -28,8 +28,11 @@ int main(int argc, char *argv[]){
 	}else if(strcmp(argv[1], "stat")==0){
 		command = "stat";
 		return parseStat(argc-1, argv+1);
+	}else if(strcmp(argv[1], "allele")==0){
+		command = "allele";
+		return parseAllele(argc-1, argv+1);
 	}else{
-		cerr << "invalid command: " << argv[1] << endl << endl;;
+		cerr << "invalid command: " << argv[1] << endl << endl;
 		show(); return 1;
 	}
 

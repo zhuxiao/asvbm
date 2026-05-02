@@ -61,7 +61,7 @@ void ResultPresentation(vector<string> &sv_files1, string &outputPathname, vecto
 			string mate_filename = "", snv_filename = "";
 			string label1 = "user", label2 = "benchmark";
 			vector<SV_item*> sv_item_vec;
-			string benchfilename = outputCommonFN + "/" + "benchmarkfile.bed";
+			string benchfilename = outputCommonFN + "/" + "Refined_benchmark.bed";
 			convertVcf(outputBenchfilename, benchfilename, ref_file, mate_filename, snv_filename, label2);
 
 			for(size_t i=0; i<sharedFPFilenames.size(); i++){
@@ -1482,7 +1482,18 @@ bool numericSort(const pair<string, int>& lhs, const pair<string, int>& rhs) {
 	}
 	return lhsChrom < rhsChrom; // Otherwise sort by chromosome
 }
+bool numericSort1(const SV_item* lhs, const SV_item* rhs) {
+	auto lhsParsed = parseChromPos(lhs->lineInfo);
+	auto rhsParsed = parseChromPos(rhs->lineInfo);
 
+	int lhsChrom = chromToInt(lhsParsed.first);
+	int rhsChrom = chromToInt(rhsParsed.first);
+
+	if (lhsChrom == rhsChrom) {
+		return lhsParsed.second < rhsParsed.second; // Sort by position if chromosome is the same
+	}
+	return lhsChrom < rhsChrom; // Otherwise sort by chromosome
+}
 //Shared FN
 void GenerateSharedFNfile(string& outputFile){
 	outputSharedFNsfilename = outputFile + "/" + "bench_low_quality_variant.vcf";

@@ -49,3 +49,4 @@ void findCommonFN(string& outputFile, vector<string>& inputFiles);
 void SvNumberDistributionGraph(const vector<string> &fileNamesPaths, string& svdistributionDirPath);
 //extern void findSharedFP(std::string& outputFile, std::vector<std::string>& sharedFP);
 bool numericSort(const pair<string, int>& lhs, const pair<string, int>& rhs);
+bool numericSort1(const SV_item* lhs, const SV_item* rhs);

@@ -4,6 +4,8 @@
 #include <iostream>
 #include <cstring>
 #include <vector>
+#include <queue>
+#include <functional>
 #include <limits.h>
 #include <sys/stat.h>
 #include <set>
@@ -19,6 +21,7 @@
 //#include <chrono>
 
 #include "constants.h"
+#include "convert.h"
 #include "structure.h"
 #include "util.h"
 #include "meminfo.h"
@@ -30,6 +33,9 @@ using namespace std;
 void upperSeq(string &seq);
 void SVNumStat(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres,string &outputPathname, vector<string> &sv_files1);
 void SVNumStatOp(string &user_file, string &benchmark_file, string &ref_file, int32_t max_valid_reg_thres, int32_t min_valid_reg_thres, string &dirname);
+void AlleleNumStat(string &user_file, string &outputPathname, vector<string> &sv_files1);
+void AlleleNumStatOp(string &user_file, string &dirname);
+void computeAlleleNumStat(vector<SV_item*> &sv_data1, string &file_prefix, int Markers);
 void computeNumStat(vector<SV_item*> &sv_data1, vector<SV_item*> &sv_data2, string &file_prefix, faidx_t *fai, int Markers);
 void computeNumStatFromFile(vector<SV_item*> TPbench_data, vector<SV_item*> TPuser_data, vector<SV_item*> FP_data, vector<SV_item*> FN_data, string &file_prefix, int32_t endpos, int Markers);
 void CollectData(int LP, int TP_benchmark, int FP, int FN, vector<int> &Data, size_t num, int Markers);
@@ -38,17 +44,22 @@ void CollectData2(int LP_bench, int LP, int TP_benchmark, int FP, int FN, vector
 void computeLenStat(vector<SV_item*> &data, string &description_str);
 
 vector<vector<SV_item*>> intersect(vector<SV_item*> &data1, vector<SV_item*> &data2, faidx_t *fai);
+vector<vector<SV_item*>> intersectAllele(vector<SV_item*> &data1);
 vector<vector<SV_item*>> constructSubsetByChr(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data);
+vector<vector<SV_item*>> constructAlleleSubsetByChr(vector<SV_item*> &user_data);
 set<string> getChrnames(vector<SV_item*> &dataset);
 set<string> getChrUnion(set<string> &chrname_set1, set<string> &chrname_set2);
 vector<string> sortChrnames(set<string> &chrname_set);
 vector<vector<SV_item*>> constructSubsetByChrOp(vector<SV_item*> &user_data, vector<SV_item*> &benchmark_data, vector<string> &chrname_vec);
+vector<vector<SV_item*>> constructAlleleSubsetByChrOp(vector<SV_item*> &user_data, vector<string> &chrname_vec);
 void sortSubsets(vector<vector<SV_item*>> &subsets);
 void* sortSubsetOp(void *arg);
 bool sortFunSameChr(const SV_item *item1, const SV_item *item2);
 void checkOrder(vector<vector<SV_item*>> &subsets);
 vector<vector<SV_item*>> intersectOp(vector<vector<SV_item*>> &subsets, faidx_t *fai);
+vector<vector<SV_item*>> intersectAlleleOp(vector<vector<SV_item*>> &subsets);
 void* intersectSubset(void *arg);
+void* intersectAlleleSubset(void *arg);
 vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset);
 SV_item* itemdup(SV_item* item);
 bool IsSameChrname(string &chrname1, string &chrname2);

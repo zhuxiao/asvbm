@@ -20,94 +20,94 @@ string getProgramVersion(const string &cmd_str){
 	return pg_version_str;
 }
 bool check_bam_average_read_length() {
-    const int REGION_LENGTH = 1000;
-    const int MAX_ATTEMPTS = 1000;
-    hts_set_log_level(HTS_LOG_OFF);
-    samFile* in = sam_open(BamFilePath.c_str(), "r");
-    if (!in) return false;
+	const int REGION_LENGTH = 1000;
+	const int MAX_ATTEMPTS = 1000;
+	hts_set_log_level(HTS_LOG_OFF);
+	samFile* in = sam_open(BamFilePath.c_str(), "r");
+	if (!in) return false;
 
-    bam_hdr_t* header = sam_hdr_read(in);
-    if (!header) {
-        sam_close(in);
-        return false;
-    }
+	bam_hdr_t* header = sam_hdr_read(in);
+	if (!header) {
+		sam_close(in);
+		return false;
+	}
 
-    hts_idx_t* idx = sam_index_load(in, BamFilePath.c_str());
-    if (!idx) {
-        bam_hdr_destroy(header);
-        sam_close(in);
-        return false;
-    }
-    // Collect valid reference sequences (length >= REGION_LENGTH)
-    vector<int> valid_tids;
-    for (int i = 0; i < header->n_targets; ++i) {
-        if (header->target_len[i] >= REGION_LENGTH) {
-            valid_tids.push_back(i);
-        }
-    }
-    if (valid_tids.empty()) {
-        hts_idx_destroy(idx);
-        bam_hdr_destroy(header);
-        sam_close(in);
-        return false;
-    }
+	hts_idx_t* idx = sam_index_load(in, BamFilePath.c_str());
+	if (!idx) {
+		bam_hdr_destroy(header);
+		sam_close(in);
+		return false;
+	}
+	// Collect valid reference sequences (length >= REGION_LENGTH)
+	vector<int> valid_tids;
+	for (int i = 0; i < header->n_targets; ++i) {
+		if (header->target_len[i] >= REGION_LENGTH) {
+			valid_tids.push_back(i);
+		}
+	}
+	if (valid_tids.empty()) {
+		hts_idx_destroy(idx);
+		bam_hdr_destroy(header);
+		sam_close(in);
+		return false;
+	}
 
-    random_device rd;
-    mt19937 gen(rd());
-    uniform_int_distribution<> tid_dist(0, valid_tids.size() - 1);
-    bam1_t* read = bam_init1();
-    vector<double> averages;
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_int_distribution<> tid_dist(0, valid_tids.size() - 1);
+	bam1_t* read = bam_init1();
+	vector<double> averages;
 
-    for (int i = 0; i < 3; ++i) {
-        bool found = false;
-        int attempts = 0;
+	for (int i = 0; i < 3; ++i) {
+		bool found = false;
+		int attempts = 0;
 
-        while (!found && attempts++ < MAX_ATTEMPTS) {
-            int tid = valid_tids[tid_dist(gen)];
-            int contig_len = header->target_len[tid];
-            uniform_int_distribution<> pos_dist(0, contig_len - REGION_LENGTH);
-            int start = pos_dist(gen);
-            int end = start + REGION_LENGTH;
+		while (!found && attempts++ < MAX_ATTEMPTS) {
+			int tid = valid_tids[tid_dist(gen)];
+			int contig_len = header->target_len[tid];
+			uniform_int_distribution<> pos_dist(0, contig_len - REGION_LENGTH);
+			int start = pos_dist(gen);
+			int end = start + REGION_LENGTH;
 
-            hts_itr_t* iter = sam_itr_queryi(idx, tid, start, end);
-            if (!iter) continue;
+			hts_itr_t* iter = sam_itr_queryi(idx, tid, start, end);
+			if (!iter) continue;
 
-            uint64_t total_len = 0;
-            int count = 0;
-            int ret;
-            while ((ret = sam_itr_next(in, iter, read)) >= 0) {
-                count++;
-                total_len += read->core.l_qseq;
-            }
+			uint64_t total_len = 0;
+			int count = 0;
+			int ret;
+			while ((ret = sam_itr_next(in, iter, read)) >= 0) {
+				count++;
+				total_len += read->core.l_qseq;
+			}
 
-            hts_itr_destroy(iter);
+			hts_itr_destroy(iter);
 
-            if (count > 0) {
-                averages.push_back(static_cast<double>(total_len) / count);
-                found = true;
-            }
-        }
+			if (count > 0) {
+				averages.push_back(static_cast<double>(total_len) / count);
+				found = true;
+			}
+		}
 
-        if (!found) {
-            bam_destroy1(read);
-            hts_idx_destroy(idx);
-            bam_hdr_destroy(header);
-            sam_close(in);
-            return false;
-        }
-    }
+		if (!found) {
+			bam_destroy1(read);
+			hts_idx_destroy(idx);
+			bam_hdr_destroy(header);
+			sam_close(in);
+			return false;
+		}
+	}
 
-    bam_destroy1(read);
-    hts_idx_destroy(idx);
-    bam_hdr_destroy(header);
-    sam_close(in);
+	bam_destroy1(read);
+	hts_idx_destroy(idx);
+	bam_hdr_destroy(header);
+	sam_close(in);
 
-    for (double avg : averages) {
-        if (avg >= 2000.0) {
-            return true;
-        }
-    }
-    return false;
+	for (double avg : averages) {
+		if (avg >= 2000.0) {
+			return true;
+		}
+	}
+	return false;
 }
 //SVregion
 vector<string> generateSVregion(){
@@ -137,7 +137,8 @@ void show_version(){
 void showUsage(){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
-	cout << "Version: " << PROG_VERSION << endl << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
 	cout << "Usage:  sv_stat  <command> [options]" << endl << endl;
 
@@ -151,7 +152,8 @@ void showUsage(){
 void showUsageConvert(){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
-	cout << "Version: " << PROG_VERSION << endl << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
 	cout << "Usage:  sv_stat convert [options] <Ref> <infile> <outfile>" << endl << endl;
 
@@ -171,7 +173,8 @@ void showUsageConvert(){
 void showUsageCreate(){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
-	cout << "Version: " << PROG_VERSION << endl << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
 	cout << "Usage:  asvbm create [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
 
@@ -181,7 +184,7 @@ void showUsageCreate(){
 	cout << "   REF_FILE       Reference file." << endl << endl;
 
 	cout << "Options:" << endl;
-	cout << "   -M INT         valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
+	cout << "   -M INT         valid maximal region size for statistics: [" << 0 << "]" << endl;
 	cout << "                  0 is for all variant size are valid, and while positive" << endl;
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
 	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
@@ -211,10 +214,13 @@ void showUsageCreate(){
 	cout << "   -B STR         BAM file [null]." << endl;
 	cout << "                  This parameter is used for local joint validation analysis." << endl;
 	cout << "                  Recommend for achieving more accurate local variant joint analysis." <<endl;
-	cout << "                  BAM file that supports long-read sequencing data as input." <<endl;
+	cout << "                  BAM file that supports long-read sequencing data." <<endl;
 	cout << "   -R STR         Custom region sizes [null]." << endl;
 	cout << "                  This parameter allows you to specify custom region sizes for analysis." << endl;
 	cout << "                  Custom region sizes are separated by ';'. Example: -R \"100;500;1000\" " <<endl;
+	cout << "   -g             This parameter is used to filter for variants violating Mendelian inheritance laws."<< endl;
+	cout << "                  The number and order of input items for the user files should be consistent with the example." <<endl;
+	cout << "                  Example: asvbm create -g -C \"chr1-22\" hg002_sv.vcf hg003_sv.vcf hg004_sv.vcf benchmark_sv.vcf ref.fa" << endl;
 	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
 	cout << "   -l FILE        file name of long SV regions: [" << longSVFilename << "]" << endl;
 	cout << "                  file name of short SV regions: [" << shortSVFilename << "]" << endl;
@@ -224,20 +230,46 @@ void showUsageCreate(){
 	cout << "   -h,--help      show this help message and exit" << endl << endl;
 
 	cout << "Example:" << endl;
-	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
-	cout << "   $ asvbm create -m 20 -T method user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   # construct high-quality set based on multiple user callsets and allow match between DUPs as INSs" << endl;
+	cout << "   $ asvbm create -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
-	cout << "   # run the benchmarking on the user-called set (method) for a single sample to perform the strict type matching by '-S' option" << endl;
-	cout << "   $ asvbm create -m 20 -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   # construct high-quality set based on multiple user callsets, and allow strict type match by '-S' option" << endl;
+	cout << "   $ asvbm create -m 20 -S -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 
-	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
-	cout << "   $ asvbm create -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+}
+void showUsageAllele(){
+
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
+
+	cout << "Usage:  asvbm allele [options] <USER_FILE> [<USER_FILE1>...]" << endl << endl;
+
+	cout << "Description:" << endl;
+	cout << "   USER_FILE      User called SV result file." << endl<< endl;
+
+	cout << "Options:" << endl;
+	cout << "   -C STR         Chromosomes to be processed: [null]" << endl;
+	cout << "                  no decoy indicates not specifying the chromosome set for benchmarking." << endl;
+	cout << "                  This parameter is used to specify the chromosomes to be benchmarked." << endl;
+	cout << "                  Chromosome names should match the format within the VCF file. " <<endl;
+	cout << "                  Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
+	cout << "   -t INT         number of threads [0]. 0 for the maximal number of threads" << endl;
+	cout << "                  in machine" << endl;
+	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
+	cout << "   -v,--version   show version information" << endl;
+	cout << "   -h,--help      show this help message and exit" << endl << endl;
+
+	cout << "Example:" << endl;
+	cout << "   # extract multi-allelic variants from each callset" << endl;
+	cout << "   $ asvbm allele user_sv1.vcf user_sv2.vcf user_sv3.vcf" << endl;
 }
 // show usage for stat command
 void showUsageStat(){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
-	cout << "Version: " << PROG_VERSION << endl << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
 	cout << "Usage:  asvbm stat [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
 
@@ -247,7 +279,7 @@ void showUsageStat(){
 	cout << "   REF_FILE       Reference file." << endl << endl;
 
 	cout << "Options:" << endl;
-	cout << "   -M INT         valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
+	cout << "   -M INT         valid maximal region size for statistics: [" << 0 << "]" << endl;
 	cout << "                  0 is for all variant size are valid, and while positive" << endl;
 	cout << "                  values are for the valid maximal region size, then longer" << endl;
 	cout << "                  regions are omitted and saved to the file specified with '-l' option" << endl;
@@ -277,7 +309,7 @@ void showUsageStat(){
 	cout << "   -B STR         BAM file [null]." << endl;
 	cout << "                  This parameter is used for local joint validation analysis." << endl;
 	cout << "                  Recommend for achieving more accurate local variant joint analysis." <<endl;
-	cout << "                  BAM file that supports long-read sequencing data as input." <<endl;
+	cout << "                  BAM file that supports long-read sequencing data." <<endl;
 	cout << "   -R STR         Custom region sizes [null]." << endl;
 	cout << "                  This parameter allows you to specify custom region sizes for analysis." << endl;
 	cout << "                  Custom region sizes are separated by ';'. Example: -R \"100;500;1000\" " <<endl;
@@ -305,9 +337,10 @@ void showUsageStat(){
 void show(){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
-	cout << "Version: " << PROG_VERSION << endl << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
-	cout << "Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
+	cout << "Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] [BENCH_FILE] [REF_FILE]" << endl << endl;
 
 	cout << "Description:" << endl;
 	cout << "   USER_FILE    User called SV result file." << endl;
@@ -316,39 +349,8 @@ void show(){
 
 	cout << "Commands:" << endl;
 	cout << "   stat         revise the existing benchmark set" << endl;
-	cout << "   create       create a new benchmark set" << endl<< endl;
-
-//	cout << "Options:" << endl;
-//	cout << "   -m INT    valid maximal region size for statistics: [" << MAX_VALID_REG_THRES << "]" << endl;
-//	cout << "             0 is for all variant size are valid, and while positive" << endl;
-//	cout << "             values are for the valid maximal region size, then longer" << endl;
-//	cout << "             regions are omitted and saved to the file specified with '-l' option" << endl;
-//	cout << "   -S        enable the strict type match mode which is disabled by default." << endl;
-//	cout << "             There are two variant type match modes:" << endl;
-//	cout << "             " << MATCHLEVEL_L << ": allow type match between DUP and INS, which takes effect by '-S' option" << endl;
-//	cout << "             " << MATCHLEVEL_S << ": strict type match which is disabled by default" << endl;
-//	cout << "             The default enabled match mode is 'loose' to allow the type match between DUP and INS." << endl;
-//	cout << "   -C STR    Chromosomes to be processed: [null]" << endl;
-//	cout << "             no decoy indicates not specifying the chromosome set for benchmarking." << endl;
-//	cout << "             This parameter is used to specify the chromosomes to be benchmarked." << endl;
-//	cout << "             Chromosome names should match the format within the VCF file. " <<endl;
-//	cout << "             Chromosome names are separated by ';'. Example: -C \"1;2;3\" " << endl;
-//	cout << "   -s INT    overlap extend size: [" << EXTEND_SIZE << "]" << endl;
-//	cout << "   -i FLOAT  minimal sequence similarity for variant match: [" << SEQ_CONSISTENCY << "]" << endl;
-//	cout << "   -a FLOAT  minimal sequence similarity for allelic variants match: [" << ALLELE_SEQ_CONSISTENCY << "]" << endl;
-//	cout << "   -p FLOAT  minimal percent size ratio for variant match: [" << SVLEN_RATIO << "]" << endl;
-//	cout << "   -t INT    number of threads [0]. 0 for the maximal number of threads" << endl;
-//	cout << "             in machine" << endl;
-//	cout << "   -T STR    Tool names [null]." << endl;
-//	cout << "             This parameter is used for comparing multiple datasets. The number" << endl;
-//	cout << "             of inputs should be consistent with the data set. Tool names are " <<endl;
-//	cout << "             separated by ';'. Example: -T \"tool1;tool2;tool3\" " << endl;
-//	cout << "   -o FILE   output directory: [" << outputPathname << "]" << endl;
-//	cout << "   -l FILE   file name of long SV regions: [" << longSVFilename << "]" << endl;
-//	cout << "   -r FILE   file name of benchmarking results to report: [" << htmlFilename << "]" << endl;
-//	cout << "             Ensure that the filename extension is '.html'." << endl;
-//	cout << "   -v        show version information" << endl;
-//	cout << "   -h        show this help message and exit" << endl << endl;
+	cout << "   create       create a new high-quality set" << endl;
+	cout << "   allele       extract multi-allelic variants from each callset" << endl<< endl;
 
 	cout << "Example:" << endl;
 	cout << "   # run the benchmarking on the user-called set (method) for a single sample to allow match between DUPs as INSs" << endl;
@@ -358,7 +360,14 @@ void show(){
 	cout << "   $ asvbm stat -m 20 -T method -S user_sv.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
-	cout << "   $ asvbm create -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "   $ asvbm stat -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl << endl;;
+
+	cout << "   # create high-quality set based on multiple user callsets" << endl;
+	cout << "   $ asvbm create -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl << endl;;
+
+	cout << "   # extract multi-allelic variants from each callset" << endl;
+	cout << "   $ asvbm allele user_sv1.vcf user_sv2.vcf user_sv3.vcf" << endl;
+
 }
 
 // parse the parameters for convert command
@@ -468,6 +477,7 @@ int parseStat(int argc, char **argv){
 	if (argc < 2) { showUsageStat(); return 1; }
 	minsvlen = MIN_SVLEN;
 	maxValidRegThres = MAX_VALID_REG_THRES;
+	indelAlleleSvlenRatio = INDEL_ALLELE_SVLEN_RATIO;
 	percentSeqSim = SEQ_CONSISTENCY;
 	percentAlleleSeqSim = ALLELE_SEQ_CONSISTENCY;
 	extendSize = EXTEND_SIZE;
@@ -486,10 +496,11 @@ int parseStat(int argc, char **argv){
 		{"minsvlen",no_argument, 0, 'm'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:M:s:t:r:o:i:a:p:l:T:B:R:hvC:bS", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:M:I:s:t:r:o:i:a:p:l:T:B:R:hvC:bS", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': minsvlen = stoi(optarg); break;
 			case 'M': maxValidRegThres = stoi(optarg); break;
+			case 'I': indelAlleleSvlenRatio = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
 			case 't': threadNum_tmp = stoi(optarg); break;
 			case 'o': outputPathname = optarg; break;
@@ -601,7 +612,80 @@ int parseStat(int argc, char **argv){
 
 	return 0;
 }
+int parseAllele(int argc, char **argv){
+	int32_t opt, threadNum_tmp, longindex = 0;
+	string sv_file1, ChromosomeNames;
+	vector<string> sv_files1;
 
+	if (argc < 2) { showUsageAllele(); return 1; }
+
+	threadNum_tmp = 0;
+
+	ChromosomeNames = "";
+
+	static struct option long_options[] = {
+		{"help", no_argument, 0, 'h'},
+		{"version", no_argument, 0, 'v'},
+		{0, 0, 0, 0}
+	};
+	while( (opt = getopt_long(argc, argv, ":t:o:hvC:", long_options, &longindex)) != -1 ){
+		switch(opt){
+			case 't': threadNum_tmp = stoi(optarg); break;
+			case 'o': outputPathname = optarg; break;
+			case 'C': ChromosomeNames = optarg; break;
+			case 'h': showUsageAllele(); exit(0);
+			case 'v': show_version();; exit(0);
+			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
+			case ':': cout << "the option -" << (char)optopt << " needs a value" << endl; exit(1);
+		}
+	}
+
+	if(ChromosomeNames.size()<0){
+		cout << "Error: Specify the correct set of chromosomes for the option, separated by ';' :-C" << endl;
+		showUsageAllele();
+		return 1;
+	}
+
+	/*if(typeMatchLevel.compare("strict")==0 or typeMatchLevel.compare("loose")==0);
+	else {
+		cout << "Error: Specify a type matching mode for the option: -L" << endl;
+		showUsageStat();
+		return 1;
+	}*/
+	if(threadNum_tmp==0) num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+	else num_threads = (threadNum_tmp>=sysconf(_SC_NPROCESSORS_ONLN)) ? sysconf(_SC_NPROCESSORS_ONLN) : threadNum_tmp;
+
+	if(outputPathname.at(outputPathname.size()-1)!='/') outputPathname += "/";
+	MeticsValues4_num.resize(size_div_vec.size()+1);
+	region = generateSVregion();
+
+	chromosomeSet = split(expand_chromosome_names(ChromosomeNames),";");
+
+	opt = argc - optind; // the number of SAMs on the command line
+	if(opt==1){ //evaluate a data set
+		if(opt==1) {
+			sv_file1 = argv[optind];
+		}else { showUsageStat(); return 1; }
+	}else{ //evaluate multiple data sets without using the "-T" parameter
+		for(int i = optind ; i<argc; i++){
+			sv_files1.push_back(argv[i]);
+		}
+	}
+
+	mem_total = getMemInfo("MemTotal", 2);
+	swap_total = getMemInfo("SwapTotal", 2);
+	if(mem_total<0 or swap_total<0){
+		cerr << "line=" << __LINE__ << ", mem_total=" << mem_total << ", swap_total=" << swap_total << ", cannot get the supplied memory information, error." << endl;
+		exit(1);
+	}
+	extend_total = mem_total<swap_total ? mem_total : swap_total;
+
+	//cout << "mem_total=" << mem_total << ", swap_total=" << swap_total << ", extend_total=" << extend_total << endl;
+
+	SVAlleleOp(sv_file1, sv_files1);
+
+	return 0;
+}
 struct ChromosomeConfig {
 	vector<string> full_list;
 	string prefix;
@@ -612,243 +696,237 @@ struct ChromosomeConfig {
 
 
 vector<ChromosomeConfig> init_chromosome_configs(){
-    return{
-        {
-            {"chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10",
-             "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
-             "chr20", "chr21", "chr22", "chrX", "chrY"},
-            "chr",
-            "chr1-chrY",
-            "chrX",
-            "chrY"
-        },
+	return{
+		{
+			{"chr1", "chr2", "chr3", "chr4", "chr5", "chr6", "chr7", "chr8", "chr9", "chr10",
+			 "chr11", "chr12", "chr13", "chr14", "chr15", "chr16", "chr17", "chr18", "chr19",
+			 "chr20", "chr21", "chr22", "chrX", "chrY"},
+			"chr",
+			"chr1-chrY",
+			"chrX",
+			"chrY"
+		},
 
-        {
-            {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-             "11", "12", "13", "14", "15", "16", "17", "18", "19",
-             "20", "21", "22", "X", "Y"},
-            "",
-            "1-Y",
-            "X",
-            "Y"
-        }
-    };
+		{
+			{"1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+			 "11", "12", "13", "14", "15", "16", "17", "18", "19",
+			 "20", "21", "22", "X", "Y"},
+			"",
+			"1-Y",
+			"X",
+			"Y"
+		}
+	};
 }
-
 
 vector<string> split_by_semicolon(const string& input){
 	vector<string> parts;
 	stringstream ss(input);
 	string part;
 
-    while(getline(ss, part, ';')){
+	while(getline(ss, part, ';')){
 
-        part.erase(0, part.find_first_not_of(" \t\n\r"));
-        part.erase(part.find_last_not_of(" \t\n\r") + 1);
-        if(!part.empty()){
-            parts.push_back(part);
-        }
-    }
-    return parts;
+		part.erase(0, part.find_first_not_of(" \t\n\r"));
+		part.erase(part.find_last_not_of(" \t\n\r") + 1);
+		if(!part.empty()){
+			parts.push_back(part);
+		}
+	}
+	return parts;
 }
+
 
 string merge_chromosomes(const vector<string>& input_chroms, const ChromosomeConfig& config){
 	vector<string> merged;
-	unordered_set<string> added;
-
+//	unordered_set<string> added;
+	unordered_set<string> user_input_set(input_chroms.begin(), input_chroms.end());
 	for(const auto& standard_chrom : config.full_list){
-        if(find(input_chroms.begin(), input_chroms.end(), standard_chrom) != input_chroms.end() && added.find(standard_chrom) == added.end()){
-            merged.push_back(standard_chrom);
-            added.insert(standard_chrom);
-        }
-    }
+		if(user_input_set.find(standard_chrom) != user_input_set.end()){
+			merged.push_back(standard_chrom);
+//            added.insert(standard_chrom);
+		}
+	}
 
 	string result;
-    for(size_t i = 0; i < merged.size(); ++i){
-        if (i > 0) {
-            result += ";";
-        }
-        result += merged[i];
-    }
-    return result;
+	for(size_t i = 0; i < merged.size(); ++i){
+		if (i > 0) {
+			result += ";";
+		}
+		result += merged[i];
+	}
+	return result;
 }
 
 string parse_single_range(const string& range, const ChromosomeConfig& config){
-    if(find(config.full_list.begin(), config.full_list.end(), range) != config.full_list.end()){
-        return range;
-    }
+	if(find(config.full_list.begin(), config.full_list.end(), range) != config.full_list.end()){
+		return range;
+	}
 
-    regex y_mix_regex("^chr(\\d+)-Y$");
-    smatch y_mix_match;
-    if(regex_match(range, y_mix_match, y_mix_regex)){
-        string start_num = y_mix_match[1].str();
-        string standard_range = "chr" + start_num + "-chrY";
-        return parse_single_range(standard_range, config);
-    }
-    string y_std_pattern = "^" + config.prefix + "(\\d+)-" + config.y_tag + "$";
-    regex y_std_regex(y_std_pattern);
-    smatch y_std_match;
-    if(regex_match(range, y_std_match, y_std_regex)){
-        errno = 0;
-        int start = stoi(y_std_match[1].str());
-        if(errno != 0 || start < 1 || start > 22){
-            cerr << "警告：无效的Y范围起始数字 " << y_std_match[1].str() << "（需1-22）\n";
-            return "";
-        }
+	regex y_mix_regex("^chr(\\d+)-Y$");
+	smatch y_mix_match;
+	if(regex_match(range, y_mix_match, y_mix_regex)){
+		string start_num = y_mix_match[1].str();
+		string standard_range = "chr" + start_num + "-chrY";
+		return parse_single_range(standard_range, config);
+	}
+	string y_std_pattern = "^" + config.prefix + "(\\d+)-" + config.y_tag + "$";
+	regex y_std_regex(y_std_pattern);
+	smatch y_std_match;
+	if(regex_match(range, y_std_match, y_std_regex)){
+		errno = 0;
+		int start = stoi(y_std_match[1].str());
+		if(errno != 0 || start < 1 || start > 22){
+			return "";
+		}
 
-        string result;
-        bool y_found = false;
-        for(const auto& chrom : config.full_list){
-            smatch num_match;
-            string num_pattern = "^" + config.prefix + "(\\d+)$";
-            if(regex_match(chrom, num_match, regex(num_pattern))){
-                int chrom_num = stoi(num_match[1].str());
-                if(chrom_num >= start && chrom_num <= 22){
-                    if (!result.empty()) result += ";";
-                    result += chrom;
-                }
-            }
-            else if(chrom == config.x_tag){
-                if (!result.empty()) result += ";";
-                result += chrom;
-            }
-            else if(chrom == config.y_tag){
-                if (!result.empty()) result += ";";
-                result += chrom;
-                y_found = true;
-                break;
-            }
-        }
-        return y_found ? result : "";
-    }
+		string result;
+		bool y_found = false;
+		for(const auto& chrom : config.full_list){
+			smatch num_match;
+			string num_pattern = "^" + config.prefix + "(\\d+)$";
+			if(regex_match(chrom, num_match, regex(num_pattern))){
+				int chrom_num = stoi(num_match[1].str());
+				if(chrom_num >= start && chrom_num <= 22){
+					if (!result.empty()) result += ";";
+					result += chrom;
+				}
+			}
+			else if(chrom == config.x_tag){
+				if (!result.empty()) result += ";";
+				result += chrom;
+			}
+			else if(chrom == config.y_tag){
+				if (!result.empty()) result += ";";
+				result += chrom;
+				y_found = true;
+				break;
+			}
+		}
+		return y_found ? result : "";
+	}
 
-    if(range == config.full_range){
-        string result;
-        for(size_t i = 0; i < config.full_list.size(); ++i){
-            if (i > 0) result += ";";
-            result += config.full_list[i];
-        }
-        return result;
-    }
+	if(range == config.full_range){
+		string result;
+		for(size_t i = 0; i < config.full_list.size(); ++i){
+			if (i > 0) result += ";";
+			result += config.full_list[i];
+		}
+		return result;
+	}
 
-    regex x_mix_regex("^chr(\\d+)-X$");
-    smatch x_mix_match;
-    if(regex_match(range, x_mix_match, x_mix_regex)){
-        string start_num = x_mix_match[1].str();
-        string standard_range = "chr" + start_num + "-chrX";
-        return parse_single_range(standard_range, config);
-    }
-    string x_std_pattern = "^" + config.prefix + "(\\d+)-" + config.x_tag + "$";
-    regex x_std_regex(x_std_pattern);
-    smatch x_std_match;
-    if(regex_match(range, x_std_match, x_std_regex)){
-        errno = 0;
-        int start = stoi(x_std_match[1].str());
-        if(errno != 0 || start < 1 || start > 22){
-            cerr << "警告：无效的X范围起始数字 " << x_std_match[1].str() << "（需1-22）\n";
-            return "";
-        }
+	regex x_mix_regex("^chr(\\d+)-X$");
+	smatch x_mix_match;
+	if(regex_match(range, x_mix_match, x_mix_regex)){
+		string start_num = x_mix_match[1].str();
+		string standard_range = "chr" + start_num + "-chrX";
+		return parse_single_range(standard_range, config);
+	}
+	string x_std_pattern = "^" + config.prefix + "(\\d+)-" + config.x_tag + "$";
+	regex x_std_regex(x_std_pattern);
+	smatch x_std_match;
+	if(regex_match(range, x_std_match, x_std_regex)){
+		errno = 0;
+		int start = stoi(x_std_match[1].str());
+		if(errno != 0 || start < 1 || start > 22){
+			return "";
+		}
 
-        string result;
-        bool x_found = false;
-        for(const auto& chrom : config.full_list){
-            if (chrom == config.y_tag) break;
+		string result;
+		bool x_found = false;
+		for(const auto& chrom : config.full_list){
+			if (chrom == config.y_tag) break;
 
-            smatch num_match;
-            string num_pattern = "^" + config.prefix + "(\\d+)$";
-            if (regex_match(chrom, num_match, regex(num_pattern))){
-                int chrom_num = stoi(num_match[1].str());
-                if (chrom_num >= start && chrom_num <= 22) {
-                    if (!result.empty()) result += ";";
-                    result += chrom;
-                }
-            }
-            else if(chrom == config.x_tag){
-                if (!result.empty()) result += ";";
-                result += chrom;
-                x_found = true;
-            }
-        }
-        return x_found ? result : "";
-    }
+			smatch num_match;
+			string num_pattern = "^" + config.prefix + "(\\d+)$";
+			if (regex_match(chrom, num_match, regex(num_pattern))){
+				int chrom_num = stoi(num_match[1].str());
+				if (chrom_num >= start && chrom_num <= 22) {
+					if (!result.empty()) result += ";";
+					result += chrom;
+				}
+			}
+			else if(chrom == config.x_tag){
+				if (!result.empty()) result += ";";
+				result += chrom;
+				x_found = true;
+			}
+		}
+		return x_found ? result : "";
+	}
 
 
-    regex num_mix_regex("^chr(\\d+)-(\\d+)$");
-    smatch num_mix_match;
-    if(regex_match(range, num_mix_match, num_mix_regex)){
-        errno = 0;
-        int start = stoi(num_mix_match[1].str());
-        int end = stoi(num_mix_match[2].str());
-        if (errno != 0 || start > end || start < 1 || end > 22) {
-            cerr << "警告：无效的混合数字范围 " << range << "（需1≤起始≤结束≤22）\n";
-            return "";
-        }
-        string standard_range = "chr" + to_string(start) + "-chr" + to_string(end);
-        return parse_single_range(standard_range, config);
-    }
-    string num_std_pattern = "^" + config.prefix + "(\\d+)-" + config.prefix + "(\\d+)$";
-    regex num_std_regex(num_std_pattern);
-    smatch num_std_match;
-    if(regex_match(range, num_std_match, num_std_regex)){
-        errno = 0;
-        int start = stoi(num_std_match[1].str());
-        int end = stoi(num_std_match[2].str());
-        if (errno != 0 || start > end || start < 1 || end > 22) {
-            cerr << "警告：无效的标准数字范围 " << range << "（需1≤起始≤结束≤22）\n";
-            return "";
-        }
+	regex num_mix_regex("^chr(\\d+)-(\\d+)$");
+	smatch num_mix_match;
+	if(regex_match(range, num_mix_match, num_mix_regex)){
+		errno = 0;
+		int start = stoi(num_mix_match[1].str());
+		int end = stoi(num_mix_match[2].str());
+		if (errno != 0 || start > end || start < 1 || end > 22) {
+			return "";
+		}
+		string standard_range = "chr" + to_string(start) + "-chr" + to_string(end);
+		return parse_single_range(standard_range, config);
+	}
+	string num_std_pattern = "^" + config.prefix + "(\\d+)-" + config.prefix + "(\\d+)$";
+	regex num_std_regex(num_std_pattern);
+	smatch num_std_match;
+	if(regex_match(range, num_std_match, num_std_regex)){
+		errno = 0;
+		int start = stoi(num_std_match[1].str());
+		int end = stoi(num_std_match[2].str());
+		if (errno != 0 || start > end || start < 1 || end > 22) {
+			return "";
+		}
 
-        string result;
-        string num_pattern = "^" + config.prefix + "(\\d+)$";
-        regex num_regex(num_pattern);
-        for(const auto& chrom : config.full_list){
-            smatch num_match;
-            if (regex_match(chrom, num_match, num_regex)){
-                int chrom_num = stoi(num_match[1].str());
-                if(chrom_num >= start && chrom_num <= end){
-                    if(!result.empty()) result += ";";
-                    result += chrom;
-                }
-            }
-        }
-        return result;
-    }
-
-    cerr << "警告：未支持的染色体格式 " << range << "\n";
-    cerr << "支持的格式示例：chr1-Y、chr1-chrY、chr1-22、chr1-chr22、1-Y、1-22\n";
-    return "";
+		string result;
+		string num_pattern = "^" + config.prefix + "(\\d+)$";
+		regex num_regex(num_pattern);
+		for(const auto& chrom : config.full_list){
+			smatch num_match;
+			if (regex_match(chrom, num_match, num_regex)){
+				int chrom_num = stoi(num_match[1].str());
+				if(chrom_num >= start && chrom_num <= end){
+					if(!result.empty()) result += ";";
+					result += chrom;
+				}
+			}
+		}
+		return result;
+	}
+	if (!range.empty()) {
+		return range;
+	}
+	return "";
 }
-
 
 string expand_chromosome_names(const string& input){
-    static const vector<ChromosomeConfig> configs = init_chromosome_configs();
+	static const vector<ChromosomeConfig> configs = init_chromosome_configs();
 
-    const ChromosomeConfig& target_config = (input.find("chr") != string::npos)
-        ? configs[0]
-        : configs[1];
+	const ChromosomeConfig& target_config = (input.find("chr") != string::npos)
+		? configs[0]
+		: configs[1];
 
-    vector<string> input_ranges = split_by_semicolon(input);
-    if(input_ranges.empty()){
-        cerr << "警告：染色体输入为空\n";
-        return "";
-    }
+	vector<string> input_ranges = split_by_semicolon(input);
+	if(input_ranges.empty()){
+		return "";
+	}
 
-    vector<string> all_chromosomes;
-    for(const auto& range : input_ranges){
-        string parsed = parse_single_range(range, target_config);
-        if(parsed.empty()){
-            continue;
-        }
-        vector<string> parsed_chroms = split_by_semicolon(parsed);
-        all_chromosomes.insert(all_chromosomes.end(), parsed_chroms.begin(), parsed_chroms.end());
-    }
+	vector<string> all_chromosomes;
+	for(const auto& range : input_ranges){
+		string parsed = parse_single_range(range, target_config);
+		if(parsed.empty()){
+			continue;
+		}
+		vector<string> parsed_chroms = split_by_semicolon(parsed);
+		all_chromosomes.insert(all_chromosomes.end(), parsed_chroms.begin(), parsed_chroms.end());
+	}
 
-    string final_result = merge_chromosomes(all_chromosomes, target_config);
-    if (final_result.empty()) {
-        cerr << "错误：未解析到有效染色体\n";
-    }
-    return final_result;
+	string final_result = merge_chromosomes(all_chromosomes, target_config);
+	if (final_result.empty()) {
+	}
+	return final_result;
 }
+
 //int parseState(int argc, char **argv){
 //	int32_t opt, threadNum_tmp;
 //	string sv_file1, ref_file, sv_file2, ToolNameStore, ChromosomeNames;
@@ -973,6 +1051,7 @@ int parseCreate(int argc, char **argv){
 	if (argc < 2) { showUsageCreate(); return 1; }
 	minsvlen = MIN_SVLEN;
 	maxValidRegThres = MAX_VALID_REG_THRES;
+	indelAlleleSvlenRatio = INDEL_ALLELE_SVLEN_RATIO;
 	percentSeqSim = SEQ_CONSISTENCY;
 	percentAlleleSeqSim = ALLELE_SEQ_CONSISTENCY;
 	extendSize = EXTEND_SIZE;
@@ -989,10 +1068,11 @@ int parseCreate(int argc, char **argv){
 		{"minsvlen",no_argument, 0, 'm'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:M:s:t:r:o:i:a:p:l:T:B:R:hvC:gS", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:M:I:s:t:r:o:i:a:p:l:T:B:R:hvC:gS", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': minsvlen = stoi(optarg); break;
 			case 'M': maxValidRegThres = stoi(optarg); break;
+			case 'I': indelAlleleSvlenRatio = stoi(optarg); break;
 			case 's': extendSize = stoi(optarg); break;
 			case 't': threadNum_tmp = stoi(optarg); break;
 			case 'o': outputPathname = optarg; break;
@@ -1175,6 +1255,64 @@ void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<strin
 	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1, ref_file);
 
 }
+void SVAlleleOp(string &sv_file1, vector<string> &sv_files1){
+	string sv_file_name, mate_filename, snv_filename, convert_sv_file2;
+	string sv_file_name_Path, convert_sv_file2_Path;
+	string label = "benchmark", label1 = "user";
+	vector<string> convert_sv_files;
+	vector<SV_item*> sv_item_vec;
+	bool isVCF = false, isBED = false;
+	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	alleleDirname = outputPathname + alleleDirname;
+	mkdir(alleleDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//	suboutputDirnamePath = outputPathname + suboutputDirname;
+//	mkdir(suboutputDirnamePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	//convert
+	if(sv_files1.size()>=1){
+		for(size_t i=0; i< sv_files1.size(); i++){
+			sv_file_name = sv_files1[i];
+			sv_file_name = PathqueryDot(sv_file_name);
+			//path
+			sv_file_name = Pathquerybackslash(sv_file_name);
+			mate_filename = to_string(i)+ "_" + mateItemFilename;
+//			snv_filename = to_string(i)+ "_" + snvFilename;
+			sv_file_name_Path = outputPathname + "/" + sv_file_name;
+			processFile(sv_files1[i], isVCF, isBED);
+			if(isVCF) convertAlleleVcf(sv_files1[i], sv_file_name_Path, mate_filename, snv_filename, label1);
+			if(isBED) convertAlleleBed(sv_files1[i], sv_file_name_Path, mate_filename, snv_filename, label1);
+			convert_sv_files.push_back(sv_file_name_Path);
+
+//			sv_item_vec = loadDataWithoutTra(sv_file_name_Path);
+//			benchmark_vec.push_back(sv_item_vec);
+			ToolsFilenames.push_back(sv_files1[i]);
+		}
+	}else{
+		sv_file_name = sv_file1;
+		sv_file_name = PathqueryDot(sv_file_name);
+		mate_filename = mateItemFilename;
+		//path
+		sv_file_name = Pathquerybackslash(sv_file_name);
+		sv_file_name_Path = outputPathname + "/" + sv_file_name;
+		processFile(sv_file1, isVCF, isBED);
+		if(isVCF) convertAlleleVcf(sv_file1, sv_file_name_Path, mate_filename, snv_filename, label1);
+		if(isBED) convertAlleleBed(sv_file1, sv_file_name_Path, mate_filename, snv_filename, label1);
+	}
+	outConvertScreenFile.close();
+	usersets_num = 0;
+
+	if(convert_sv_files.size()>=1){	//multiple data sets are evaluated			sv_files1
+		for(string& sv_file1 : convert_sv_files){
+			SVAllele(sv_file1, convert_sv_files);
+		}
+	}else
+		SVAllele(sv_file_name_Path, sv_files1);
+
+	cout << "## More information ## " << endl;
+	cout << "For more detailed benchmarking results, please refer to the generated result information in the respective folders." << endl;
+	cout << "For more detailed experiment information, please refer to the github repositories: https://github.com/zhuxiao/asvbm and https://github.com/zhuxiao/asvbm-experiments." << endl;
+//	cout << "For more detailed evaluation results, please refer to the generated result information in the respective folders." << endl;
+	cout << "For any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!" << endl;
+}
 void SVCreateOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names){
 	string sv_file_name, mate_filename, snv_filename, convert_sv_file2;
 	string sv_file_name_Path, convert_sv_file2_Path;
@@ -1319,6 +1457,61 @@ void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<
 	//Evaluate multiple data sets and initialize the path for the next data save
 	if(sv_files1.size()>=1)	FolderInit();
 }
+void SVAllele(string &user_file, vector<string> &sv_files1){
+
+//	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	if(sv_files1.size()>=1){
+		for(size_t i=1; i<=sv_files1.size();i++){
+			if(user_file == sv_files1.at(i-1)){
+				//Instead of entering the tool name, use the data set name as the name of the output file
+				size_t lastSlashPos = user_file.find_last_of('/');
+				if (lastSlashPos == string::npos) {
+					// If '/' is not found, the entire string is printed
+					outputInsideToolDirname = sv_files1.at(i-1);
+				} else {
+					// When '/' is reached, the part after '/' is printed
+					outputInsideToolDirname = user_file.substr(lastSlashPos + 1);
+				}
+				SVcallernames.push_back(outputInsideToolDirname);
+
+				alltoolnames.push_back(outputInsideToolDirname);
+				method_name = outputInsideToolDirname;
+				allmetric.push_back(outputInsideToolDirname);
+				centerDistance.push_back(outputInsideToolDirname);
+				sizeratio.push_back(outputInsideToolDirname);
+//				outputInsideToolDirname = outputPathname + outputInsideToolDirname;
+//				mkdir(outputInsideToolDirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+//				statScreenFilename = outputInsideToolDirname +'/' + statScreenFilename;
+//				outStatScreenFile.open(statScreenFilename);
+				break;
+			}
+		}
+	}else{
+		alltoolnames.push_back("method");
+		allmetric.push_back(acquiesce_count);
+		centerDistance.push_back(acquiesce_count);
+		sizeratio.push_back(acquiesce_count);
+//		statScreenFilename = outputPathname + statScreenFilename;
+//		outStatScreenFile.open(statScreenFilename);
+	}
+
+//	if(!outStatScreenFile.is_open()){
+//		cerr << __func__ << ", line=" << __LINE__ << ": cannot open file:" << statScreenFilename << endl;
+//		exit(1);
+//	}
+//	outStatScreenFile << "Program command: " << program_cmd_str << endl << endl;
+
+	printAlleleParas(user_file); // print parameters
+
+	cout << "\n\n############# Stage 1: Num statistics: #############" << endl;
+	outStatScreenFile << "\n\n############# Stage 1: Num statistics: #############" << endl;
+	AlleleNumStat(user_file, outputPathname, sv_files1);
+
+
+//	outStatScreenFile.close();
+	//Evaluate multiple data sets and initialize the path for the next data save
+	if(sv_files1.size()>=1)	FolderInit();
+}
 void SVCreate(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names){
 
 //	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
@@ -1448,7 +1641,8 @@ void printConvertParas(string &infilename, string &outfilename, string &reffilen
 void printStatParas(string &user_file, string &benchmark_file ,string &ref_file){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
-	cout << "Version: " << PROG_VERSION << endl << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
 	cout << "############# Parameters for 'ASVBM' command: #############" << endl;
 	cout << "        Reference file: " << ref_file << endl;
@@ -1494,10 +1688,33 @@ void printStatParas(string &user_file, string &benchmark_file ,string &ref_file)
 	outStatScreenFile << " Short SV regions file: " << shortSVFilename << endl;
 	outStatScreenFile << "  Long SV regions file: " << longSVFilename << endl << endl;
 }
+void printAlleleParas(string &user_file){
+
+	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
+
+	cout << "############# Parameters for 'ASVBM' command: #############" << endl;
+	cout << "     Number of threads: " << num_threads << endl;
+	cout << "      Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+
+	// print to file
+	outStatScreenFile << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
+	outStatScreenFile << "Version: " << PROG_VERSION << endl << endl;
+
+	outStatScreenFile << "############# Parameters for 'allele' command: #############" << endl;
+	outStatScreenFile << "   User-called SV file: " << user_file << endl;
+
+
+	outStatScreenFile << "     Number of threads: " << num_threads << endl;
+	outStatScreenFile << "      Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
+
+}
 void printCreateParas(string &user_file, string &benchmark_file ,string &ref_file){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
-	cout << "Version: " << PROG_VERSION << endl << endl;
+	cout << "Version: " << PROG_VERSION << endl;
+	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
 	cout << "############# Parameters for 'ASVBM' command: #############" << endl;
 	cout << "        Reference file: " << ref_file << endl;
@@ -1521,7 +1738,8 @@ void printCreateParas(string &user_file, string &benchmark_file ,string &ref_fil
 
 	// print to file
 	outStatScreenFile << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
-	outStatScreenFile << "Version: " << PROG_VERSION << endl << endl;
+	outStatScreenFile << "Version: " << PROG_VERSION << endl;
+	outStatScreenFile << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
 	outStatScreenFile << "############# Parameters for 'create' command: #############" << endl;
 	outStatScreenFile << "        Reference file: " << ref_file << endl;

@@ -83,7 +83,6 @@ void SVSizeNumStatOp(string &user_file, string &benchmark_file, string &ref_file
 	destroyData(FP_data);
 	destroyData(FN_data);
 	if(max_valid_reg_thres>0 && min_valid_reg_thres>0) {destroyData(long_sv_data);destroyData(short_sv_data);}
-	//修改结束
 
 //	user_data = loadData(user_file);
 //	benchmark_data = loadData(benchmark_file);

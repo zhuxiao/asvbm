@@ -31,4 +31,5 @@ vector<string> mergeHeaders(const vector<string>& filenames);
 vector<string> split1(const string& str, char delimiter);
 string getCurrentTime();
 void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &sv_files1);
+void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> &sv_files1);
 #endif /* SRC_BENCHMARK_INTEGRATION_H_ */

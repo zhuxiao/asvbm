@@ -29,7 +29,7 @@ using namespace std;
 // program variables
 #define PROG_NAME		"ASVBM"
 #define PROG_DESC		"A tool for multi-Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets"
-#define PROG_VERSION	"1.4.0"
+#define PROG_VERSION	"1.4.1"
 
 #define CMD_STAT_STR					"stat"
 #define CMD_CREATE_STR					"create"
@@ -42,6 +42,7 @@ void showUsageConvert();
 void showUsageCreate();
 void showUsageStat();
 int parseConvert(int argc, char **argv);
+int parseAllele(int argc, char **argv);
 int parseStat(int argc, char **argv);
 int parseCreate(int argc, char **argv);
 
@@ -50,13 +51,16 @@ vector<string> generateSVregion();
 string getProgramVersion(const string &cmd_str);
 void convert(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format);
 //void SVStat(string &ref_file, string &user_file, string &benchmark_file);
+void SVAllele(string &user_file, vector<string> &sv_files1);
 void SVStat(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names);
 string expand_chromosome_names(const std::string& chromosome_names);
 void SVCreate(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names);
+void SVAlleleOp(string &sv_file1, vector<string> &sv_files1);
 void SVStatOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names);
 void SVCreateOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names);
 void printConvertParas(string &infilename, string &outfilename, string &reffilename, string &mate_filename, string &snv_filename, string &sv_format);
 void printStatParas(string &user_file, string &benchmark_file, string &ref_file);
 void printCreateParas(string &user_file, string &benchmark_file ,string &ref_file);
+void printAlleleParas(string &user_file);
 
 #endif /* SRC_PARAS_H_ */

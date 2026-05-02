@@ -1,6 +1,6 @@
 #ifndef SRC_CONSTANTS_H_
 #define SRC_CONSTANTS_H_
-
+#include <climits>
 //decoy
 #define DECOY_PREFIX				"hs37d"
 #define DECOY_PREFIX2				"hs38d"
@@ -19,9 +19,11 @@
 //Sequence consistency condition setting
 #define SEQ_CONSISTENCY				0.7f
 #define ALLELE_SEQ_CONSISTENCY		0.7f
+#define INDEL_ALLELE_SVLEN_RATIO	0.9f
 
 #define MIN_SVLEN					20
-#define MAX_VALID_REG_THRES			100000
+#define MAX_VALID_REG_THRES			INT_MAX
+#define BND_MAX_SVLEN				100000
 #define EXTEND_SIZE					200  // 100
 
 #define MIN_SIZE_LARGE_SV			100
@@ -45,7 +47,7 @@
 #define MATCHLEVEL_S				"strict"
 #define MATCHLEVEL_L				"loose"
 
-#define ALLELIC_DISTANCE			50
+#define ALLELIC_DISTANCE			75
 
 // breakpoints
 #define ONE_OVERLAP_ONE_BP			2

@@ -25,9 +25,6 @@
 #include "num_stat.h"
 #include "vcf_header.h"
 
-
-
-
 void addEntryMap(size_t index, SV_item* entry);
 vector<string> split(const string& str, char delimiter);
 string appendCustomInfo(const string& originalInfo, const string& customInfo);

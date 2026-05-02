@@ -1,19 +1,19 @@
 #include "htmlGenerate.h"
 
 
-std::string escapeHtml(const std::string& str) {
-    std::ostringstream escaped;
-    for (char ch : str) {
-        switch (ch) {
-            case '&':  escaped << "&amp;";    break;
-            case '\"': escaped << "&quot;";   break;
-            case '\'': escaped << "&#39;";    break;
-            case '<':  escaped << "&lt;";     break;
-            case '>':  escaped << "&gt;";     break;
-            default:   escaped << ch;        break;
-        }
-    }
-    return escaped.str();
+string escapeHtml(const string& str){
+	ostringstream escaped;
+	for (char ch : str) {
+		switch (ch) {
+		case '&':  escaped << "&amp;";    break;
+		case '\"': escaped << "&quot;";   break;
+		case '\'': escaped << "&#39;";    break;
+		case '<':  escaped << "&lt;";     break;
+		case '>':  escaped << "&gt;";     break;
+		default:   escaped << ch;        break;
+		}
+	}
+	return escaped.str();
 }
 
 void Generatehtml(string figuresFilePath){
@@ -441,7 +441,8 @@ void Generatehtml(string figuresFilePath){
 		//htmlFile << "The user-called set：<br>";
 		for(size_t i=1; i<allmetrics.size(); i++){
 			htmlFile << "<h4 style=\"margin-top: 5px; margin-bottom: 5px;\">("<< i+1 <<") Statistics of the count of different SV lengths in the user-called set ("<< allmetrics[i][0] <<"): " << "</h4>";
-			htmlFile << "The SV reference region size statistics before filtering for user-called set ("<< allmetrics[i][0]<<"):"<< "Total SV count：" << before_filtered[1]<<"<br>";
+			if(i==1) htmlFile << "The SV reference region size statistics before filtering for user-called set ("<< allmetrics[i][0]<<"):"<< "Total SV count：" << before_filtered[i]<<"<br>";
+			else htmlFile << "The SV reference region size statistics before filtering for user-called set ("<< allmetrics[i][0]<<"):"<< "Total SV count：" << before_filtered[2*i - 1]<<"<br>";
 			htmlFile << "The SV reference region size statistics after filtering for user-called set ("<< allmetrics[i][0]<<"):"<< "Total SV count：" << allmetrics[i][2]<<"<br>";
 			htmlFile <<"<div style=\" display: flex; justify-content: center; text-align:center; margin: 0 auto;\">\n";
 			htmlFile <<"<h4 style=\" margin-left: 40px;\">(a)</h4>\n";

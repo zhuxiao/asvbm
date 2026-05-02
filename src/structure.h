@@ -31,7 +31,9 @@ typedef struct {
 	bool overlapped;	// default: false
 	bool mergeMark;		// default: false
 	bool mergeMark2;		// default: false
+//	bool sameReadFlag;
 	bool mergeFlag;		// default: false
+	bool alleleFlag;		// default: false
 	bool LpFlag;		// default: false
 	bool validFlag;		// default: true
 	//bool balancedTraFlag;	// TRA, default: false
@@ -45,13 +47,13 @@ typedef struct {
 }SV_item;
 
 struct Minimizer {
-    size_t position;
-    size_t hashValue;
-    string sequence;
-    bool matchflag;
+	size_t position;
+	size_t hashValue;
+	string sequence;
+	bool matchflag;
 
-    Minimizer(size_t pos, size_t hash, const string& seq, bool match)
-        : position(pos), hashValue(hash), sequence(seq), matchflag(match) {}
+	Minimizer(size_t pos, size_t hash, const string& seq, bool match)
+		: position(pos), hashValue(hash), sequence(seq), matchflag(match) {}
 };
 
 typedef struct {
@@ -67,7 +69,7 @@ typedef struct {
 
 typedef struct {
 	vector<SV_item*> subset1, subset2;
-	vector<SV_item*> *intersect_vec_user, *intersect_vec_benchmark, *private_vec_user, *private_vec_benchmark, *intersect_vec_latentpositive_user, *intersect_vec_latentpositive_benchmark;
+	vector<SV_item*> *intersect_vec_user, *intersect_vec_benchmark, *private_vec_user, *private_vec_benchmark, *intersect_vec_latentpositive_user, *intersect_vec_latentpositive_benchmark, *allele_vec;
 	vector<SV_pair*> *sv_pair_vec;
 	faidx_t *fai;
 }overlapWork_opt;

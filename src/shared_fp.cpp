@@ -256,7 +256,7 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 	faidx_t *fai;
 	fai = fai_load(ref_file.c_str());
 	string newFilename = outputFile + "shared_fp.vcf";
-	string newFilename1 = outputFile + "IntegrateBenchmark.vcf";
+//	string newFilename1 = outputFile + "IntegrateBenchmark.vcf";
 //	string newFilename2 = outputFile + "refinedshared_fp.vcf";
 	//string newFilename3 = outputFile + "benchmarkAddTP_user.bed";
 	vector<int> entriesStartIndex(sharedFPFilenames.size(), 0);
@@ -284,8 +284,6 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 //		}
 //	}
 //	sort(tp_vec);
-
-
 	cout << "Do you want to set the number of selected tools? (1 for Yes, 0 for No): " << endl;
 	cout << "If you input 0, the selectToolsNum = " << ceil(sharedFPFilenames.size() * 0.6) << endl;
 
@@ -385,11 +383,11 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 	vector<int> mostRepresentativeVariantIndices;
 	unordered_map<int, int> sizeDifferenceCount;
 	ofstream outputFile1(newFilename);
-	ofstream outputFile2(newFilename1);
+//	ofstream outputFile2(newFilename1);
 //	ofstream outputFile3(newFilename2);
 	//ofstream outputFile4(newFilename3);
 	vector<string> fields;
-	vector<SV_item*> shared_fp_vec;
+	vector<SV_item*> shared_fp_vec, benchmark_nonFNS_vec;
 	string infoField, customInfo, newInfoField, newLineInfo, tools;
 	SV_item* currentVariant;
 	SV_item* mostRepresentativeVariant;
@@ -401,7 +399,7 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 //	outputFile2 << VCF_HEADER << endl;
 	for (const auto& header : headers){
 		outputFile1 << header << endl;
-		outputFile2 << header << endl;
+//		outputFile2 << header << endl;
 	}
 //	outputFile3 << VCF_HEADER << endl;
 	for(i=0; i<connectedComponents.size(); i++){
@@ -533,13 +531,13 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 								if(l != (sharedFPFilenames.size() - 1)){
 									if(connectedComponents[mostRepresentativeVariantIndex][k] < entriesStartIndex[l + 1]){
 										if(k!= 0){
-											if(tools.find(SVcallernames[l]) == string::npos) { // 检查tools是否已包含SVcallernames[l]
+											if(tools.find(SVcallernames[l]) == string::npos){
 												tools += "," + SVcallernames[l];
 												toolsNum++;
 												}
 											break;
 										}else{
-											if(tools.find(SVcallernames[l]) == string::npos) { // 检查tools是否已包含SVcallernames[l]
+											if(tools.find(SVcallernames[l]) == string::npos){
 												tools += SVcallernames[l];
 												toolsNum++;
 											}
@@ -547,12 +545,12 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 										}
 									}
 								}else if(k != 0){
-									if (tools.find(SVcallernames[l]) == string::npos) { // 检查tools是否已包含SVcallernames[l]
+									if (tools.find(SVcallernames[l]) == string::npos){
 										tools += "," + SVcallernames[l];
 										toolsNum++;
 									}
 								}else{
-									if(tools.find(SVcallernames[l]) == string::npos) { // 检查tools是否已包含SVcallernames[l]
+									if(tools.find(SVcallernames[l]) == string::npos){
 										tools += SVcallernames[l];
 										toolsNum++;
 									}
@@ -626,6 +624,19 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 //		if(shared_fp_vec[i] == nullptr) continue;
 //		refinedsharedFPlineMap.insert(make_pair(shared_fp_vec[i]->lineInfo,1));
 //	}
+
+//	convertVcf(outputCommonFN + "/" + "Refined_benchmark.vcf", outputCommonFN + "/" + "Refined_benchmark.bed", ref_file, mate_filename, snv_filename, label1);
+	benchmark_nonFNS_vec = loadData(outputCommonFN + "/" + "Refined_benchmark.bed");
+
+	string benchmark_nonFNS_addSharedFP = outputCommonFN + "/" + "benchmark_nonFNS_addSharedFP";
+	vector<string> benchmark_nonFNS_addSharedFP_files;
+	benchmark_nonFNS_addSharedFP_files.push_back(outputCommonFN + "/" + "Refined_benchmark.vcf");
+	benchmark_nonFNS_addSharedFP_files.push_back(outputCommonFN + "/" + "shared_fp.vcf");
+
+	benchmark_vec.clear();
+	benchmark_vec.push_back(benchmark_nonFNS_vec);
+	benchmark_vec.push_back(shared_fp_vec);
+	integrationBenchmark2(benchmark_nonFNS_addSharedFP, ref_file, benchmark_nonFNS_addSharedFP_files);
 	for(const auto& pair : benchmarklineMap){
 		if(pair.second != int(SVcallernames.size())){
 			benchmarkMap_nonFNS.insert(pair);
@@ -638,14 +649,14 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 //	vector<pair<string, int>> sortedVec2(refinedsharedFPlineMap.begin(), refinedsharedFPlineMap.end());
 	sort(sortedVec.begin(), sortedVec.end(), numericSort);
 //	sort(sortedVec2.begin(), sortedVec2.end(), numericSort);
-	for(const auto& pair : sortedVec){
-		outputFile2 << pair.first << endl;
-	}
+//	for(const auto& pair : sortedVec){
+//		outputFile2 << pair.first << endl;
+//	}
 //	for(const auto& pair : sortedVec2){
 //			outputFile3 << pair.first << endl;
 //	}
 	outputFile1.close();
-	outputFile2.close();
+//	outputFile2.close();
 //	outputFile3.close();
 	fai_destroy(fai);
 	releaseSVItems(entryMap);
