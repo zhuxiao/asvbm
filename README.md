@@ -276,19 +276,19 @@ Invalid long user-called regions can be removed by using the `-M` option as they
 ```sh
 $ asvbm stat -M 100000 -m 20 -T method user_sv.vcf benchmark_sv.vcf reference.fa
 ```
-Benchmarking multiple identification result datasets can be achieved by using the '-T' option.
+Benchmarking multiple identification result datasets can be achieved by using the `-T` option.
 ```sh
 $ asvbm stat -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
-Benchmarking specifies the chromosomes to be processed can be achieved by using the '-C' option.
+Benchmarking specifies the chromosomes to be processed can be achieved by using the `-C` option.
 ```sh
 $ asvbm stat -C "chr1-22;chrX;chrY" -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
-Perform the refinement of benchmark set along with the benchmarking process can be achieved by using the '-b' option.
+Perform the refinement of benchmark set along with the benchmarking process can be achieved by using the `-b` option.
 ```sh
 $ asvbm stat -b -C "chr1-22;chrX;chrY" -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
-Filter out variants that violating Mendelian inheritance laws can be achieved by using the '-g' option.
+Filter out variants that violating Mendelian inheritance laws can be achieved by using the `-g` option.
 ```sh
 $ asvbm create -g -C "chr1-22" -m 20 -T "tool1;tool2;tool3" hg002_sv.vcf hg003_sv.vcf hg004_sv.vcf benchmark_sv.vcf reference.fa
 ```
