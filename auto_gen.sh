@@ -5,5 +5,8 @@
 	cd src/
 	make
 	mv -f asvbm ../bin
-	cd ../
+	cd ../script
+	chmod a+x callset_ensemble.sh
+	ln -s $PWD/callset_ensemble.sh ../bin
+	cd ..
 
