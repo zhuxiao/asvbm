@@ -1915,7 +1915,259 @@ bool IsSameChrname(string &chrname1, string &chrname2){
 	}
 	return false;
 }
+vector<size_t> computeOverlapType1(SV_item* item1, SV_item* item2){
+	bool flag = false, flag_tmp = false;
+	int32_t startPos1, endPos1, startPos2, endPos2;
+	vector<size_t> overlap_type_vec;
+	size_t overlap_type;
 
+	if(item1->sv_type!=VAR_TRA and item1->sv_type!=VAR_BND){ // INS, DEL, DUP, INV
+		if(item1->chrname.size()>0 and IsSameChrname(item1->chrname, item2->chrname)){
+			startPos1 = item1->startPos - min(1000, item1->sv_len);
+			if(startPos1<1) startPos1 = 1;
+			endPos1 = item1->endPos + min(1000, item1->sv_len);
+			startPos2 = item2->startPos - min(1000, item2->sv_len);
+			if(startPos2<1) startPos2 = 1;
+			endPos2 = item2->endPos + min(1000, item2->sv_len);
+
+			flag = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+		}
+
+		if(flag==false and (item2->sv_type==VAR_TRA or item2->sv_type==VAR_BND)){
+			if(item1->chrname.size()>0 and IsSameChrname(item1->chrname, item2->chrname2)){
+				startPos1 = item1->startPos - extendSize;
+				if(startPos1<1) startPos1 = 1;
+				endPos1 = item1->endPos + extendSize;
+				startPos2 = item2->startPos2 - extendSize;
+				if(startPos2<1) startPos2 = 1;
+				endPos2 = item2->endPos2 + extendSize;
+
+				flag = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+			}
+		}
+
+		if(flag) overlap_type_vec.push_back(WHOLE_REG_OVERLAP);
+
+	}else{ // TRA or BND
+
+		if(item1->chrname.size()>0){
+			if(IsSameChrname(item1->chrname, item2->chrname)){
+				if(item1->startPos!=0){
+					// 1: one_overlap_one_bp
+					startPos1 = item1->startPos - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->startPos + extendSize;
+
+					if(item2->startPos!=0){
+						startPos2 = item2->startPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = ONE_OVERLAP_ONE_BP;
+					else if(item2->startPos!=item2->endPos and item2->endPos!=0){
+						// one_overlap_two_bp
+						startPos2 = item2->endPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = ONE_OVERLAP_TWO_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
+				}
+
+				if(item1->startPos!=item1->endPos and item1->endPos!=0){
+					// 2: two_overlap_one_bp
+					startPos1 = item1->endPos - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->endPos + extendSize;
+
+					if(item2->startPos!=0){
+						startPos2 = item2->startPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = TWO_OVERLAP_ONE_BP;
+					else if(item2->startPos!=item2->endPos and item2->endPos!=0){
+						// two_overlap_two_bp
+						startPos2 = item2->endPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = TWO_OVERLAP_TWO_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
+				}
+			}else if(IsSameChrname(item1->chrname, item2->chrname2)){
+
+				if(item1->startPos!=0){
+					// one_overlap_three_bp
+					startPos1 = item1->startPos - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->startPos + extendSize;
+
+					if(item2->startPos2!=0){
+						startPos2 = item2->startPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos2 + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = ONE_OVERLAP_THREE_BP;
+					else if(item2->startPos2!=item2->endPos2 and item2->endPos2!=0){
+						// one_overlap_four_bp
+						startPos2 = item2->endPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos2 + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = ONE_OVERLAP_FOUR_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
+				}
+
+				if(item1->startPos!=item1->endPos and item1->endPos!=0){
+					// two_overlap_three_bp
+					startPos1 = item1->endPos - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->endPos + extendSize;
+
+					if(item2->startPos2!=0){
+						startPos2 = item2->startPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos2 + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = TWO_OVERLAP_THREE_BP;
+					else if(item2->startPos2!=item2->endPos2 and item2->endPos2!=0) { // two_overlap_four_bp
+						startPos2 = item2->endPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos2 + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = TWO_OVERLAP_FOUR_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
+				}
+			}
+		}
+
+		if(item1->chrname2.size()>0){
+			if(IsSameChrname(item1->chrname2, item2->chrname)){
+				if(item1->startPos2!=0){
+					// 3: three_overlap_one_bp
+					startPos1 = item1->startPos2 - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->startPos2 + extendSize;
+
+					if(item2->startPos!=0){
+						startPos2 = item2->startPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = THREE_OVERLAP_ONE_BP;
+					else if(item2->startPos!=item2->endPos and item2->endPos!=0){
+						// three_overlap_two_bp
+						startPos2 = item2->endPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = THREE_OVERLAP_TWO_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
+				}
+
+				if(item1->startPos2!=item1->endPos2 and item1->endPos2!=0){
+					// 4: four_overlap_one_bp
+					startPos1 = item1->endPos2 - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->endPos2 + extendSize;
+
+					if(item2->startPos!=0){
+						startPos2 = item2->startPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = FOUR_OVERLAP_ONE_BP;
+					else if(item2->startPos!=item2->endPos and item2->endPos!=0){
+						// four_overlap_two_bp
+						startPos2 = item2->endPos - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = FOUR_OVERLAP_TWO_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
+				}
+			}else if(IsSameChrname(item1->chrname2, item2->chrname2)){
+				if(item1->startPos2!=0){
+					// three_overlap_three_bp
+					startPos1 = item1->startPos2 - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->startPos2 + extendSize;
+
+					if(item2->startPos2!=0){
+						startPos2 = item2->startPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos2 + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = THREE_OVERLAP_THREE_BP;
+					else if(item2->startPos2!=item2->endPos2 and item2->endPos2!=0) {
+						// three_overlap_four_bp
+						startPos2 = item2->endPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos2 + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = THREE_OVERLAP_FOUR_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
+				}
+
+				if(item1->startPos2!=item1->endPos2 and item1->endPos2!=0){
+					// four_overlap_three_bp
+					startPos1 = item1->endPos2 - extendSize;
+					if(startPos1<1) startPos1 = 1;
+					endPos1 = item1->endPos2 + extendSize;
+
+					if(item2->startPos2!=0){
+						startPos2 = item2->startPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->startPos2 + extendSize;
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+					}
+
+					if(flag_tmp) overlap_type = FOUR_OVERLAP_THREE_BP;
+					else if(item2->startPos2!=item2->endPos2 and item2->endPos2!=0) { // four_overlap_four_bp
+						startPos2 = item2->endPos2 - extendSize;
+						if(startPos2<1) startPos2 = 1;
+						endPos2 = item2->endPos2 + extendSize;
+
+						flag_tmp = isOverlappedPos(startPos1, endPos1, startPos2, endPos2);
+						if(flag_tmp) overlap_type = FOUR_OVERLAP_FOUR_BP;
+					}
+					if(flag_tmp) overlap_type_vec.push_back(overlap_type);
+				}
+			}
+		}
+	}
+
+	return overlap_type_vec;
+}
 vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2){
 	bool flag = false, flag_tmp = false;
 	int32_t startPos1, endPos1, startPos2, endPos2;
@@ -2250,14 +2502,16 @@ string getSVUniqueKeyByParams(const string& chr, int64_t start, int64_t end, con
 void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai, vector<SV_item*> &merge_item2_vec){
 	vector<SV_item*> merge_users_vec, merge_item_vec;
 	unordered_set<SV_item*> sv_allocated_ptrs;
-	vector<vector<SV_item*>> clusters;
+	unordered_set<SV_item*> user_set, clip_vec, user_read_sv_group;
+	unordered_set<SV_item*> sv_noclip;
+	vector<vector<SV_item*>> clusters, clusters2;
 	SV_item *sv_item;
 	vector<SV_item*> sv_item_vec;
 	SV_item *Maymerge_user, *Merge_users, *Merge_item, *Lp_Merge_item, *Definite_Merge_item;
 	size_t i = user_pos + 1;
 	int32_t min_startpos, max_endpos, refseq_len_tmp;
 	int64_t pos_update, pos_update_const, merge_users_vec_endPos_max=0;
-	bool flag = false;
+	bool flag = false, dup_flag = false;
 	size_t startpos1, startpos2, endpos1, endpos2;
 	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
 	double consistency;
@@ -2271,23 +2525,23 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 	merge_users_vec.push_back(user);
 	pos_update = user->endPos;
 	pos_update_const = user->endPos;
-	if(i<subset1.size()){
+	if(i<=subset1.size()){
 		for(i = user_pos + 1; i<subset1.size(); i++){
 			Maymerge_user = subset1.at(i);
-			if(user->sv_type == VAR_INS and (bench->sv_type == VAR_INS or bench->sv_type == VAR_DUP)){
-				if(abs(Maymerge_user->startPos - user->startPos) > 500) break;
+			if((user->sv_type == VAR_INS or user->sv_type == VAR_DUP) and (bench->sv_type == VAR_INS or bench->sv_type == VAR_DUP)){
+				if(abs(Maymerge_user->startPos - user->startPos) > 1000) break;
 				else{
-					if(Maymerge_user->sv_type == user->sv_type)
+					if((Maymerge_user->sv_type == user->sv_type) || (Maymerge_user->sv_type == VAR_DUP && user->sv_type == VAR_INS) || (Maymerge_user->sv_type == VAR_INS && user->sv_type == VAR_DUP))
 						merge_users_vec.push_back(Maymerge_user);
 				}
 			}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
 				//distance
-				if(abs(Maymerge_user->startPos - pos_update) > 500) break;
+				if(abs(Maymerge_user->startPos - pos_update) > 700) break;
 				else{
 					if(Maymerge_user->sv_type == user->sv_type){
 //						merge_users_vec.push_back(Maymerge_user);
 //						pos_update = Maymerge_user->endPos;
-						if(abs(Maymerge_user->startPos - pos_update_const) <= 500 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
+						if(abs(Maymerge_user->startPos - pos_update_const) <= 700 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
 						{
 							merge_users_vec.push_back(Maymerge_user);
 							pos_update = Maymerge_user->endPos;
@@ -2300,10 +2554,35 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 			}else break;
 		}
 		//BAM
-		if(BamFileSign and merge_users_vec.size()>1){
+		size_t merge_singleVariant;
+		if(merge_singleVariant_flag){
+			merge_singleVariant = 0;
+		}else{
+			merge_singleVariant = 1;
+		}
+		if(merge_users_vec.size() > 1 || (merge_users_vec.size() == 1 && user_pos >= 1 && abs(subset1.at(user_pos - 1)->startPos - user->startPos) <= 100)){
+			for(SV_item* sv : merge_users_vec){
+				sv->mayMergeFlag = true;
+			}
+		}
+		if(BamFileSign and (merge_users_vec.size() > merge_singleVariant || user->mayMergeFlag || bench->mayMergeFlag)){
 			//Area range calculation
-			int32_t region_start = std::max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 200));
-			int32_t region_end = merge_users_vec.back()->endPos + 200;
+			int32_t region_start, region_end;
+/*			if(merge_users_vec.front()->sv_type == VAR_INS && merge_users_vec.front()->sv_len > 1000){
+				region_start = max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - merge_users_vec.front()->sv_len));
+				region_end = merge_users_vec.back()->endPos + merge_users_vec.front()->sv_len;
+			}else{
+				region_start = max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 1000));
+				region_end = merge_users_vec.back()->endPos + 1000;
+			}*/
+			if(merge_users_vec.size() == 1){
+				region_start = max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 1500));
+				region_end = merge_users_vec.back()->endPos + 1500;
+			}else{
+				region_start = max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 1000));
+				region_end = merge_users_vec.back()->endPos + 1000;
+			}
+
 			regionReads = load_region_data(user->chrname, region_start, region_end);
 //			cout<<"111111111111:"<<regionReads.size()<<endl;
 			 // Build SV location index (variant for fast query coverage)
@@ -2314,7 +2593,8 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 				else
 					sv_pos_map[{sv->startPos, sv->endPos}] = sv;
 			}
-
+			clip_vec.clear();
+			clusters2.clear();
 			// Iterate through all reads and record the covered SV set
 			unordered_map<string, vector<SV_item*>> read_sv_groups;
 			unordered_map<string, SV_item*> sv_key_to_ptr;
@@ -2328,6 +2608,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 				// Analyze the CIGAR and calculate the coverage area (more accurate way)
 
 				if(read == nullptr) continue;
+//				if(region_start < (read->core.pos + 1) || region_end > (int64_t)bam_endpos(read)) continue;
 				uint32_t* cigar = bam_get_cigar(read);
 				int n_cigar = read->core.n_cigar;
 				if(cigar == nullptr || n_cigar <= 0) continue;
@@ -2370,6 +2651,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 					top10IndexSet.insert(minHeap.top().second);
 					minHeap.pop();
 				}*/
+				bool clip_flag = false;
 				for(int i = 0; i < n_cigar; ++i){
 /*					if(top10IndexSet.find(i) == top10IndexSet.end()){
 						continue;
@@ -2378,7 +2660,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 					int len = bam_cigar_oplen(cigar[i]);
 					switch(op) {
 						case BAM_CDEL:
-							if(len >= 2 && merge_users_vec[0]->sv_type == VAR_DEL && ref_pos >= region_start && (ref_pos + len) <= region_end){
+							if(len >= 2 && merge_users_vec[0]->sv_type == VAR_DEL && (ref_pos + len - 1) >= region_start && ref_pos <= region_end){
 								ref_blocks.push_back({ref_pos, ref_pos + len});
 								int fetch_len = 0;
 								string ref_reg = chrname + ":" + to_string(ref_pos) + "-" + to_string(ref_pos + len);
@@ -2402,13 +2684,17 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 									sv_key_to_ptr[sv_key_del] = sv_item;
 									sv_allocated_ptrs.insert(sv_item);
 								}
-
+								if(bam_cigar_op(cigar[0]) == BAM_CSOFT_CLIP || bam_cigar_op(cigar[n_cigar - 1]) == BAM_CSOFT_CLIP){
+									sv_item->clipFlag = true;
+								}else{
+									sv_item->clipFlag = false;
+								}
 								sv_item_vec.push_back(sv_item);
 							}
 							ref_pos += len;
 							break;
 						case BAM_CINS:
-							if(len >= 2 && merge_users_vec[0]->sv_type == VAR_INS && ref_pos >= region_start && ref_pos <= region_end){
+							if(len >= 2 && (merge_users_vec[0]->sv_type == VAR_INS || merge_users_vec[0]->sv_type == VAR_DUP) && ref_pos >= region_start && ref_pos <= region_end){
 								ref_blocks.push_back({ref_pos, ref_pos + len});
 								int fetch_len = 0;
 								string ref_reg = chrname + ":" + to_string(ref_pos) + "-" + to_string(ref_pos);
@@ -2436,6 +2722,11 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 								sv_key_to_ptr[sv_key_ins] = sv_item;
 								sv_allocated_ptrs.insert(sv_item);
 								}
+								if(bam_cigar_op(cigar[0]) == BAM_CSOFT_CLIP || bam_cigar_op(cigar[n_cigar - 1]) == BAM_CSOFT_CLIP){
+									sv_item->clipFlag = true;
+								}else{
+									sv_item->clipFlag = false;
+								}
 								sv_item_vec.push_back(sv_item);
 							}
 							read_len += len;
@@ -2454,6 +2745,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 							} else if (op == BAM_CREF_SKIP) {
 								ref_pos += len;
 							} else if (op == BAM_CSOFT_CLIP) {
+								clip_flag = true;
 								read_len += len;
 								read_seq_idx += len;
 							}else{
@@ -2462,7 +2754,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 							break;
 					}
 				}
-
+				if(!clip_flag && (region_start < (read->core.pos + 1) || region_end > (int64_t)bam_endpos(read))) continue;
 				// Check whether each SV is overwritten by the current read
 				vector<SV_item*> covered_svs;
 /*				for (auto& sv_pair : sv_pos_map) {
@@ -2512,9 +2804,9 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						int64_t covered_length = 0;
 						//Intersection of computation interval
 						int64_t overlap_start = max(sv_start, block.first);
-						int64_t overlap_end = min(sv_end, block.second);
+						int64_t overlap_end = min(sv_end + 200, block.second + 200);
 						if (overlap_start < overlap_end) {
-							if(abs(sv_start-block.first) > 250) continue;
+							if(abs(sv_start-block.first) > 500) continue;
 							if(overlap_start < overlap_end)
 								covered_length += (overlap_end - overlap_start);
 /*							else
@@ -2524,7 +2816,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 							}else{
 								ratio = (double)sv_length/(block.second - block.first);
 							}
-							if((double)covered_length/(block.second - block.first) >= 0.9 and ratio >= 0.9){	//  0.7/0.95
+							if((double)covered_length/(block.second - block.first) >= 0 and ratio >= 0.9){	//  0.7/0.95
 								covered_svs.push_back(sv);
 								break;
 							}
@@ -2532,7 +2824,8 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 					}
 				}
 				// Records reads covering multiple SVS
-				unordered_set<string> covered_sv_keys;
+/*				unordered_set<string> covered_sv_keys;
+				unordered_set<SV_item*> processed_svs;
 				for(SV_item* sv : covered_svs){
 					if (sv != nullptr){
 						string sv_key = getSVUniqueKey(sv);
@@ -2555,37 +2848,163 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						}
 						bool overlap_flag = false;
 						int64_t overlap_start1,overlap_end1;
-						for(SV_item* sv2 : covered_svs){
+						double ratio = 0;
+						for(size_t k = 0; k < covered_svs.size(); ++k){
+							SV_item* sv2 = covered_svs[k];
 							if (sv2 != nullptr){
+								if(processed_svs.find(sv2) != processed_svs.end()){
+									continue;
+								}
 								if(sv->sv_type == VAR_INS){
 									overlap_start1 = max(sv->startPos, sv2->startPos);
-									overlap_end1 = min(sv->endPos + sv->sv_len, sv2->endPos + sv2->sv_len);
+									overlap_end1 = min(sv->endPos + sv->sv_len + 200, sv2->endPos + sv2->sv_len + 200);
 								}else{
 									overlap_start1 = max(sv->startPos, sv2->startPos);
-									overlap_end1 = min(sv->endPos, sv2->endPos);
+									overlap_end1 = min(sv->endPos + 200, sv2->endPos + 200);
 								}
-								if (overlap_start1 < overlap_end1) {overlap_flag = true; break;}
+//								if (overlap_start1 < overlap_end1) {overlap_flag = true; break;}
+								if(sv->sv_len >= sv2->sv_len){
+									ratio = (double)sv2->sv_len / sv->sv_len;
+								}else{
+									ratio = (double)sv->sv_len / sv2->sv_len;
+								}
+								if(((double)(overlap_end1 - overlap_start1) / max(sv->sv_len, sv2->sv_len)) >= 0 and ratio >= 0.95) {overlap_flag = true;}
+								if(overlap_flag){
+									if(sv->clipFlag){
+										sv2->clipFlag2 = true;
+									}else{
+										sv_noclip.insert(sv2);
+									}
+									processed_svs.insert(sv2);
+									break;
+								}
 							}
 						}
 						if(overlap_flag) continue;
 						if(covered_sv_keys.find(sv_key) == covered_sv_keys.end()){
-							covered_svs.push_back(sv);
+							temp_new_svs.push_back(sv);
 							covered_sv_keys.insert(sv_key);
 						}
+					}
+					for(SV_item* sv3 : covered_svs){
+						if(sv_noclip.find(sv3) == sv_noclip.end()){
+							if(sv3->clipFlag2){
+								if(sv3->alt_seq.compare("-") == 0 or bench->alt_seq.compare("-") == 0){
+//									if(find(clip_vec.begin(), clip_vec.end(), sv3) == clip_vec.end()){
+//										clip_vec.push_back(sv3);
+//									}
+									if(clip_vec.find(sv3) == clip_vec.end()) clip_vec.insert(sv3);
+								}else{
+									consistency = computeVarseqConsistency(sv3, bench, fai, 0.5);
+									if(consistency >= 0.5){
+//										if(find(clip_vec.begin(), clip_vec.end(), sv3) == clip_vec.end()){
+//											clip_vec.push_back(sv3);
+//										}
+										if(clip_vec.find(sv3) == clip_vec.end()) clip_vec.insert(sv3);
+									}
+								}
+							}
+						}
+					}
+				}
+				covered_svs.insert(covered_svs.end(), temp_new_svs.begin(), temp_new_svs.end());
+				temp_new_svs.clear();*/
+				unordered_set<size_t> removed_sv_indices;
+				if(covered_svs.size() >= 1){
+					removed_sv_indices.clear();
+					for(size_t k = 0; k < covered_svs.size(); ++k){
+						SV_item* sv2 = covered_svs[k];
+						if (sv2 == nullptr){continue;}
+
+						size_t best_sv_index = -1;
+						int64_t max_overlap_len = 0, current_overlap;
+
+						for (size_t p = 0; p < sv_item_vec.size(); ++p){
+							if(removed_sv_indices.count(p)){continue;}
+							SV_item* sv = sv_item_vec[p];
+							if(sv == nullptr){
+								continue;
+							}
+							if(sv->startPos < region_start || sv->endPos > region_end){
+								continue;
+							}
+							bool overlap_flag = false;
+							int64_t overlap_start1, overlap_end1;
+							double ratio = 0;
+							if(sv->sv_type == VAR_INS){
+								overlap_start1 = max(sv->startPos, sv2->startPos);
+								overlap_end1 = min(sv->endPos + sv->sv_len + 200, sv2->endPos + sv2->sv_len + 200);
+							}else{
+								overlap_start1 = max(sv->startPos, sv2->startPos);
+								overlap_end1 = min(sv->endPos + 200, sv2->endPos + 200);
+							}
+							if (overlap_start1 > overlap_end1) {continue;}
+							if(sv->sv_len >= sv2->sv_len){
+								ratio = (double)sv2->sv_len / sv->sv_len;
+							}else{
+								ratio = (double)sv->sv_len / sv2->sv_len;
+							}
+							if(ratio >= 0.9) {overlap_flag = true;}
+							if(overlap_flag){
+								if(sv->clipFlag){
+									sv2->clipFlag2 = true;
+								}else{
+									sv_noclip.insert(sv2);
+								}
+								current_overlap = overlap_end1 - overlap_start1;
+								if(current_overlap > max_overlap_len){
+									max_overlap_len = current_overlap;
+									best_sv_index = p;
+								}
+							}
+						}
+						removed_sv_indices.insert(best_sv_index);
+					}
+
+					for(SV_item* sv3 : covered_svs){
+						if(sv_noclip.find(sv3) == sv_noclip.end()){
+							if(sv3->clipFlag2){
+								if(sv3->alt_seq.compare("-") == 0 or bench->alt_seq.compare("-") == 0){
+//									if(find(clip_vec.begin(), clip_vec.end(), sv3) == clip_vec.end()){
+//										clip_vec.push_back(sv3);
+//									}
+									if(clip_vec.find(sv3) == clip_vec.end()) clip_vec.insert(sv3);
+								}else{
+									consistency = computeVarseqConsistency(sv3, bench, fai, 0.5);
+									if(consistency >= 0.5){
+//										if(find(clip_vec.begin(), clip_vec.end(), sv3) == clip_vec.end()){
+//											clip_vec.push_back(sv3);
+//										}
+										if(clip_vec.find(sv3) == clip_vec.end()) clip_vec.insert(sv3);
+									}
+								}
+							}
+						}
+					}
+				}
+
+				for(size_t q = 0; q < sv_item_vec.size(); ++q){
+					SV_item* sv = sv_item_vec[q];
+					if(!removed_sv_indices.count(q)){
+						covered_svs.push_back(sv);
 					}
 				}
 				if (covered_svs.size() >= 2) {
 					string qname = bam_get_qname(read);
 					read_sv_groups[qname] = covered_svs;
 				}
+				clusters2.push_back(sv_item_vec);
 				sv_item_vec.clear();
 			}
 			bam_hdr_destroy(header);
 			sam_close(bam_file);
 			sv_key_to_ptr.clear();
 			sv_allocated_ptrs.clear();
+			if(clip_vec.find(user) != clip_vec.end() && sv_noclip.find(user) == sv_noclip.end()){
+				user->clipFlag3 = true;
+			}
 			// Merge SVS that share the same read (build clusters)
-			unordered_map<SV_item*, int> sv_to_cluster;
+/*			unordered_map<SV_item*, int> sv_to_cluster;
 			clusters.clear();
 			int cluster_id = 0;
 
@@ -2638,18 +3057,71 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 			for (auto& cluster : clusters) {
 				if (!cluster.empty()) {
 					// Sort by startPos ascending order
-/*					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
+					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
 						return a->sv_len < b->sv_len;
 					});
-					if(cluster.size()>10)cluster.resize(10);*/
+					if(cluster.size()>10)cluster.resize(10);
 					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
 						return a->startPos < b->startPos;
 					});
 					final_clusters.push_back(cluster);
 				}
 			}
-			clusters = final_clusters;
+			clusters = final_clusters;*/
+			clusters.clear();
+			// clusters2.clear();
+			for(auto& group : read_sv_groups){
+				user_read_sv_group.clear();
+				user_read_sv_group.insert(group.second.begin(), group.second.end());
+				if (user_read_sv_group.find(user) != user_read_sv_group.end()){
+					clusters.push_back(group.second);
+				}
+				// clusters2.push_back(group.second);
+			}
 
+			if(!clusters.empty()){
+				sort(clusters.begin(), clusters.end(), [bench](const vector<SV_item*>& a, const vector<SV_item*>& b){
+					int sum_a = 0;
+					for(const SV_item* sv : a){
+						sum_a += sv->sv_len;
+					}
+					int sum_b = 0;
+					for(const SV_item* sv : b){
+						sum_b += sv->sv_len;
+					}
+					return abs(sum_a - bench->sv_len) < abs(sum_b - bench->sv_len);
+				});
+			}
+			for(auto& cluster : clusters){
+				if(!cluster.empty()){
+					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b){
+						return a->startPos < b->startPos;
+					});
+				}
+			}
+			for(auto& cluster : clusters2){
+				if(!cluster.empty()){
+					int sum_sv = 0;
+					bool cluster_clipFlag = false;
+					for(const SV_item* sv : cluster){
+						// if(sv->clipFlag){
+						// 	cluster_clipFlag = true;
+						// 	break;
+						// }
+						if((sv->sv_type == VAR_DEL) && (sv->endPos < user->startPos) && (user->startPos - sv->endPos > 800)) continue;
+						sum_sv += sv->sv_len;
+					}
+					for (SV_item* sv2 : merge_users_vec){
+						if((static_cast<double>(min(sum_sv, sv2->sv_len)) / max(sum_sv, sv2->sv_len) >= 0.95) && !cluster_clipFlag && sum_sv > 100){
+							if(clip_vec.find(sv2) == clip_vec.end() || sv_noclip.find(sv2) != sv_noclip.end()){
+								user_set.insert(sv2);
+								sv2->singleFlag = true;
+							}
+						}
+					}
+
+				}
+			}
 //			cout << "Found " << clusters.size() << " clusters supported by reads" << endl;
 
 		}
@@ -2660,8 +3132,8 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 		regionReads.clear();
 
 		if(BamFileSign){
-			for(size_t m =0; m < clusters.size(); m++){
-				if(clusters[m].size()>1){
+//			for(size_t m =0; m < clusters.size(); m++){
+				if((!clusters.empty() && clusters[0].size() > 1)){
 /*					bool has_next = (find(clusters[m].begin(), clusters[m].end(), Next_user) != clusters[m].end());
 					bool has_user = (find(clusters[m].begin(), clusters[m].end(), user) != clusters[m].end());
 					if(has_next && has_user){
@@ -2675,7 +3147,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						clusters[m].resize(10);
 					}*/
 					//Merge verification: Whether it is consistent after the merger
-					auto merge_result = findClosestSubarray(clusters[m], bench->sv_len);
+					auto merge_result = findClosestSubarray(clusters[0], bench->sv_len);
 					merge_item_vec = merge_result.second;
 					if(merge_item_vec.size() > 1){
 						//Verify heterozygous variant overlap
@@ -2836,6 +3308,8 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 										seq1 += Merge_item->ref_seq;
 									}
 								}
+							}else if(Merge_item->sv_type == VAR_DUP){
+								dup_flag = true;
 							}
 						}
 						//Extract seq2 sequence
@@ -2917,7 +3391,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						upperSeq(seq2);
 						needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 						consistency = calculate_consistency(aln_seq1, aln_seq2);
-						if(consistency >= SEQ_CONSISTENCY){
+						if(consistency >= 0.6 || bench->alt_seq.compare("-") == 0 || dup_flag){
 							for(size_t j=0; j < merge_item_vec.size(); j++){
 								//LP flag
 								Lp_Merge_item = merge_item_vec.at(j);
@@ -2929,6 +3403,19 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 							if(!flag) {LpNum += 1;
 		//					cout << "merge Num: " << merge_item_vec.size() <<"	pos:" << merge_item_vec.at(0)->startPos <<"	LpNum = " << LpNum << endl;
 							}
+/*							unordered_set<SV_item*> existing_set(merge_item_vec.begin(), merge_item_vec.end());
+							for (SV_item* sv : clip_vec){
+								if(existing_set.find(sv) == existing_set.end() && sv_noclip.find(sv) == sv_noclip.end()){
+									merge_item_vec.push_back(sv);
+									existing_set.insert(sv);
+								}
+							}*/
+/*							auto it = remove_if(merge_item_vec.begin(), merge_item_vec.end(),[&user_set](SV_item* sv){
+								return user_set.find(sv) != user_set.end();
+							}
+							);
+							merge_item_vec.erase(it, merge_item_vec.end());*/
+
 							for(size_t j=0; j < merge_item_vec.size(); j++){
 								Definite_Merge_item = merge_item_vec.at(j);
 								Definite_Merge_item->mergeMark2 = true;
@@ -2942,7 +3429,18 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						}
 					}
 				}
-			}
+/*				else if(clip_vec.find(user) != clip_vec.end() && sv_noclip.find(user) == sv_noclip.end()){
+					merge_item_vec.push_back(user);
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						Definite_Merge_item = merge_item_vec.at(j);
+						Definite_Merge_item->mergeMark2 = true;
+						Definite_Merge_item->LpFlag = true;
+						Definite_Merge_item->mergeFlag = true;
+					}
+					bench->overlapped = true;
+					merge_item2_vec = merge_item_vec;
+				}*/
+//			}
 			for (SV_item* item : sv_allocated_ptrs) {
 				if (item != nullptr) {
 					delete item;
@@ -3109,6 +3607,8 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 								seq1 += Merge_item->ref_seq;
 							}
 						}
+					}else if(Merge_item->sv_type == VAR_DUP){
+						dup_flag = true;
 					}
 				}
 				//Extract seq2 sequence
@@ -3190,7 +3690,7 @@ void IsmergeJudge4(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 				upperSeq(seq2);
 				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 				consistency = calculate_consistency(aln_seq1, aln_seq2);
-				if(consistency >= SEQ_CONSISTENCY){
+				if(consistency >= 0.6 || bench->alt_seq.compare("-") == 0 || dup_flag){
 					for(size_t j=0; j < merge_item_vec.size(); j++){
 						//LP flag
 						Lp_Merge_item = merge_item_vec.at(j);
@@ -3225,7 +3725,7 @@ void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 	size_t i = user_pos + 1;
 	int32_t min_startpos, max_endpos, refseq_len_tmp;
 	int64_t pos_update, pos_update_const, merge_users_vec_endPos_max=0;
-	bool flag = false;
+	bool flag = false, dup_flag = false;
 	size_t startpos1, startpos2, endpos1, endpos2;
 	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
 	double consistency;
@@ -3240,19 +3740,19 @@ void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 		for(i = user_pos + 1; i<subset1.size(); i++){
 			Maymerge_user = subset1.at(i);
 			if(user->sv_type == VAR_INS and (bench->sv_type == VAR_INS or bench->sv_type == VAR_DUP)){
-				if(abs(Maymerge_user->startPos - user->startPos) > 500) break;
+				if(abs(Maymerge_user->startPos - user->startPos) > 2000) break;
 				else{
 					if(Maymerge_user->sv_type == user->sv_type)
 						merge_users_vec.push_back(Maymerge_user);
 				}
 			}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
 				//distance
-				if(abs(Maymerge_user->startPos - pos_update) > 500) break;
+				if(abs(Maymerge_user->startPos - pos_update) > 1000) break;
 				else{
 					if(Maymerge_user->sv_type == user->sv_type){
 //						merge_users_vec.push_back(Maymerge_user);
 //						pos_update = Maymerge_user->endPos;
-						if(abs(Maymerge_user->startPos - pos_update_const) <= 500 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
+						if(abs(Maymerge_user->startPos - pos_update_const) <= 1000 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
 						{
 							merge_users_vec.push_back(Maymerge_user);
 							pos_update = Maymerge_user->endPos;
@@ -3348,7 +3848,7 @@ void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						int64_t overlap_start = max(sv_start, block.first);
 						int64_t overlap_end = min(sv_end, block.second);
 						if (overlap_start - 50 < overlap_end + 50) {
-							if(abs(sv_start-block.first) > 250) continue;
+//							if(abs(sv_start-block.first) > 250) continue;
 							if(overlap_start < overlap_end)
 								covered_length += (overlap_end - overlap_start);
 							else
@@ -3604,6 +4104,8 @@ void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 										seq1 += Merge_item->ref_seq;
 									}
 								}
+							}else if(Merge_item->sv_type == VAR_DUP){
+								dup_flag = true;
 							}
 						}
 						//Extract seq2 sequence
@@ -3685,7 +4187,7 @@ void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						upperSeq(seq2);
 						needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 						consistency = calculate_consistency(aln_seq1, aln_seq2);
-						if(consistency >= SEQ_CONSISTENCY){
+						if(consistency >= SEQ_CONSISTENCY || bench->alt_seq.compare("-") == 0 || dup_flag){
 							for(size_t j=0; j < merge_item_vec.size(); j++){
 								//LP flag
 								Lp_Merge_item = merge_item_vec.at(j);
@@ -3870,6 +4372,8 @@ void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 								seq1 += Merge_item->ref_seq;
 							}
 						}
+					}else if(Merge_item->sv_type == VAR_DUP){
+						dup_flag = true;
 					}
 				}
 				//Extract seq2 sequence
@@ -3951,7 +4455,7 @@ void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 				upperSeq(seq2);
 				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 				consistency = calculate_consistency(aln_seq1, aln_seq2);
-				if(consistency >= SEQ_CONSISTENCY){
+				if(consistency >= SEQ_CONSISTENCY || bench->alt_seq.compare("-") == 0 || dup_flag){
 					for(size_t j=0; j < merge_item_vec.size(); j++){
 						//LP flag
 						Lp_Merge_item = merge_item_vec.at(j);
@@ -3982,14 +4486,16 @@ void IsmergeJudge3(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai, vector<SV_item*> &merge_item1_vec){
 	vector<SV_item*> merge_users_vec, merge_item_vec;
 	unordered_set<SV_item*> sv_allocated_ptrs;
-	vector<vector<SV_item*>> clusters;
+	unordered_set<SV_item*> sv_noclip;
+	unordered_set<SV_item*> user_set, clip_vec, user_read_sv_group;
+	vector<vector<SV_item*>> clusters, clusters2;
 	SV_item *sv_item;
 	vector<SV_item*> sv_item_vec;
 	SV_item *Maymerge_user, *Merge_users, *Merge_item, *Lp_Merge_item, *Definite_Merge_item;
 	size_t i = user_pos + 1;
 	int32_t min_startpos, max_endpos, refseq_len_tmp;
 	int64_t pos_update, pos_update_const, merge_users_vec_endPos_max=0;
-	bool flag = false;
+	bool flag = false, dup_flag = false;
 	size_t startpos1, startpos2, endpos1, endpos2;
 	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
 	double consistency;
@@ -4003,23 +4509,23 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 	merge_users_vec.push_back(user);
 	pos_update = user->endPos;
 	pos_update_const = user->endPos;
-	if(i<subset1.size()){
+	if(i<=subset1.size()){
 		for(i = user_pos + 1; i<subset1.size(); i++){
 			Maymerge_user = subset1.at(i);
-			if(user->sv_type == VAR_INS and (bench->sv_type == VAR_INS or bench->sv_type == VAR_DUP)){
-				if(abs(Maymerge_user->startPos - user->startPos) > 500) break;
+			if((user->sv_type == VAR_INS || user->sv_type == VAR_DUP) and (bench->sv_type == VAR_INS or bench->sv_type == VAR_DUP)){
+				if(abs(Maymerge_user->startPos - user->startPos) > 1000) break;
 				else{
-					if(Maymerge_user->sv_type == user->sv_type)
+					if((Maymerge_user->sv_type == user->sv_type) || (Maymerge_user->sv_type == VAR_DUP && user->sv_type == VAR_INS) || (Maymerge_user->sv_type == VAR_INS && user->sv_type == VAR_DUP))
 						merge_users_vec.push_back(Maymerge_user);
 				}
 			}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
 				//distance
-				if(abs(Maymerge_user->startPos - pos_update) > 500) break;
+				if(abs(Maymerge_user->startPos - pos_update) > 700) break;
 				else{
 					if(Maymerge_user->sv_type == user->sv_type){
 //						merge_users_vec.push_back(Maymerge_user);
 //						pos_update = Maymerge_user->endPos;
-						if(abs(Maymerge_user->startPos - pos_update_const) <= 500 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
+						if(abs(Maymerge_user->startPos - pos_update_const) <= 700 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
 						{
 							merge_users_vec.push_back(Maymerge_user);
 							pos_update = Maymerge_user->endPos;
@@ -4032,10 +4538,35 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 			}else break;
 		}
 		//BAM
-		if(BamFileSign and merge_users_vec.size()>1){
+		size_t merge_singleVariant;
+		if(merge_singleVariant_flag){
+			merge_singleVariant = 0;
+		}else{
+			merge_singleVariant = 1;
+		}
+		if(merge_users_vec.size() > 1 || (merge_users_vec.size() == 1 && user_pos >= 1 && abs(subset1.at(user_pos - 1)->startPos - user->startPos) <= 100)){
+			for(SV_item* sv : merge_users_vec){
+				sv->mayMergeFlag = true;
+			}
+		}
+		if(BamFileSign and (merge_users_vec.size() > merge_singleVariant || user->mayMergeFlag || bench->mayMergeFlag)){
 			//Area range calculation
-			int32_t region_start = std::max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 200));
-			int32_t region_end = merge_users_vec.back()->endPos + 200;
+			int32_t region_start, region_end;
+/*			if(merge_users_vec.front()->sv_type == VAR_INS && merge_users_vec.front()->sv_len > 1000){
+				region_start = max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - merge_users_vec.front()->sv_len));
+				region_end = merge_users_vec.back()->endPos + merge_users_vec.front()->sv_len;
+			}else{
+				region_start = max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 1000));
+				region_end = merge_users_vec.back()->endPos + 1000;
+			}*/
+			if(merge_users_vec.size() == 1){
+				region_start = max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 1500));
+				region_end = merge_users_vec.back()->endPos + 1500;
+			}else{
+				region_start = max(static_cast<int32_t>(0), static_cast<int32_t>(merge_users_vec.front()->startPos - 1000));
+				region_end = merge_users_vec.back()->endPos + 1000;
+			}
+
 			regionReads = load_region_data(user->chrname, region_start, region_end);
 //			cout<<"111111111111:"<<regionReads.size()<<endl;
 			 // Build SV location index (variant for fast query coverage)
@@ -4046,7 +4577,8 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 				else
 					sv_pos_map[{sv->startPos, sv->endPos}] = sv;
 			}
-
+			clip_vec.clear();
+			clusters2.clear();
 			// Iterate through all reads and record the covered SV set
 			unordered_map<string, vector<SV_item*>> read_sv_groups;
 			unordered_map<string, SV_item*> sv_key_to_ptr;
@@ -4059,6 +4591,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 //				size_t read_end = bam_endpos(read);
 				// Analyze the CIGAR and calculate the coverage area (more accurate way)
 				if(read == nullptr) continue;
+//				if(region_start < (read->core.pos + 1) || region_end > (int64_t)bam_endpos(read)) continue;
 				uint32_t* cigar = bam_get_cigar(read);
 				int n_cigar = read->core.n_cigar;
 				if(cigar == nullptr || n_cigar <= 0) continue;
@@ -4101,6 +4634,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 					top10IndexSet.insert(minHeap.top().second);
 					minHeap.pop();
 				}*/
+				bool clip_flag = false;
 				for(int i = 0; i < n_cigar; ++i){
 /*					if(top10IndexSet.find(i) == top10IndexSet.end()){
 						continue;
@@ -4109,7 +4643,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 					int len = bam_cigar_oplen(cigar[i]);
 					switch(op) {
 						case BAM_CDEL:
-							if(len >= 2 && merge_users_vec[0]->sv_type == VAR_DEL && ref_pos >= region_start && (ref_pos + len) <= region_end){
+							if(len >= 2 && merge_users_vec[0]->sv_type == VAR_DEL && (ref_pos + len - 1) >= region_start && ref_pos <= region_end){
 								ref_blocks.push_back({ref_pos, ref_pos + len});
 								int fetch_len = 0;
 								string ref_reg = chrname + ":" + to_string(ref_pos) + "-" + to_string(ref_pos + len);
@@ -4134,12 +4668,17 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 									sv_key_to_ptr[sv_key_del] = sv_item;
 									sv_allocated_ptrs.insert(sv_item);
 								}
+								if(bam_cigar_op(cigar[0]) == BAM_CSOFT_CLIP || bam_cigar_op(cigar[n_cigar - 1]) == BAM_CSOFT_CLIP){
+									sv_item->clipFlag = true;
+								}else{
+									sv_item->clipFlag = false;
+								}
 								sv_item_vec.push_back(sv_item);
 							}
 							ref_pos += len;
 							break;
 						case BAM_CINS:
-							if(len >= 2 && merge_users_vec[0]->sv_type == VAR_INS && ref_pos >= region_start && ref_pos <= region_end){
+							if(len >= 2 && (merge_users_vec[0]->sv_type == VAR_INS || merge_users_vec[0]->sv_type == VAR_DUP) && ref_pos >= region_start && ref_pos <= region_end){
 								ref_blocks.push_back({ref_pos, ref_pos + len});
 								int fetch_len = 0;
 								string ref_reg = chrname + ":" + to_string(ref_pos) + "-" + to_string(ref_pos);
@@ -4167,6 +4706,11 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 									sv_key_to_ptr[sv_key_ins] = sv_item;
 									sv_allocated_ptrs.insert(sv_item);
 								}
+								if(bam_cigar_op(cigar[0]) == BAM_CSOFT_CLIP || bam_cigar_op(cigar[n_cigar - 1]) == BAM_CSOFT_CLIP){
+									sv_item->clipFlag = true;
+								}else{
+									sv_item->clipFlag = false;
+								}
 								sv_item_vec.push_back(sv_item);
 							}
 							read_len += len;
@@ -4185,6 +4729,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 							} else if (op == BAM_CREF_SKIP) {
 								ref_pos += len;
 							} else if (op == BAM_CSOFT_CLIP) {
+								clip_flag = true;
 								read_len += len;
 								read_seq_idx += len;
 							}else{
@@ -4193,7 +4738,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 							break;
 					}
 				}
-
+				if(!clip_flag && (region_start < (read->core.pos + 1) || region_end > (int64_t)bam_endpos(read))) continue;
 				// Check whether each SV is overwritten by the current read
 				vector<SV_item*> covered_svs;
 				for(auto& sv_pair : sv_pos_map){
@@ -4201,7 +4746,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 					int64_t sv_end = sv_pair.first.second;
 					SV_item* sv = sv_pair.second;
 					if(sv->sv_type == VAR_INS)
-						sv_length = sv_end - sv_start;
+						sv_length = sv->sv_len;
 					else
 						sv_length = sv_end - sv_start +1;
 					double ratio = 0;
@@ -4211,9 +4756,9 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						int64_t covered_length = 0;
 						//Intersection of computation interval
 						int64_t overlap_start = max(sv_start, block.first);
-						int64_t overlap_end = min(sv_end, block.second);
+						int64_t overlap_end = min(sv_end + 200, block.second + 200);
 						if (overlap_start < overlap_end) {
-							if(abs(sv_start-block.first) > 250) continue;
+							if(abs(sv_start-block.first) > 500) continue;
 							if(overlap_start < overlap_end)
 								covered_length += (overlap_end - overlap_start);
 /*							else
@@ -4223,53 +4768,104 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 							}else{
 								ratio = (double)sv_length/(block.second - block.first);
 							}
-							if((double)covered_length/(block.second - block.first) >= 0.9 and ratio >= 0.9){	//  0.7/0.95
+							if((double)covered_length/(block.second - block.first) >= 0 and ratio >= 0.9){	//  0.7/0.95
 								covered_svs.push_back(sv);
 								break;
 							}
 						}
 					}
 				}
-				unordered_set<string> covered_sv_keys;
-				for(SV_item* sv : covered_svs){
+//				unordered_set<string> covered_sv_keys;
+
+/*				for(SV_item* sv : covered_svs){
 					if (sv != nullptr){
 						string sv_key = getSVUniqueKey(sv);
 						if(!sv_key.empty()){
 							covered_sv_keys.insert(sv_key);
 						}
 					}
-				}
+				}*/
+				unordered_set<size_t> removed_sv_indices;
 				if(covered_svs.size() >= 1){
-					for (SV_item* sv : sv_item_vec){
-						if(sv == nullptr){
-							continue;
-						}
-						if(sv->startPos < region_start || sv->endPos > region_end){
-							continue;
-						}
-						string sv_key = getSVUniqueKey(sv);
-						if(sv_key.empty()){
-							continue;
-						}
-						bool overlap_flag = false;
-						int64_t overlap_start1,overlap_end1;
-						for(SV_item* sv2 : covered_svs){
-							if (sv2 != nullptr){
-								if(sv->sv_type == VAR_INS){
-									overlap_start1 = max(sv->startPos, sv2->startPos);
-									overlap_end1 = min(sv->endPos + sv->sv_len, sv2->endPos + sv2->sv_len);
+					removed_sv_indices.clear();
+					for(size_t k = 0; k < covered_svs.size(); ++k){
+						SV_item* sv2 = covered_svs[k];
+						if (sv2 == nullptr){continue;}
+
+						size_t best_sv_index = -1;
+						int64_t max_overlap_len = 0, current_overlap;
+
+						for (size_t p = 0; p < sv_item_vec.size(); ++p){
+							if(removed_sv_indices.count(p)){continue;}
+							SV_item* sv = sv_item_vec[p];
+							if(sv == nullptr){
+								continue;
+							}
+							if(sv->startPos < region_start || sv->endPos > region_end){
+								continue;
+							}
+							bool overlap_flag = false;
+							int64_t overlap_start1, overlap_end1;
+							double ratio = 0;
+							if(sv->sv_type == VAR_INS){
+								overlap_start1 = max(sv->startPos, sv2->startPos);
+								overlap_end1 = min(sv->endPos + sv->sv_len + 200, sv2->endPos + sv2->sv_len + 200);
+							}else{
+								overlap_start1 = max(sv->startPos, sv2->startPos);
+								overlap_end1 = min(sv->endPos + 200, sv2->endPos + 200);
+							}
+							if (overlap_start1 > overlap_end1) {continue;}
+							if(sv->sv_len >= sv2->sv_len){
+								ratio = (double)sv2->sv_len / sv->sv_len;
+							}else{
+								ratio = (double)sv->sv_len / sv2->sv_len;
+							}
+							if(ratio >= 0.9) {overlap_flag = true;}
+							if(overlap_flag){
+								if(sv->clipFlag){
+									sv2->clipFlag2 = true;
 								}else{
-									overlap_start1 = max(sv->startPos, sv2->startPos);
-									overlap_end1 = min(sv->endPos, sv2->endPos);
+									sv_noclip.insert(sv2);
 								}
-								if (overlap_start1 < overlap_end1) {overlap_flag = true; break;}
+								current_overlap = overlap_end1 - overlap_start1;
+								if(current_overlap > max_overlap_len){
+									max_overlap_len = current_overlap;
+									best_sv_index = p;
+								}
 							}
 						}
-						if(overlap_flag) continue;
-						if(covered_sv_keys.find(sv_key) == covered_sv_keys.end()){
-							covered_svs.push_back(sv);
-							covered_sv_keys.insert(sv_key);
+						removed_sv_indices.insert(best_sv_index);
+					}
+
+					for(SV_item* sv3 : covered_svs){
+						if(sv_noclip.find(sv3) == sv_noclip.end()){
+							if(sv3->clipFlag2){
+								if(sv3->alt_seq.compare("-") == 0 or bench->alt_seq.compare("-") == 0){
+//									if(find(clip_vec.begin(), clip_vec.end(), sv3) == clip_vec.end()){
+//										clip_vec.push_back(sv3);
+//									}
+									if(clip_vec.find(sv3) == clip_vec.end()) clip_vec.insert(sv3);
+								}else{
+									consistency = computeVarseqConsistency(sv3, bench, fai, 0.5);
+									if(consistency >= 0.5){
+//										if(find(clip_vec.begin(), clip_vec.end(), sv3) == clip_vec.end()){
+//											clip_vec.push_back(sv3);
+//										}
+										if(clip_vec.find(sv3) == clip_vec.end()) clip_vec.insert(sv3);
+									}
+								}
+							}
 						}
+					}
+				}
+/*				for(size_t idx : removed_sv_indices){
+					sv_item_vec[idx] = nullptr;
+				}*/
+
+				for(size_t q = 0; q < sv_item_vec.size(); ++q){
+					SV_item* sv = sv_item_vec[q];
+					if(!removed_sv_indices.count(q)){
+						covered_svs.push_back(sv);
 					}
 				}
 
@@ -4278,17 +4874,18 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 					string qname = bam_get_qname(read);
 					read_sv_groups[qname] = covered_svs;
 				}
-
-
-
+				clusters2.push_back(sv_item_vec);
 				sv_item_vec.clear();
 			}
 			bam_hdr_destroy(header);
 			sam_close(bam_file);
 			sv_key_to_ptr.clear();
 			sv_allocated_ptrs.clear();
+			if(clip_vec.find(user) != clip_vec.end() && sv_noclip.find(user) == sv_noclip.end()){
+				user->clipFlag3 = true;
+			}
 			// Merge SVS that share the same read (build clusters)
-			unordered_map<SV_item*, int> sv_to_cluster;
+/*			unordered_map<SV_item*, int> sv_to_cluster;
 			clusters.clear();
 			int cluster_id = 0;
 
@@ -4341,18 +4938,71 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 			for (auto& cluster : clusters) {
 				if (!cluster.empty()) {
 					// Sort by startPos ascending order
-/*					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
+					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
 						return a->sv_len < b->sv_len;
 					});
-					if(cluster.size()>10)cluster.resize(10);*/
+					if(cluster.size()>10)cluster.resize(10);
 					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b) {
 						return a->startPos < b->startPos;
 					});
 					final_clusters.push_back(cluster);
 				}
 			}
-			clusters = final_clusters;
+			clusters = final_clusters;*/
 
+			clusters.clear();
+			// clusters2.clear();
+			for(auto& group : read_sv_groups){
+				user_read_sv_group.clear();
+				user_read_sv_group.insert(group.second.begin(), group.second.end());
+				if (user_read_sv_group.find(user) != user_read_sv_group.end()){
+					clusters.push_back(group.second);
+				}
+				// clusters2.push_back(group.second);
+			}
+			if(!clusters.empty()){
+				sort(clusters.begin(), clusters.end(), [bench](const vector<SV_item*>& a, const vector<SV_item*>& b){
+					int sum_a = 0;
+					for(const SV_item* sv : a){
+						sum_a += sv->sv_len;
+					}
+					int sum_b = 0;
+					for(const SV_item* sv : b){
+						sum_b += sv->sv_len;
+					}
+					return abs(sum_a - bench->sv_len) < abs(sum_b - bench->sv_len);
+				});
+			}
+			for(auto& cluster : clusters){
+				if(!cluster.empty()){
+					sort(cluster.begin(), cluster.end(), [](SV_item* a, SV_item* b){
+						return a->startPos < b->startPos;
+					});
+				}
+			}
+			for(auto& cluster : clusters2){
+				if(!cluster.empty()){
+					int sum_sv = 0;
+					bool cluster_clipFlag = false;
+					for(const SV_item* sv : cluster){
+						// if(sv->clipFlag){
+						// 	cluster_clipFlag = true;
+						// 	break;
+						// }
+					//	if((sv->sv_type == VAR_DEL) && (sv->endPos < user->startPos)) continue;
+						if((sv->sv_type == VAR_DEL) && (sv->endPos < user->startPos) && (user->startPos - sv->endPos > 800)) continue;
+						sum_sv += sv->sv_len;
+					}
+					for (SV_item* sv2 : merge_users_vec){
+						if((static_cast<double>(min(sum_sv, sv2->sv_len)) / max(sum_sv, sv2->sv_len) >= 0.95) && !cluster_clipFlag && sum_sv > 100){
+							if(clip_vec.find(sv2) == clip_vec.end() || sv_noclip.find(sv2) != sv_noclip.end()){
+								user_set.insert(sv2);
+								sv2->singleFlag = true;
+							}
+						}
+					}
+				}
+			}
 //			cout << "Found " << clusters.size() << " clusters supported by reads" << endl;
 
 		}
@@ -4363,8 +5013,8 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 		regionReads.clear();
 
 		if(BamFileSign){
-			for(size_t m =0; m < clusters.size(); m++){
-				if(clusters[m].size()>1){
+//			for(size_t m =0; m < clusters.size(); m++){
+				if(!clusters.empty() && clusters[0].size()>1){
 //					bool has_next = (find(clusters[m].begin(), clusters[m].end(), Next_user) != clusters[m].end());
 //					bool has_user = (find(clusters[m].begin(), clusters[m].end(), user) != clusters[m].end());
 //					if(has_next && has_user){
@@ -4377,7 +5027,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						clusters[m].resize(10);
 					}*/
 					//Merge verification: Whether it is consistent after the merger
-					auto merge_result = findClosestSubarray(clusters[m], bench->sv_len);
+					auto merge_result = findClosestSubarray(clusters[0], bench->sv_len);
 					merge_item_vec = merge_result.second;
 					if(merge_item_vec.size() > 1){
 						//Verify heterozygous variant overlap
@@ -4535,6 +5185,8 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 										seq1 += Merge_item->ref_seq;
 									}
 								}
+							}else if(Merge_item->sv_type == VAR_DUP){
+								dup_flag = true;
 							}
 						}
 						//Extract seq2 sequence
@@ -4616,7 +5268,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						upperSeq(seq2);
 						needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 						consistency = calculate_consistency(aln_seq1, aln_seq2);
-						if(consistency >= SEQ_CONSISTENCY){
+						if(consistency >= 0.6 || bench->alt_seq.compare("-") == 0 || dup_flag){
 							for(size_t j=0; j < merge_item_vec.size(); j++){
 								//LP flag
 								Lp_Merge_item = merge_item_vec.at(j);
@@ -4628,11 +5280,26 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 							if(!flag) {LpNum += 1;
 		//					cout << "merge Num: " << merge_item_vec.size() <<"	pos:" << merge_item_vec.at(0)->startPos <<"	LpNum = " << LpNum << endl;
 							}
+/*							unordered_set<SV_item*> existing_set(merge_item_vec.begin(), merge_item_vec.end());
+							for (SV_item* sv : clip_vec){
+								if(existing_set.find(sv) == existing_set.end() && sv_noclip.find(sv) == sv_noclip.end()){
+									merge_item_vec.push_back(sv);
+									existing_set.insert(sv);
+								}
+							}*/
+
+/*							auto it = remove_if(merge_item_vec.begin(), merge_item_vec.end(),[&user_set](SV_item* sv){
+								return user_set.find(sv) != user_set.end();
+							}
+							);
+							merge_item_vec.erase(it, merge_item_vec.end());*/
+
 							for(size_t j=0; j < merge_item_vec.size(); j++){
 								Definite_Merge_item = merge_item_vec.at(j);
 								Definite_Merge_item->mergeMark = true;
 								Definite_Merge_item->LpFlag = true;
 								Definite_Merge_item->mergeFlag = true;
+
 							}
 							bench->overlapped = true;
 							merge_item1_vec = merge_item_vec;
@@ -4641,7 +5308,19 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 						}
 					}
 				}
-			}
+/*				else if(clip_vec.find(user) != clip_vec.end() && sv_noclip.find(user) == sv_noclip.end()){
+					merge_item_vec.push_back(user);
+					for(size_t j=0; j < merge_item_vec.size(); j++){
+						Definite_Merge_item = merge_item_vec.at(j);
+						Definite_Merge_item->mergeMark = true;
+						Definite_Merge_item->LpFlag = true;
+						Definite_Merge_item->mergeFlag = true;
+
+					}
+					bench->overlapped = true;
+					merge_item1_vec = merge_item_vec;
+				}*/
+//			}
 			for (SV_item* item : sv_allocated_ptrs) {
 				if (item != nullptr) {
 					delete item;
@@ -4808,6 +5487,8 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 								seq1 += Merge_item->ref_seq;
 							}
 						}
+					}else if(Merge_item->sv_type == VAR_DUP){
+						dup_flag = true;
 					}
 				}
 				//Extract seq2 sequence
@@ -4889,7 +5570,7 @@ void IsmergeJudge2(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_ite
 				upperSeq(seq2);
 				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 				consistency = calculate_consistency(aln_seq1, aln_seq2);
-				if(consistency >= SEQ_CONSISTENCY){
+				if(consistency >= 0.6 || bench->alt_seq.compare("-") == 0 || dup_flag){
 					for(size_t j=0; j < merge_item_vec.size(); j++){
 						//LP flag
 						Lp_Merge_item = merge_item_vec.at(j);
@@ -4924,7 +5605,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 	size_t i = user_pos + 1;
 	int32_t min_startpos, max_endpos, refseq_len_tmp;
 	int64_t pos_update, pos_update_const, merge_users_vec_endPos_max=0;
-	bool flag = false;
+	bool flag = false, dup_flag = false;
 	size_t startpos1, startpos2, endpos1, endpos2;
 	string seq1="", seq2="", seq_extact="", reg_str, aln_seq1, aln_seq2;
 	double consistency;
@@ -4939,17 +5620,17 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 		for(i = user_pos + 1; i<subset1.size(); i++){
 			Maymerge_user = subset1.at(i);
 			if(user->sv_type == VAR_INS and (bench->sv_type == VAR_INS or bench->sv_type == VAR_DUP)){
-				if(abs(Maymerge_user->startPos - user->startPos) > 500) break;
+				if(abs(Maymerge_user->startPos - user->startPos) > 2000) break;
 				else{
 					if(Maymerge_user->sv_type == user->sv_type)
 						merge_users_vec.push_back(Maymerge_user);
 				}
 			}else if(user->sv_type == VAR_DEL and bench->sv_type == VAR_DEL){
 				//distance
-				if(abs(Maymerge_user->startPos - pos_update) > 500) break;
+				if(abs(Maymerge_user->startPos - pos_update) > 1000) break;
 				else{
 					if(Maymerge_user->sv_type == user->sv_type){
-						if(abs(Maymerge_user->startPos - pos_update_const) <= 500 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
+						if(abs(Maymerge_user->startPos - pos_update_const) <= 1000 || Maymerge_user->startPos > merge_users_vec_endPos_max || merge_users_vec.empty())
 						{
 							merge_users_vec.push_back(Maymerge_user);
 							pos_update = Maymerge_user->endPos;
@@ -5045,7 +5726,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 						int64_t overlap_start = max(sv_start, block.first);
 						int64_t overlap_end = min(sv_end, block.second);
 						if (overlap_start - 50 < overlap_end + 50) {
-							if(abs(sv_start-block.first) > 250) continue;
+//							if(abs(sv_start-block.first) > 250) continue;
 							if(overlap_start < overlap_end)
 								covered_length += (overlap_end - overlap_start);
 							else
@@ -5301,6 +5982,8 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 										seq1 += Merge_item->ref_seq;
 									}
 								}
+							}else if(Merge_item->sv_type == VAR_DUP){
+								dup_flag = true;
 							}
 						}
 						//Extract seq2 sequence
@@ -5382,7 +6065,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 						upperSeq(seq2);
 						needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 						consistency = calculate_consistency(aln_seq1, aln_seq2);
-						if(consistency >= SEQ_CONSISTENCY){
+						if(consistency >= SEQ_CONSISTENCY || bench->alt_seq.compare("-") == 0 || dup_flag){
 							for(size_t j=0; j < merge_item_vec.size(); j++){
 								//LP flag
 								Lp_Merge_item = merge_item_vec.at(j);
@@ -5567,6 +6250,8 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 								seq1 += Merge_item->ref_seq;
 							}
 						}
+					}else if(Merge_item->sv_type == VAR_DUP){
+						dup_flag = true;
 					}
 				}
 				//Extract seq2 sequence
@@ -5648,7 +6333,7 @@ void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item
 				upperSeq(seq2);
 				needleman_wunsch(seq1, seq2, MATCH_SCORE, MISMATCH_SCORE, GAP_PENALTY, aln_seq1, aln_seq2);
 				consistency = calculate_consistency(aln_seq1, aln_seq2);
-				if(consistency >= SEQ_CONSISTENCY){
+				if(consistency >= SEQ_CONSISTENCY || bench->alt_seq.compare("-") == 0 || dup_flag){
 					for(size_t j=0; j < merge_item_vec.size(); j++){
 						//LP flag
 						Lp_Merge_item = merge_item_vec.at(j);
@@ -5733,6 +6418,7 @@ struct DPState {
 	vector<SV_item*> subset;
 	unordered_set<int32_t> startSet;
 	double ratio;
+	int count;
 };
 
 
@@ -5742,9 +6428,30 @@ inline double calcMergeLenRatio(int currentSum, int32_t target) {
 }
 
 
+inline bool isOverlapping(const SV_item* a, const SV_item* b, int sv_type){
+	if (!a || !b) return false;
+
+	int start1 = a->startPos;
+	int start2 = b->startPos;
+	int end1, end2;
+
+	if(sv_type == VAR_INS || sv_type == VAR_DUP){
+
+		end1 = a->startPos + static_cast<int>(a->ref_seq.length()) - 1;
+		end2 = b->startPos + static_cast<int>(b->ref_seq.length()) - 1;
+	}else if(sv_type == VAR_DEL){
+
+		end1 = a->endPos;
+		end2 = b->endPos;
+	}else{
+		return false;
+	}
+	return (end1 >= start2 && end2 >= start1);
+}
 pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t target) {
 	int closestSVlenSum = 0;
 	int minDiff = numeric_limits<int>::max();
+	int minCount = numeric_limits<int>::max();
 	vector<SV_item*> bestSubarray;
 	double merge_len_ratio;
 
@@ -5755,7 +6462,7 @@ pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t 
 	}
 
 	unordered_map<int, DPState> dp;
-	dp[0] = {{}, {}, 0.0};
+	dp[0] = {{}, {}, 0.0, 0};
 	const int max_valid_sum = static_cast<int>(target * 1.1);
 
 
@@ -5764,22 +6471,37 @@ pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t 
 
 
 		vector<int> existing_sums;
-		for (unordered_map<int, DPState>::iterator it = dp.begin(); it != dp.end(); ++it) {
-			existing_sums.push_back(it->first);
+		existing_sums.reserve(dp.size());
+		for (const auto& p : dp) {
+			existing_sums.push_back(p.first);
 		}
+/*		for (unordered_map<int, DPState>::iterator it = dp.begin(); it != dp.end(); ++it) {
+			existing_sums.push_back(it->first);
+		}*/
 
 
 		for (int prev_sum : existing_sums) {
-			DPState prev_state = dp[prev_sum];
-
+//			DPState prev_state = dp[prev_sum];
+			const DPState& prev_state = dp[prev_sum];
 			if (prev_state.startSet.count(item->startPos)) {
 				continue;
 			}
 
+			bool has_overlap = false;
+			for (const SV_item* existing_item : prev_state.subset) {
+				if (isOverlapping(existing_item, item, items[0]->sv_type)) {
+					has_overlap = true;
+					break;
+				}
+			}
+			if (has_overlap) {
+				continue;
+			}
 			int new_sum = prev_sum + item->sv_len;
 			if (new_sum > max_valid_sum) {
 				continue;
 			}
+
 			double new_ratio = calcMergeLenRatio(new_sum, target);
 
 			DPState new_state;
@@ -5788,11 +6510,12 @@ pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t 
 			new_state.startSet = prev_state.startSet;
 			new_state.startSet.insert(item->startPos);
 			new_state.ratio = new_ratio;
+			new_state.count = prev_state.count + 1;
 
 			if (dp.find(new_sum) == dp.end()) {
 				dp[new_sum] = new_state;
 			} else {
-				if (new_ratio > dp[new_sum].ratio) {
+				if (new_ratio > dp[new_sum].ratio || (new_ratio == dp[new_sum].ratio && new_state.count < dp[new_sum].count)) {
 					dp[new_sum] = new_state;
 				}
 			}
@@ -5800,17 +6523,20 @@ pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t 
 	}
 
 
-	for (unordered_map<int, DPState>::iterator it = dp.begin(); it != dp.end(); ++it) {
+/*	for (unordered_map<int, DPState>::iterator it = dp.begin(); it != dp.end(); ++it) {
 		int sum = it->first;
-		DPState state = it->second;
-
+		DPState state = it->second;*/
+	for (const auto& p : dp) {
+		int sum = p.first;
+		const DPState& state = p.second;
 		if (sum == 0) continue;
 		merge_len_ratio = state.ratio;
 
 		if (merge_len_ratio >= 0.9) {
 			int currentDiff = abs(sum - target);
-			if (currentDiff < minDiff) {
+			if (currentDiff < minDiff || (currentDiff == minDiff && state.count < minCount)) {
 				minDiff = currentDiff;
+				minCount = state.count;
 				closestSVlenSum = sum;
 				bestSubarray = state.subset;
 			}

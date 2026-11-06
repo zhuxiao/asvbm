@@ -33,7 +33,12 @@ typedef struct {
 	bool mergeMark2;		// default: false
 //	bool sameReadFlag;
 	bool mergeFlag;		// default: false
-	bool alleleFlag;		// default: false
+	bool clipFlag;		// default: false
+	bool clipFlag2;		// default: false
+	bool clipFlag3;		// default: false
+	bool singleFlag;
+	bool alleleFlag;	// default: false
+	bool mayMergeFlag;	// default: false
 	bool LpFlag;		// default: false
 	bool validFlag;		// default: true
 	//bool balancedTraFlag;	// TRA, default: false

@@ -94,6 +94,7 @@ unordered_map<string, int> benchmark_hg002_Map;
 bool refine_bench_flag = false;
 bool create_bench_flag = false;
 bool genotype_filterBench_flag = false;
+bool merge_singleVariant_flag = false;
 unordered_map<SV_item*, int> itemToIndex;
 
 vector<string> ResultdataPath;

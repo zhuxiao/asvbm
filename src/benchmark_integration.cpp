@@ -266,6 +266,9 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 			start_idx = end_idx = -1;
 			for(i=0; i<subset1.size(); i++){
 				item1 = subset1.at(i);
+				if((i >= 1 && abs(subset1.at(i - 1)->startPos - item1->startPos) <= 500) || (i + 1 <subset1.size() && abs(subset1.at(i + 1)->startPos - item1->startPos) <= 500)){
+					item1->mayMergeFlag = true;
+				}
 //				item1_merge_flag = false;
 //				item2_merge_flag = false;
 				start_idx_tmp0 = start_idx;
@@ -285,7 +288,6 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 						end_search_pos = item1->endPos + item1->sv_len;
 					}
 				}
-
 				if(start_search_pos < 1)
 					start_search_pos = 1;
 				if(start_idx_tmp0 == -1)
@@ -294,7 +296,7 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 					new_start_idx = -1;
 					for(j=start_idx_tmp0; j<subset2.size(); j++){
 						item2 = subset2.at(j);
-						overlap_type_vec = computeOverlapType(item1, item2);
+						overlap_type_vec = computeOverlapType1(item1, item2);
 						if(overlap_type_vec.size() > 0 && overlap_type_vec.at(0) != NO_OVERLAP){
 							new_start_idx = j;
 							break;
@@ -316,7 +318,9 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 //					}
 					for(j=start_idx; j<subset2.size(); j++){
 						item2 = subset2.at(j);
-
+						if((j >= 1 && abs(subset2.at(j - 1)->startPos - item2->startPos) <= 500) || (j + 1 <subset2.size() && abs(subset2.at(j + 1)->startPos - item2->startPos) <= 500)){
+							item2->mayMergeFlag = true;
+						}
 						if(item2->startPos < start_search_pos)
 							continue;
 //						if(item1_merge_flag){
@@ -325,12 +329,27 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 //						if(item2_merge_flag){
 //							continue;
 //						}
+/*						if((item1->sv_type == VAR_BND and item2->sv_type == VAR_BND) or (item1->sv_type == VAR_BND and item2->sv_type == VAR_TRA) or (item1->sv_type == VAR_TRA and item2->sv_type == VAR_BND) or (item1->sv_type == VAR_TRA and item2->sv_type == VAR_TRA)){
+							if(item1->chrname2 == item2->chrname2 and (item1->startPos2 - 1000) < item2->startPos2 and item2->startPos2 < (item1->startPos2 + 1000)){
+								if(extract_bnd_strand(item1->lineInfo) == "" || extract_bnd_strand(item2->lineInfo) == "" || extract_bnd_strand(item1->lineInfo) == extract_bnd_strand(item2->lineInfo)){
 
-						overlap_type_vec = computeOverlapType(item1, item2);
+									item1->overlapped = true;
+									item2->overlapped = true;
+									continue;
+								}
+							}
+						}*/
+						overlap_type_vec = computeOverlapType1(item1, item2);
 						if((overlap_type_vec.size() > 0 && overlap_type_vec.at(0) != NO_OVERLAP)){
 //							if(item1->sv_type == item2->sv_type)
 							if(item1->sv_type == item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){
-								IsmergeJudge2(i, item1, item2, subset1, fai, merge_item1_vec);
+								if(item1->sv_len <= (item2->sv_len * 1.1 ) && ((float)min(item1->sv_len, item2->sv_len) / max(item1->sv_len, item2->sv_len)) < 0.95){
+									index1 = entriesStartIndex[m] + subsetStartIndex[l][m] + i;
+									index2 = entriesStartIndex[n] + subsetStartIndex[l][n] + j;
+									if(find(connectedComponents[index1].begin(), connectedComponents[index1].end(), index2) == connectedComponents[index1].end()){
+										IsmergeJudge2(i, item1, item2, subset1, fai, merge_item1_vec);
+									}
+								}
 							}
 
 							if(!merge_item1_vec.empty()){
@@ -351,7 +370,13 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 							}
 //							if(item1->sv_type == item2->sv_type)
 							if(item1->sv_type == item2->sv_type or (item1->sv_type==VAR_INS and item2->sv_type==VAR_DUP) or (item1->sv_type==VAR_DUP and item2->sv_type==VAR_INS)){
-								IsmergeJudge4(j, item2, item1, subset2, fai, merge_item2_vec);
+								if(item2->sv_len <= (item1->sv_len * 1.1 ) && ((float)min(item1->sv_len, item2->sv_len) / max(item1->sv_len, item2->sv_len)) < 0.95){
+									index1 = entriesStartIndex[m] + subsetStartIndex[l][m] + i;
+									index2 = entriesStartIndex[n] + subsetStartIndex[l][n] + j;
+									if(find(connectedComponents[index2].begin(), connectedComponents[index2].end(), index1) == connectedComponents[index2].end()){
+										IsmergeJudge4(j, item2, item1, subset2, fai, merge_item2_vec);
+									}
+								}
 							}
 
 							if(!merge_item2_vec.empty()){
@@ -403,7 +428,7 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 						}
 
 						if(!foundIndex){
-							overlap_type_vec = computeOverlapType(item1, item2);
+							overlap_type_vec = computeOverlapType1(item1, item2);
 							if(overlap_type_vec.size() > 0 && overlap_type_vec.at(0) != NO_OVERLAP){
 
 								sv_len1 = item1->sv_len;
@@ -413,9 +438,9 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 								if(sv_len2 < 0)
 									sv_len2 = -sv_len2;
 								if(sv_len1 <= sv_len2)
-									svlenRatio_tmp1 = (float) sv_len1 / sv_len2;
+									svlenRatio_tmp1 = (float)sv_len1 / sv_len2;
 								else
-									svlenRatio_tmp1 = (float) sv_len2 / sv_len1;
+									svlenRatio_tmp1 = (float)sv_len2 / sv_len1;
 								feature_len = max(sv_len1, sv_len2);
 								if(feature_len < 50){
 									svlenRatio = 0;
@@ -426,12 +451,9 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 //									svlenRatio = 0.7 * (1 - exp(-0.006 * (feature_len - 50)));
 //									svlenRatio = (0.7 / 950) * (feature_len - 50);
 								}
-
+//								if(abs(sv_len1 - sv_len2) < 100) svlenRatio = 0;
 								if(svlenRatio_tmp1 >= svlenRatio){
 									if(item1->sv_type == item2->sv_type or (item1->sv_type == VAR_INS and item2->sv_type== VAR_DUP) or (item1->sv_type == VAR_DUP and item2->sv_type== VAR_INS)){
-
-
-
 										if(item1->alt_seq.compare("-") == 0 or item2->alt_seq.compare("-") == 0){
 											flag = true;
 										}else{
@@ -442,8 +464,8 @@ void match1(vector<vector<SV_item*>>& sets, size_t l, vector<vector<int>>& subse
 //											}else{
 //											consistency = computeVarseqConsistency(item1, item2, fai, AlleleSeqSim);
 //											}
-											consistency = computeVarseqConsistency(item1, item2, fai, 0.7);
-											if(consistency >= 0.7){
+											consistency = computeVarseqConsistency(item1, item2, fai, 0.6);
+											if(consistency >= 0.6){
 												//SeqConsNumStat(consistency);
 												flag = true;
 											}
@@ -1028,11 +1050,11 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 	size_t totalEntries = 0;
 	int entryIndex = 0;
 	size_t selectToolsNum;
-	size_t input, input2;
-	bool validInput;
+//	size_t input, input2;
+//	bool validInput;
 	if(!genotype_filterBench_flag){
-		selectToolsNum = ceil(sv_files1.size() * 0.6);
-		cout << "Do you want to set the number of selected tools? (1 for Yes, 0 for No): " << endl;
+		selectToolsNum = ceil(sv_files1.size() * 0.1);
+		/*cout << "Do you want to set the number of selected tools? (1 for Yes, 0 for No): " << endl;
 		cout << "If you input 0, the selectToolsNum = " << ceil(sv_files1.size() * 0.6) << endl;
 
 		while(true){
@@ -1060,8 +1082,8 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 				}
 			}
 		}else if(input == 0){
-			selectToolsNum = ceil(sv_files1.size() * 0.6);
-		}
+			selectToolsNum = ceil(sv_files1.size() * 0.1);
+		}*/
 	}else{
 		selectToolsNum = 3;
 	}
@@ -1069,7 +1091,8 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 	cout << "Selected value: " << selectToolsNum << endl;
 
 	if(!genotype_filterBench_flag){
-		newFilename = outputFile + to_string(sv_files1.size()) + "_" + to_string(selectToolsNum) + "_" +"Benchmark.vcf";
+//		newFilename = outputFile + to_string(sv_files1.size()) + "_" + to_string(selectToolsNum) + "_" +"Benchmark.vcf";
+		newFilename = outputFile + "benchmark.vcf";
 		newFilename1 = outputFile + "allele.vcf";
 	}else{
 		newFilename = outputFile + "genotype_filteredBenchmark.vcf";
@@ -1155,7 +1178,7 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 //		vector<size_t> connectedIndex;
 		unordered_set<size_t> connectedIndex,currentIdxSet, alleleFilter;
 		unordered_set<int> toAddSet;
-		vector<int> differentToolsIndex, maxAlleleComponents, alleleMerge, mostRepresentativeVariantComponents;
+		vector<int> differentToolsIndex, maxAlleleComponents, alleleMerge, mostRepresentativeVariantComponents, singleVariant, AlleleSingleVariant, NoAlleleSingleVariant;
 		vector<int> mostRepresentativeVariantIndices, connectedComponentsToAdd;
 		unordered_map<int, int> sizeDifferenceCount;
 		ofstream outputFile1(newFilename);
@@ -1166,7 +1189,7 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 		SV_item* currentVariant;
 //		SV_item* mostRepresentativeVariant;
 		SV_item* otherVariant;
-		bool flag, alleleflag, alleleMergeFlag, alleleSVLenFlag;
+		bool flag, alleleflag, alleleMergeFlag, alleleSVLenFlag, clipFlag, has_long_clip, has_clip_flag, has_short_noclip;
 		int totalOverlapForCurrentVariant, maxTotalOverlap, mostRepresentativeVariantIndex, toolsNum, count, maxCount, len, max_len, maxSVLen, maxAlleleComponentsSize, currentAlleleComponentsSize;
 //		outputFile1 << VCF_HEADER << endl;
 
@@ -1203,29 +1226,58 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 				}
 					if(connectedComponents[i].size() >= selectToolsNum){
 						max_len = 0;
+						clipFlag = false;
+						has_long_clip = false;
+						has_clip_flag = false;
+						has_short_noclip = false;
 			//				mergeFlagExist = false;
 					////	if((extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "") || (extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2) || (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "")|| (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2)){
 							differentToolsIndex.clear();
 							for(j=0; j<connectedComponents[i].size(); j++){
 								for(l=0; l<sv_files1.size(); l++){
 									if(l != (sv_files1.size() - 1)){
-										if(connectedComponents[i][j] < entriesStartIndex[l + 1]){
+										if(connectedComponents[i][j] < entriesStartIndex[l + 1] && !entryMap1[connectedComponents[i][j]]->clipFlag3){
 											if(find(differentToolsIndex.begin(), differentToolsIndex.end(), l) == differentToolsIndex.end()){
 												differentToolsIndex.push_back(l);
 											}
 											break;
 										}
 									}else{
-										if(find(differentToolsIndex.begin(), differentToolsIndex.end(), l) == differentToolsIndex.end()){
-											differentToolsIndex.push_back(l);
+										if(!entryMap1[connectedComponents[i][j]]->clipFlag3){
+											if(find(differentToolsIndex.begin(), differentToolsIndex.end(), l) == differentToolsIndex.end()){
+												differentToolsIndex.push_back(l);
+											}
 										}
 										break;
 									}
 								}
+
 								if(differentToolsIndex.size() >= selectToolsNum) break;
 							}
-
-							if(differentToolsIndex.size() >= selectToolsNum){
+							for(j=0; j<connectedComponents[i].size(); j++){
+								if(entryMap1[connectedComponents[i][j]]->sv_len > max_len){
+									max_len = entryMap1[connectedComponents[i][j]]->sv_len;
+								}
+							}
+							for(j=0; j<connectedComponents[i].size(); j++){
+								if(entryMap1[connectedComponents[i][j]]->sv_len < (0.7 * max_len)){
+									if(!entryMap1[connectedComponents[i][j]]->clipFlag3 && entryMap1[connectedComponents[i][j]]->clipFlag2){
+										has_short_noclip = true;
+										break;
+									}
+								}
+								if(entryMap1[connectedComponents[i][j]]->clipFlag3){
+									has_clip_flag = true;
+									if(entryMap1[connectedComponents[i][j]]->sv_len >= (0.7 * max_len)){
+										has_long_clip = true;
+										break;
+									}
+								}
+							}
+							
+							if(has_clip_flag && !has_long_clip && !has_short_noclip) continue;
+							max_len = 0;
+							if(differentToolsIndex.size() >= selectToolsNum && !clipFlag){
 /*								if(entryMap1[i]->alleleFlag){
 									allelePair = make_pair(entryMap1[i]->lineInfo,1);
 									allelelineMap.insert(allelePair);
@@ -1259,7 +1311,7 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 			//							}
 			//						}
 			//					}
-
+							singleVariant.clear();
 							for(j=0; j<connectedComponents[i].size(); j++){
 //								connectedComponentsToAdd.clear();
 								for(m=0; m<connectedComponents[connectedComponents[i][j]].size(); m++){
@@ -1276,13 +1328,37 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 								}
 			//						if(entryMap1[connectedComponents[i][j]]->mergeFlag){mergeFlagExist = true;}
 //								connectedComponents[i].insert(connectedComponents[i].end(), connectedComponentsToAdd.begin(), connectedComponentsToAdd.end());
+								if(entryMap1[connectedComponents[i][j]]->singleFlag){
+									bool canPush = true;
+									if(!singleVariant.empty()){
+										for(int varId : singleVariant){
+											if((double)min(entryMap1[connectedComponents[i][j]]->sv_len, entryMap1[varId]->sv_len) / max(entryMap1[connectedComponents[i][j]]->sv_len, entryMap1[varId]->sv_len) >= 0.9){
+												canPush = false;
+												break;
+											}
+										}
+									}
+									if(canPush){
+										singleVariant.push_back(connectedComponents[i][j]);
+									}
+								}
 							}
+/*							for(k=0; k<connectedComponents[i].size(); k++){
+								if(!singleVariant.empty()){
+									for(int varId : singleVariant){
+										if((double)min(entryMap1[connectedComponents[i][k]]->sv_len, entryMap1[varId]->sv_len) / max(entryMap1[connectedComponents[i][k]]->sv_len, entryMap1[varId]->sv_len) < 0.7){
+											singleVariant.push_back(connectedComponents[i][k]);
+											break;
+										}
+									}
+								}
+							}*/
 							if(flag){
 								alleleflag = false;
 								alleleMergeFlag = false;
 								for(j=0; j<connectedComponents[i].size(); j++){
-//									if(entryMap1[connectedComponents[i][j]]->alleleFlag && !entryMap1[connectedComponents[i][j]]->mergeFlag){
-									if(entryMap1[connectedComponents[i][j]]->alleleFlag){
+									if(entryMap1[connectedComponents[i][j]]->alleleFlag && !entryMap1[connectedComponents[i][j]]->mergeFlag && !entryMap1[connectedComponents[i][j]]->clipFlag3){
+//									if(entryMap1[connectedComponents[i][j]]->alleleFlag){
 										flag = false;
 										alleleflag = true;
 										break;
@@ -1293,7 +1369,7 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 									filterAlleleComponents.clear();
 									filterAlleleComponents.resize(sv_files1.size(), vector<int>());
 									for(j=0; j<connectedComponents[i].size(); j++){
-										if(entryMap1[connectedComponents[i][j]]->alleleFlag){
+										if(entryMap1[connectedComponents[i][j]]->alleleFlag && !entryMap1[connectedComponents[i][j]]->mergeFlag && !entryMap1[connectedComponents[i][j]]->clipFlag3){
 											for(l=0; l<sv_files1.size(); l++){
 												if(l != (sv_files1.size() - 1)){
 													if(connectedComponents[i][j] < entriesStartIndex[l + 1]){
@@ -1373,6 +1449,9 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 												}
 											}
 										}*/
+										for(j=0; j<alleleMerge.size(); j++){
+											alleleFilter.insert(alleleMerge[j]);
+										}
 									}
 									alleleMerge.clear();
 								}
@@ -1420,18 +1499,18 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 //										currentAlleleComponentsSize = component.size();
 										alleleSVLenFlag = false;
 
-										for(j=0; j<component.size(); j++){
-											if(entryMap1[component[j]]->sv_len > (max_len * 0.9))
-												alleleSVLenFlag = true;
-										}
-										if(currentAlleleComponentsSize > maxAlleleComponentsSize && alleleSVLenFlag){
+										// for(j=0; j<component.size(); j++){
+										// 	if(entryMap1[component[j]]->sv_len > (max_len * 0.9))
+										// 		alleleSVLenFlag = true;
+										// }
+										if(currentAlleleComponentsSize > maxAlleleComponentsSize){
 											maxAlleleComponentsSize = currentAlleleComponentsSize;
 											maxAlleleComponents = component;
 										}
 										if(maxAlleleComponents.size() == 1){
 											if(component_count != (sv_files1.size() - 1)){
 												int currentIdx = maxAlleleComponents[0] - 1;
-												while(currentIdx >= entriesStartIndex[component_count] && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx + 1]->startPos) <= ALLELIC_DISTANCE){
+												while(currentIdx >= entriesStartIndex[component_count] && !entryMap1[currentIdx]->mergeFlag && !entryMap1[currentIdx]->clipFlag3 && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx + 1]->startPos) <= ALLELIC_DISTANCE){
 													differentToolsIndex.clear();
 													for(j=0; j<connectedComponents[currentIdx].size(); j++){
 														for(m=0; m<connectedComponents[connectedComponents[currentIdx][j]].size(); m++){
@@ -1463,7 +1542,7 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 
 												}
 												currentIdx = maxAlleleComponents[0] + 1;
-												while(currentIdx < entriesStartIndex[component_count + 1] && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx - 1]->startPos) <= ALLELIC_DISTANCE){
+												while(currentIdx < entriesStartIndex[component_count + 1] && !entryMap1[currentIdx]->mergeFlag && !entryMap1[currentIdx]->clipFlag3 && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx - 1]->startPos) <= ALLELIC_DISTANCE){
 													differentToolsIndex.clear();
 													for(j=0; j<connectedComponents[currentIdx].size(); j++){
 														for(m=0; m<connectedComponents[connectedComponents[currentIdx][j]].size(); m++){
@@ -1497,7 +1576,7 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 												}
 											}else{
 												int currentIdx = maxAlleleComponents[0] - 1;
-												while(currentIdx >= entriesStartIndex[component_count] && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx + 1]->startPos) <= ALLELIC_DISTANCE){
+												while(currentIdx >= entriesStartIndex[component_count] && !entryMap1[currentIdx]->mergeFlag && !entryMap1[currentIdx]->clipFlag3 && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx + 1]->startPos) <= ALLELIC_DISTANCE){
 													differentToolsIndex.clear();
 													for(j=0; j<connectedComponents[currentIdx].size(); j++){
 														for(m=0; m<connectedComponents[connectedComponents[currentIdx][j]].size(); m++){
@@ -1529,7 +1608,7 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 
 												}
 												currentIdx = maxAlleleComponents[0] + 1;
-												while(currentIdx < static_cast<int>(entryMap1.size()) && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx - 1]->startPos) <= ALLELIC_DISTANCE){
+												while(currentIdx < static_cast<int>(entryMap1.size()) && !entryMap1[currentIdx]->mergeFlag && !entryMap1[currentIdx]->clipFlag3 && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx - 1]->startPos) <= ALLELIC_DISTANCE){
 													differentToolsIndex.clear();
 													for(j=0; j<connectedComponents[currentIdx].size(); j++){
 														for(m=0; m<connectedComponents[connectedComponents[currentIdx][j]].size(); m++){
@@ -1562,7 +1641,35 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 												}
 											}
 										}
-										if(maxAlleleComponents.size() > 1){
+										for(j=0; j<maxAlleleComponents.size(); j++){
+											// if(max_len >= 100){
+											// 	if(entryMap1[maxAlleleComponents[j]]->sv_len > (max_len * 0.9))
+											// 	alleleSVLenFlag = true;
+											// }else{
+											// 	if(entryMap1[maxAlleleComponents[j]]->sv_len > (max_len * 0.8))
+											// 	alleleSVLenFlag = true;
+											// }
+											if(entryMap1[maxAlleleComponents[j]]->sv_len > (max_len * 0.9))
+												alleleSVLenFlag = true;
+
+										}
+										if(maxAlleleComponents.size() > 1 && alleleSVLenFlag){
+											if(!singleVariant.empty()){
+												for(int varId : singleVariant){
+													bool canPush2 = true;
+													for(j=0; j<maxAlleleComponents.size(); j++){
+														if((double)min(entryMap1[maxAlleleComponents[j]]->sv_len, entryMap1[varId]->sv_len) / max(entryMap1[maxAlleleComponents[j]]->sv_len, entryMap1[varId]->sv_len) >= 0.9){
+															canPush2 = false;
+															break;
+														}
+													}
+													if(canPush2){
+														AlleleSingleVariant.push_back(varId);
+													}
+												}
+											}
+											maxAlleleComponents.insert(maxAlleleComponents.end(), AlleleSingleVariant.begin(), AlleleSingleVariant.end());
+											AlleleSingleVariant.clear();
 											for(j=0; j<maxAlleleComponents.size(); j++){
 												toolsNum = 0;
 												tools = "";
@@ -1598,6 +1705,24 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 																toolsNum++;
 															}
 														}
+													}
+												}
+												for(k=0; k<connectedComponents[i].size(); k++){
+													for(l=0; l<sv_files1.size(); l++){
+														if(l != (sv_files1.size() - 1)){
+															if(connectedComponents[i][k] < entriesStartIndex[l + 1]){
+																if(tools.find(SVcallernames[l]) == string::npos){
+																	tools += "," + SVcallernames[l];
+																	toolsNum++;
+																}
+																break;
+
+															}
+														}else if(tools.find(SVcallernames[l]) == string::npos){
+																tools += "," + SVcallernames[l];
+																toolsNum++;
+														}
+
 													}
 												}
 												fields = split1(entryMap1[maxAlleleComponents[j]]->lineInfo, '\t');
@@ -1649,11 +1774,56 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 
 								if(flag){
 									if(entryMap1[i] != nullptr){
-										for(k=0; k<connectedComponents[i].size(); k++){
-											if(entryMap1[connectedComponents[i][k]]->sv_len > max_len)
-												max_len = entryMap1[connectedComponents[i][k]]->sv_len;
-										}
 
+										for(k=0; k<connectedComponents[i].size(); k++){
+											if(entryMap1[connectedComponents[i][k]]->sv_len > max_len){
+												max_len = entryMap1[connectedComponents[i][k]]->sv_len;
+											}
+										}
+								/*	components2.clear();
+									for(j=0; j<connectedComponents[i].size(); j++){
+										if(entryMap1[connectedComponents[i][j]]->sv_len < (max_len * 0.7))
+											components2.push_back(connectedComponents[i][j]);
+									}
+									
+									components3.clear();
+									components3.resize(sv_files1.size(), vector<int>());
+									for(j=0; j<components2.size(); j++){									
+											for(l=0; l<sv_files1.size(); l++){
+												if(l != (sv_files1.size() - 1)){
+													if(components2[j] < entriesStartIndex[l + 1]){
+														components3[l].push_back(components2[j]);
+														break;
+													}
+												}else{
+													components3[l].push_back(components2[j]);
+													break;
+												}
+											}
+										
+									}
+									maxComponentsSize = 0;
+									component4.clear();			
+									component_sizeFlag = false;					
+									for(const auto& component : components3){
+//										if(component_count == ceil(alleleComponents.size() * 0.6)) break;
+//										if(component.size()==0) continue;
+										currentComponentsSize = 0;
+										if(component.size()>=3){											
+											for(k=0; k<component.size(); k++){
+												currentComponentsSize++;	
+											}
+											component_sizeFlag = true;
+										}
+										if(currentComponentsSize > maxComponentsSize){
+											maxComponentsSize = currentComponentsSize;
+											component4 = component;
+										}										
+									}
+									if(component_sizeFlag){
+										mostRepresentativeVariantComponents.insert(mostRepresentativeVariantComponents.end(), component4.begin(), component4.end());
+									}else{*/
+									
 											maxCount = 0;
 											len = 0;
 											while(maxCount == 0){
@@ -1678,6 +1848,7 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 													}*/
 			//											if(differentToolsIndex.size() >= selectToolsNum){
 			//												if(entryMap1[connectedComponents[i][k]]->mergeFlag) continue;
+
 														if(entryMap1[connectedComponents[i][k]]->sv_len > (max_len * 0.9)){
 
 														currentVariant = entryMap1[connectedComponents[i][k]];
@@ -1693,7 +1864,6 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 														}
 														sizeDifferenceCount.insert(make_pair(connectedComponents[i][k], count));
 														}
-			//											}
 												}
 												for(const auto& kv : sizeDifferenceCount){
 													if(kv.second > maxCount){
@@ -1711,65 +1881,81 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 												if(maxCount == 0) mostRepresentativeVariantIndices.clear();
 
 											}
+											maxTotalOverlap = -1, maxSVLen = 0;
+											for(k=0; k<mostRepresentativeVariantIndices.size(); k++){
+												currentVariant = entryMap1[mostRepresentativeVariantIndices[k]];
+												totalOverlapForCurrentVariant = 0;
 
+												for(o=0; o<mostRepresentativeVariantIndices.size(); o++){
+													if(k != o){
+														otherVariant = entryMap1[mostRepresentativeVariantIndices[o]];
+														totalOverlapForCurrentVariant += calculateOverlap1(currentVariant,otherVariant);
+													}
 
-
-										maxTotalOverlap = -1, maxSVLen = 0;
-										for(k=0; k<mostRepresentativeVariantIndices.size(); k++){
-											currentVariant = entryMap1[mostRepresentativeVariantIndices[k]];
-											totalOverlapForCurrentVariant = 0;
-
-											for(o=0; o<mostRepresentativeVariantIndices.size(); o++){
-												if(k != o){
-													otherVariant = entryMap1[mostRepresentativeVariantIndices[o]];
-													totalOverlapForCurrentVariant += calculateOverlap1(currentVariant,otherVariant);
 												}
-
+												if(totalOverlapForCurrentVariant > maxTotalOverlap){
+													maxSVLen = currentVariant->sv_len;
+													maxTotalOverlap = totalOverlapForCurrentVariant;
+	//												mostRepresentativeVariant = currentVariant;
+													mostRepresentativeVariantIndex = mostRepresentativeVariantIndices[k];
+												}else if(totalOverlapForCurrentVariant == maxTotalOverlap && currentVariant->sv_len >= maxSVLen){
+													maxSVLen = currentVariant->sv_len;
+													maxTotalOverlap = totalOverlapForCurrentVariant;
+	//												mostRepresentativeVariant = currentVariant;
+													mostRepresentativeVariantIndex = mostRepresentativeVariantIndices[k];
+												}
 											}
-											if(totalOverlapForCurrentVariant > maxTotalOverlap){
-												maxSVLen = currentVariant->sv_len;
-												maxTotalOverlap = totalOverlapForCurrentVariant;
-//												mostRepresentativeVariant = currentVariant;
-												mostRepresentativeVariantIndex = mostRepresentativeVariantIndices[k];
-											}else if(totalOverlapForCurrentVariant == maxTotalOverlap && currentVariant->sv_len >= maxSVLen){
-												maxSVLen = currentVariant->sv_len;
-												maxTotalOverlap = totalOverlapForCurrentVariant;
-//												mostRepresentativeVariant = currentVariant;
-												mostRepresentativeVariantIndex = mostRepresentativeVariantIndices[k];
-											}
-										}
-										mostRepresentativeVariantIndices.clear();
-										size_t l_mostRepresentativeVariant;
-										mostRepresentativeVariantComponents.clear();
+											mostRepresentativeVariantIndices.clear();
+											size_t l_mostRepresentativeVariant;
+											mostRepresentativeVariantComponents.clear();
 
-										for(l=0; l<sv_files1.size(); l++){
-											if(l != (sv_files1.size() - 1)){
-												if(connectedComponents[mostRepresentativeVariantIndex][0] < entriesStartIndex[l + 1]){
+											for(l=0; l<sv_files1.size(); l++){
+												if(l != (sv_files1.size() - 1)){
+													if(connectedComponents[mostRepresentativeVariantIndex][0] < entriesStartIndex[l + 1]){
+														mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][0]);
+														l_mostRepresentativeVariant = l;
+														break;
+													}
+												}else{
 													mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][0]);
 													l_mostRepresentativeVariant = l;
 													break;
 												}
-											}else{
-												mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][0]);
-												l_mostRepresentativeVariant = l;
-												break;
 											}
-										}
-										for(j=1; j<connectedComponents[mostRepresentativeVariantIndex].size(); j++){
-											if(!entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->mergeFlag && !entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->alleleFlag){
-												if(l_mostRepresentativeVariant == (sv_files1.size() - 1)){
-													if(entriesStartIndex[l_mostRepresentativeVariant] <= connectedComponents[mostRepresentativeVariantIndex][j]){
-														mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][j]);
-														break;
-													}
-												}else{
-													if(entriesStartIndex[l_mostRepresentativeVariant] <= connectedComponents[mostRepresentativeVariantIndex][j] && connectedComponents[mostRepresentativeVariantIndex][j] < entriesStartIndex[l_mostRepresentativeVariant + 1]){
-														mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][j]);
-														break;
+											for(j=1; j<connectedComponents[mostRepresentativeVariantIndex].size(); j++){
+												if(!entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->mergeFlag && !entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->clipFlag3 && !entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->alleleFlag){
+													if(l_mostRepresentativeVariant == (sv_files1.size() - 1)){
+														if(entriesStartIndex[l_mostRepresentativeVariant] <= connectedComponents[mostRepresentativeVariantIndex][j]){
+															mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][j]);
+															break;
+														}
+													}else{
+														if(entriesStartIndex[l_mostRepresentativeVariant] <= connectedComponents[mostRepresentativeVariantIndex][j] && connectedComponents[mostRepresentativeVariantIndex][j] < entriesStartIndex[l_mostRepresentativeVariant + 1]){
+															mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][j]);
+															break;
+														}
 													}
 												}
 											}
-										}
+								//	}
+
+											if(!singleVariant.empty()){
+												for(int varId : singleVariant){
+													bool canPush2 = true;
+													for(j=0; j<mostRepresentativeVariantComponents.size(); j++){
+														if((double)min(entryMap1[mostRepresentativeVariantComponents[j]]->sv_len, entryMap1[varId]->sv_len) / max(entryMap1[mostRepresentativeVariantComponents[j]]->sv_len, entryMap1[varId]->sv_len) >= 0.9){
+															canPush2 = false;
+															break;
+														}
+													}
+													if(canPush2){
+														NoAlleleSingleVariant.push_back(varId);
+													}
+												}
+											}
+
+											mostRepresentativeVariantComponents.insert(mostRepresentativeVariantComponents.end(), NoAlleleSingleVariant.begin(), NoAlleleSingleVariant.end());
+											NoAlleleSingleVariant.clear();
 
 										for(j=0; j<mostRepresentativeVariantComponents.size(); j++){
 											toolsNum = 0;
@@ -1803,6 +1989,25 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 															toolsNum++;
 														}
 													}
+												}
+											}
+
+											for(k=0; k<connectedComponents[i].size(); k++){
+												for(l=0; l<sv_files1.size(); l++){
+													if(l != (sv_files1.size() - 1)){
+														if(connectedComponents[i][k] < entriesStartIndex[l + 1]){
+															if(tools.find(SVcallernames[l]) == string::npos){
+																tools += "," + SVcallernames[l];
+																toolsNum++;
+															}
+															break;
+
+														}
+													}else if(tools.find(SVcallernames[l]) == string::npos){
+															tools += "," + SVcallernames[l];
+															toolsNum++;
+													}
+
 												}
 											}
 											fields = split1(entryMap1[connectedComponents[mostRepresentativeVariantComponents[j]][0]]->lineInfo, '\t');
@@ -2090,7 +2295,7 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 //		vector<size_t> connectedIndex;
 		unordered_set<size_t> connectedIndex,currentIdxSet, alleleFilter;
 		unordered_set<int> toAddSet;
-		vector<int> differentToolsIndex, maxAlleleComponents, alleleMerge, mostRepresentativeVariantComponents;
+		vector<int> differentToolsIndex, maxAlleleComponents, alleleMerge, mostRepresentativeVariantComponents, singleVariant, AlleleSingleVariant, NoAlleleSingleVariant;
 		vector<int> mostRepresentativeVariantIndices, connectedComponentsToAdd;
 		unordered_map<int, int> sizeDifferenceCount;
 		ofstream outputFile1(newFilename);
@@ -2101,7 +2306,7 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 		SV_item* currentVariant;
 //		SV_item* mostRepresentativeVariant;
 		SV_item* otherVariant;
-		bool flag, alleleflag, alleleMergeFlag, alleleSVLenFlag;
+		bool flag, alleleflag, alleleMergeFlag, alleleSVLenFlag, clipFlag, has_clip_flag, has_long_clip, has_short_noclip;
 		int totalOverlapForCurrentVariant, maxTotalOverlap, mostRepresentativeVariantIndex, toolsNum, count, maxCount, len, max_len, maxSVLen, maxAlleleComponentsSize, currentAlleleComponentsSize;
 //		outputFile1 << VCF_HEADER << endl;
 
@@ -2138,29 +2343,65 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 				}
 					if(connectedComponents[i].size() >= selectToolsNum){
 						max_len = 0;
+						clipFlag = false;
+						has_clip_flag = false;
+						has_long_clip = false;
+						has_short_noclip = false;
 			//				mergeFlagExist = false;
 					////	if((extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "") || (extractDP(entryMap1[connectedComponents[i][0]]->lineInfo) == "" && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2) || (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && extractAF(entryMap1[connectedComponents[i][0]]->lineInfo) == "")|| (safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 25 && safeStoi(extractDP(entryMap1[connectedComponents[i][0]]->lineInfo)) <= 75 && safeStof(extractAF(entryMap1[connectedComponents[i][0]]->lineInfo)) >= 0.2)){
 							differentToolsIndex.clear();
 							for(j=0; j<connectedComponents[i].size(); j++){
 								for(l=0; l<sv_files1.size(); l++){
 									if(l != (sv_files1.size() - 1)){
-										if(connectedComponents[i][j] < entriesStartIndex[l + 1]){
+										if(connectedComponents[i][j] < entriesStartIndex[l + 1] && !entryMap1[connectedComponents[i][j]]->clipFlag3){
 											if(find(differentToolsIndex.begin(), differentToolsIndex.end(), l) == differentToolsIndex.end()){
 												differentToolsIndex.push_back(l);
 											}
 											break;
 										}
 									}else{
-										if(find(differentToolsIndex.begin(), differentToolsIndex.end(), l) == differentToolsIndex.end()){
-											differentToolsIndex.push_back(l);
+										if(!entryMap1[connectedComponents[i][j]]->clipFlag3){
+											if(find(differentToolsIndex.begin(), differentToolsIndex.end(), l) == differentToolsIndex.end()){
+												differentToolsIndex.push_back(l);
+											}
 										}
 										break;
 									}
 								}
+
 								if(differentToolsIndex.size() >= selectToolsNum) break;
 							}
+							// for(j=0; j<connectedComponents[i].size(); j++){
+							// 		if(entryMap1[connectedComponents[i][j]]->clipFlag3){
+							// 		clipFlag = true;
+							// 		break;
+							// 	}
+							// }							
+							// if(clipFlag) continue;
+							for(j=0; j<connectedComponents[i].size(); j++){
+								if(entryMap1[connectedComponents[i][j]]->sv_len > max_len){
+									max_len = entryMap1[connectedComponents[i][j]]->sv_len;
+								}
+							}
 
-							if(differentToolsIndex.size() >= selectToolsNum){
+							for(j=0; j<connectedComponents[i].size(); j++){
+								if(entryMap1[connectedComponents[i][j]]->sv_len < (0.7 * max_len)){
+									if(!entryMap1[connectedComponents[i][j]]->clipFlag3 && entryMap1[connectedComponents[i][j]]->clipFlag2){
+										has_short_noclip = true;
+										break;
+									}
+								}
+								if(entryMap1[connectedComponents[i][j]]->clipFlag3){
+									has_clip_flag = true;
+									if(entryMap1[connectedComponents[i][j]]->sv_len >= (0.7 * max_len)){
+										has_long_clip = true;
+										break;
+									}
+								}
+							}
+							if(has_clip_flag && !has_long_clip && !has_short_noclip) continue;
+							max_len = 0;
+							if(differentToolsIndex.size() >= selectToolsNum && !clipFlag){
 /*								if(entryMap1[i]->alleleFlag){
 									allelePair = make_pair(entryMap1[i]->lineInfo,1);
 									allelelineMap.insert(allelePair);
@@ -2194,7 +2435,7 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 			//							}
 			//						}
 			//					}
-
+							singleVariant.clear();
 							for(j=0; j<connectedComponents[i].size(); j++){
 //								connectedComponentsToAdd.clear();
 								for(m=0; m<connectedComponents[connectedComponents[i][j]].size(); m++){
@@ -2211,13 +2452,38 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 								}
 			//						if(entryMap1[connectedComponents[i][j]]->mergeFlag){mergeFlagExist = true;}
 //								connectedComponents[i].insert(connectedComponents[i].end(), connectedComponentsToAdd.begin(), connectedComponentsToAdd.end());
+								if(entryMap1[connectedComponents[i][j]]->singleFlag){
+									bool canPush = true;
+									if(!singleVariant.empty()){
+										for(int varId : singleVariant){
+											if((double)min(entryMap1[connectedComponents[i][j]]->sv_len, entryMap1[varId]->sv_len) / max(entryMap1[connectedComponents[i][j]]->sv_len, entryMap1[varId]->sv_len) >= 0.9){
+												canPush = false;
+												break;
+											}
+										}
+									}
+									if(canPush){
+										singleVariant.push_back(connectedComponents[i][j]);
+									}
+								}
 							}
+/*							for(k=0; k<connectedComponents[i].size(); k++){
+								if(!singleVariant.empty()){
+									for(int varId : singleVariant){
+										if((double)min(entryMap1[connectedComponents[i][k]]->sv_len, entryMap1[varId]->sv_len) / max(entryMap1[connectedComponents[i][k]]->sv_len, entryMap1[varId]->sv_len) < 0.7){
+											singleVariant.push_back(connectedComponents[i][k]);
+											break;
+										}
+									}
+								}
+							}*/
+
 							if(flag){
 								alleleflag = false;
 								alleleMergeFlag = false;
 								for(j=0; j<connectedComponents[i].size(); j++){
-//									if(entryMap1[connectedComponents[i][j]]->alleleFlag && !entryMap1[connectedComponents[i][j]]->mergeFlag){
-									if(entryMap1[connectedComponents[i][j]]->alleleFlag){
+									if(entryMap1[connectedComponents[i][j]]->alleleFlag && !entryMap1[connectedComponents[i][j]]->mergeFlag && !entryMap1[connectedComponents[i][j]]->clipFlag3){
+//									if(entryMap1[connectedComponents[i][j]]->alleleFlag){
 										flag = false;
 										alleleflag = true;
 										break;
@@ -2228,7 +2494,7 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 									filterAlleleComponents.clear();
 									filterAlleleComponents.resize(sv_files1.size(), vector<int>());
 									for(j=0; j<connectedComponents[i].size(); j++){
-										if(entryMap1[connectedComponents[i][j]]->alleleFlag){
+										if(entryMap1[connectedComponents[i][j]]->alleleFlag && !entryMap1[connectedComponents[i][j]]->mergeFlag && !entryMap1[connectedComponents[i][j]]->clipFlag3){
 											for(l=0; l<sv_files1.size(); l++){
 												if(l != (sv_files1.size() - 1)){
 													if(connectedComponents[i][j] < entriesStartIndex[l + 1]){
@@ -2308,6 +2574,9 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 												}
 											}
 										}*/
+										for(j=0; j<alleleMerge.size(); j++){
+											alleleFilter.insert(alleleMerge[j]);
+										}
 									}
 									alleleMerge.clear();
 								}
@@ -2355,18 +2624,18 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 //										currentAlleleComponentsSize = component.size();
 										alleleSVLenFlag = false;
 
-										for(j=0; j<component.size(); j++){
-											if(entryMap1[component[j]]->sv_len > (max_len * 0.9))
-												alleleSVLenFlag = true;
-										}
-										if(currentAlleleComponentsSize > maxAlleleComponentsSize && alleleSVLenFlag){
+										// for(j=0; j<component.size(); j++){
+										// 	if(entryMap1[component[j]]->sv_len > (max_len * 0.9))
+										// 		alleleSVLenFlag = true;
+										// }
+										if(currentAlleleComponentsSize > maxAlleleComponentsSize){
 											maxAlleleComponentsSize = currentAlleleComponentsSize;
 											maxAlleleComponents = component;
 										}
 										if(maxAlleleComponents.size() == 1){
 											if(component_count != (sv_files1.size() - 1)){
 												int currentIdx = maxAlleleComponents[0] - 1;
-												while(currentIdx >= entriesStartIndex[component_count] && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx + 1]->startPos) <= ALLELIC_DISTANCE){
+												while(currentIdx >= entriesStartIndex[component_count] && !entryMap1[currentIdx]->mergeFlag && !entryMap1[currentIdx]->clipFlag3 && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx + 1]->startPos) <= ALLELIC_DISTANCE){
 													differentToolsIndex.clear();
 													for(j=0; j<connectedComponents[currentIdx].size(); j++){
 														for(m=0; m<connectedComponents[connectedComponents[currentIdx][j]].size(); m++){
@@ -2398,7 +2667,7 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 
 												}
 												currentIdx = maxAlleleComponents[0] + 1;
-												while(currentIdx < entriesStartIndex[component_count + 1] && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx - 1]->startPos) <= ALLELIC_DISTANCE){
+												while(currentIdx < entriesStartIndex[component_count + 1] && !entryMap1[currentIdx]->mergeFlag && !entryMap1[currentIdx]->clipFlag3 && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx - 1]->startPos) <= ALLELIC_DISTANCE){
 													differentToolsIndex.clear();
 													for(j=0; j<connectedComponents[currentIdx].size(); j++){
 														for(m=0; m<connectedComponents[connectedComponents[currentIdx][j]].size(); m++){
@@ -2432,7 +2701,7 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 												}
 											}else{
 												int currentIdx = maxAlleleComponents[0] - 1;
-												while(currentIdx >= entriesStartIndex[component_count] && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx + 1]->startPos) <= ALLELIC_DISTANCE){
+												while(currentIdx >= entriesStartIndex[component_count] && !entryMap1[currentIdx]->mergeFlag && !entryMap1[currentIdx]->clipFlag3 && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx + 1]->startPos) <= ALLELIC_DISTANCE){
 													differentToolsIndex.clear();
 													for(j=0; j<connectedComponents[currentIdx].size(); j++){
 														for(m=0; m<connectedComponents[connectedComponents[currentIdx][j]].size(); m++){
@@ -2464,7 +2733,7 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 
 												}
 												currentIdx = maxAlleleComponents[0] + 1;
-												while(currentIdx < static_cast<int>(entryMap1.size()) && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx - 1]->startPos) <= ALLELIC_DISTANCE){
+												while(currentIdx < static_cast<int>(entryMap1.size()) && !entryMap1[currentIdx]->mergeFlag && !entryMap1[currentIdx]->clipFlag3 && entryMap1[currentIdx]->alleleFlag && abs(entryMap1[currentIdx]->startPos - entryMap1[currentIdx - 1]->startPos) <= ALLELIC_DISTANCE){
 													differentToolsIndex.clear();
 													for(j=0; j<connectedComponents[currentIdx].size(); j++){
 														for(m=0; m<connectedComponents[connectedComponents[currentIdx][j]].size(); m++){
@@ -2497,7 +2766,34 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 												}
 											}
 										}
-										if(maxAlleleComponents.size() > 1){
+										for(j=0; j<maxAlleleComponents.size(); j++){
+											// if(max_len >= 100){
+											// 	if(entryMap1[maxAlleleComponents[j]]->sv_len > (max_len * 0.9))
+											// 	alleleSVLenFlag = true;
+											// }else{
+											// 	if(entryMap1[maxAlleleComponents[j]]->sv_len > (max_len * 0.8))
+											// 	alleleSVLenFlag = true;
+											// }
+											if(entryMap1[maxAlleleComponents[j]]->sv_len > (max_len * 0.9))
+												alleleSVLenFlag = true;
+										}
+										if(maxAlleleComponents.size() > 1 && alleleSVLenFlag){
+											if(!singleVariant.empty()){
+												for(int varId : singleVariant){
+													bool canPush2 = true;
+													for(j=0; j<maxAlleleComponents.size(); j++){
+														if((double)min(entryMap1[maxAlleleComponents[j]]->sv_len, entryMap1[varId]->sv_len) / max(entryMap1[maxAlleleComponents[j]]->sv_len, entryMap1[varId]->sv_len) >= 0.9){
+															canPush2 = false;
+															break;
+														}
+													}
+													if(canPush2){
+														AlleleSingleVariant.push_back(varId);
+													}
+												}
+											}
+											maxAlleleComponents.insert(maxAlleleComponents.end(), AlleleSingleVariant.begin(), AlleleSingleVariant.end());
+											AlleleSingleVariant.clear();
 											for(j=0; j<maxAlleleComponents.size(); j++){
 												toolsNum = 0;
 												tools = "";
@@ -2584,10 +2880,55 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 
 								if(flag){
 									if(entryMap1[i] != nullptr){
+
 										for(k=0; k<connectedComponents[i].size(); k++){
-											if(entryMap1[connectedComponents[i][k]]->sv_len > max_len)
+											if(entryMap1[connectedComponents[i][k]]->sv_len > max_len){
 												max_len = entryMap1[connectedComponents[i][k]]->sv_len;
+											}
 										}
+								/*		components2.clear();
+									for(j=0; j<connectedComponents[i].size(); j++){
+										if(entryMap1[connectedComponents[i][j]]->sv_len < (max_len * 0.7))
+											components2.push_back(connectedComponents[i][j]);
+									}
+									
+									components3.clear();
+									components3.resize(sv_files1.size(), vector<int>());
+									for(j=0; j<components2.size(); j++){									
+											for(l=0; l<sv_files1.size(); l++){
+												if(l != (sv_files1.size() - 1)){
+													if(components2[j] < entriesStartIndex[l + 1]){
+														components3[l].push_back(components2[j]);
+														break;
+													}
+												}else{
+													components3[l].push_back(components2[j]);
+													break;
+												}
+											}
+										
+									}
+									maxComponentsSize = 0;
+									component4.clear();			
+									component_sizeFlag = false;					
+									for(const auto& component : components3){
+//										if(component_count == ceil(alleleComponents.size() * 0.6)) break;
+//										if(component.size()==0) continue;
+										currentComponentsSize = 0;
+										if(component.size()>=3){											
+											for(k=0; k<component.size(); k++){
+												currentComponentsSize++;	
+											}
+											component_sizeFlag = true;
+										}
+										if(currentComponentsSize > maxComponentsSize){
+											maxComponentsSize = currentComponentsSize;
+											component4 = component;
+										}										
+									}
+									if(component_sizeFlag){
+										mostRepresentativeVariantComponents.insert(mostRepresentativeVariantComponents.end(), component4.begin(), component4.end());
+									}else{*/
 
 											maxCount = 0;
 											len = 0;
@@ -2628,6 +2969,8 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 														}
 														sizeDifferenceCount.insert(make_pair(connectedComponents[i][k], count));
 														}
+
+
 			//											}
 												}
 												for(const auto& kv : sizeDifferenceCount){
@@ -2646,65 +2989,83 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 												if(maxCount == 0) mostRepresentativeVariantIndices.clear();
 
 											}
+											maxTotalOverlap = -1, maxSVLen = 0;
+											for(k=0; k<mostRepresentativeVariantIndices.size(); k++){
+												currentVariant = entryMap1[mostRepresentativeVariantIndices[k]];
+												totalOverlapForCurrentVariant = 0;
 
+												for(o=0; o<mostRepresentativeVariantIndices.size(); o++){
+													if(k != o){
+														otherVariant = entryMap1[mostRepresentativeVariantIndices[o]];
+														totalOverlapForCurrentVariant += calculateOverlap1(currentVariant,otherVariant);
+													}
 
-
-										maxTotalOverlap = -1, maxSVLen = 0;
-										for(k=0; k<mostRepresentativeVariantIndices.size(); k++){
-											currentVariant = entryMap1[mostRepresentativeVariantIndices[k]];
-											totalOverlapForCurrentVariant = 0;
-
-											for(o=0; o<mostRepresentativeVariantIndices.size(); o++){
-												if(k != o){
-													otherVariant = entryMap1[mostRepresentativeVariantIndices[o]];
-													totalOverlapForCurrentVariant += calculateOverlap1(currentVariant,otherVariant);
 												}
-
+												if(totalOverlapForCurrentVariant > maxTotalOverlap){
+													maxSVLen = currentVariant->sv_len;
+													maxTotalOverlap = totalOverlapForCurrentVariant;
+	//												mostRepresentativeVariant = currentVariant;
+													mostRepresentativeVariantIndex = mostRepresentativeVariantIndices[k];
+												}else if(totalOverlapForCurrentVariant == maxTotalOverlap && currentVariant->sv_len >= maxSVLen){
+													maxSVLen = currentVariant->sv_len;
+													maxTotalOverlap = totalOverlapForCurrentVariant;
+	//												mostRepresentativeVariant = currentVariant;
+													mostRepresentativeVariantIndex = mostRepresentativeVariantIndices[k];
+												}
 											}
-											if(totalOverlapForCurrentVariant > maxTotalOverlap){
-												maxSVLen = currentVariant->sv_len;
-												maxTotalOverlap = totalOverlapForCurrentVariant;
-//												mostRepresentativeVariant = currentVariant;
-												mostRepresentativeVariantIndex = mostRepresentativeVariantIndices[k];
-											}else if(totalOverlapForCurrentVariant == maxTotalOverlap && currentVariant->sv_len >= maxSVLen){
-												maxSVLen = currentVariant->sv_len;
-												maxTotalOverlap = totalOverlapForCurrentVariant;
-//												mostRepresentativeVariant = currentVariant;
-												mostRepresentativeVariantIndex = mostRepresentativeVariantIndices[k];
-											}
-										}
-										mostRepresentativeVariantIndices.clear();
-										size_t l_mostRepresentativeVariant;
-										mostRepresentativeVariantComponents.clear();
+											mostRepresentativeVariantIndices.clear();
+											size_t l_mostRepresentativeVariant;
+											mostRepresentativeVariantComponents.clear();
 
-										for(l=0; l<sv_files1.size(); l++){
-											if(l != (sv_files1.size() - 1)){
-												if(connectedComponents[mostRepresentativeVariantIndex][0] < entriesStartIndex[l + 1]){
+											for(l=0; l<sv_files1.size(); l++){
+												if(l != (sv_files1.size() - 1)){
+													if(connectedComponents[mostRepresentativeVariantIndex][0] < entriesStartIndex[l + 1]){
+														mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][0]);
+														l_mostRepresentativeVariant = l;
+														break;
+													}
+												}else{
 													mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][0]);
 													l_mostRepresentativeVariant = l;
 													break;
 												}
-											}else{
-												mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][0]);
-												l_mostRepresentativeVariant = l;
-												break;
 											}
-										}
-										for(j=1; j<connectedComponents[mostRepresentativeVariantIndex].size(); j++){
-											if(!entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->mergeFlag && !entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->alleleFlag){
-												if(l_mostRepresentativeVariant == (sv_files1.size() - 1)){
-													if(entriesStartIndex[l_mostRepresentativeVariant] <= connectedComponents[mostRepresentativeVariantIndex][j]){
-														mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][j]);
-														break;
-													}
-												}else{
-													if(entriesStartIndex[l_mostRepresentativeVariant] <= connectedComponents[mostRepresentativeVariantIndex][j] && connectedComponents[mostRepresentativeVariantIndex][j] < entriesStartIndex[l_mostRepresentativeVariant + 1]){
-														mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][j]);
-														break;
+											for(j=1; j<connectedComponents[mostRepresentativeVariantIndex].size(); j++){
+												if(!entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->mergeFlag && !entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->clipFlag3 && !entryMap1[connectedComponents[mostRepresentativeVariantIndex][j]]->alleleFlag){
+													if(l_mostRepresentativeVariant == (sv_files1.size() - 1)){
+														if(entriesStartIndex[l_mostRepresentativeVariant] <= connectedComponents[mostRepresentativeVariantIndex][j]){
+															mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][j]);
+															break;
+														}
+													}else{
+														if(entriesStartIndex[l_mostRepresentativeVariant] <= connectedComponents[mostRepresentativeVariantIndex][j] && connectedComponents[mostRepresentativeVariantIndex][j] < entriesStartIndex[l_mostRepresentativeVariant + 1]){
+															mostRepresentativeVariantComponents.push_back(connectedComponents[mostRepresentativeVariantIndex][j]);
+															break;
+														}
 													}
 												}
 											}
-										}
+									//}
+											if(!singleVariant.empty()){
+												for(int varId : singleVariant){
+													bool canPush2 = true;
+													for(j=0; j<mostRepresentativeVariantComponents.size(); j++){
+														if((double)min(entryMap1[mostRepresentativeVariantComponents[j]]->sv_len, entryMap1[varId]->sv_len) / max(entryMap1[mostRepresentativeVariantComponents[j]]->sv_len, entryMap1[varId]->sv_len) >= 0.9){
+															canPush2 = false;
+															break;
+														}
+													}
+													if(canPush2){
+														NoAlleleSingleVariant.push_back(varId);
+													}
+												}
+											}
+
+											mostRepresentativeVariantComponents.insert(mostRepresentativeVariantComponents.end(), NoAlleleSingleVariant.begin(), NoAlleleSingleVariant.end());
+											NoAlleleSingleVariant.clear();
+
+
+
 
 										for(j=0; j<mostRepresentativeVariantComponents.size(); j++){
 											toolsNum = 0;

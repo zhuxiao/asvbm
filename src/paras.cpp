@@ -1068,7 +1068,7 @@ int parseCreate(int argc, char **argv){
 		{"minsvlen",no_argument, 0, 'm'},
 		{0, 0, 0, 0}
 	};
-	while( (opt = getopt_long(argc, argv, ":m:M:I:s:t:r:o:i:a:p:l:T:B:R:hvC:gS", long_options, &longindex)) != -1 ){
+	while( (opt = getopt_long(argc, argv, ":m:M:I:s:t:r:o:i:a:p:l:T:B:R:hvC:geS", long_options, &longindex)) != -1 ){
 		switch(opt){
 			case 'm': minsvlen = stoi(optarg); break;
 			case 'M': maxValidRegThres = stoi(optarg); break;
@@ -1086,6 +1086,7 @@ int parseCreate(int argc, char **argv){
 			case 'r': htmlFilename = optarg; break;
 			case 'C': ChromosomeNames = optarg; break;
 			case 'g': genotype_filterBench_flag = true; break;
+			case 'e': merge_singleVariant_flag = true; break;
 			case 'h': showUsageCreate(); exit(0);
 			case 'v': show_version();; exit(0);
 			case 'S': typeMatchLevel = MATCHLEVEL_S; break;

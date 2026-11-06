@@ -117,7 +117,7 @@ void multipledataset(vector< vector<float> > MeticsValues, vector<string> &sv_fi
 			string str;
 			if (lastSlashPos == string::npos) {
 				// If '/' is not found, the entire string is printed
-				 str = sv_files1.at(i-1);
+				 str = sv_files1.at(i);
 			} else {
 				// When '/' is reached, the part after '/' is printed
 				str = sv_files1.at(i).substr(lastSlashPos + 1);
@@ -1483,14 +1483,16 @@ bool numericSort(const pair<string, int>& lhs, const pair<string, int>& rhs) {
 	return lhsChrom < rhsChrom; // Otherwise sort by chromosome
 }
 bool numericSort1(const SV_item* lhs, const SV_item* rhs) {
-	auto lhsParsed = parseChromPos(lhs->lineInfo);
-	auto rhsParsed = parseChromPos(rhs->lineInfo);
+//	auto lhsParsed = parseChromPos(lhs->lineInfo);
+//	auto rhsParsed = parseChromPos(rhs->lineInfo);
 
-	int lhsChrom = chromToInt(lhsParsed.first);
-	int rhsChrom = chromToInt(rhsParsed.first);
-
+//	int lhsChrom = chromToInt(lhsParsed.first);
+//	int rhsChrom = chromToInt(rhsParsed.first);
+	int lhsChrom = chromToInt(lhs->chrname);
+	int rhsChrom = chromToInt(rhs->chrname);
 	if (lhsChrom == rhsChrom) {
-		return lhsParsed.second < rhsParsed.second; // Sort by position if chromosome is the same
+//		return lhsParsed.second < rhsParsed.second; // Sort by position if chromosome is the same
+		return lhs->startPos < rhs->startPos;
 	}
 	return lhsChrom < rhsChrom; // Otherwise sort by chromosome
 }

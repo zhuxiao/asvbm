@@ -64,6 +64,7 @@ vector<SV_item*> getItemsByChr(string &chrname, vector<SV_item*> &dataset);
 SV_item* itemdup(SV_item* item);
 bool IsSameChrname(string &chrname1, string &chrname2);
 vector<size_t> computeOverlapType(SV_item* item1, SV_item* item2);
+vector<size_t> computeOverlapType1(SV_item* item1, SV_item* item2);
 bool isOverlappedPos(size_t startPos1, size_t endPos1, size_t startPos2, size_t endPos2);
 pair<int, vector<SV_item*>> findClosestSubarray(vector<SV_item*> items, int32_t target);
 void IsmergeJudge(size_t user_pos, SV_item* user, SV_item* bench, vector<SV_item*> subset1, faidx_t *fai);

@@ -25,6 +25,31 @@ vector<string> split(const string& s, const string& delim)
 	}
 	return elems;
 }
+vector<string> split2(const string& s, const string& delims)
+{
+    vector<string> elems;
+    size_t pos = 0;
+    size_t len = s.length();
+
+    if (delims.empty()) return elems;
+
+    while (pos < len)
+    {
+
+        size_t find_pos = s.find_first_of(delims, pos);
+
+        if (find_pos == string::npos) {
+            elems.push_back(s.substr(pos, len - pos));
+            break;
+        }
+
+        string tmp = s.substr(pos, find_pos - pos);
+        if (!tmp.empty()) elems.push_back(tmp);
+
+        pos = find_pos + 1;
+    }
+    return elems;
+}
 //Split a custom interval
 vector<size_t> parseSemicolonSeparatedValues(const string& str){
 	vector<size_t> values;

@@ -886,8 +886,9 @@ void convertBed(const string &infilename, const string &outfilename, const strin
 
 //    if (!mate_filename.empty()) removemateSVItems(mate_filename, sv_item_vec);
 	if (!snv_filename.empty()) removeSNVItems(snv_filename, sv_item_vec);
-
-	output2File(outfilename, sv_item_vec, outConvertScreenFile);
+	vector<SV_item*> sortedVec(sv_item_vec.begin(), sv_item_vec.end());
+	sort(sortedVec.begin(), sortedVec.end(), numericSort1);
+	output2File(outfilename, sortedVec, outConvertScreenFile);
 	releaseSVItemVec(sv_item_vec);
 
 	usersetsannotationLines.push_back(userannotationLines);
@@ -927,7 +928,7 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 				lineInfo = line;
 
 				if(label.compare("benchmark")==0)	benchmarklineMap[lineInfo] = 0;
-				str_vec = split(line, "\t");
+				str_vec = split2(line, "\t ");
 
 				// get locations
 				chrname = str_vec.at(0);
@@ -1133,13 +1134,14 @@ void convertVcf(const string &infilename, const string &outfilename, const strin
 
 	// remove mate sv items
 //	if(mate_filename.size()) removemateSVItems(mate_filename, sv_item_vec);
-
+	vector<SV_item*> sortedVec(sv_item_vec.begin(), sv_item_vec.end());
+	sort(sortedVec.begin(), sortedVec.end(), numericSort1);
 	// remove snv items
 	if(snv_filename.size()) removeSNVItems(snv_filename, sv_item_vec);
 	//if(mate_filename.size()==0)	fp_vec.push_back(sv_item_vec);
 
 	// save to file
-	output2File(outfilename, sv_item_vec, outConvertScreenFile);
+	output2File(outfilename, sortedVec, outConvertScreenFile);
 
 	// release memory
 	releaseSVItemVec(sv_item_vec);

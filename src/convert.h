@@ -11,7 +11,7 @@
 #include "structure.h"
 #include "dataLoader.h"
 #include "extvab.h"
-
+#include "gnuplotcall.h"
 using namespace std;
 
 #define Max_SeqLen    50000  //The maximum length of the sequence
