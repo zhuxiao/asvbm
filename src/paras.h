@@ -32,8 +32,8 @@ using namespace std;
 #define PROG_VERSION	"1.4.2"
 
 #define CMD_STAT_STR					"stat"
-#define CMD_CREATE_STR					"create"
-
+#define CMD_ENSEMBLE_STR				"ensemble"
+#define CMD_ALLELE_STR					"allele"
 
 void show_version();
 void show();

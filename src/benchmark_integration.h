@@ -1,10 +1,3 @@
-/*
- * benchmark_integration.h
- *
- *  Created on: Jan 5, 2025
- *      Author: node
- */
-
 #ifndef SRC_BENCHMARK_INTEGRATION_H_
 #define SRC_BENCHMARK_INTEGRATION_H_
 
@@ -24,7 +17,6 @@
 #include "extvab.h"
 #include "gnuplotcall.h"
 #include "num_stat.h"
-#include "vcf_header.h"
 #include <cmath>
 set<string> readVCFHeader(const string& filename);
 vector<string> mergeHeaders(const vector<string>& filenames);

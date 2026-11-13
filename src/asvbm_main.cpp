@@ -20,16 +20,16 @@ int main(int argc, char *argv[]){
 		show_version();
 		return 0;
 	}
-	if (strcmp(argv[1], "create")==0){
-		command = "create";
+	if (strcmp(argv[1], CMD_ENSEMBLE_STR)==0){
+		command = CMD_ENSEMBLE_STR;
 		create_bench_flag = true;
 		return parseCreate(argc-1, argv+1);
 //		return parseConvert(argc-1, argv+1);
-	}else if(strcmp(argv[1], "stat")==0){
-		command = "stat";
+	}else if(strcmp(argv[1], CMD_STAT_STR)==0){
+		command = CMD_STAT_STR;
 		return parseStat(argc-1, argv+1);
-	}else if(strcmp(argv[1], "allele")==0){
-		command = "allele";
+	}else if(strcmp(argv[1], CMD_ALLELE_STR)==0){
+		command = CMD_ALLELE_STR;
 		return parseAllele(argc-1, argv+1);
 	}else{
 		cerr << "invalid command: " << argv[1] << endl << endl;

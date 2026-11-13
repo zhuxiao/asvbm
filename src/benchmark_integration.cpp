@@ -1,10 +1,5 @@
-/*
- * benchmark_integration.cpp
- *
- *  Created on: Jan 5, 2025
- *      Author: node
- */
 #include "benchmark_integration.h"
+
 int safeStoi(const string& str){
 	if(str.empty()) return -1;
 	try{
@@ -1191,7 +1186,6 @@ void integrationBenchmark(string &outputFile, string &ref_file, vector<string> &
 		SV_item* otherVariant;
 		bool flag, alleleflag, alleleMergeFlag, alleleSVLenFlag, clipFlag, has_long_clip, has_clip_flag, has_short_noclip;
 		int totalOverlapForCurrentVariant, maxTotalOverlap, mostRepresentativeVariantIndex, toolsNum, count, maxCount, len, max_len, maxSVLen, maxAlleleComponentsSize, currentAlleleComponentsSize;
-//		outputFile1 << VCF_HEADER << endl;
 
 		for(const auto& header : headers){
 			outputFile1 << header << endl;
@@ -2308,7 +2302,6 @@ void integrationBenchmark2(string &outputFile, string &ref_file, vector<string> 
 		SV_item* otherVariant;
 		bool flag, alleleflag, alleleMergeFlag, alleleSVLenFlag, clipFlag, has_clip_flag, has_long_clip, has_short_noclip;
 		int totalOverlapForCurrentVariant, maxTotalOverlap, mostRepresentativeVariantIndex, toolsNum, count, maxCount, len, max_len, maxSVLen, maxAlleleComponentsSize, currentAlleleComponentsSize;
-//		outputFile1 << VCF_HEADER << endl;
 
 		for(const auto& header : headers){
 			outputFile1 << header << endl;

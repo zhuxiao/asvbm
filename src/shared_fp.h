@@ -1,12 +1,6 @@
-/*
- * find_shared_fp.h
- *
- *  Created on: Oct 23, 2024
- *      Author: node
- */
-
 #ifndef SRC_SHARED_FP_H_
 #define SRC_SHARED_FP_H_
+
 #include <string>
 #include <vector>
 #include <sstream>
@@ -23,7 +17,6 @@
 #include "extvab.h"
 #include "gnuplotcall.h"
 #include "num_stat.h"
-#include "vcf_header.h"
 
 void addEntryMap(size_t index, SV_item* entry);
 vector<string> split(const string& str, char delimiter);

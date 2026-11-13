@@ -176,7 +176,7 @@ void showUsageCreate(){
 	cout << "Version: " << PROG_VERSION << endl;
 	cout << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
-	cout << "Usage:  asvbm create [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
+	cout << "Usage:  asvbm ensemble [options] <USER_FILE> [<USER_FILE1>...] <BENCH_FILE> <REF_FILE>" << endl << endl;
 
 	cout << "Description:" << endl;
 	cout << "   USER_FILE      User called SV result file." << endl;
@@ -220,7 +220,7 @@ void showUsageCreate(){
 	cout << "                  Custom region sizes are separated by ';'. Example: -R \"100;500;1000\" " <<endl;
 	cout << "   -g             This parameter is used to filter for variants violating Mendelian inheritance laws."<< endl;
 	cout << "                  The number and order of input items for the user files should be consistent with the example." <<endl;
-	cout << "                  Example: asvbm create -g -C \"chr1-22\" hg002_sv.vcf hg003_sv.vcf hg004_sv.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "                  Example: asvbm ensemble -g -C \"chr1-22\" hg002_sv.vcf hg003_sv.vcf hg004_sv.vcf benchmark_sv.vcf ref.fa" << endl;
 	cout << "   -o FILE        output directory: [" << outputPathname << "]" << endl;
 	cout << "   -l FILE        file name of long SV regions: [" << longSVFilename << "]" << endl;
 	cout << "                  file name of short SV regions: [" << shortSVFilename << "]" << endl;
@@ -231,10 +231,10 @@ void showUsageCreate(){
 
 	cout << "Example:" << endl;
 	cout << "   # construct high-quality set based on multiple user callsets and allow match between DUPs as INSs" << endl;
-	cout << "   $ asvbm create -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl << endl;
+	cout << "   $ asvbm ensemble -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl << endl;
 
 	cout << "   # construct high-quality set based on multiple user callsets, and allow strict type match by '-S' option" << endl;
-	cout << "   $ asvbm create -m 20 -S -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
+	cout << "   $ asvbm ensemble -m 20 -S -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl;
 
 }
 void showUsageAllele(){
@@ -349,7 +349,7 @@ void show(){
 
 	cout << "Commands:" << endl;
 	cout << "   stat         revise the existing benchmark set" << endl;
-	cout << "   create       create a new high-quality set" << endl;
+	cout << "   ensemble     create a new high-quality set" << endl;
 	cout << "   allele       extract multi-allelic variants from each callset" << endl<< endl;
 
 	cout << "Example:" << endl;
@@ -362,8 +362,8 @@ void show(){
 	cout << "   # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets" << endl;
 	cout << "   $ asvbm stat -m 20 -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl << endl;;
 
-	cout << "   # create high-quality set based on multiple user callsets" << endl;
-	cout << "   $ asvbm create -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl << endl;;
+	cout << "   # generate high-quality set based on multiple user callsets" << endl;
+	cout << "   $ asvbm ensemble -T \"tool1;tool2;tool3\" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa" << endl << endl;;
 
 	cout << "   # extract multi-allelic variants from each callset" << endl;
 	cout << "   $ asvbm allele user_sv1.vcf user_sv2.vcf user_sv3.vcf" << endl;
@@ -1041,7 +1041,7 @@ string expand_chromosome_names(const string& input){
 //
 //	return 0;
 //}
-// parse the parameters for create command
+// parse the parameters for ensemble command
 int parseCreate(int argc, char **argv){
 	int32_t opt, threadNum_tmp, longindex = 0;;
 	string sv_file1, ref_file, sv_file2, ToolNameStore, ChromosomeNames;
@@ -1742,7 +1742,7 @@ void printCreateParas(string &user_file, string &benchmark_file ,string &ref_fil
 	outStatScreenFile << "Version: " << PROG_VERSION << endl;
 	outStatScreenFile << "Compile: " << __DATE__ << ", " << __TIME__ << endl << endl;
 
-	outStatScreenFile << "############# Parameters for 'create' command: #############" << endl;
+	outStatScreenFile << "############# Parameters for 'ensemble' command: #############" << endl;
 	outStatScreenFile << "        Reference file: " << ref_file << endl;
 	outStatScreenFile << "   User-called SV file: " << user_file << endl;
 	outStatScreenFile << "     Benchmark SV file: " << benchmark_file << endl;

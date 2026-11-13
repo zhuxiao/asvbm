@@ -1,10 +1,5 @@
-/*
- * find_shared_fp.cpp
- *
- *  Created on: Oct 23, 2024
- *      Author: node
- */
 #include "shared_fp.h"
+
 int lcs(const string& a, const string& b){
 	int m, n, i, j;
 	m = a.length();
@@ -395,13 +390,9 @@ void findSharedFP(string &outputFile, string &ref_file, string &benchfilename, v
 	bool flag;
 	size_t size;
 	int totalOverlapForCurrentVariant, maxTotalOverlap, mostRepresentativeVariantIndex, toolsNum, count, maxCount, len;
-//	outputFile1 << VCF_HEADER << endl;
-//	outputFile2 << VCF_HEADER << endl;
 	for (const auto& header : headers){
 		outputFile1 << header << endl;
-//		outputFile2 << header << endl;
 	}
-//	outputFile3 << VCF_HEADER << endl;
 	for(i=0; i<connectedComponents.size(); i++){
 		size = connectedComponents[i].size();
 		if(size >= selectToolsNum){
