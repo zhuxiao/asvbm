@@ -4,7 +4,7 @@ A tool for multi-Allele-aware Structural Variant statistics Benchmarking for Mul
 -------------------
 ASVBM is A tool for multi-Allele-aware Structural Variant (SV) statistics Benchmarking for Multiple callsets. ASVBM uses user-provided callsets and a benchmark data set as input. It first computes the basics metrics, such as the number of true positives (TPs), false positives (FPs), false negatives (FNs), latent positives (LPs), sequence similarity, recall, precision, and F1 score. Notably, ASVBM introduces the concept of LP and employs a local joint analysis validation approach to address cases where multiple smaller variants are nearly or entirely equivalent to a larger variant. It then computes the variant region size difference between the user-called variants and the corresponding ones in the benchmark data set by computing the distance between their breakpoint distance, and it also calculates the variant size ratio for the two variant regions. Finally, it computes the statistics for variants with various region sizes. A notable feature of ASVBM is its capability to benchmark multiple identification results and generate information-rich chart information. This provides a more intuitive showcase of the performance of different detection methods. At the same time, ASVBM supports multiple user callsets benchmarking on the same benchmark set, providing a more intuitive display of the comparative results between samples. Finally, in multiple user callsets benchmarking, ASVBM supports filtering shared false negatives (FNs) not reported by any calling results within the benchmark set, providing a more reliable reference for benchmarking.
 
-Besides, ASVBM has the ability of constructing confident high-quality SV set from multiple callsets, which is useful when constructing high-quality benchmark sets. ASVBM employs the bi-directional local joint analysis strategy to construct the SV set in a robost way. The script `callset_ensemble.sh` in script folder can be used to produce a high-quality callset by ensembling multiple callsets in an convenient way.
+Besides, ASVBM has the ability of constructing confident high-quality SV set from multiple callsets, which is useful when constructing high-quality benchmark sets. ASVBM employs the bi-directional local joint analysis strategy to construct the SV set in a robost way. The script `callset_ensemble.sh` in script folder can be used to produce a high-quality callset from multiple callsets ensemble in an convenient way.
 
 Moreover, ASVBM also can be used to extract multi-allelic variants in human genomes. For the diploid human genome, there are many heterozygous variants, and ASVBM can be used to extract these variants.
 
@@ -99,7 +99,7 @@ ASVBM supports the creation of a robust high-quality set constructed from multip
 The workflow is briefly explained in the following diagram:
 
 <div align="center">
-<img src="img/create_workflow.png" alt= "create workflow"> 
+<img src="img/ensemble_workflow.png" alt= "ASVBM ensemble workflow"> 
 </div>
 
 ### Extract multi-allelic variants
@@ -178,7 +178,7 @@ Description:
 
 Commands:
    stat         revise the existing benchmark set
-   create       create a new high-quality set
+   ensemble       create a new high-quality set
    allele       extract multi-allelic variants from each callset
 
 Example:
@@ -192,7 +192,7 @@ Example:
    $ asvbm stat -m 20 -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 
    # create high-quality set based on multiple user callsets
-   $ asvbm create -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
+   $ asvbm ensemble -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 
    # extract multi-allelic variants from each callset
    $ asvbm allele user_sv1.vcf user_sv2.vcf user_sv3.vcf
@@ -228,7 +228,7 @@ $ callset_ensemble.sh -B ccs.bam -f reference.fa -C "chr1-22;chrX;chrY" -T "tool
 #### Filter out variants that violating Mendelian inheritance laws
 Filter out variants that violating Mendelian inheritance laws can be achieved by using the `-g` option.
 ```sh
-$ asvbm create -g -C "chr1-22" -m 20 -T "tool1;tool2;tool3" hg002_sv.vcf hg003_sv.vcf hg004_sv.vcf benchmark_sv.vcf reference.fa
+$ asvbm ensemble -g -C "chr1-22" -m 20 -T "tool1;tool2;tool3" hg002_sv.vcf hg003_sv.vcf hg004_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
 #### Extract multi-allelic variants
