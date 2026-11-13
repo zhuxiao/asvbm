@@ -94,7 +94,7 @@ When benchmarking the performance of a tool, ASVBM employes a set of quantitativ
 
 Additionally, SVs within seven sub-bins are benchmarked individually, and metrics for TP_bench, TP_user, FP, FN, Recall, Precision, F1 score, and sequence similarity are calculated.
 
-### Create high-quality set
+### Generate high-quality set
 ASVBM supports the creation of a robust high-quality set constructed from multiple callsets by bi-directional local joint analysis.
 The workflow is briefly explained in the following diagram:
 
@@ -167,7 +167,7 @@ The help information is below:
 $ asvbm
 Program: ASVBM (A tool for multi-Allele-aware Structural Variants Statistics Benchmarking for Multiple callsets)
 Version: 1.4.2
-Compile: Nov  2 2026, 14:46:58
+Compile: Nov 13 2026, 23:15:48
 
 Usage:  asvbm <command> [options] <USER_FILE> [<USER_FILE1>...] [BENCH_FILE] [REF_FILE]
 
@@ -178,7 +178,7 @@ Description:
 
 Commands:
    stat         revise the existing benchmark set
-   ensemble       create a new high-quality set
+   ensemble     create a new high-quality set
    allele       extract multi-allelic variants from each callset
 
 Example:
@@ -191,7 +191,7 @@ Example:
    # run the benchmarking on the user-called sets (tool1, tool2 and tool3) for multiple user callsets
    $ asvbm stat -m 20 -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 
-   # create high-quality set based on multiple user callsets
+   # generate high-quality set based on multiple user callsets
    $ asvbm ensemble -T "tool1;tool2;tool3" user_sv1.vcf user_sv2.vcf user_sv3.vcf benchmark_sv.vcf ref.fa
 
    # extract multi-allelic variants from each callset
@@ -219,8 +219,8 @@ Perform the refinement of benchmark set along with the benchmarking process can 
 $ asvbm stat -b -C "chr1-22;chrX;chrY" -m 20 -T "tool1;tool2;tool3" user1_sv.vcf user2_sv.vcf user3_sv.vcf benchmark_sv.vcf reference.fa
 ```
 
-#### Create high-quality set
-Create a high-quality benchmark set by using the callset_ensemble.sh script.
+#### Generate high-quality set
+Generate a high-quality benchmark set by using the callset_ensemble.sh script.
 ```sh
 $ callset_ensemble.sh -B ccs.bam -f reference.fa -C "chr1-22;chrX;chrY" -T "tool1;tool2;tool3" -o output -x ccs -i user1_sv.vcf user2_sv.vcf user3_sv.vcf
 ```
