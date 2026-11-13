@@ -7,6 +7,6 @@
 	mv -f asvbm ../bin
 	cd ../script
 	chmod a+x callset_ensemble.sh
-	ln -s $PWD/callset_ensemble.sh ../bin
+	ln -sf $PWD/callset_ensemble.sh ../bin
 	cd ..
 
