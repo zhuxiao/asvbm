@@ -22,9 +22,8 @@ int main(int argc, char *argv[]){
 	}
 	if (strcmp(argv[1], CMD_ENSEMBLE_STR)==0){
 		command = CMD_ENSEMBLE_STR;
-		create_bench_flag = true;
-		return parseCreate(argc-1, argv+1);
-//		return parseConvert(argc-1, argv+1);
+		ensemble_bench_flag = true;
+		return parseEnsemble(argc-1, argv+1);
 	}else if(strcmp(argv[1], CMD_STAT_STR)==0){
 		command = CMD_STAT_STR;
 		return parseStat(argc-1, argv+1);

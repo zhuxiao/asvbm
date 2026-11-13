@@ -73,7 +73,7 @@ extern vector<string> ToolsFilenames;
 extern vector<SV_item*> entryMap1;
 extern unordered_map<string, int> benchmark_hg002_Map;
 extern bool refine_bench_flag;
-extern bool create_bench_flag;
+extern bool ensemble_bench_flag;
 extern bool genotype_filterBench_flag;
 extern bool merge_singleVariant_flag;
 extern unordered_map<SV_item*, int> itemToIndex;

@@ -170,7 +170,7 @@ void showUsageConvert(){
 	cout << "     -S FILE      snv items file: [" << snvFilename << "]" << endl;
 	cout << "     -h           show this help message and exit" << endl;
 }
-void showUsageCreate(){
+void showUsageEnsemble(){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl;
@@ -349,7 +349,7 @@ void show(){
 
 	cout << "Commands:" << endl;
 	cout << "   stat         revise the existing benchmark set" << endl;
-	cout << "   ensemble     create a new high-quality set" << endl;
+	cout << "   ensemble     generate a new high-quality set" << endl;
 	cout << "   allele       extract multi-allelic variants from each callset" << endl<< endl;
 
 	cout << "Example:" << endl;
@@ -1042,13 +1042,13 @@ string expand_chromosome_names(const string& input){
 //	return 0;
 //}
 // parse the parameters for ensemble command
-int parseCreate(int argc, char **argv){
+int parseEnsemble(int argc, char **argv){
 	int32_t opt, threadNum_tmp, longindex = 0;;
 	string sv_file1, ref_file, sv_file2, ToolNameStore, ChromosomeNames;
 	vector<string> sv_files1;
 	vector<string> tool_names;
 
-	if (argc < 2) { showUsageCreate(); return 1; }
+	if (argc < 2) { showUsageEnsemble(); return 1; }
 	minsvlen = MIN_SVLEN;
 	maxValidRegThres = MAX_VALID_REG_THRES;
 	indelAlleleSvlenRatio = INDEL_ALLELE_SVLEN_RATIO;
@@ -1087,7 +1087,7 @@ int parseCreate(int argc, char **argv){
 			case 'C': ChromosomeNames = optarg; break;
 			case 'g': genotype_filterBench_flag = true; break;
 			case 'e': merge_singleVariant_flag = true; break;
-			case 'h': showUsageCreate(); exit(0);
+			case 'h': showUsageEnsemble(); exit(0);
 			case 'v': show_version();; exit(0);
 			case 'S': typeMatchLevel = MATCHLEVEL_S; break;
 			case '?': cout << "unknown option -" << (char)optopt << endl; exit(1);
@@ -1097,7 +1097,7 @@ int parseCreate(int argc, char **argv){
 
 	if(maxValidRegThres<0){
 		cout << "Error: Please specify the correct positive value for option: -M" << endl;
-		showUsageCreate();
+		showUsageEnsemble();
 		return 1;
 	}
 	if(minsvlen<0){
@@ -1107,17 +1107,17 @@ int parseCreate(int argc, char **argv){
 	}
 	if(extendSize<=0){
 		cout << "Error: Please specify the correct positive value for option: -s" << endl;
-		showUsageCreate();
+		showUsageEnsemble();
 		return 1;
 	}
 	if(ToolNameStore.size()<0){
 		cout << "Error: Specify the correct tool name for the option, separated by ';' :-T" << endl;
-		showUsageCreate();
+		showUsageEnsemble();
 		return 1;
 	}
 	if(ChromosomeNames.size()<0){
 		cout << "Error: Specify the correct set of chromosomes for the option, separated by ';' :-C" << endl;
-		showUsageCreate();
+		showUsageEnsemble();
 		return 1;
 	}
 
@@ -1146,7 +1146,7 @@ int parseCreate(int argc, char **argv){
 		}
 		if(tool_names.size() != sv_files1.size()){
 			cout << "Error: The number of tool names does not match the data set :-T" << endl;
-			showUsageCreate();
+			showUsageEnsemble();
 			return 1;
 		}
 	}else if(opt==3){ //evaluate a data set
@@ -1154,7 +1154,7 @@ int parseCreate(int argc, char **argv){
 			sv_file1 = argv[optind];
 			sv_file2 = argv[optind+1];
 			ref_file = argv[optind+2];
-		}else { showUsageCreate(); return 1; }
+		}else { showUsageEnsemble(); return 1; }
 	}else{ //evaluate multiple data sets without using the "-T" parameter
 		for(int i = optind ; i<argc; i++){
 			if(i == argc-2) sv_file2 = argv[i];
@@ -1180,7 +1180,7 @@ int parseCreate(int argc, char **argv){
 
 	//cout << "mem_total=" << mem_total << ", swap_total=" << swap_total << ", extend_total=" << extend_total << endl;
 
-	SVCreateOp(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
+	SVEnsembleOp(ref_file, sv_file1, sv_file2, sv_files1, tool_names);
 
 	return 0;
 }
@@ -1314,7 +1314,8 @@ void SVAlleleOp(string &sv_file1, vector<string> &sv_files1){
 //	cout << "For more detailed evaluation results, please refer to the generated result information in the respective folders." << endl;
 	cout << "For any problems, comments, or suggestions, please contact xzhu@ytu.edu.cn without hesitation. Thank you very much!" << endl;
 }
-void SVCreateOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names){
+
+void SVEnsembleOp(string &ref_file, string &sv_file1, string &sv_file2, vector<string> &sv_files1, vector<string> tool_names){
 	string sv_file_name, mate_filename, snv_filename, convert_sv_file2;
 	string sv_file_name_Path, convert_sv_file2_Path;
 	string label = "benchmark", label1 = "user";
@@ -1380,10 +1381,10 @@ void SVCreateOp(string &ref_file, string &sv_file1, string &sv_file2, vector<str
 
 	if(convert_sv_files.size()>=1){	//multiple data sets are evaluated			sv_files1
 		for(string& sv_file1 : convert_sv_files){
-			SVCreate(ref_file, sv_file1, convert_sv_file2_Path, convert_sv_files, tool_names);
+			SVEnsemble(ref_file, sv_file1, convert_sv_file2_Path, convert_sv_files, tool_names);
 		}
 	}else
-		SVCreate(ref_file, sv_file_name_Path, convert_sv_file2_Path, sv_files1, tool_names);
+		SVEnsemble(ref_file, sv_file_name_Path, convert_sv_file2_Path, sv_files1, tool_names);
 
 	ResultPresentation(sv_files1, outputPathname, tool_names, outputBasicMetricschart, MeticsValues, MeticsValues1, ref_file);
 
@@ -1513,7 +1514,8 @@ void SVAllele(string &user_file, vector<string> &sv_files1){
 	//Evaluate multiple data sets and initialize the path for the next data save
 	if(sv_files1.size()>=1)	FolderInit();
 }
-void SVCreate(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names){
+
+void SVEnsemble(string &ref_file, string &user_file, string &benchmark_file, vector<string> &sv_files1, vector<string> &tool_names){
 
 //	mkdir(outputPathname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 	if(sv_files1.size()>=1){
@@ -1559,7 +1561,7 @@ void SVCreate(string &ref_file, string &user_file, string &benchmark_file, vecto
 	}
 	outStatScreenFile << "Program command: " << program_cmd_str << endl << endl;
 
-	printCreateParas(user_file, benchmark_file, ref_file); // print parameters
+	printEnsembleParas(user_file, benchmark_file, ref_file); // print parameters
 
 	cout << "############# Stage 1: SV size statistics: #############" << endl;
 	outStatScreenFile << "############# Stage 1: SV size statistics: #############" << endl;
@@ -1711,7 +1713,7 @@ void printAlleleParas(string &user_file){
 	outStatScreenFile << "      Output directory: " << outputPathname.substr(0, outputPathname.size()-1) << endl;
 
 }
-void printCreateParas(string &user_file, string &benchmark_file ,string &ref_file){
+void printEnsembleParas(string &user_file, string &benchmark_file ,string &ref_file){
 
 	cout << "Program: " << PROG_NAME << " (" << PROG_DESC << ")" << endl;
 	cout << "Version: " << PROG_VERSION << endl;
