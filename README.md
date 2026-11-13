@@ -178,7 +178,7 @@ Description:
 
 Commands:
    stat         revise the existing benchmark set
-   ensemble     create a new high-quality set
+   ensemble     generate a new high-quality set
    allele       extract multi-allelic variants from each callset
 
 Example:
