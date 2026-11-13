@@ -217,7 +217,7 @@ else
     INS_BIAS=1000; INS_RATIO=0.5; DEL_BIAS=1000; DEL_RATIO=0.5
 fi
 
-# If data type is ont, append -I 0.7 parameter for asvbm create
+# If data type is ont, append -I 0.7 parameter for asvbm ensemble
 ASVBM_I_PARAM=""
 if [[ "$SEQ_TYPE" == "ont" ]]; then
     ASVBM_I_PARAM="-I 0.7"
@@ -277,13 +277,13 @@ cuteFC -t 32 -l 20 -md 500 -mi 500 \
 done
 echo "✅ Step 1 & 2 pre-processing completed!"
 
-# ================= 3. Step 2: Run asvbm create =================
+# ================= 3. Step 2: Run asvbm ensemble =================
 DUMMY_VCF="${OUTPUT_DIR}/output.vcf"
 echo "##fileformat=VCFv4.2" > "$DUMMY_VCF"
 echo -e "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tsample" >> "$DUMMY_VCF"
 
-echo "🔄 [Step 2] Running asvbm create..."
-asvbm create $ASVBM_I_PARAM \
+echo "🔄 [Step 2] Running asvbm ensemble..."
+asvbm ensemble $ASVBM_I_PARAM \
     -B "$BAM_FILE" \
     "${ASVBM_C_ARGS[@]}" \
     -T "$TOOLS" \
@@ -291,7 +291,7 @@ asvbm create $ASVBM_I_PARAM \
     "${STEP2_OUTPUT_ARGS[@]}" \
     "$DUMMY_VCF" \
     "$REF_FILE"
-echo "✅ asvbm create completed!"
+echo "✅ asvbm ensemble completed!"
 
 # ================= 4. Step 3: Pre-filtering + asvbm stat =================
 BENCHMARK_VCF="${ASVBM_OUTPUT_BASE}/SharedFN_RefinedBenchmark/benchmark.vcf"
@@ -318,7 +318,7 @@ asvbm stat \
     "$REF_FILE"
 echo "✅ asvbm stat completed!"
 
-# ================= 5. Step 4: Rename files and run asvbm create =================
+# ================= 5. Step 4: Rename files and run asvbm ensemble =================
 
 STEP4_INPUT_FILES=()
 for i in "${!TOOL_ARRAY[@]}"; do
@@ -337,8 +337,8 @@ for i in "${!TOOL_ARRAY[@]}"; do
     fi
 done
 
-echo "🔄 [Step 4] Running asvbm create (FP merge)..."
-asvbm create $ASVBM_I_PARAM \
+echo "🔄 [Step 4] Running asvbm ensemble (FP merge)..."
+asvbm ensemble $ASVBM_I_PARAM \
     -B "$BAM_FILE" \
     "${ASVBM_C_ARGS[@]}" \
     -T "$TOOLS" \
@@ -346,7 +346,7 @@ asvbm create $ASVBM_I_PARAM \
     -o "$FP_MERGE_OUTPUT" \
     "$DUMMY_VCF" \
     "$REF_FILE"
-echo "✅ asvbm create (FP merge) completed!"
+echo "✅ asvbm ensemble (FP merge) completed!"
 
 # ================= 6. Step 5: Filter TOOLSNUM >= 4 using awk =================
 echo "📊 [Step 5] Filtering TOOLSNUM >= 4..."
@@ -467,8 +467,8 @@ awk '
 ' "${FP_BENCH_DIR}/Benchmark_toolsNum_3_cuteFC.vcf" \
     > "${FP_BENCH_DIR}/Benchmark_toolsNum_3_cuteFC_filteredPRECISE.vcf"
 
-# ================= 10. Step 9: Final asvbm create merge =================
-echo "🏁 [Step 9] Running final merge asvbm create..."
+# ================= 10. Step 9: Final asvbm ensemble merge =================
+echo "🏁 [Step 9] Running final merge asvbm ensemble..."
 
 STEP9_INPUT_FILES=(
     "$BENCHMARK_TOOLSNUM_2PLUS"
@@ -477,7 +477,7 @@ STEP9_INPUT_FILES=(
     "${FP_BENCH_DIR}/Benchmark_toolsNum_2_cuteFC_filteredPRECISE.vcf"
 )
 
-asvbm create -e $ASVBM_I_PARAM \
+asvbm ensemble -e $ASVBM_I_PARAM \
     -B "$BAM_FILE" \
     "${ASVBM_C_ARGS[@]}" \
     "${STEP9_INPUT_FILES[@]}" \
